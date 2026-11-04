@@ -96,7 +96,8 @@ npm run dev
 10. Run `supabase/migrations/007_completion_workflows.sql` to add certificate verification and completion workflow support
 11. Run `supabase/migrations/008_workflow_automation.sql` to add submission, grading, clinic, and project-review notifications
 12. Run `supabase/migrations/009_staff_assignments.sql` to add instructor cohort and squad assignment records
-13. Deploy Edge Functions:
+13. Run `supabase/migrations/010_security_hardening.sql` to enable RLS on cohorts, labs and assessments, hide lab solutions and quiz answer keys, block deactivated accounts, and stop users from changing their own role
+14. Deploy Edge Functions:
    ```bash
    npx supabase functions deploy
    ```

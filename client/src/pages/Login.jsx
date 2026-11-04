@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 
 const ease = [0.23, 1, 0.32, 1]
 
@@ -22,7 +22,8 @@ const PORTALS = {
   },
   '/instructor-login': {
     role: 'Instructor',
-    title: 'Instructor Sign In',
+    displayRole: 'Teacher',
+    title: 'Teacher Sign In',
     description: 'Access your modules, squads, grading and clinics',
   },
   '/admin-login': {
@@ -36,7 +37,7 @@ const DEFAULT_PORTAL = PORTALS['/student-login']
 
 const PORTAL_LABEL_BY_ROLE = {
   Student: 'student',
-  Instructor: 'instructor',
+  Instructor: 'teacher',
   Administrator: 'administrator',
 }
 
@@ -49,6 +50,7 @@ export default function Login() {
   const pathname = rawPathname.replace(/\/+$/, '').toLowerCase() || '/'
   const portal = PORTALS[pathname] || DEFAULT_PORTAL
   const { role } = portal
+  const displayRole = portal.displayRole || role
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -69,6 +71,14 @@ export default function Login() {
     try {
       const user = await login(email, password)
       const accountRole = user?.type
+
+      // Deactivated accounts are also blocked by RLS (see migration 010), but
+      // fail visibly here instead of dropping them into an empty dashboard.
+      if (user?.is_active === 0 || user?.is_active === false) {
+        await logout()
+        toast.error('This account has been deactivated. Contact an administrator.')
+        return
+      }
 
       // Fail closed: an account with no provisioned role, or one that does not
       // match this portal, must not continue into the app.
@@ -115,6 +125,8 @@ export default function Login() {
         password: newPassword,
       })
       if (error) throw error
+      // Clear the DB flag too, otherwise the next login forces a reset again.
+      await supabase.rpc('clear_my_force_password_change')
       setUser({ forcePasswordChange: false })
       toast.success('Password updated successfully')
       navigate('/dashboard', { replace: true })
@@ -127,13 +139,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full flex bg-gray-50">
-      <div className="hidden lg:flex w-1/2 bg-deep-600 relative overflow-hidden items-center justify-center">
-        <div className="absolute inset-0 opacity-[0.03]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
+      <div
+        className="hidden lg:flex w-1/2 min-h-screen relative overflow-hidden items-center justify-center bg-deep-600 bg-cover bg-center"
+        style={{
+          backgroundImage: 'url("https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=1600")',
+        }}
+      >
+        <div className="absolute inset-0 bg-deep-900/70" />
         <div className="relative z-10 text-center px-12 max-w-md">
           <motion.img
             initial={{ opacity: 0, y: -12 }}
@@ -162,7 +174,8 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
+      <div className="w-full lg:w-1/2 min-h-screen flex flex-col">
+        <div className="flex-1 flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -297,7 +310,7 @@ export default function Login() {
                             </span>
                           ) : (
                             <span className="flex items-center gap-2">
-                              Sign in as {role}
+                              Sign in as {displayRole}
                               <ArrowRight size={15} />
                             </span>
                           )}
@@ -305,16 +318,15 @@ export default function Login() {
                       </div>
                     </form>
                   </CardContent>
-                  <CardFooter>
-                    <p className="text-xs text-center text-gray-400">
-                      BlueSPACE Fintech Academy &copy; {new Date().getFullYear()}
-                    </p>
-                  </CardFooter>
                 </Card>
               </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
+        </div>
+        <footer className="shrink-0 px-6 pb-6 text-center text-xs text-gray-400">
+          BlueSPACE Fintech Academy &copy; 2026
+        </footer>
       </div>
     </div>
   )

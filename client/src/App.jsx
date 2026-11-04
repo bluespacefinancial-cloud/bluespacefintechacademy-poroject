@@ -35,8 +35,15 @@ import ProjectReview from './pages/ProjectReview'
 import PeerReview from './pages/PeerReview'
 import MentorEvaluation from './pages/MentorEvaluation'
 import InstructorAssignments from './pages/InstructorAssignments'
+import PartnerCourses from './pages/PartnerCourses'
+import PartnerCatalog from './pages/PartnerCatalog'
+import PartnerManagement from './pages/PartnerManagement'
+import PartnerCourseReview from './pages/PartnerCourseReview'
+import PartnerCourseLearning from './pages/PartnerCourseLearning'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
+import Register from './pages/Register'
+import ApplicationReview from './pages/ApplicationReview'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -57,8 +64,9 @@ export default function App() {
       <Route path="/login" element={<Navigate to="/student-login" replace />} />
       <Route path="/student-login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/instructor-login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/partner-login" element={<Navigate to="/instructor-login" replace />} />
+      <Route path="/partner-login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/admin-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
       <Route path="/verify-certificate/:token" element={<CertificateVerify />} />
       <Route path="/" element={user ? <AppLayout /> : <Navigate to="/student-login" replace />}>
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -71,6 +79,11 @@ export default function App() {
         <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="quiz/:assessmentId" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
         <Route path="project-workspace" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
+        <Route path="partner-courses" element={<ProtectedRoute roles={['Partner']}><PartnerCourses /></ProtectedRoute>} />
+        <Route path="partner-catalog" element={<ProtectedRoute roles={['Student']}><PartnerCatalog /></ProtectedRoute>} />
+        <Route path="partner-course/:courseId" element={<ProtectedRoute roles={['Student']}><PartnerCourseLearning /></ProtectedRoute>} />
+        <Route path="partner-management" element={<ProtectedRoute roles={['Administrator']}><PartnerManagement /></ProtectedRoute>} />
+        <Route path="partner-course-review" element={<ProtectedRoute roles={['Administrator']}><PartnerCourseReview /></ProtectedRoute>} />
         <Route path="peer-reviews" element={<ProtectedRoute><PeerReview /></ProtectedRoute>} />
         <Route path="project-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><ProjectReview /></ProtectedRoute>} />
         <Route path="mentor-evaluation" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MentorEvaluation /></ProtectedRoute>} />
@@ -91,6 +104,7 @@ export default function App() {
         <Route path="cohorts" element={<ProtectedRoute roles={['Administrator']}><Cohorts /></ProtectedRoute>} />
         <Route path="instructor-assignments" element={<ProtectedRoute roles={['Administrator']}><InstructorAssignments /></ProtectedRoute>} />
         <Route path="enrolments" element={<ProtectedRoute roles={['Administrator']}><Enrolments /></ProtectedRoute>} />
+        <Route path="applications" element={<ProtectedRoute roles={['Administrator']}><ApplicationReview /></ProtectedRoute>} />
         <Route path="curriculum" element={<ProtectedRoute roles={['Administrator']}><Curriculum /></ProtectedRoute>} />
         <Route path="placement" element={<ProtectedRoute roles={['Administrator']}><Placement /></ProtectedRoute>} />
         <Route path="reports" element={<ProtectedRoute roles={['Administrator']}><Reports /></ProtectedRoute>} />

@@ -104,14 +104,14 @@ export default function Grading() {
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
         <h1 className="mb-1 text-2xl font-bold text-deep-600">Grading Console</h1>
-        <p className="text-sm text-gray-500">Review real student submissions, record scores, and provide feedback.</p>
+        <p className="text-sm text-gray-500">Review real student submissions, record scores and provide feedback.</p>
       </div>
       {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       {saved && <p className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">Grade saved successfully.</p>}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{submissions.length}</p><p className="text-xs uppercase tracking-wider text-gray-500">Submissions</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{gradedCount}</p><p className="text-xs uppercase tracking-wider text-gray-500">Graded</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{average === null ? '—' : `${average}%`}</p><p className="text-xs uppercase tracking-wider text-gray-500">Average Score</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{average === null ? 'N/A' : `${average}%`}</p><p className="text-xs uppercase tracking-wider text-gray-500">Average Score</p></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card>

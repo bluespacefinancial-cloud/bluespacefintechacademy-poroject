@@ -91,21 +91,36 @@ npm run dev
 5. Run `supabase/migrations/002_academy_operations.sql` to add the direct Auth profile key and announcements
 6. Run `supabase/migrations/003_student_squad_visibility.sql` to allow students to see their squad roster
 7. Run `supabase/migrations/004_staff_learning_monitoring.sql` to allow staff read-only learning monitoring
-8. Run `supabase/migrations/005_production_operations.sql` to secure squad, placement, and notification operations
-9. Run `supabase/migrations/006_academy_v2_operations.sql` to add clinics, skills profiles, project evidence, peer reviews, mentor evaluations, and quiz attempts
+8. Run `supabase/migrations/005_production_operations.sql` to secure squad, placement and notification operations
+9. Run `supabase/migrations/006_academy_v2_operations.sql` to add clinics, skills profiles, project evidence, peer reviews, mentor evaluations and quiz attempts
 10. Run `supabase/migrations/007_completion_workflows.sql` to add certificate verification and completion workflow support
-11. Run `supabase/migrations/008_workflow_automation.sql` to add submission, grading, clinic, and project-review notifications
+11. Run `supabase/migrations/008_workflow_automation.sql` to add submission, grading, clinic and project-review notifications
 12. Run `supabase/migrations/009_staff_assignments.sql` to add instructor cohort and squad assignment records
-13. Run `supabase/migrations/010_security_hardening.sql` to enable RLS on cohorts, labs and assessments, hide lab solutions and quiz answer keys, block deactivated accounts, and stop users from changing their own role
-14. Deploy Edge Functions:
+13. Run `supabase/migrations/010_security_hardening.sql` to enable RLS on cohorts, labs and assessments, hide lab solutions and quiz answer keys, block deactivated accounts and stop users from changing their own role
+14. Run `supabase/migrations/011_partner_courses.sql` to add partner onboarding, partner course approval, student enrollment and dual-logo certificate metadata
+15. Run `supabase/migrations/012_applications_and_registration.sql` to add the shared student, teacher and partner application workflow
+16. Deploy Edge Functions:
    ```bash
    npx supabase functions deploy
    ```
-14. Copy your Supabase URL and anon key to `.env`
+17. Copy your Supabase URL and anon key to `.env`
 
 After migration 009, administrators can manage instructor boundaries from
 `/instructor-assignments`. Create cohort and squad assignments before relying on
 instructor-specific monitoring and mentor evaluation visibility.
+
+After migration 011, administrators can onboard partner agencies from
+`/partner-management`, connect provisioned `Partner` accounts and review submitted
+courses from `/partner-course-review`. Partners use `/partner-login` and
+`/partner-courses` to create drafts and add lessons. Approved courses appear in the
+student `/partner-catalog`. Students can complete lessons from the course page and
+receive a certificate record containing both the BlueSPACE logo and the partner logo.
+
+After migration 012, applicants use `/register` for the shared animated wizard.
+Students, teachers and partner agencies submit the same application flow with
+role-specific fields. Administrators review the queue at `/applications`.
+Approved students are activated and enrolled into the selected cohort and track.
+Approved teachers and partners are activated for their existing role portals.
 
 Panel reviewers can approve a capstone and issue its certificate from the same
 review screen. Issued certificates receive a verification number and public

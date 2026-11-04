@@ -1,5 +1,5 @@
 -- =============================================================
--- BlueSPACE Fintech Academy LMS — Supabase Storage Buckets
+-- BlueSPACE Fintech Academy LMS: Supabase Storage Buckets
 -- Run this AFTER schema.sql in the Supabase SQL Editor
 -- =============================================================
 

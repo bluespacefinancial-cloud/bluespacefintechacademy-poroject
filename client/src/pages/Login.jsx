@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Lock } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -31,6 +31,11 @@ const PORTALS = {
     title: 'Administrator Sign In',
     description: 'Access cohorts, enrolments, reports and academy operations',
   },
+  '/partner-login': {
+    role: 'Partner',
+    title: 'Partner Sign In',
+    description: 'Create and manage partner courses for academy students',
+  },
 }
 
 const DEFAULT_PORTAL = PORTALS['/student-login']
@@ -39,6 +44,7 @@ const PORTAL_LABEL_BY_ROLE = {
   Student: 'student',
   Instructor: 'teacher',
   Administrator: 'administrator',
+  Partner: 'partner',
 }
 
 export default function Login() {
@@ -317,6 +323,9 @@ export default function Login() {
                         </Button>
                       </div>
                     </form>
+                    <p className="mt-5 text-center text-xs text-gray-500">
+                      Need an account? <Link to="/register" className="font-semibold text-brand-600 hover:underline">Submit an application</Link>
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>

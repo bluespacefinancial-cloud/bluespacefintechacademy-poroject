@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { useAuth } from '../context/AuthContext'
 import StudentDashboard from './StudentDashboard'
+import PartnerCourses from './PartnerCourses'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -11,6 +12,7 @@ export default function Dashboard() {
   const isStudent = user?.type === 'Student'
   const isInstructor = user?.type === 'Instructor'
   const isAdmin = user?.type === 'Administrator'
+  const isPartner = user?.type === 'Partner'
 
   if (isStudent) {
     return <StudentDashboard user={user} />
@@ -221,6 +223,10 @@ export default function Dashboard() {
         </div>
       </div>
   ) */
+  }
+
+  if (isPartner) {
+    return <PartnerCourses />
   }
 
   // ==================== INSTRUCTOR DASHBOARD ====================

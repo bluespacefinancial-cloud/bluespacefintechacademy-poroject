@@ -46,7 +46,9 @@ export default function Enrolments() {
             email,
             track
           ),
-          cohorts (name)
+          cohorts (
+            name
+          )
         `)
         .order('created_at', { ascending: false })
 

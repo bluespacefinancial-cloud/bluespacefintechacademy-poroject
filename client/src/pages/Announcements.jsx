@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Bell, Users } from 'lucide-react'
+import { MapPin, Bell, Users } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -174,7 +174,7 @@ export default function Announcements() {
                   {announcement.pinned && (
                     <Badge variant="outline" className="text-[10px] mr-2">Pinned</Badge>
                   )}
-                  <Badge className={config.color}>{config.label}</Badge>
+                  <Badge className={TYPE_CONFIG[announcement.type].color}>{TYPE_CONFIG[announcement.type].label}</Badge>
                 </div>
                 <span className="text-[10px] text-gray-400">
                   {new Date(announcement.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}

@@ -1,10 +1,18 @@
 import { useState } from 'react'
-import { BarChart3, Award, FileText, Calendar, MapPin, TrendingUp, TrendingDown, Users, Clock } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { BarChart3, Clock, Users, Award, FileText, Calendar, MapPin, TrendingUp, TrendingDown } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 import { supabase } from '../lib/supabase'
+
+const DOMAIN_COLORS = {
+  FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
+  FinCore: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', fill: 'bg-emerald-500' },
+  FinOps: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-500' },
+  FinInfra: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-500' },
+}
 
 export default function Reports() {
   const [filterCohort, setFilterCohort] = useState('all')
@@ -25,8 +33,8 @@ export default function Reports() {
 
   const loadData = async () => {
     try {
-      const { data: enrolments } = await supabase
-        .from('enrolments')
+      const { data: cohorts } = await supabase
+        .from('cohorts')
         .select('*')
 
       const { data: lessons } = await supabase
@@ -37,20 +45,11 @@ export default function Reports() {
         .from('lesson_progress')
         .select('*')
 
-      const { data: cohorts } = await supabase
-        .from('cohorts')
-        .select('*')
-
-      const { data: placements } = await supabase
-        .from('placements')
-        .select('*')
-
-      const totalFellows = enrolments?.length || 0
+      const totalFellows = cohorts?.length || 0
       const completedLessons = progress?.filter(p => p.is_completed).length || 0
       const totalLessons = lessons?.length || 0
       const avgCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
-      // Domain stats
       const domainMap = {}
       lessons?.forEach(l => {
         const domain = l.domain || 'Unknown'
@@ -75,9 +74,7 @@ export default function Reports() {
         totalFellows,
         avgAttendance: 94,
         avgCompletion,
-        avgPassRate: domainStats.length > 0
-          ? Math.round(domainStats.reduce((sum, d) => sum + d.passRate, 0) / domainStats.length)
-          : 0,
+        avgPassRate: domainStats.length > 0 ? Math.round(domainStats.reduce((sum, d) => sum + d.passRate, 0) / domainStats.length) : 0,
       })
       setDomainData(domainStats)
       setCohortData(cohorts || [])
@@ -119,12 +116,20 @@ export default function Reports() {
       <div className="flex gap-4 mb-6">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Cohort</span>
-          <Select value={filterCohort} onValueChange={(v) => setFilterCohort(v)}>
+          <Select
+            value={filterCohort}
+            onValueChange={(v) => setFilterCohort(v)}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All cohorts" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Cohorts</SelectItem>
+              {cohortData.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -136,6 +141,11 @@ export default function Reports() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Domains</SelectItem>
+              {domainData.map((d) => (
+                <SelectItem key={d.key} value={d.key}>
+                  {d.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -259,7 +269,7 @@ export default function Reports() {
                 <div key={domain.key} className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge className={`bg-${domain.key === 'FaaS' ? 'indigo' : domain.key === 'FinCore' ? 'emerald' : domain.key === 'FinOps' ? 'amber' : 'slate'}-100 text-${domain.key === 'FaaS' ? 'indigo' : domain.key === 'FinCore' ? 'emerald' : domain.key === 'FinOps' ? 'amber' : 'slate'}-700 border-${domain.key === 'FaaS' ? 'indigo' : domain.key === 'FinCore' ? 'emerald' : domain.key === 'FinOps' ? 'amber' : 'slate'}-200`}>
+                      <Badge className={DOMAIN_COLORS[domain.key].bg + ' ' + DOMAIN_COLORS[domain.key].text + ' ' + DOMAIN_COLORS[domain.key].border}>
                         {domain.label}
                       </Badge>
                       <span className="text-[10px] font-medium text-gray-500">
@@ -272,7 +282,7 @@ export default function Reports() {
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-indigo-500"
+                      className={`h-full rounded-full transition-all duration-500 ease-out-expo ${DOMAIN_COLORS[domain.key].fill}`}
                       style={{ width: `${domain.passRate}%` }}
                     />
                   </div>

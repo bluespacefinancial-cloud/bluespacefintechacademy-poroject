@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Calendar, Clock, Users, AlertCircle, FileText } from 'lucide.react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -58,7 +58,6 @@ export default function MentorClinics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Upcoming clinics */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
@@ -104,45 +103,7 @@ export default function MentorClinics() {
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Completed clinics */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <FileText size={14} className="mr-1.5" />
-                Recently Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {completedClinics.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                  <p>No completed clinics</p>
-                </div>
-              ) : (
-                clinics.filter((c) => c.status === 'completed').map((clinic) => (
-                  <Card
-                    key={clinic.id}
-                    className="p-3 border border-gray-100 bg-white"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <p className="text-sm font-medium text-deep-600">{clinic.title}</p>
-                        <p className="text-[10px] text-gray-500">{clinic.mentor}</p>
-                      </div>
-                      <Badge variant="secondary">Completed</Badge>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {clinic.attendees} attendees / {clinic.capacity} capacity
-                    </div>
-                  </Card>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Quick actions */}
           <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-sm font-bold">Quick Actions</CardTitle>
@@ -160,6 +121,39 @@ export default function MentorClinics() {
                 <AlertCircle size={14} className="mr-2" />
                 Clinic Requests
               </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <FileText size={14} className="mr-1.5" />
+                Recently Completed
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {completedClinics.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <p>No completed clinics</p>
+                </div>
+              ) : (
+                clinics.filter((c) => c.status === 'completed').map((clinic) => (
+                  <Card key={clinic.id} className="p-3 border border-gray-100 bg-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="text-sm font-medium text-deep-600">{clinic.title}</p>
+                        <p className="text-[10px] text-gray-500">{clinic.mentor}</p>
+                      </div>
+                      <Badge variant="secondary">Completed</Badge>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {clinic.attendees} attendees / {clinic.capacity} capacity
+                    </div>
+                  </Card>
+                ))}
+              )}
             </CardContent>
           </Card>
         </div>

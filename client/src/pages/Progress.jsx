@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Users, Award, Calendar } from 'lucide.react'
+import { BarChart3, Clock, Users, Award } from 'lucide.react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
@@ -37,14 +37,14 @@ export default function Progress() {
         .from('modules')
         .select('*')
 
-      const moduleIds = modules?.map((m) => m.id) || []
+      const moduleIds = modules?.map(m => m.id) || []
 
       const { data: lessons } = await supabase
         .from('lessons')
         .select('*')
         .in('module_id', moduleIds)
 
-      const lessonIds = lessons?.map((l) => l.id) || []
+      const lessonIds = lessons?.map(l => l.id) || []
 
       const { data: progress } = await supabase
         .from('lesson_progress')
@@ -53,13 +53,13 @@ export default function Progress() {
         .in('lesson_id', lessonIds)
 
       const domainMap = {}
-      lessons?.forEach((l) => {
+      lessons?.forEach(l => {
         const domain = l.domain || 'General'
         if (!domainMap[domain]) {
           domainMap[domain] = { total: 0, completed: 0 }
         }
         domainMap[domain].total++
-        if (progress?.find((p) => p.lesson_id === l.id && p.is_completed)) {
+        if (progress?.find(p => p.lesson_id === l.id && p.is_completed)) {
           domainMap[domain].completed++
         }
       })
@@ -73,21 +73,20 @@ export default function Progress() {
       }))
 
       const stagesData = STAGES.map((stage) => {
-        const stageModules = modules?.filter((m) => m.stage === stage.key) || []
-        const stageLessonIds = stageModules.flatMap((m) =>
-          lessons?.filter((l) => l.module_id === m.id).map((l) => l.id) || []
+        const stageModules = modules?.filter(m => m.stage === stage.key) || []
+        const stageLessonIds = stageModules.flatMap(m =>
+          lessons?.filter(l => l.module_id === m.id).map(l => l.id) || []
         )
-        const stageCompleted = stageLessonIds.filter((lid) =>
-          progress?.find((p) => p.lesson_id === lid && p.is_completed)
+        const stageCompleted = stageLessonIds.filter(lid =>
+          progress?.find(p => p.lesson_id === lid && p.is_completed)
         ).length
-        const stageStatus =
-          stageLessonIds.length === 0
-            ? 'pending'
-            : stageCompleted === stageLessonIds.length
-              ? 'completed'
-              : stageCompleted > 0
-                ? 'active'
-                : 'pending'
+        const stageStatus = stageLessonIds.length === 0
+          ? 'pending'
+          : stageCompleted === stageLessonIds.length
+            ? 'completed'
+            : stageCompleted > 0
+              ? 'active'
+              : 'pending'
 
         return {
           key: stage.key,
@@ -98,7 +97,7 @@ export default function Progress() {
       })
 
       const totalLessons = lessons?.length || 0
-      const completedLessons = progress?.filter((p) => p.is_completed).length || 0
+      const completedLessons = progress?.filter(p => p.is_completed).length || 0
       const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
       setDomains(domainsData)
@@ -145,7 +144,7 @@ export default function Progress() {
                   <p className="text-2xl font-bold text-deep-600">{stat.value}</p>
                   <p className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</p>
                 </div>
-                <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${stat.color}`}>
+                <div className="h-10 w-10 rounded-lg flex items-center justify-center ${stat.color}">
                   <stat.icon size={16} className="text-white" />
                 </div>
               </div>
@@ -184,6 +183,10 @@ export default function Progress() {
                       className={`h-full rounded-full transition-all duration-500 ease-out-expo ${DOMAIN_COLORS[domain.key].fill}`}
                       style={{ width: `${domain.passRate}%` }}
                     />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+                    <span>Pass Rate: {domain.passRate}%</span>
+                    <span>Labs Complete: {domain.labsComplete}%</span>
                   </div>
                 </div>
               ))}

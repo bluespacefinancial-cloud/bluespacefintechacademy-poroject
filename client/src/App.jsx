@@ -25,6 +25,16 @@ import PanelReview from './pages/PanelReview'
 import SkillsProfile from './pages/SkillsProfile'
 import LessonPlayer from './pages/LessonPlayer'
 import LiveClasses from './pages/LiveClasses'
+import StudentMonitoring from './pages/StudentMonitoring'
+import Quiz from './pages/Quiz'
+import Notifications from './pages/Notifications'
+import CertificateVerify from './pages/CertificateVerify'
+import ProjectWorkspace from './pages/ProjectWorkspace'
+import QuizManagement from './pages/QuizManagement'
+import ProjectReview from './pages/ProjectReview'
+import PeerReview from './pages/PeerReview'
+import MentorEvaluation from './pages/MentorEvaluation'
+import InstructorAssignments from './pages/InstructorAssignments'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 
@@ -49,6 +59,7 @@ export default function App() {
       <Route path="/instructor-login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/partner-login" element={<Navigate to="/instructor-login" replace />} />
       <Route path="/admin-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/verify-certificate/:token" element={<CertificateVerify />} />
       <Route path="/" element={user ? <AppLayout /> : <Navigate to="/student-login" replace />}>
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -57,6 +68,13 @@ export default function App() {
         <Route path="progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
         <Route path="my-squad" element={<ProtectedRoute><MySquad /></ProtectedRoute>} />
         <Route path="certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+        <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="quiz/:assessmentId" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+        <Route path="project-workspace" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
+        <Route path="peer-reviews" element={<ProtectedRoute><PeerReview /></ProtectedRoute>} />
+        <Route path="project-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><ProjectReview /></ProtectedRoute>} />
+        <Route path="mentor-evaluation" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MentorEvaluation /></ProtectedRoute>} />
+        <Route path="quiz-management" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><QuizManagement /></ProtectedRoute>} />
         <Route path="my-modules" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MyModules /></ProtectedRoute>} />
         <Route path="labs-to-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><LabsToReview /></ProtectedRoute>} />
         <Route path="grading" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
@@ -67,9 +85,11 @@ export default function App() {
         <Route path="capstone" element={<ProtectedRoute><CapstoneSubmission /></ProtectedRoute>} />
         <Route path="lesson/:lessonId" element={<ProtectedRoute><LessonPlayer /></ProtectedRoute>} />
         <Route path="live-classes" element={<ProtectedRoute><LiveClasses /></ProtectedRoute>} />
+        <Route path="student-monitoring" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><StudentMonitoring /></ProtectedRoute>} />
         <Route path="panel-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><PanelReview /></ProtectedRoute>} />
         <Route path="skills-profile" element={<ProtectedRoute><SkillsProfile /></ProtectedRoute>} />
         <Route path="cohorts" element={<ProtectedRoute roles={['Administrator']}><Cohorts /></ProtectedRoute>} />
+        <Route path="instructor-assignments" element={<ProtectedRoute roles={['Administrator']}><InstructorAssignments /></ProtectedRoute>} />
         <Route path="enrolments" element={<ProtectedRoute roles={['Administrator']}><Enrolments /></ProtectedRoute>} />
         <Route path="curriculum" element={<ProtectedRoute roles={['Administrator']}><Curriculum /></ProtectedRoute>} />
         <Route path="placement" element={<ProtectedRoute roles={['Administrator']}><Placement /></ProtectedRoute>} />

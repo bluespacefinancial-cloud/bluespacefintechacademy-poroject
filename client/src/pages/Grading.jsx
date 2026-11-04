@@ -1,149 +1,138 @@
-import { useState } from 'react'
-import { BarChart3 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { BarChart3, Save } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
+import { supabase } from '../lib/supabase'
+import { getCurrentProfile } from '../lib/profile'
 
-const ASSESSMENT_COMPONENTS = [
-  { key: 'attendance', label: 'Attendance & Participation', weight: '10%' },
-  { key: 'labs', label: 'Domain Labs & Assessments', weight: '25%' },
-  { key: 'project', label: 'Live Project Contribution', weight: '40%' },
-  { key: 'capstone', label: 'Capstone & Panel Review', weight: '25%' },
-]
-
-const MOCK_STUDENTS = [
-  { id: 1, name: 'Ada Okonkwo', track: 'Finsoft', squad: 'Squad Alpha', attendance: 95, labs: 82, project: 88, capstone: null, status: 'in_progress' },
-  { id: 2, name: 'Kwame Asante', track: 'Finsoft', squad: 'Squad Alpha', attendance: 92, labs: 87, project: 91, capstone: null, status: 'in_progress' },
-  { id: 3, name: 'Zainab Yusuf', track: 'Finsoft', squad: 'Squad Alpha', attendance: 88, labs: 76, project: 79, capstone: null, status: 'at_risk' },
-  { id: 4, name: 'Emeka Ndiaye', track: 'Finops', squad: 'Squad Alpha', attendance: 96, labs: 90, project: 85, capstone: null, status: 'in_progress' },
-  { id: 5, name: 'Fatima Diallo', track: 'Finops', squad: 'Squad Alpha', attendance: 90, labs: 84, project: 82, capstone: null, status: 'in_progress' },
-]
+const statusLabels = {
+  submitted: 'Submitted',
+  graded: 'Graded',
+  remediation: 'Remediation',
+  passed: 'Passed',
+  failed: 'Failed',
+}
 
 export default function Grading() {
-  const [selectedStudent, setSelectedStudent] = useState(null)
-  const [grades, setGrades] = useState({})
+  const [submissions, setSubmissions] = useState([])
+  const [selectedId, setSelectedId] = useState(null)
+  const [score, setScore] = useState('')
+  const [feedback, setFeedback] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [searchParams] = useSearchParams()
 
-  const student = selectedStudent ? MOCK_STUDENTS.find((s) => s.id === selectedStudent) : null
-  const finalGrade = student && grades.attendance && grades.labs && grades.project && grades.capstone
-    ? (
-        (parseFloat(grades.attendance) * 0.1 +
-          parseFloat(grades.labs) * 0.25 +
-          parseFloat(grades.project) * 0.4 +
-          parseFloat(grades.capstone) * 0.25
-        ).toFixed(1)
-      )
-    : null
+  const loadSubmissions = async () => {
+    const { data, error: loadError } = await supabase
+      .from('submissions')
+      .select('id, user_id, lab_id, assessment_id, status, score, feedback, content_url, submitted_at, users(name, email), labs(title), assessments(title)')
+      .order('submitted_at', { ascending: false })
+    if (loadError) throw loadError
+    setSubmissions(data || [])
+    const requestedId = Number(searchParams.get('submission'))
+    if (requestedId && data?.some((submission) => submission.id === requestedId)) {
+      const requested = data.find((submission) => submission.id === requestedId)
+      setSelectedId(requested.id)
+      setScore(requested.score ?? '')
+      setFeedback(requested.feedback || '')
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      try {
+        await loadSubmissions()
+      } catch (loadError) {
+        if (!cancelled) setError(loadError.message || 'Unable to load submissions')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [searchParams])
+
+  const selectSubmission = (submission) => {
+    setSelectedId(submission.id)
+    setScore(submission.score ?? '')
+    setFeedback(submission.feedback || '')
+    setSaved(false)
+  }
+
+  const saveGrade = async () => {
+    if (!selectedId || score === '' || Number(score) < 0 || Number(score) > 100) {
+      setError('Enter a score between 0 and 100 before saving')
+      return
+    }
+    setSaving(true)
+    setError('')
+    const status = Number(score) >= 70 ? 'passed' : 'remediation'
+    const profile = await getCurrentProfile()
+    const { data, error: updateError } = await supabase
+      .from('submissions')
+      .update({
+        score: Number(score),
+        feedback: feedback.trim() || null,
+        status,
+        graded_by: profile?.id || null,
+        graded_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', selectedId)
+      .select('id, status, score, feedback, graded_at')
+      .single()
+    if (updateError) {
+      setError(updateError.message)
+    } else {
+      setSubmissions((current) => current.map((submission) => submission.id === selectedId ? { ...submission, ...data } : submission))
+      setSaved(true)
+    }
+    setSaving(false)
+  }
+
+  const selected = submissions.find((submission) => submission.id === selectedId)
+  const gradedCount = submissions.filter((submission) => Number.isFinite(submission.score)).length
+  const average = gradedCount ? Math.round(submissions.filter((submission) => Number.isFinite(submission.score)).reduce((total, submission) => total + submission.score, 0) / gradedCount) : null
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-deep-600 mb-1">Grading Console</h1>
-        <p className="text-sm text-gray-500">Record assessment scores and calculate final grades</p>
+        <h1 className="mb-1 text-2xl font-bold text-deep-600">Grading Console</h1>
+        <p className="text-sm text-gray-500">Review real student submissions, record scores, and provide feedback.</p>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold">Students</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 p-3">
-              {MOCK_STUDENTS.map((s) => {
-                const isSelected = selectedStudent === s.id
-                return (
-                  <div
-                    key={s.id}
-                    onClick={() => setSelectedStudent(s.id)}
-                    className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-colors ${
-                      isSelected ? 'bg-brand-50 border-brand-200' : 'bg-white border-gray-100 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-deep-600 truncate">{s.name}</p>
-                      <p className="text-[10px] text-gray-500 truncate">{s.track} · {s.squad}</p>
-                    </div>
-                    <Badge variant={s.status === 'at_risk' ? 'outline' : 'secondary'} className="text-[10px]">
-                      {s.status === 'at_risk' ? 'At Risk' : 'Active'}
-                    </Badge>
-                  </div>
-                )
-              })}
-            </CardContent>
-          </Card>
-        </div>
-
-        {selectedStudent && student && (
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Grade: {student.name}</CardTitle>
-                <Badge variant="secondary">{student.track} · {student.squad}</Badge>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {ASSESSMENT_COMPONENTS.map((component) => (
-                    <div key={component.key} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
-                      <div>
-                        <p className="text-xs font-medium text-deep-600">{component.label}</p>
-                        <p className="text-[10px] text-gray-500">Weight: {component.weight}</p>
-                      </div>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={grades[component.key] || ''}
-                        onChange={(e) => setGrades({ ...grades, [component.key]: e.target.value })}
-                        placeholder="0-100"
-                        className="w-[80px]"
-                      />
-                    </div>
-                  ))}
-                </div>
-                {finalGrade !== null && (
-                  <div className="mt-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-deep-600">Final Grade</span>
-                      <span className="text-sm font-bold text-brand-600">{finalGrade}</span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-end pt-4">
-                <Button variant="outline" onClick={() => setGrades({})}>
-                  Reset
-                </Button>
-                <Button onClick={() => alert('Grades saved!')}>Save Grades</Button>
-              </CardFooter>
-            </Card>
-          </div>
-        )}
+      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {saved && <p className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">Grade saved successfully.</p>}
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{submissions.length}</p><p className="text-xs uppercase tracking-wider text-gray-500">Submissions</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{gradedCount}</p><p className="text-xs uppercase tracking-wider text-gray-500">Graded</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-2xl font-bold text-deep-600">{average === null ? '—' : `${average}%`}</p><p className="text-xs uppercase tracking-wider text-gray-500">Average Score</p></CardContent></Card>
       </div>
-
-      <div className="mt-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <BarChart3 size={14} className="mr-1.5" />
-              Assessment Weights (per Academy Framework)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {ASSESSMENT_COMPONENTS.map((component) => (
-              <div key={component.key} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-full bg-brand-100 flex items-center justify-center">
-                    <BarChart3 size={12} className="text-brand-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-deep-600">{component.label}</p>
-                    <p className="text-[10px] text-gray-500">Component of final grade</p>
-                  </div>
-                </div>
-                <Badge className="bg-brand-50 text-brand-700 border-brand-100">{component.weight}</Badge>
-              </div>
-            ))}
+          <CardHeader><CardTitle className="text-sm">Student submissions</CardTitle></CardHeader>
+          <CardContent className="space-y-2 p-3">
+            {loading && <p className="p-4 text-sm text-gray-500">Loading submissions...</p>}
+            {!loading && submissions.length === 0 && <p className="p-4 text-sm text-gray-500">No submissions are waiting for review.</p>}
+            {submissions.map((submission) => <button key={submission.id} type="button" onClick={() => selectSubmission(submission)} className={`w-full rounded-lg border p-3 text-left ${selectedId === submission.id ? 'border-brand-300 bg-brand-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
+              <div className="flex items-center justify-between gap-2"><p className="truncate text-xs font-medium text-deep-600">{submission.users?.name || submission.users?.email || 'Student'}</p><Badge variant="outline">{statusLabels[submission.status] || submission.status}</Badge></div>
+              <p className="mt-1 truncate text-[10px] text-gray-500">{submission.labs?.title || submission.assessments?.title || 'Assessment submission'}</p>
+              <p className="mt-1 text-[10px] text-gray-400">{submission.submitted_at ? new Date(submission.submitted_at).toLocaleDateString() : 'No date'}</p>
+            </button>)}
           </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardHeader><CardTitle className="text-sm">{selected ? `Grade: ${selected.users?.name || 'Student'}` : 'Select a submission'}</CardTitle></CardHeader>
+          {selected ? <><CardContent className="space-y-4">
+            <div className="rounded-lg border border-gray-100 bg-white p-3"><p className="text-xs font-medium text-deep-600">{selected.labs?.title || selected.assessments?.title || 'Assessment submission'}</p><p className="mt-1 text-xs text-gray-500">{selected.content_url || 'No submission link provided.'}</p></div>
+            <div className="flex items-center gap-3"><label htmlFor="score" className="text-xs font-medium text-deep-600">Score</label><Input id="score" type="number" min="0" max="100" value={score} onChange={(event) => setScore(event.target.value)} className="w-24" placeholder="0-100" /><span className="text-xs text-gray-500">Pass mark: 70</span></div>
+            <div><label htmlFor="feedback" className="mb-2 block text-xs font-medium text-deep-600">Feedback</label><textarea id="feedback" value={feedback} onChange={(event) => setFeedback(event.target.value)} rows={5} className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" placeholder="Add clear feedback for the student" /></div>
+          </CardContent><CardFooter className="justify-end"><Button onClick={saveGrade} disabled={saving}><Save size={14} className="mr-2" />{saving ? 'Saving...' : 'Save grade'}</Button></CardFooter></> : <CardContent className="py-16 text-center text-sm text-gray-500"><BarChart3 size={24} className="mx-auto mb-2 text-gray-400" />Choose a submission to review.</CardContent>}
         </Card>
       </div>
     </div>

@@ -57,7 +57,7 @@ export default function UseCaseAssignment() {
 
   const filtered = useCases.filter((u) => {
     const matchesSearch = u.title.toLowerCase().includes(search.toLowerCase()) ||
-      u.stakeholder.toLowerCase().includes(search.toLowerCase())
+      (u.stakeholder || '').toLowerCase().includes(search.toLowerCase())
     const domainMatch = filterDomain === 'all' || u.domain === filterDomain
     const statusMatch = filterStatus === 'all' || u.status === filterStatus
     return matchesSearch && domainMatch && statusMatch

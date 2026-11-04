@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, CheckCircle, FileText, Video } from 'lucide-react'
+import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, CheckCircle, FileText, Video, Bell, Briefcase, ListPlus } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const navItems = {
@@ -12,6 +12,11 @@ const navItems = {
     { to: '/skills-profile', icon: CheckCircle, label: 'Skills Profile' },
     { to: '/certificates', icon: Award, label: 'Certificates' },
     { to: '/live-classes', icon: Video, label: 'Live Classes' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
+    { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace' },
+    { to: '/peer-reviews', icon: ClipboardList, label: 'Peer Reviews' },
+    { to: '/project-review', icon: ClipboardList, label: 'Project Review' },
+    { to: '/mentor-evaluation', icon: CheckCircle, label: 'Mentor Evaluation' },
   ],
   Instructor: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -21,22 +26,33 @@ const navItems = {
     { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics' },
     { to: '/live-classes', icon: Video, label: 'Live Classes' },
     { to: '/grading', icon: BarChart3, label: 'Grading' },
+    { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring' },
     { to: '/announcements', icon: MapPin, label: 'Announcements' },
     { to: '/capstone', icon: FileText, label: 'Capstone' },
     { to: '/panel-review', icon: ClipboardList, label: 'Panel Review' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
+    { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring' },
+    { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace' },
+    { to: '/project-review', icon: ClipboardList, label: 'Project Review' },
+    { to: '/mentor-evaluation', icon: CheckCircle, label: 'Mentor Evaluation' },
   ],
   Administrator: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/cohorts', icon: GraduationCap, label: 'Cohorts' },
     { to: '/enrolments', icon: Users, label: 'Enrolments' },
     { to: '/curriculum', icon: BookOpen, label: 'Curriculum' },
+    { to: '/instructor-assignments', icon: Users, label: 'Instructor Assignments' },
     { to: '/use-case-assignment', icon: Target, label: 'Use Cases' },
     { to: '/placement', icon: MapPin, label: 'Placement' },
     { to: '/squads', icon: Target, label: 'Squads' },
     { to: '/capstone', icon: FileText, label: 'Capstone' },
     { to: '/panel-review', icon: ClipboardList, label: 'Panel Review' },
     { to: '/reports', icon: BarChart3, label: 'Reports' },
+    { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring' },
     { to: '/live-classes', icon: Video, label: 'Live Classes' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
+    { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring' },
+    { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace' },
   ],
 }
 

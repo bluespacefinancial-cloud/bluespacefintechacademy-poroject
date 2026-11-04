@@ -90,11 +90,25 @@ npm run dev
 4. Run `supabase/migrations/001_phase_one_academy.sql` to add live classes and RLS policies
 5. Run `supabase/migrations/002_academy_operations.sql` to add the direct Auth profile key and announcements
 6. Run `supabase/migrations/003_student_squad_visibility.sql` to allow students to see their squad roster
-7. Deploy Edge Functions:
+7. Run `supabase/migrations/004_staff_learning_monitoring.sql` to allow staff read-only learning monitoring
+8. Run `supabase/migrations/005_production_operations.sql` to secure squad, placement, and notification operations
+9. Run `supabase/migrations/006_academy_v2_operations.sql` to add clinics, skills profiles, project evidence, peer reviews, mentor evaluations, and quiz attempts
+10. Run `supabase/migrations/007_completion_workflows.sql` to add certificate verification and completion workflow support
+11. Run `supabase/migrations/008_workflow_automation.sql` to add submission, grading, clinic, and project-review notifications
+12. Run `supabase/migrations/009_staff_assignments.sql` to add instructor cohort and squad assignment records
+13. Deploy Edge Functions:
    ```bash
    npx supabase functions deploy
    ```
-6. Copy your Supabase URL and anon key to `.env`
+14. Copy your Supabase URL and anon key to `.env`
+
+After migration 009, administrators can manage instructor boundaries from
+`/instructor-assignments`. Create cohort and squad assignments before relying on
+instructor-specific monitoring and mentor evaluation visibility.
+
+Panel reviewers can approve a capstone and issue its certificate from the same
+review screen. Issued certificates receive a verification number and public
+verification token through the `issue_certificate` database function.
 
 ### Google Meet and Calendar
 
@@ -103,6 +117,8 @@ Meet URL and stores Google Calendar/Meet identifiers for the server-side OAuth i
 Configure Google OAuth and Calendar/Meet API credentials in Supabase Edge Function secrets;
 never place client secrets or refresh tokens in Vite environment variables. The
 `google_integrations` table provides server-side token storage fields for that integration.
+Automatic event creation is not enabled until the OAuth Edge Function is deployed and
+the required Google credentials and redirect URI are configured.
 
 ### Environment Variables
 

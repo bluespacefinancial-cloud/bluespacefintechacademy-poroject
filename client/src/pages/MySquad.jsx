@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Clock, Activity, Award, Target, Plus, Search, Eye } from 'lucide.react'
+import { Users, Clock, Activity, Award, Target, Plus } from 'lucide.react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { Input } from '../components/ui/input'
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 
 const TRACK_COLORS = {
   Finsoft: 'bg-indigo-100 text-indigo-700 border-indigo-200',
@@ -160,11 +161,7 @@ export default function SquadManagement() {
           </div>
         ) : (
           filtered.map((squad) => (
-            <Card
-              key={squad.id}
-              className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-              onClick={() => navigate(`/squads/${squad.id}`)}
-            >
+            <Card key={squad.id} key={squad.id} className="cursor-pointer hover:border-brand-200 transition-colors duration-150" onClick={() => navigate(`/squads/${squad.id}`)}>
               <CardHeader className="flex flex-row items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
@@ -193,18 +190,12 @@ export default function SquadManagement() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-deep-600">Members</span>
-                    <span className="text-xs text-gray-600">
-                      {squad.finsoftCount} Finsoft + {squad.finopsCount} Finops
-                    </span>
+                    <span className="text-xs text-gray-600">{squad.finsoftCount} Finsoft + {squad.finopsCount} Finops</span>
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <Badge className={TRACK_COLORS.Finsoft}>
-                    {squad.finsoftCount} Finsoft
-                  </Badge>
-                  <Badge className={TRACK_COLORS.Finops}>
-                    {squad.finopsCount} Finops
-                  </Badge>
+                  <Badge className={TRACK_COLORS.Finsoft}>{squad.finsoftCount} Finsoft</Badge>
+                  <Badge className={TRACK_COLORS.Finops}>{squad.finopsCount} Finops</Badge>
                 </div>
               </CardContent>
               <CardFooter className="flex items-center justify-between pt-3">

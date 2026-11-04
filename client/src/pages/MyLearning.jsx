@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle, Target } from 'lucide-react'
+import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -39,7 +39,7 @@ export default function MyLearning() {
   const [overallStats, setOverallStats] = useState({
     overallCompletion: 0,
     attendance: 0,
-    lessonsComplete: 0,
+    labsComplete: 0,
     currentGrade: 0,
   })
 
@@ -52,7 +52,6 @@ export default function MyLearning() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Get enrolments for this user
       const { data: enrolments } = await supabase
         .from('enrolments')
         .select('cohort_id, track, squad_id')
@@ -66,7 +65,6 @@ export default function MyLearning() {
 
       const enrolment = enrolments[0]
 
-      // Get modules for this cohort
       const { data: modulesData } = await supabase
         .from('modules')
         .select('*')
@@ -74,7 +72,6 @@ export default function MyLearning() {
         .order('created_at', { ascending: true })
       setModules(modulesData || [])
 
-      // Get all lessons for these modules
       const moduleIds = modulesData?.map(m => m.id) || []
       if (moduleIds.length > 0) {
         const { data: lessonsData } = await supabase
@@ -84,30 +81,28 @@ export default function MyLearning() {
           .order('order_index', { ascending: true })
         setLessons(lessonsData || [])
 
-        // Get progress for all lessons
         const { data: progressData } = await supabase
           .from('lesson_progress')
           .select('*')
           .eq('user_id', user.id)
-          .in('lesson_id', lessonsData.map(l => l.id))
+          .in('lesson_id', lessonIds)
 
-          const progressMap = {}
-          progressData?.forEach(p => {
-            progressMap[p.lesson_id] = p
-          })
-          setProgress(progressMap)
+        const progressMap = {}
+        progressData?.forEach(p => {
+          progressMap[p.lesson_id] = p
+        })
+        setProgress(progressMap)
 
-          // Calculate stats
-          const totalLessons = lessonsData.length
-          const completedLessons = progressData?.filter(p => p.is_completed).length || 0
-          const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+        const totalLessons = lessonsData.length
+        const completedLessons = progressData?.filter(p => p.is_completed).length || 0
+        const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
-          setOverallStats({
-            overallCompletion,
-            attendance: 0, // Will be filled from attendance tracking
-            lessonsComplete: completedLessons,
-            currentGrade: 0, // Will be calculated from assessments
-          })
+        setOverallStats({
+          overallCompletion,
+          attendance: 0,
+          labsComplete: completedLessons,
+          currentGrade: 0,
+        })
       }
 
       setActiveModuleId(modulesData?.[0]?.id || null)
@@ -158,7 +153,6 @@ export default function MyLearning() {
         </p>
       </div>
 
-      {/* Progress overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
@@ -214,7 +208,6 @@ export default function MyLearning() {
         </Card>
       </div>
 
-      {/* Modules list */}
       <div className="lg:col-span-2">
         <h2 className="text-sm font-semibold text-deep-600 mb-4 flex items-center gap-2">
           <BookOpen size={14} className="mr-1.5" />
@@ -283,14 +276,13 @@ export default function MyLearning() {
                       style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }}
                     />
                   </div>
-                </CardContent>
-              </Card>
-            )
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
+        )}
       </div>
 
-      {/* Active module details */}
       {currentModule && (
         <div className="lg:col-span-2 mt-8">
           <div className="flex items-center justify-between mb-4">

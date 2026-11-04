@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Users, Award, Calendar, FileText } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
+import { BarChart3, Clock, Users, Award, Calendar } from 'lucide.react'
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 
@@ -19,7 +19,6 @@ const STAGES = [
 ]
 
 export default function Progress() {
-  const [user, setUser] = useState(null)
   const [domains, setDomains] = useState([])
   const [stages, setStages] = useState([])
   const [statCards, setStatCards] = useState([])
@@ -31,58 +30,36 @@ export default function Progress() {
 
   const loadData = async () => {
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) {
-        setLoading(false)
-        return
-      }
-      setUser(authUser)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-      // Get enrolment
-      const { data: enrolments } = await supabase
-        .from('enrolments')
-        .select('cohort_id, track')
-        .eq('user_id', authUser.id)
-        .eq('status', 'active')
-
-      if (!enrolments || enrolments.length === 0) {
-        setLoading(false)
-        return
-      }
-
-      const enrolment = enrolments[0]
-
-      // Get modules and lessons for this cohort
       const { data: modules } = await supabase
         .from('modules')
         .select('*')
-        .eq('cohort_id', enrolment.cohort_id)
 
-      const moduleIds = modules?.map(m => m.id) || []
+      const moduleIds = modules?.map((m) => m.id) || []
 
       const { data: lessons } = await supabase
         .from('lessons')
         .select('*')
         .in('module_id', moduleIds)
 
-      const lessonIds = lessons?.map(l => l.id) || []
+      const lessonIds = lessons?.map((l) => l.id) || []
 
-      // Get progress
       const { data: progress } = await supabase
         .from('lesson_progress')
         .select('*')
-        .eq('user_id', authUser.id)
+        .eq('user_id', user.id)
         .in('lesson_id', lessonIds)
 
-      // Calculate domain stats
       const domainMap = {}
-      lessons?.forEach(l => {
+      lessons?.forEach((l) => {
         const domain = l.domain || 'General'
         if (!domainMap[domain]) {
           domainMap[domain] = { total: 0, completed: 0 }
         }
         domainMap[domain].total++
-        if (progress?.find(p => p.lesson_id === l.id && p.is_completed)) {
+        if (progress?.find((p) => p.lesson_id === l.id && p.is_completed)) {
           domainMap[domain].completed++
         }
       })
@@ -95,18 +72,22 @@ export default function Progress() {
         labsComplete: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
       }))
 
-      // Calculate stage progress
-      const stagesData = STAGES.map(stage => {
-        const stageModules = modules?.filter(m => m.stage === stage.key) || []
-        const stageLessonIds = stageModules.flatMap(m =>
-          lessons?.filter(l => l.module_id === m.id).map(l => l.id) || []
+      const stagesData = STAGES.map((stage) => {
+        const stageModules = modules?.filter((m) => m.stage === stage.key) || []
+        const stageLessonIds = stageModules.flatMap((m) =>
+          lessons?.filter((l) => l.module_id === m.id).map((l) => l.id) || []
         )
-        const stageCompleted = stageLessonIds.filter(lid =>
-          progress?.find(p => p.lesson_id === lid && p.is_completed)
+        const stageCompleted = stageLessonIds.filter((lid) =>
+          progress?.find((p) => p.lesson_id === lid && p.is_completed)
         ).length
-        const stageStatus = stageLessonIds.length === 0 ? 'pending' :
-          stageCompleted === stageLessonIds.length ? 'completed' :
-          stageCompleted > 0 ? 'active' : 'pending'
+        const stageStatus =
+          stageLessonIds.length === 0
+            ? 'pending'
+            : stageCompleted === stageLessonIds.length
+              ? 'completed'
+              : stageCompleted > 0
+                ? 'active'
+                : 'pending'
 
         return {
           key: stage.key,
@@ -116,9 +97,8 @@ export default function Progress() {
         }
       })
 
-      // Calculate overall stats
       const totalLessons = lessons?.length || 0
-      const completedLessons = progress?.filter(p => p.is_completed).length || 0
+      const completedLessons = progress?.filter((p) => p.is_completed).length || 0
       const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
       setDomains(domainsData)
@@ -156,7 +136,6 @@ export default function Progress() {
         </p>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {statCards.map((stat, i) => (
           <Card key={i}>
@@ -176,7 +155,6 @@ export default function Progress() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Domain Progress */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
@@ -189,7 +167,7 @@ export default function Progress() {
               {domains.map((domain) => (
                 <div key={domain.key} className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <Badge className={DOMAIN_COLORS[domain.key].bg + ' ' + DOMAIN_COLORS[domain.key].text + ' ' + DOMAIN_COLORS[domain.key].border}>
                         {domain.label}
                       </Badge>
@@ -213,7 +191,6 @@ export default function Progress() {
           </Card>
         </div>
 
-        {/* Stage Tracker */}
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
@@ -242,13 +219,7 @@ export default function Progress() {
                         {stage.label}
                       </span>
                     </div>
-                    <Badge
-                      variant={
-                        stage.status === 'completed' ? 'secondary' :
-                        stage.status === 'active' ? 'default' : 'outline'
-                      }
-                      className="text-[10px]"
-                    >
+                    <Badge variant={stage.status === 'completed' ? 'secondary' : stage.status === 'active' ? 'default' : 'outline'} className="text-[10px]">
                       {stage.status}
                     </Badge>
                   </div>

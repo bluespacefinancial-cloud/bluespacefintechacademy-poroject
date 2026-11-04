@@ -45,6 +45,9 @@ export default function MentorClinics() {
     }
   }
 
+  const upcomingClinics = clinics.filter((c) => c.status === 'upcoming')
+  const completedClinics = clinics.filter((c) => c.status === 'completed')
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
@@ -65,7 +68,7 @@ export default function MentorClinics() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {clinics.filter((c) => c.status === 'upcoming').length === 0 ? (
+              {upcomingClinics.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <p>No upcoming clinics</p>
                 </div>
@@ -113,13 +116,16 @@ export default function MentorClinics() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {clinics.filter((c) => c.status === 'completed').length === 0 ? (
+              {completedClinics.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <p>No completed clinics</p>
                 </div>
               ) : (
                 clinics.filter((c) => c.status === 'completed').map((clinic) => (
-                  <Card key={clinic.id} className="p-3 border border-gray-100 bg-white">
+                  <Card
+                    key={clinic.id}
+                    className="p-3 border border-gray-100 bg-white"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="text-sm font-medium text-deep-600">{clinic.title}</p>

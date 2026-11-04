@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Users, FileText, Search, Edit3 } from 'lucide-react'
+import { Users, FileText, Search, Edit3 } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -42,7 +41,11 @@ export default function Enrolments() {
         .from('enrolments')
         .select(`
           *,
-          users (name, email, track),
+          users (
+            name,
+            email,
+            track
+          ),
           cohorts (name)
         `)
         .order('created_at', { ascending: false })
@@ -92,7 +95,6 @@ export default function Enrolments() {
         </div>
       </div>
 
-      {/* Search & Filters */}
       <div className="flex gap-4 mb-6">
         <div className="flex-1">
           <Input
@@ -105,10 +107,7 @@ export default function Enrolments() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Track</span>
-          <Select
-            value={filterTrack}
-            onValueChange={(value) => setFilterTrack(value)}
-          >
+          <Select value={filterTrack} onValueChange={(value) => setFilterTrack(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All tracks" />
             </SelectTrigger>
@@ -121,10 +120,7 @@ export default function Enrolments() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
-          <Select
-            value={filterStatus}
-            onValueChange={(value) => setFilterStatus(value)}
-          >
+          <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
@@ -140,7 +136,6 @@ export default function Enrolments() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
@@ -151,7 +146,7 @@ export default function Enrolments() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {enrolments.filter(e => e.track === 'Finsoft').length}
+              {enrolments.filter((e) => e.track === 'Finsoft').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Finsoft</p>
           </CardContent>
@@ -159,7 +154,7 @@ export default function Enrolments() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {enrolments.filter(e => e.track === 'Finops').length}
+              {enrolments.filter((e) => e.track === 'Finops').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Finops</p>
           </CardContent>
@@ -167,14 +162,13 @@ export default function Enrolments() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {enrolments.filter(e => e.status === 'active').length}
+              {enrolments.filter((e) => e.status === 'active').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Enrolments list */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
@@ -195,9 +189,7 @@ export default function Enrolments() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-sm">{enrolment.name}</CardTitle>
-                    <CardDescription className="text-[10px]">
-                      {enrolment.email}
-                    </CardDescription>
+                    <CardDescription className="text-[10px]">{enrolment.email}</CardDescription>
                   </div>
                 </div>
                 <Badge className={STATUS_COLORS[enrolment.status] || 'bg-gray-50 text-gray-600'}>
@@ -228,9 +220,7 @@ export default function Enrolments() {
                 <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/enrolments/${enrolment.id}/edit`) }}>
                   <Edit3 size={12} />
                 </Button>
-                <Badge variant="secondary" className="text-[10px]">
-                  {enrolment.squad}
-                </Badge>
+                <Badge variant="secondary" className="text-[10px]">{enrolment.squad}</Badge>
               </CardFooter>
             </Card>
           ))}

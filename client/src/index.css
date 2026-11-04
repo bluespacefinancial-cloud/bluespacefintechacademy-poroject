@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.625rem;
+
+    /* Bluespace design tokens (from DESIGN.md) */
+    --bs-brand: #0000ff;
+    --bs-brand-50: #eef2ff;
+    --bs-brand-100: #dbeafe;
+    --bs-brand-200: #bfdbfe;
+    --bs-brand-300: #93c5fd;
+    --bs-brand-400: #60a5fa;
+    --bs-brand-500: #3b82f6;
+    --bs-brand-600: #0000ff;
+    --bs-brand-700: #0000cc;
+    --bs-brand-800: #000099;
+    --bs-brand-900: #000066;
+
+    --bs-deep: #0f172a;
+    --bs-deep-50: #f1f5f9;
+    --bs-deep-100: #e2e8f0;
+    --bs-deep-200: #cbd5e1;
+    --bs-deep-300: #94a3b8;
+    --bs-deep-400: #64748b;
+    --bs-deep-500: #1e293b;
+    --bs-deep-600: #0f172a;
+    --bs-deep-700: #0b1120;
+    --bs-deep-800: #070b16;
+    --bs-deep-900: #03050b;
+
+    /* Domain colors */
+    --bs-domain-faas: #6366f1;
+    --bs-domain-fincore: #10b981;
+    --bs-domain-finops: #f59e0b;
+    --bs-domain-fininfra: #64748b;
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Manrope', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm;
+    transition-property: box-shadow;
+    transition-timing-function: var(--ease-out);
+    transition-duration: 200ms;
+  }
+
+  .card-interactive {
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm cursor-pointer;
+    transition-property: box-shadow, border-color;
+    transition-timing-function: var(--ease-out);
+    transition-duration: 200ms;
+  }
+
+  .card-interactive:hover {
+    @apply shadow-md border-gray-200;
+  }
+
+  .card-header {
+    @apply px-5 py-4 border-b border-gray-100;
+  }
+
+  .card-body {
+    @apply p-5;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold text-deep-600;
+  }
+
+  .stat-label {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  .form-label {
+    @apply block font-semibold uppercase tracking-wider;
+    font-size: 12px;
+    color: #3b82f6;
+  }
+
+  .form-input {
+    @apply flex w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-sm text-deep-600 placeholder:text-gray-400;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+    transition-property: border-color, box-shadow;
+    transition-timing-function: var(--ease-out);
+    transition-duration: 150ms;
+  }
+
+  textarea.form-input {
+    @apply resize-none;
+  }
+
+  .form-select {
+    @apply flex w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-sm text-deep-600 placeholder:text-gray-400;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+    transition-property: border-color, box-shadow;
+    transition-timing-function: var(--ease-out);
+    transition-duration: 150ms;
+    -webkit-appearance: none;
+    appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+  }
+
+  .form-error {
+    @apply border-red-400;
+  }
+}

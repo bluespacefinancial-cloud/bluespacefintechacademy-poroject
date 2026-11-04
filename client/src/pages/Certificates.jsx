@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Award, FileText, Download } from 'lucide.react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 
 const CERTIFICATE_TEMPLATES = {
-  Finsoft: {
+  FaaS: {
     title: 'BlueSPACE Fellow Certification - Finsoft Track',
     subtitle: 'Certified Fintech Software Developer & DevOps Engineer',
     description: 'This certifies that the recipient has successfully completed the Finsoft Fellows program, demonstrating proficiency in financial software engineering, API design, ledger engineering, CI/CD pipelines, and cloud platforms as run in the BlueSPACE AI Fintech Factory domains: FaaS, FinCore, FinOps and FinInfra.',
@@ -50,7 +50,7 @@ export default function Certificates() {
         date: c.created_at,
         grade: c.final_grade,
         certificateId: c.id,
-        downloadUrl: c.download_url,
+        downloadUrl: null,
       }))
 
       setCertificates(transformed)
@@ -64,6 +64,169 @@ export default function Certificates() {
   useEffect(() => {
     loadCertificates()
   }, [])
+
+  const downloadCertificate = async (certificationId) => {
+    try {
+      const { data, error } = await supabase
+        .from('certifications')
+        .select('*')
+        .eq('id', certificationId)
+        .single()
+
+      if (error) throw error
+
+      const certificateData = {
+        recipient: 'Student Name',
+        track: data.track,
+        certification: `${data.track} Certification`,
+        date: c.created_at,
+        skillsProfile: c.skills_profile || {},
+      }
+
+      const pdfContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            @page {
+              size: letter;
+              margin: 0.5in;
+            }
+            body {
+              font-family: 'Georgia', serif;
+              padding: 1cm;
+              background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+              color: #1e293b;
+              min-height: 100vh;
+              padding: 40px;
+              background-image: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            }
+            .border {
+              border: 4px solid #1e3a8a;
+              padding: 30px;
+              position: relative;
+              background: white;
+              min-height: calc(100vh - 80px);
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 40px;
+            }
+            .title {
+              font-size: 36px;
+              font-weight: bold;
+              color: #1e3a8a;
+              margin-bottom: 10px;
+            }
+            .subtitle {
+              font-size: 18px;
+              color: #64748b;
+              margin-bottom: 20px;
+            }
+            .description {
+              font-size: 14px;
+              line-height: 1.6;
+              color: #64748b;
+              margin-bottom: 30px;
+            }
+            .certificate-details {
+              margin-bottom: 40px;
+            }
+            .detail-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 10px;
+              font-size: 14px;
+            }
+            .label {
+              font-weight: bold;
+              color: #64748b;
+            }
+            .value {
+              font-weight: bold;
+              color: #1e293b;
+            }
+            .signature-section {
+              margin-top: 60px;
+              display: flex;
+              justify-content: space-between;
+            }
+            .signature-line {
+              width: 200px;
+              border-bottom: 1px solid #94a3b8;
+              padding-bottom: 10px;
+              margin-top: 20px;
+            }
+            .signature-label {
+              font-size: 11px;
+              color: #64748b;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-top: 5px;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 10px;
+              color: #94a3b8;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="border">
+            <div class="header">
+              <div class="title">BlueSPACE Fintech Academy</div>
+              <div class="subtitle">Certificate of Completion</div>
+            </div>
+            <div class="certificate-details">
+              <div class="detail-row">
+                <span class="label">Name:</span>
+                <span class="value">Student Name</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Track:</span>
+                <span class="value">${data.track}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Certification:</span>
+                <span class="value">${c.track} Fellowship Certification</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Date:</span>
+                <span class="value">${new Date(c.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Certificate ID:</span>
+                <span class="value">${c.id}</span>
+              </div>
+            </div>
+            <div class="signature-section">
+              <div>
+                <div class="signature-line"></div>
+                <div class="signature-label">Academy Director</div>
+              </div>
+              <div class="signature-line"></div>
+              <div class="signature-label">Date</div>
+            </div>
+            <div class="footer">
+              BlueSPACE Fintech Academy &copy; ${new Date().getFullYear()}
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+
+      // Generate PDF using window.print()
+      const printWindow = window.open('', '_blank')
+      printWindow.document.write(pdfContent)
+      printWindow.document.close()
+      printWindow.print()
+    } catch (err) {
+      console.error('Error generating PDF:', err)
+      alert('Failed to generate certificate PDF. Please try again.')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -85,7 +248,7 @@ export default function Certificates() {
                 <Award size={16} />
               </div>
               <Badge variant={cert.status === 'certified' ? 'secondary' : 'default'} className={cert.status === 'certified' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-gray-50 text-gray-600 border-gray-100'}>
-                {cert.status}
+                {cert.label}
               </Badge>
             </CardHeader>
             <CardContent className="space-y-4">

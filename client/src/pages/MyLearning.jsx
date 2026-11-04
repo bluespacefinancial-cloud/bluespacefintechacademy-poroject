@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { Input } from '../components/ui/input'
 import { supabase } from '../lib/supabase'
 
 const STAGE_LABELS = {
@@ -248,15 +249,13 @@ export default function MyLearning() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge
-                    variant={
-                      moduleStatus === 'completed'
-                        ? 'secondary'
+                  <Badge variant={
+                    moduleStatus === 'completed'
+                      ? 'secondary'
                         : moduleStatus === 'in_progress'
                         ? 'default'
                         : 'outline'
-                    }
-                  >
+                    }>
                     {STAGE_LABELS[module.stage]}
                     {module.domain && ` · ${module.domain}`}
                   </Badge>
@@ -276,63 +275,63 @@ export default function MyLearning() {
                       style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }}
                     />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           )}
+        </div>
+
+        {currentModule && (
+          <div className="lg:col-span-2 mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-deep-600">{currentModule.title}</h2>
+                <p className="text-sm text-gray-500">
+                  {STAGE_LABELS[currentModule.stage]}{currentModule.domain ? ` · ${currentModule.domain}` : ''}
+                </p>
+              </div>
+              <Button className="shrink-0">Start Module</Button>
+            </div>
+            <div className="space-y-3">
+              {moduleLessons.map((lesson) => {
+                const lessonProgress = progress[lesson.id]
+                const isCompleted = lessonProgress?.is_completed || false
+                return (
+                  <Card
+                    key={lesson.id}
+                    onClick={() => handleLessonClick(lesson)}
+                    className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
+                      isCompleted ? 'border-brand-100 bg-brand-50' : ''
+                    }`}
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
+                          {isCompleted ? (
+                            <CheckCircle className="text-white" />
+                          ) : (
+                            <PlayCircle size={14} className="text-brand-600" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-sm">{lesson.title}</CardTitle>
+                            <Badge className={LESSON_TYPE_COLORS[lesson.type]}>{LESSON_TYPE_LABELS[lesson.type]}</Badge>
+                          </div>
+                          <p className="text-[10px] text-gray-500">{formatTime(lesson.duration_minutes)}</p>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
+                        {isCompleted ? 'Review' : 'Start'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
         )}
       </div>
-
-      {currentModule && (
-        <div className="lg:col-span-2 mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-bold text-deep-600">{currentModule.title}</h2>
-              <p className="text-sm text-gray-500">
-                {STAGE_LABELS[currentModule.stage]}{currentModule.domain ? ` · ${currentModule.domain}` : ''}
-              </p>
-            </div>
-            <Button className="shrink-0">Start Module</Button>
-          </div>
-          <div className="space-y-3">
-            {moduleLessons.map((lesson) => {
-              const lessonProgress = progress[lesson.id]
-              const isCompleted = lessonProgress?.is_completed || false
-              return (
-                <Card
-                  key={lesson.id}
-                  onClick={() => handleLessonClick(lesson)}
-                  className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
-                    isCompleted ? 'border-brand-100 bg-brand-50' : ''
-                  }`}
-                >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
-                        {isCompleted ? (
-                          <CheckCircle className="text-white" />
-                        ) : (
-                          <PlayCircle size={14} className="text-brand-600" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm">{lesson.title}</CardTitle>
-                          <Badge className={LESSON_TYPE_COLORS[lesson.type]}>{LESSON_TYPE_LABELS[lesson.type]}</Badge>
-                        </div>
-                        <p className="text-[10px] text-gray-500">{formatTime(lesson.duration_minutes)}</p>
-                      </div>
-                    </div>
-                    <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
-                      {isCompleted ? 'Review' : 'Start'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

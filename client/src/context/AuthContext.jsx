@@ -3,6 +3,19 @@ import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
+// Role lives in public.users.type, not in the Supabase auth session. Without
+// this lookup, a page refresh restores a user with no `type`, which breaks
+// every role-gated route and sidebar until the next login.
+async function loadProfile(authUser) {
+  if (!authUser?.email) return authUser
+  const { data: profile } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', authUser.email)
+    .maybeSingle()
+  return { ...authUser, ...(profile || {}) }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -11,8 +24,8 @@ export function AuthProvider({ children }) {
     const initAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession()
-        if (data.session) {
-          setUser(data.session.user)
+        if (data.session?.user) {
+          setUser(await loadProfile(data.session.user))
         }
       } catch {
         // Supabase not configured
@@ -47,17 +60,7 @@ export function AuthProvider({ children }) {
 
     if (error) throw error
 
-    const userData = data.user
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', userData.email)
-      .maybeSingle()
-
-    const fullUser = {
-      ...userData,
-      ...(profile || {}),
-    }
+    const fullUser = await loadProfile(data.user)
 
     localStorage.setItem('token', data.session.access_token)
     localStorage.setItem('user', JSON.stringify(fullUser))

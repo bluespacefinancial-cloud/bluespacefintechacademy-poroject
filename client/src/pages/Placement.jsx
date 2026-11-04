@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Clock, FileText, Search, Target } from 'lucide-react'
+import { Users, Clock, FileText, Search, Target } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -11,7 +11,7 @@ import { supabase } from '../lib/supabase'
 const ROLE_COLORS = {
   'Project Manager': 'bg-brand-100 text-brand-700 border-brand-200',
   'Field Lead': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  'UAT': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  UAT: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   'Technical Specialist': 'bg-amber-100 text-amber-700 border-amber-200',
 }
 
@@ -56,7 +56,7 @@ export default function Placement() {
         id: p.id,
         name: p.users?.name || 'Unknown',
         track: p.users?.track || 'Unknown',
-        cohort: 'Cohort 1 - December 2026', // Simplified
+        cohort: 'Cohort 1 - December 2026',
         role: p.role || 'Technical Specialist',
         project: p.project_id || null,
         status: p.status || 'pending',
@@ -111,7 +111,9 @@ export default function Placement() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Track</span>
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Track
+          </span>
           <Select value={filterTrack} onValueChange={(v) => setFilterTrack(v)}>
             <SelectTrigger className="w-[130px]">
               <SelectValue placeholder="All tracks" />
@@ -165,7 +167,7 @@ export default function Placement() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {placements.filter(p => p.status === 'placed').length}
+              {placements.filter((p) => p.status === 'placed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Placed</p>
           </CardContent>
@@ -173,16 +175,14 @@ export default function Placement() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {placements.filter(p => p.status === 'matched').length}
+              {placements.filter((p) => p.status === 'matched').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Matched</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              0
-            </p>
+            <p className="text-2xl font-bold text-deep-600">0</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">30-Day Check-ins</p>
           </CardContent>
         </Card>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, Plus, Eye } from 'lucide-react'
+import { Target, Plus, Eye, Clock, Users, FileText, Search } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -69,7 +69,8 @@ export default function UseCaseAssignment() {
   }
 
   const filtered = useCases.filter((u) => {
-    const matchesSearch = u.title.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch =
+      u.title.toLowerCase().includes(search.toLowerCase()) ||
       u.stakeholder.toLowerCase().includes(search.toLowerCase())
     const domainMatch = filterDomain === 'all' || u.domain === filterDomain
     const statusMatch = filterStatus === 'all' || u.status === filterStatus
@@ -149,7 +150,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {useCases.filter(u => u.status === 'assigned').length}
+              {useCases.filter((u) => u.status === 'assigned').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Assigned to Squads</p>
           </CardContent>
@@ -157,7 +158,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {useCases.filter(u => u.status === 'proposed').length}
+              {useCases.filter((u) => u.status === 'proposed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed</p>
           </CardContent>
@@ -165,7 +166,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {useCases.filter(u => u.sandboxAccess).length}
+              {useCases.filter((u) => u.sandboxAccess).length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Sandbox Access</p>
           </CardContent>

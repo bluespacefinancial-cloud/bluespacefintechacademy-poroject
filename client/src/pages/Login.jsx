@@ -261,7 +261,7 @@ export default function Login() {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="you@bluespaceacademy.com"
+                          placeholder="you@bluespacefintechacademy.com"
                           required
                         />
                       </div>

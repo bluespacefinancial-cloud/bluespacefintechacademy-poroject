@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
     const { data: profile } = await supabase
       .from('users')
       .select('*')
-      .eq('id', userData.id)
+      .eq('email', userData.email)
       .maybeSingle()
 
     const fullUser = {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Users, FileText, Search, Edit3 } from 'lucide.react'
+import { Users, Search, Edit3 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -194,9 +194,7 @@ export default function Enrolments() {
                     <CardDescription className="text-[10px]">{enrolment.email}</CardDescription>
                   </div>
                 </div>
-                <Badge className={STATUS_COLORS[enrolment.status] || 'bg-gray-50 text-gray-600'}>
-                  {STATUS_LABELS[enrolment.status]}
-                </Badge>
+                <Badge className={STATUS_COLORS[enrolment.status] || 'bg-gray-50 text-gray-600'}>{STATUS_LABELS[enrolment.status]}</Badge>
               </CardHeader>
               <CardContent className="pt-0 pb-3">
                 <div className="space-y-2">

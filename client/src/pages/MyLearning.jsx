@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
+import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 
@@ -222,8 +222,7 @@ export default function MyLearning() {
             const moduleStatus = moduleLessonsCount > 0 && moduleCompleted === moduleLessonsCount ? 'completed' :
               moduleLessonsCount > 0 && moduleCompleted > 0 ? 'in_progress' : 'locked'
 
-            return (
-              <Card
+            return <Card
                 key={module.id}
                 onClick={() => setActiveModuleId(module.id)}
                 className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
@@ -241,7 +240,7 @@ export default function MyLearning() {
                         <ChevronRight className="text-gray-400" />
                       )}
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <CardTitle className="text-sm">{module.title}</CardTitle>
                       <CardDescription className="text-[10px]">
                         {module.week} · {module.track} track
@@ -261,7 +260,7 @@ export default function MyLearning() {
                     {module.domain && ` · ${module.domain}`}
                   </Badge>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 pb-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
                       {moduleStatus}
@@ -275,12 +274,10 @@ export default function MyLearning() {
                       className="h-full rounded-full bg-brand-600"
                       style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }}
                     />
-                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
-        )}
+          })}
       </div>
 
       {currentModule && (

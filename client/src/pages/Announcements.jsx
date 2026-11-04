@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Bell, Users } from 'lucide.react'
+import { MapPin, Bell, Users } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'

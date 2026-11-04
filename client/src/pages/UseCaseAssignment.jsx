@@ -79,46 +79,8 @@ export default function UseCaseAssignment() {
   const [search, setSearch] = useState('')
   const [filterDomain, setFilterDomain] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadUseCases()
-  }, [])
-
-  const loadUseCases = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('use_cases')
-        .select(`
-          *,
-          squads (name)
-        `)
-        .order('created_at', { ascending: true })
-
-      if (error) throw error
-
-      const dataWithSquad = (data || []).map((uc) => ({
-        id: uc.id,
-        title: uc.title,
-        domain: uc.domain,
-        cohort: uc.cohort_id,
-        stakeholder: uc.stakeholder,
-        status: uc.status,
-        squad: uc.squads?.name || null,
-        sandboxAccess: uc.sandbox_access,
-        anonymisedData: uc.anonymised_data,
-        createdAt: uc.created_at,
-      }))
-
-      setUseCases(dataWithSquad)
-    } catch (err) {
-      console.error('Error loading use cases:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const filtered = useCases.filter((u) => {
+  const filtered = MOCK_USE_CASES.filter((u) => {
     const matchesSearch = u.title.toLowerCase().includes(search.toLowerCase()) ||
       u.stakeholder.toLowerCase().includes(search.toLowerCase())
     const domainMatch = filterDomain === 'all' || u.domain === filterDomain
@@ -154,9 +116,7 @@ export default function UseCaseAssignment() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Domain
-          </span>
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</span>
           <Select value={filterDomain} onValueChange={(v) => setFilterDomain(v)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All domains" />
@@ -171,9 +131,7 @@ export default function UseCaseAssignment() {
           </Select>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Status
-          </span>
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All statuses" />
@@ -192,14 +150,14 @@ export default function UseCaseAssignment() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{useCases.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{MOCK_USE_CASES.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Use Cases</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {useCases.filter((u) => u.status === 'assigned').length}
+              {MOCK_USE_CASES.filter((u) => u.status === 'assigned').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Assigned to Squads</p>
           </CardContent>
@@ -207,7 +165,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {useCases.filter((u) => u.status === 'proposed').length}
+              {MOCK_USE_CASES.filter((u) => u.status === 'proposed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed</p>
           </CardContent>
@@ -215,7 +173,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {useCases.filter((u) => u.sandboxAccess).length}
+              {MOCK_USE_CASES.filter((u) => u.sandboxAccess).length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Sandbox Access</p>
           </CardContent>
@@ -242,9 +200,7 @@ export default function UseCaseAssignment() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-sm">{useCase.title}</CardTitle>
-                    <CardDescription className="text-[10px]">
-                      {useCase.cohort} · {useCase.domain}
-                    </CardDescription>
+                    <CardDescription className="text-[10px]">{useCase.cohort} · {useCase.domain}</CardDescription>
                   </div>
                 </div>
                 <Badge className={DOMAIN_COLORS[useCase.domain]}>{useCase.domain}</Badge>

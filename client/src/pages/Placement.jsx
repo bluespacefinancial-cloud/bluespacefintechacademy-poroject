@@ -11,7 +11,7 @@ import { supabase } from '../lib/supabase'
 const ROLE_COLORS = {
   'Project Manager': 'bg-brand-100 text-brand-700 border-brand-200',
   'Field Lead': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  'UAT': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  UAT: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   'Technical Specialist': 'bg-amber-100 text-amber-700 border-amber-200',
 }
 
@@ -101,53 +101,8 @@ export default function Placement() {
   const [filterTrack, setFilterTrack] = useState('all')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadPlacements()
-  }, [])
-
-  const loadPlacements = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('placements')
-        .select(`
-          *,
-          users (
-            name,
-            email,
-            type,
-            track
-          )
-        `)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      const dataWithNames = (data || []).map((p) => ({
-        id: p.id,
-        fellow: p.users?.name || 'Unknown',
-        track: p.users?.track || 'Unknown',
-        cohort: 'Cohort 1 - December 2026',
-        role: p.role || 'Technical Specialist',
-        project: p.project_id || null,
-        status: p.status || 'pending',
-        matchScore: null,
-        startDate: p.start_date || null,
-        checkin30: false,
-        checkin60: false,
-        checkin90: false,
-      }))
-
-      setPlacements(dataWithNames)
-    } catch (err) {
-      console.error('Error loading placements:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const filtered = placements.filter((p) => {
+  const filtered = MOCK_PLACEMENTS.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
     const matchesTrack = filterTrack === 'all' || p.track === filterTrack
     const matchesStatus = filterStatus === 'all' || p.status === filterStatus
@@ -230,14 +185,14 @@ export default function Placement() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{placements.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Fellows</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {placements.filter((p) => p.status === 'placed').length}
+              {MOCK_PLACEMENTS.filter((p) => p.status === 'placed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Placed</p>
           </CardContent>
@@ -245,16 +200,14 @@ export default function Placement() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {placements.filter((p) => p.status === 'matched').length}
+              {MOCK_PLACEMENTS.filter((p) => p.status === 'matched').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Matched</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {placements.filter((p) => p.checkin30).length}
-            </p>
+            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.filter((p) => p.checkin30).length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">30-Day Check-ins</p>
           </CardContent>
         </Card>
@@ -282,9 +235,7 @@ export default function Placement() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-sm">{placement.name}</CardTitle>
-                      <CardDescription className="text-[10px]">
-                        {placement.track} · {placement.cohort}
-                      </CardDescription>
+                      <CardDescription className="text-[10px]">{placement.track} · {placement.cohort}</CardDescription>
                     </div>
                   </div>
                   <Badge className={config.color}>{config.label}</Badge>
@@ -322,8 +273,7 @@ export default function Placement() {
                   </Button>
                 </CardFooter>
               </Card>
-            )
-          })}
+            )}
         )}
       </div>
     </div>

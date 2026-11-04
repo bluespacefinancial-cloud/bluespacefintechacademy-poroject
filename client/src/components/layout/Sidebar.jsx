@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, Eye, CheckCircle, FileText } from 'lucide-react'
+import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, Eye, CheckCircle, FileText, Video } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const navItems = {
@@ -12,15 +12,15 @@ const navItems = {
     { to: '/capstone', icon: FileText, label: 'Capstone' },
     { to: '/skills-profile', icon: CheckCircle, label: 'Skills Profile' },
     { to: '/certificates', icon: Award, label: 'Certificates' },
+    { to: '/live-classes', icon: Video, label: 'Live Classes' },
   ],
   Instructor: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/my-modules', icon: BookOpen, label: 'My Modules' },
     { to: '/squads', icon: Target, label: 'Squads' },
-    { to: '/sprints', icon: Activity, label: 'Sprints' },
-    { to: '/uat', icon: Eye, label: 'UAT Cycles' },
     { to: '/labs-to-review', icon: ClipboardList, label: 'Labs to Review' },
     { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics' },
+    { to: '/live-classes', icon: Video, label: 'Live Classes' },
     { to: '/grading', icon: BarChart3, label: 'Grading' },
     { to: '/announcements', icon: MapPin, label: 'Announcements' },
     { to: '/capstone', icon: FileText, label: 'Capstone' },
@@ -34,12 +34,10 @@ const navItems = {
     { to: '/use-case-assignment', icon: Target, label: 'Use Cases' },
     { to: '/placement', icon: MapPin, label: 'Placement' },
     { to: '/squads', icon: Target, label: 'Squads' },
-    { to: '/sprints', icon: Activity, label: 'Sprints' },
-    { to: '/uat', icon: Eye, label: 'UAT Cycles' },
     { to: '/capstone', icon: FileText, label: 'Capstone' },
     { to: '/panel-review', icon: ClipboardList, label: 'Panel Review' },
     { to: '/reports', icon: BarChart3, label: 'Reports' },
-    { to: '/system-logs', icon: MoreHorizontal, label: 'System Logs' },
+    { to: '/live-classes', icon: Video, label: 'Live Classes' },
   ],
 }
 

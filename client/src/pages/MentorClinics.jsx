@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Calendar, Clock, Users, AlertCircle, FileText } from 'lucide.react'
+import { useState, useEffect } from 'react'
+import { Calendar, Clock, Users, AlertCircle, FileText } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
@@ -71,7 +71,7 @@ export default function MentorClinics() {
                 <div className="text-center py-8 text-gray-400">
                   <p>No upcoming clinics</p>
                 </div>
-              ) : (
+              ) :
                 clinics.filter((c) => c.status === 'upcoming').map((clinic) => (
                   <Card
                     key={clinic.id}
@@ -99,8 +99,8 @@ export default function MentorClinics() {
                       </div>
                     </div>
                   </Card>
-                ))
-              )}
+                ))}
+              }
             </CardContent>
           </Card>
 
@@ -138,9 +138,12 @@ export default function MentorClinics() {
                 <div className="text-center py-8 text-gray-400">
                   <p>No completed clinics</p>
                 </div>
-              ) : (
+              ) :
                 clinics.filter((c) => c.status === 'completed').map((clinic) => (
-                  <Card key={clinic.id} className="p-3 border border-gray-100 bg-white">
+                  <Card
+                    key={clinic.id}
+                    className="p-3 border border-gray-100 bg-white"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="text-sm font-medium text-deep-600">{clinic.title}</p>
@@ -153,7 +156,6 @@ export default function MentorClinics() {
                     </div>
                   </Card>
                 ))}
-              )}
             </CardContent>
           </Card>
         </div>

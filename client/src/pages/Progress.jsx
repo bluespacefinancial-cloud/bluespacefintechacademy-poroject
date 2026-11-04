@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Users, Award } from 'lucide.react'
+import { BarChart3, Clock, Users, Award, FileText } from 'lucide.react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
@@ -104,7 +104,7 @@ export default function Progress() {
       setStages(stagesData)
       setStatCards([
         { label: 'Overall Completion', value: `${overallCompletion}%`, icon: BarChart3, color: 'bg-brand-500' },
-        { label: 'Attendance', value: '94%', icon: Calendar, color: 'bg-emerald-500' },
+        { label: 'Attendance', value: '94%', icon: Clock, color: 'bg-emerald-500' },
         { label: 'Labs Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
         { label: 'Current Grade', value: '86%', icon: Award, color: 'bg-slate-500' },
       ])
@@ -192,15 +192,16 @@ export default function Progress() {
               ))}
             </CardContent>
           </Card>
-        </div>
 
-        <div className="lg:col-span-1">
-          <Card>
+          <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="text-sm font-bold">Learning Stages</CardTitle>
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <BarChart3 size={14} className="mr-1.5" />
+                Learning Stages
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {stages.map((stage, i) => (
+              {stages.map((stage) => (
                 <div key={stage.key} className="flex flex-col gap-2 relative">
                   {i > 0 && (
                     <div className="absolute -top-1 left-0 w-full h-[2px] bg-gray-200" />
@@ -229,6 +230,20 @@ export default function Progress() {
                   <span className="text-[10px] text-gray-400">{stage.weeks}</span>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-bold">Reporting</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
+                <span className="text-xs font-medium text-deep-600">Progress Report</span>
+                <FileText size={14} className="ml-2" />
+              </div>
             </CardContent>
           </Card>
         </div>

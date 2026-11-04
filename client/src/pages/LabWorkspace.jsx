@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, Upload, CheckCircle, AlertCircle, FileText } from 'lucide-react'
+import { Clock, Upload, CheckCircle, AlertCircle, FileText, Upload as UploadIcon } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
+import { supabase } from '../lib/supabase'
 
 const DOMAIN_COLORS = {
   FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
@@ -17,6 +18,8 @@ export default function LabWorkspace() {
   const navigate = useNavigate()
   const [submissionUrl, setSubmissionUrl] = useState('')
   const [submissionStatus, setSubmissionStatus] = useState('draft')
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [ledgerEntries, setLedgerEntries] = useState([
     { transactionId: 'TX-001', account: 'Cash', debit: 100, credit: 0 },
     { transactionId: 'TX-001', account: 'Revenue', debit: 0, credit: 100 },
@@ -31,7 +34,7 @@ export default function LabWorkspace() {
     week: 'Weeks 5-6',
     duration: '90 minutes',
     dueDate: '2027-01-15',
-instructions: `
+    instructions: `
 # Lab Objective
 
 Implement a simple double-entry ledger with balance checks. This lab will help you understand:
@@ -41,7 +44,7 @@ Implement a simple double-entry ledger with balance checks. This lab will help y
 
 ## Requirements
 
-1. Create a Ledger class with \\\`post(transaction)\\\` method
+1. Create a Ledger class with \`post(transaction)\` method
 2. Implement double-entry validation (debits must equal credits)
 3. Add balance check queries per account
 4. Handle idempotency - same transaction ID should not post twice
@@ -49,7 +52,7 @@ Implement a simple double-entry ledger with balance checks. This lab will help y
 
 ## Starter Code
 
-\\\`\\\`\\\`javascript
+\`\`\`javascript
 class Ledger {
   constructor() {
     this.accounts = new Map()
@@ -68,7 +71,7 @@ class Ledger {
     // Your implementation here
   }
 }
-\\\`\\\`\\\`
+\`\`\`
 
 ## Submission
 
@@ -94,9 +97,63 @@ Submit your solution as a GitHub repository link or upload your code files.
 }`,
   }
 
-  const handleSubmit = (e) => {
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    setUploadProgress(0)
+
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${crypto.randomUUID()}.${fileExt}`
+      const filePath = `${user.id}/${lessonId}/${fileName}`
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('labs')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data } = supabase.storage.from('labs').getPublicUrl(filePath)
+      setSubmissionUrl(data.publicUrl)
+
+      setUploading(false)
+      setUploadProgress(100)
+    } catch (err) {
+      console.error('Upload error:', err)
+      setUploading(false)
+      alert('Failed to upload file. Please try again.')
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmissionStatus('submitted')
+    if (!submissionUrl) return
+
+    setUploading(true)
+    try {
+      const { error } = await supabase
+        .from('submissions')
+        .insert({
+          lab_id: lab.id,
+          user_id: user.id,
+          content_url: submissionUrl,
+          status: 'submitted',
+          submitted_at: new Date().toISOString(),
+        })
+
+      if (error) throw error
+
+      setSubmissionStatus('submitted')
+      setUploading(false)
+    } catch (err) {
+      console.error('Submission error:', err)
+      setUploading(false)
+      alert('Failed to submit lab. Please try again.')
+    }
   }
 
   const validateLedger = () => {
@@ -109,7 +166,7 @@ Submit your solution as a GitHub repository link or upload your code files.
       setLedgerMessage(`Validation failed: debits ${debits.toFixed(2)} / credits ${credits.toFixed(2)}. Each transaction must balance and each line must contain either a debit or credit.`)
       return
     }
-    setLedgerMessage(`Ledger valid: ${ledgerEntries.length} entries balance at ${debits.toFixed(2)}.`)
+    setLedgerMessage(`Lab validated: ${ledgerEntries.length} entries balance at ${debits.toFixed(2)}.`)
   }
 
   return (
@@ -186,20 +243,43 @@ Submit your solution as a GitHub repository link or upload your code files.
                 </pre>
               </div>
               <div className="mt-6 rounded-lg border border-indigo-100 bg-indigo-50 p-4">
-                <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center justify-between mb-3">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-deep-600">Double-entry validator</h4>
-                  <Button size="sm" variant="outline" onClick={validateLedger}>Validate ledger</Button>
+                  <Button size="sm" variant="outline" onClick={validateLedger}>Validate lab</Button>
                 </div>
                 <div className="space-y-2">
-                  {ledgerEntries.map((entry, index) => <div key={`${entry.transactionId}-${index}`} className="grid grid-cols-4 gap-2 text-xs">
-                    <Input value={entry.transactionId} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, transactionId: event.target.value } : item))} placeholder="Transaction ID" />
-                    <Input value={entry.account} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, account: event.target.value } : item))} placeholder="Account" />
-                    <Input type="number" min="0" value={entry.debit} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, debit: event.target.value } : item))} placeholder="Debit" />
-                    <Input type="number" min="0" value={entry.credit} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} placeholder="Credit" />
-                  </div>)}
+                  {ledgerEntries.map((entry, index) => (
+                    <div key={`${entry.transactionId}-${index}`} className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={entry.transactionId}
+                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, transactionId: event.target.value } : item))}
+                        placeholder="Transaction ID"
+                      />
+                      <Input
+                        type="text"
+                        value={entry.account}
+                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, account: event.target.value } : item))}
+                        placeholder="Account"
+                      />
+                      <Input
+                        type="number"
+                        min="0"
+                        value={entry.debit}
+                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, debit: event.target.value } : item))}
+                        placeholder="Debit"
+                      />
+                      <Input
+                        type="number"
+                        min="0"
+                        value={entry.credit}
+                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))}
+                        placeholder="Credit"
+                      />
+                    </div>)}
                 </div>
-                <Button className="mt-3" size="sm" variant="ghost" onClick={() => setLedgerEntries((current) => [...current, { transactionId: '', account: '', debit: 0, credit: 0 }])}>Add posting line</Button>
-                {ledgerMessage && <p className={`mt-2 text-xs ${ledgerMessage.startsWith('Ledger valid') ? 'text-emerald-700' : 'text-red-700'}`}>{ledgerMessage}</p>}
+                <Button className="mt-3" size="sm" variant="outline" onClick={() => setLedgerEntries((current) => [...current, { transactionId: '', account: '', debit: 0, credit: 0 }]})>Add posting line</Button>
+                {ledgerMessage && <p className={`mt-2 text-xs ${ledgerMessage.startsWith('Lab validated') ? 'text-emerald-600' : 'text-red-700'}`}>{ledgerMessage}</p>}
               </div>
             </CardContent>
             <CardFooter className="flex items-center justify-between pt-4">
@@ -224,7 +304,7 @@ Submit your solution as a GitHub repository link or upload your code files.
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                    Repository URL
+                    GitHub Repository URL
                   </label>
                   <Input
                     type="url"
@@ -238,93 +318,101 @@ Submit your solution as a GitHub repository link or upload your code files.
                   <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
                     Upload Files (optional)
                   </label>
-                  <div className="flex items-center gap-3">
-                    <Upload size={16} className="text-gray-400" />
-                    <Input type="file" />
-                  </div>
+                  <Input
+                    type="file"
+                    onChange={handleUpload}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-deep-600 placeholder:text-gray-400 border border-gray-200 rounded-md"
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={!submissionUrl}>
-                  {submissionStatus === 'submitted' ? 'Submitted' : 'Submit Solution'}
+                <Button type="submit" className="w-full" disabled={!submissionUrl || uploading}>
+                  {uploading ? 'Uploading...' : submissionStatus === 'submitted' ? 'Submitted' : 'Submit Solution'}
                 </Button>
-              </form>
-            </CardContent>
-            {submissionStatus === 'submitted' && (
-              <CardContent className="p-4 bg-emerald-50 border-emerald-100">
-                <div className="flex items-center gap-3">
-                  <CheckCircle size={20} className="text-emerald-600" />
-                  <div>
-                    <p className="text-sm font-medium text-emerald-700">Solution submitted</p>
-                    <p className="text-[10px] text-emerald-600">
-                      Your submission has been received and is pending review.
-                    </p>
+                {uploading && (
+                  <div className="mt-2 w-full">
+                    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                      <div className={`h-full ${uploadProgress === 100 ? 'bg-emerald-500' : 'bg-brand-600'}`} style={{ width: `${uploadProgress}%` }} />
+                    </div>
                   </div>
+                )}
+              </form>
+              {submissionStatus === 'submitted' && (
+                <CardContent className="p-4 bg-emerald-50 border-emerald-100">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle size={20} className="text-emerald-600" />
+                    <div>
+                      <p className="text-sm font-medium text-emerald-700">Solution submitted</p>
+                      <p className="text-[10px] text-emerald-600">
+                        Your submission has been received and is pending review.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </Card>
+
+          {/* Squad info */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-bold">Lab Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-deep-600">Module</span>
+                  <p className="text-xs text-gray-600">{lab.module}</p>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-deep-600">Domain</span>
+                  <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-deep-600">Week</span>
+                  <p className="text-xs text-gray-600">{lab.week}</p>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-deep-600">Duration</span>
+                  <p className="text-xs text-gray-600">{lab.duration}</p>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-deep-600">Due Date</span>
+                  <p className="text-xs text-gray-600">{lab.dueDate}</p>
                 </div>
               </CardContent>
-            )}
-          </Card>
-        </div>
+            </Card>
 
-        {/* Sidebar info */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold">Lab Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <span className="text-xs font-medium text-deep-600">Module</span>
-                <p className="text-xs text-gray-600">{lab.module}</p>
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-medium text-deep-600">Domain</span>
-                <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-medium text-deep-600">Week</span>
-                <p className="text-xs text-gray-600">{lab.week}</p>
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-medium text-deep-600">Duration</span>
-                <p className="text-xs text-gray-600">{lab.duration}</p>
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-medium text-deep-600">Due Date</span>
-                <p className="text-xs text-gray-600">{lab.dueDate}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold">Mentor Support</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center">
-                  <FileText size={14} className="text-deep-600" />
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-bold">Mentor Support</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center">
+                    <FileText size={14} className="text-deep-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-deep-600">Mentor Clinic</p>
+                    <p className="text-[10px] text-gray-500">Weekly office hours with domain lead</p>
+                  </div>
+                  <Button size="sm" variant="outline">
+                    Book Clinic
+                  </Button>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-deep-600">Mentor Clinic</p>
-                  <p className="text-[10px] text-gray-500">Weekly office hours with domain lead</p>
+                <div className="flex items-center gap-3 border-t border-gray-100 pt-3">
+                  <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <AlertCircle size={14} className="text-emerald-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-deep-600">Squad Stand-up</p>
+                    <p className="text-[10px] text-gray-500">Tue & Thu, 10:00 AM WAT</p>
+                  </div>
+                  <Button size="sm" variant="outline">
+                    Join Stand-up
+                  </Button>
                 </div>
-                <Button size="sm" variant="outline">
-                  Book Clinic
-                </Button>
-              </div>
-              <div className="flex items-center gap-3 border-t border-gray-100 pt-3">
-                <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <AlertCircle size={14} className="text-emerald-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-deep-600">Squad Stand-up</p>
-                  <p className="text-[10px] text-gray-500">Tue & Thu, 10:00 AM WAT</p>
-                </div>
-                <Button size="sm" variant="outline">
-                  Join Stand-up
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

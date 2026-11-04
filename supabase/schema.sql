@@ -68,7 +68,7 @@ CREATE TABLE public.modules (
   title varchar(200) NOT NULL,
   stage varchar(20) NOT NULL CHECK (stage IN ('foundations', 'domain_immersion', 'live_projects', 'certification')),
   domain varchar(20) CHECK (domain IN ('FaaS', 'FinCore', 'FinOps', 'FinInfra')),
-  track varchar(20) CHECK (track IN ('Finsoft', 'Finops')),
+  track varchar(20) CHECK (track IN ('Finsoft', 'Finops', 'All')),
   description text,
   week_start int NOT NULL,
   week_end int NOT NULL,

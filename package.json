@@ -1,0 +1,15 @@
+{
+  "name": "bluespace-lms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BlueSPACE Fintech Academy Learning Management System",
+  "scripts": {
+    "install:all": "cd client && npm install",
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "lint": "cd client && npm run lint",
+    "lint:fix": "cd client && npm run lint:fix",
+    "format": "cd client && npm run format",
+    "format:check": "cd client && npm run format:check"
+  }
+}

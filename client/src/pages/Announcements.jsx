@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { MapPin, Bell, Users } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
@@ -100,7 +99,6 @@ export default function Announcements() {
         </div>
       </div>
 
-      {/* Create announcement */}
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-bold">Create New Announcement</CardTitle>
@@ -157,7 +155,6 @@ export default function Announcements() {
         </CardContent>
       </Card>
 
-      {/* Announcements list */}
       <div className="mt-6 space-y-3">
         {announcements.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
@@ -165,32 +162,32 @@ export default function Announcements() {
             <p>No announcements yet</p>
           </div>
         ) : (
-          announcements.map((announcement) => {
-            const config = TYPE_CONFIG[announcement.type]
-            return (
-              <Card
-                key={announcement.id}
-                className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
-                  announcement.pinned ? 'border-brand-200 bg-brand-50' : ''
-                }`}
-              >
-                <CardHeader className="flex flex-row items-center justify-between py-3">
-                  <div className="flex items-center gap-2">
-                    {announcement.pinned && (
-                      <Badge variant="outline" className="text-[10px] mr-2">Pinned</Badge>
-                    )}
-                    <Badge className={config.color}>{config.label}</Badge>
-                  </div>
-                  <span className="text-[10px] text-gray-400">{new Date(announcement.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3">
-                  <div className="space-y-2">
-                    <CardTitle className="text-sm">{announcement.title}</CardTitle>
-                    <p className="text-sm text-gray-600">{announcement.content}</p>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex items-center justify-between pt-3">
-<div className="flex items-center gap-3">
+          announcements.map((announcement) => (
+            <Card
+              key={announcement.id}
+              className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
+                announcement.pinned ? 'border-brand-200 bg-brand-50' : ''
+              }`}
+            >
+              <CardHeader className="flex flex-row items-center justify-between py-3">
+                <div className="flex items-center gap-2">
+                  {announcement.pinned && (
+                    <Badge variant="outline" className="text-[10px] mr-2">Pinned</Badge>
+                  )}
+                  <Badge className={config.color}>{config.label}</Badge>
+                </div>
+                <span className="text-[10px] text-gray-400">
+                  {new Date(announcement.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3">
+                <div className="space-y-2">
+                  <CardTitle className="text-sm">{announcement.title}</CardTitle>
+                  <p className="text-sm text-gray-600">{announcement.content}</p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex items-center justify-between pt-3">
+                <div className="flex items-center gap-3">
                   <Users size={12} className="text-gray-400" />
                   <span className="text-xs text-gray-500">{announcement.audience}</span>
                 </div>
@@ -198,10 +195,9 @@ export default function Announcements() {
                   <Bell size={12} className="text-gray-400" />
                   <span className="text-xs text-gray-500">{announcement.author_name}</span>
                 </div>
-                </CardFooter>
-              </Card>
-            )
-          })}
+              </CardFooter>
+            </Card>
+          ))}
         )}
       </div>
     </div>

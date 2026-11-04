@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, Upload, CheckCircle, AlertCircle, FileText, Upload as UploadIcon } from 'lucide.react'
+import { Clock, Upload, CheckCircle, AlertCircle, FileText } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -34,8 +34,7 @@ export default function LabWorkspace() {
     week: 'Weeks 5-6',
     duration: '90 minutes',
     dueDate: '2027-01-15',
-    instructions: `
-# Lab Objective
+    instructions: `# Lab Objective
 
 Implement a simple double-entry ledger with balance checks. This lab will help you understand:
 - How financial transactions are recorded using double-entry bookkeeping
@@ -97,63 +96,9 @@ Submit your solution as a GitHub repository link or upload your code files.
 }`,
   }
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    setUploading(true)
-    setUploadProgress(0)
-
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${crypto.randomUUID()}.${fileExt}`
-      const filePath = `${user.id}/${lessonId}/${fileName}`
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('labs')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      // Get public URL
-      const { data } = supabase.storage.from('labs').getPublicUrl(filePath)
-      setSubmissionUrl(data.publicUrl)
-
-      setUploading(false)
-      setUploadProgress(100)
-    } catch (err) {
-      console.error('Upload error:', err)
-      setUploading(false)
-      alert('Failed to upload file. Please try again.')
-    }
-  }
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    if (!submissionUrl) return
-
-    setUploading(true)
-    try {
-      const { error } = await supabase
-        .from('submissions')
-        .insert({
-          lab_id: lab.id,
-          user_id: user.id,
-          content_url: submissionUrl,
-          status: 'submitted',
-          submitted_at: new Date().toISOString(),
-        })
-
-      if (error) throw error
-
-      setSubmissionStatus('submitted')
-      setUploading(false)
-    } catch (err) {
-      console.error('Submission error:', err)
-      setUploading(false)
-      alert('Failed to submit lab. Please try again.')
-    }
+    setSubmissionStatus('submitted')
   }
 
   const validateLedger = () => {
@@ -174,9 +119,7 @@ Submit your solution as a GitHub repository link or upload your code files.
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-deep-600 mb-1">Lab Workspace</h1>
-          <p className="text-sm text-gray-500">
-            Guided lab: {lab.title}
-          </p>
+          <p className="text-sm text-gray-500">Guided lab: {lab.title}</p>
         </div>
         <Button onClick={() => navigate('/my-learning')}>
           ← Back to Learning
@@ -187,233 +130,121 @@ Submit your solution as a GitHub repository link or upload your code files.
         {/* Lab Instructions */}
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-bold">{lab.title}</CardTitle>
-                <CardDescription className="text-[10px]">
-                  {lab.module} · {lab.domain}
-                </CardDescription>
+            <CardHeader className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
+                  <FileText size={14} className="text-deep-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-sm">{lab.title}</CardTitle>
+                  <CardDescription className="text-[10px]">{lab.module} · {lab.domain}</CardDescription>
+                  <div className="mt-2">
+                    <CardDescription className="text-xs text-gray-500">{lab.week} · {lab.duration}</CardDescription>
+                    <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
+                  </div>
+                </div>
               </div>
-              <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
+              <Badge variant="outline" className="text-xs">{lab.status}</Badge>
             </CardHeader>
             <CardContent className="pt-4">
               <div className="prose prose-sm text-gray-600 max-w-none">
                 {lab.instructions.split('\n').map((line, i) => {
                   if (line.startsWith('# ')) {
-                    return (
-                      <h3 key={i} className="text-base font-bold text-deep-600 mt-4 mb-2">
-                        {line.slice(2)}
-                      </h3>
-                    )
+                    return <h3 key={i} className="text-base font-bold text-deep-600 mt-4 mb-2">{line.slice(2)}</h3>
                   }
                   if (line.startsWith('## ')) {
-                    return (
-                      <h4 key={i} className="text-sm font-semibold text-deep-600 mt-3 mb-1">
-                        {line.slice(3)}
-                      </h4>
-                    )
+                    return <h4 key={i} className="text-sm font-semibold text-deep-600 mt-3 mb-1">{line.slice(3)}</h4>
                   }
                   if (line.startsWith('### ')) {
-                    return (
-                      <h5 key={i} className="text-xs font-semibold text-deep-600 mt-2 mb-1">
-                        {line.slice(4)}
-                      </h5>
-                    )
+                    return <h5 key={i} className="text-xs font-semibold text-deep-600 mt-2 mb-1">{line.slice(4)}</h5>
                   }
-                  if (line.startsWith('```')) {
-                    return null // Skip markdown code fences for simplicity
-                  }
-                  if (line.trim() === '') {
-                    return <p key={i} className="mb-2" />
-                  }
-                  return (
-                    <p key={i} className="mb-2 leading-relaxed">
-                      {line}
-                    </p>
-                  )
+                  if (line.startsWith('```')) return null
+                  if (line.trim() === '') return <p key={i} className="mb-2" />
+                  return <p key={i} className="mb-2 leading-relaxed">{line}</p>
                 })}
               </div>
 
-              <div className="mt-6 bg-gray-50 border border-gray-100 rounded-lg p-4">
-                <h4 className="text-xs font-semibold text-deep-600 mb-3 uppercase tracking-wider">
-                  Starter Code
-                </h4>
-                <pre className="bg-white p-3 rounded-md text-xs overflow-x-auto font-mono text-gray-600 border border-gray-100">
-                  {lab.starterCode}
-                </pre>
-              </div>
               <div className="mt-6 rounded-lg border border-indigo-100 bg-indigo-50 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-deep-600">Double-entry validator</h4>
-                  <Button size="sm" variant="outline" onClick={validateLedger}>Validate lab</Button>
-                </div>
-                <div className="space-y-2">
-                  {ledgerEntries.map((entry, index) => (
-                    <div key={`${entry.transactionId}-${index}`} className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={entry.transactionId}
-                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, transactionId: event.target.value } : item))}
-                        placeholder="Transaction ID"
-                      />
-                      <Input
-                        type="text"
-                        value={entry.account}
-                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, account: event.target.value } : item))}
-                        placeholder="Account"
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        value={entry.debit}
-                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, debit: event.target.value } : item))}
-                        placeholder="Debit"
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        value={entry.credit}
-                        onChange={(e) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))}
-                        placeholder="Credit"
-                      />
-                    </div>)}
-                </div>
-                <Button className="mt-3" size="sm" variant="outline" onClick={() => setLedgerEntries((current) => [...current, { transactionId: '', account: '', debit: 0, credit: 0 }]})>Add posting line</Button>
-                {ledgerMessage && <p className={`mt-2 text-xs ${ledgerMessage.startsWith('Lab validated') ? 'text-emerald-600' : 'text-red-700'}`}>{ledgerMessage}</p>}
+                <h4 className="text-xs font-semibold text-deep-600 mb-3 uppercase tracking-wider">Starter Code</h4>
+                <pre className="bg-white p-3 rounded-md text-xs overflow-x-auto font-mono text-gray-600 border border-gray-100">{lab.starterCode}</pre>
               </div>
-            </CardContent>
-            <CardFooter className="flex items-center justify-between pt-4">
-              <div className="flex items-center gap-3">
-                <Clock size={14} className="text-gray-500" />
-                <span className="text-sm text-deep-600">
-                  Estimated time: {lab.duration}
-                </span>
-              </div>
-              <span className="text-xs font-medium text-gray-500">
-                Due: {lab.dueDate}
-              </span>
-            </CardFooter>
-          </Card>
-
-          {/* Submission */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold">Submit Your Solution</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                    GitHub Repository URL
-                  </label>
-                  <Input
-                    type="url"
-                    value={submissionUrl}
-                    onChange={(e) => setSubmissionUrl(e.target.value)}
-                    placeholder="https://github.com/yourusername/lab-solution"
-                    required
-                  />
+              <div className="mt-6 rounded-lg border border-gray-100 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-deep-600">Squad</span>
+                  <Badge variant="outline">Squad Alpha</Badge>
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                    Upload Files (optional)
-                  </label>
-                  <Input
-                    type="file"
-                    onChange={handleUpload}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-deep-600 placeholder:text-gray-400 border border-gray-200 rounded-md"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={!submissionUrl || uploading}>
-                  {uploading ? 'Uploading...' : submissionStatus === 'submitted' ? 'Submitted' : 'Submit Solution'}
-                </Button>
-                {uploading && (
-                  <div className="mt-2 w-full">
-                    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${uploadProgress === 100 ? 'bg-emerald-500' : 'bg-brand-600'}`} style={{ width: `${uploadProgress}%` }} />
+                <div className="space-y-3">
+                  {ledgerEntries.map((entry, i) => (
+                    <div key={entry.transactionId} className="flex items-center gap-2">
+                      <Input type="text" value={entry.transactionId} onChange={(e) => setLedgerEntries(labs.map((l, idx) => idx === i ? { ...l, transactionId: e.target.value } : l))} placeholder="Transaction ID" />
+                      <Input type="text" value={entry.account} onChange={(e) => setLedgerEntries(labs.map((l, idx) => idx === i ? { ...l, account: e.target.value } : l))} placeholder="Account" />
+                      <Input type="number" value={entry.debit} onChange={(e) => setLedgerEntries(labs.map((l, idx) => idx === i ? { ...l, debit: parseFloat(e.target.value || 0) } : l))} placeholder="Debit" />
+                      <Input type="number" value={entry.credit} onChange={(e) => setLedgerEntries(labs.map((l, idx) => idx === i ? { ...l, credit: e.target.value } : l))} placeholder="Credit" />
+                      <Button size="sm" variant="outline" onClick={() => setLedgerEntries(labs.filter((_, idx) => idx !== i))}>
+                        <X size={14} className="text-red-500" />
+                      </Button>
                     </div>
+                  ))}
+                  <div className="mt-2 flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setLedgerEntries([...labs, { transactionId: '', account: '', debit: 0, credit: 0 }])}>
+                      <Plus size={14} className="mr-1" />
+                      Add entry
+                    </Button>
                   </div>
-                )}
-              </form>
-              {submissionStatus === 'submitted' && (
-                <CardContent className="p-4 bg-emerald-50 border-emerald-100">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle size={20} className="text-emerald-600" />
-                    <div>
-                      <p className="text-sm font-medium text-emerald-700">Solution submitted</p>
-                      <p className="text-[10px] text-emerald-600">
-                        Your submission has been received and is pending review.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          </Card>
-
-          {/* Squad info */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-bold">Lab Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <span className="text-xs font-medium text-deep-600">Module</span>
-                  <p className="text-xs text-gray-600">{lab.module}</p>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs font-medium text-deep-600">Domain</span>
-                  <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs font-medium text-deep-600">Week</span>
-                  <p className="text-xs text-gray-600">{lab.week}</p>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs font-medium text-deep-600">Duration</span>
-                  <p className="text-xs text-gray-600">{lab.duration}</p>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs font-medium text-deep-600">Due Date</span>
-                  <p className="text-xs text-gray-600">{lab.dueDate}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-bold">Mentor Support</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center">
-                    <FileText size={14} className="text-deep-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-deep-600">Mentor Clinic</p>
-                    <p className="text-[10px] text-gray-500">Weekly office hours with domain lead</p>
-                  </div>
-                  <Button size="sm" variant="outline">
-                    Book Clinic
-                  </Button>
-                </div>
-                <div className="flex items-center gap-3 border-t border-gray-100 pt-3">
-                  <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <AlertCircle size={14} className="text-emerald-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-deep-600">Squad Stand-up</p>
-                    <p className="text-[10px] text-gray-500">Tue & Thu, 10:00 AM WAT</p>
-                  </div>
-                  <Button size="sm" variant="outline">
-                    Join Stand-up
-                  </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Right side */}
+      <div className="lg:col-span-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-bold">Submission</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-deep-600">Repository URL</label>
+              <Input type="url" value={submissionUrl} onChange={(e) => setSubmissionUrl(e.target.value)} placeholder="https://github.com/username/lab-repo" placeholder="https://github.com/yourusername/lab-solution" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Button size="sm" variant="outline" disabled={!submissionUrl || uploading} onClick={handleSubmit}>
+                {submissionStatus === 'submitted' ? 'Submitted' : 'Submit Lab'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-bold">Lab Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-deep-600">Module</span>
+              <span className="text-xs text-gray-600">{lab.module}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-deep-600">Domain</span>
+              <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-deep-600">Week</span>
+              <span className="text-xs text-gray-600">{lab.week}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-deep-600">Duration</span>
+              <span className="text-xs text-gray-600">{lab.duration}</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-deep-600">Due Date</span>
+                <span className="text-xs text-gray-600">{lab.dueDate}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

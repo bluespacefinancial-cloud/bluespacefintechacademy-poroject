@@ -1,15 +1,9 @@
-import { BookOpen, Users, Activity, Award, Clock, Target, GraduationCap, MapPin, FileText, AlertCircle, ClipboardList } from 'lucide-react'
+import { BookOpen, Users, Clock, Target, GraduationCap, MapPin, FileText, ClipboardList } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { useAuth } from '../context/AuthContext'
-
-const DOMAIN_COLORS = {
-  FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
-  FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
-}
+import StudentDashboard from './StudentDashboard'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -18,9 +12,9 @@ export default function Dashboard() {
   const isInstructor = user?.type === 'Instructor'
   const isAdmin = user?.type === 'Administrator'
 
-  // ==================== STUDENT DASHBOARD ====================
   if (isStudent) {
-    return (
+    return <StudentDashboard user={user} />
+    /* return (
       <div className="min-h-screen bg-gray-50">
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -33,7 +27,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stat Cards - Student Metrics */}
+        {// Stat Cards - Student Metrics }
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4">
@@ -90,7 +84,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Current Course */}
+          {// Current Course }
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -121,7 +115,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Upcoming Deadlines */}
+            {// Upcoming Deadlines }
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -154,9 +148,9 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Right Column - Squad + Progress */}
+          {// Right Column - Squad + Progress }
           <div className="lg:col-span-1">
-            {/* My Squad */}
+            {// My Squad }
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -195,7 +189,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Domain Progress */}
+            {// Domain Progress }
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="text-sm font-bold">Domain Progress</CardTitle>
@@ -226,7 +220,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-  )
+  ) */
   }
 
   // ==================== INSTRUCTOR DASHBOARD ====================

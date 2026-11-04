@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Target, Plus } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import { supabase } from '../lib/supabase'
 
 const DOMAIN_COLORS = {
   FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
@@ -22,64 +23,39 @@ const STATUS_COLORS = {
   archived: 'bg-slate-50 text-slate-600 border-slate-100',
 }
 
-const MOCK_USE_CASES = [
-  {
-    id: 1,
-    title: 'FinCore Ledger Integration',
-    domain: 'FinCore',
-    cohort: 'Cohort 1 - December 2026',
-    stakeholder: 'BlueSPACE Engineering Team',
-    status: 'qualified',
-    squad: 'Squad Alpha',
-    sandboxAccess: true,
-    anonymisedData: true,
-    createdAt: '2026-10-20',
-  },
-  {
-    id: 2,
-    title: 'FaaS Partner API Onboarding',
-    domain: 'FaaS',
-    cohort: 'Cohort 1 - December 2026',
-    stakeholder: 'Code Partner - FinTech Solutions',
-    status: 'assigned',
-    squad: 'Squad Beta',
-    sandboxAccess: false,
-    anonymisedData: true,
-    createdAt: '2026-10-22',
-  },
-  {
-    id: 3,
-    title: 'FinOps Automated Reconciliation',
-    domain: 'FinOps',
-    cohort: 'Cohort 2 - March 2027',
-    stakeholder: 'Bank Partner - Ghana',
-    status: 'proposed',
-    squad: null,
-    sandboxAccess: false,
-    anonymisedData: true,
-    createdAt: '2026-10-25',
-  },
-  {
-    id: 4,
-    title: 'FinInfra CI/CD Pipeline',
-    domain: 'FinInfra',
-    cohort: 'Cohort 2 - March 2027',
-    stakeholder: 'Platform Team',
-    status: 'proposed',
-    squad: null,
-    sandboxAccess: true,
-    anonymisedData: false,
-    createdAt: '2026-10-28',
-  },
-]
-
 export default function UseCaseAssignment() {
   const navigate = useNavigate()
+  const [useCases, setUseCases] = useState([])
   const [search, setSearch] = useState('')
   const [filterDomain, setFilterDomain] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const filtered = MOCK_USE_CASES.filter((u) => {
+  useEffect(() => {
+    const loadUseCases = async () => {
+      const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
+        supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
+        supabase.from('cohorts').select('id, name'),
+        supabase.from('squads').select('id, name'),
+      ])
+      if (loadError) throw loadError
+      if (cohortsError) throw cohortsError
+      if (squadsError) throw squadsError
+      const cohortNames = new Map((cohorts || []).map((cohort) => [cohort.id, cohort.name]))
+      const squadNames = new Map((squads || []).map((squad) => [squad.id, squad.name]))
+      setUseCases((data || []).map((item) => ({
+        ...item,
+        cohort: cohortNames.get(item.cohort_id) || 'Unassigned cohort',
+        squad: squadNames.get(item.squad_id) || null,
+        sandboxAccess: item.sandbox_access,
+        anonymisedData: item.anonymised_data,
+      })))
+    }
+    loadUseCases().catch((loadError) => setError(loadError.message || 'Unable to load use cases')).finally(() => setLoading(false))
+  }, [])
+
+  const filtered = useCases.filter((u) => {
     const matchesSearch = u.title.toLowerCase().includes(search.toLowerCase()) ||
       u.stakeholder.toLowerCase().includes(search.toLowerCase())
     const domainMatch = filterDomain === 'all' || u.domain === filterDomain
@@ -149,14 +125,14 @@ export default function UseCaseAssignment() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_USE_CASES.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{useCases.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Use Cases</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_USE_CASES.filter((u) => u.status === 'assigned').length}
+              {useCases.filter((u) => u.status === 'assigned').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Assigned to Squads</p>
           </CardContent>
@@ -164,7 +140,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_USE_CASES.filter((u) => u.status === 'proposed').length}
+              {useCases.filter((u) => u.status === 'proposed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed</p>
           </CardContent>
@@ -172,7 +148,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_USE_CASES.filter((u) => u.sandboxAccess).length}
+              {useCases.filter((u) => u.sandboxAccess).length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Sandbox Access</p>
           </CardContent>
@@ -180,7 +156,9 @@ export default function UseCaseAssignment() {
       </div>
 
       <div className="space-y-3">
-        {filtered.length === 0 ? (
+        {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {loading && <p className="py-8 text-center text-sm text-gray-500">Loading use cases...</p>}
+        {!loading && filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <Target size={32} className="mx-auto mb-3 opacity-50" />
             <p>No use cases found</p>

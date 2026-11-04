@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
+import { getCurrentProfile } from '../lib/profile'
 
 const STAGE_LABELS = {
   foundations: 'Foundations',
@@ -57,13 +58,13 @@ export default function MyLearning() {
 
   const loadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      const profile = await getCurrentProfile()
+      if (!profile) return
 
       const { data: enrolments } = await supabase
         .from('enrolments')
         .select('cohort_id, track, squad_id')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .eq('status', 'active')
 
       if (!enrolments || enrolments.length === 0) {
@@ -92,7 +93,7 @@ export default function MyLearning() {
         const { data: progressData } = await supabase
           .from('lesson_progress')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', profile.id)
           .in('lesson_id', lessonsData.map(lesson => lesson.id))
 
         const progressMap = {}
@@ -108,7 +109,8 @@ export default function MyLearning() {
         setOverallStats({
           overallCompletion,
           attendance: 0,
-          labsComplete: completedLessons,
+          labsComplete: 0,
+          lessonsComplete: completedLessons,
           currentGrade: 0,
         })
       }

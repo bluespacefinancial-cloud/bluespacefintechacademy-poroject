@@ -88,7 +88,9 @@ npm run dev
 2. Run `supabase/schema.sql` in the SQL Editor
 3. Run `supabase/storage.sql` to create storage buckets
 4. Run `supabase/migrations/001_phase_one_academy.sql` to add live classes and RLS policies
-5. Deploy Edge Functions:
+5. Run `supabase/migrations/002_academy_operations.sql` to add the direct Auth profile key and announcements
+6. Run `supabase/migrations/003_student_squad_visibility.sql` to allow students to see their squad roster
+7. Deploy Edge Functions:
    ```bash
    npx supabase functions deploy
    ```

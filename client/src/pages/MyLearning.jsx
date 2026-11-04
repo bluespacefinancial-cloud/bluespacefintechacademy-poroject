@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 
@@ -248,15 +248,13 @@ export default function MyLearning() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge
-                    variant={
-                      moduleStatus === 'completed'
-                        ? 'secondary'
+                  <Badge variant={
+                    moduleStatus === 'completed'
+                      ? 'secondary'
                         : moduleStatus === 'in_progress'
                         ? 'default'
                         : 'outline'
-                    }
-                  >
+                    }>
                     {STAGE_LABELS[module.stage]}
                     {module.domain && ` · ${module.domain}`}
                   </Badge>

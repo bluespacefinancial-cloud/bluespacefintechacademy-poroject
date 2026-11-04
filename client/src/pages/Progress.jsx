@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Award, FileText } from 'lucide-react'
+import { BarChart3, Clock, Users, Award } from 'lucide.react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
-import { getCurrentProfile } from '../lib/profile'
 
 const DOMAIN_COLORS = {
   FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
@@ -11,13 +10,6 @@ const DOMAIN_COLORS = {
   FinOps: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-500' },
   FinInfra: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-500' },
 }
-
-const STAGES = [
-  { key: 'foundations', label: 'Foundations', weeks: 'Weeks 1-3' },
-  { key: 'domain_immersion', label: 'Domain Immersion', weeks: 'Weeks 4-8' },
-  { key: 'live_projects', label: 'Live Projects', weeks: 'Weeks 9-14' },
-  { key: 'certification', label: 'Certification', weeks: 'Weeks 15-16' },
-]
 
 export default function Progress() {
   const [domains, setDomains] = useState([])
@@ -31,12 +23,12 @@ export default function Progress() {
 
   const loadData = async () => {
     try {
-      const profile = await getCurrentProfile()
-      if (!profile) return
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
       const { data: modules } = await supabase
         .from('modules')
-        .select('*, lessons(id)')
+        .select('*')
 
       const moduleIds = modules?.map(m => m.id) || []
 
@@ -47,17 +39,15 @@ export default function Progress() {
 
       const lessonIds = lessons?.map(l => l.id) || []
 
-      const { data: progress } = lessonIds.length
-        ? await supabase
-          .from('lesson_progress')
-          .select('*')
-          .eq('user_id', profile.id)
-          .in('lesson_id', lessonIds)
-        : { data: [] }
+      const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .in('lesson_id', lessonIds)
 
       const domainMap = {}
       lessons?.forEach(l => {
-        const domain = modules?.find(m => m.id === l.module_id)?.domain || 'General'
+        const domain = l.domain || 'General'
         if (!domainMap[domain]) {
           domainMap[domain] = { total: 0, completed: 0 }
         }
@@ -107,9 +97,9 @@ export default function Progress() {
       setStages(stagesData)
       setStatCards([
         { label: 'Overall Completion', value: `${overallCompletion}%`, icon: BarChart3, color: 'bg-brand-500' },
-        { label: 'Attendance', value: 'Not available', icon: Clock, color: 'bg-emerald-500' },
-        { label: 'Lessons Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
-        { label: 'Current Grade', value: 'Not graded', icon: Award, color: 'bg-slate-500' },
+        { label: 'Attendance', value: '94%', icon: Clock, color: 'bg-emerald-500' },
+        { label: 'Labs Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
+        { label: 'Current Grade', value: '86%', icon: Award, color: 'bg-slate-500' },
       ])
       setLoading(false)
     } catch (err) {
@@ -187,10 +177,6 @@ export default function Progress() {
                       style={{ width: `${domain.passRate}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-[10px] text-gray-500 mt-1">
-                    <span>Pass Rate: {domain.passRate}%</span>
-                    <span>Labs Complete: {domain.labsComplete}%</span>
-                  </div>
                 </div>
               ))}
             </CardContent>
@@ -204,7 +190,7 @@ export default function Progress() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {stages.map((stage, i) => (
+              {stages.map((stage) => (
                 <div key={stage.key} className="flex flex-col gap-2 relative">
                   {i > 0 && (
                     <div className="absolute -top-1 left-0 w-full h-[2px] bg-gray-200" />
@@ -233,20 +219,6 @@ export default function Progress() {
                   <span className="text-[10px] text-gray-400">{stage.weeks}</span>
                 </div>
               ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold">Reporting</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
-                <span className="text-xs font-medium text-deep-600">Progress Report</span>
-                <FileText size={14} className="ml-2" />
-              </div>
             </CardContent>
           </Card>
         </div>

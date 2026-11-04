@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
@@ -244,7 +244,7 @@ export default function MyLearning() {
                     <div>
                       <CardTitle className="text-sm">{module.title}</CardTitle>
                       <CardDescription className="text-[10px]">
-                        {module.week} · {module.duration} · {module.track} track
+                        {module.week} · {module.track} track
                       </CardDescription>
                     </div>
                   </div>

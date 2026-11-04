@@ -16,11 +16,11 @@ export default function QuizManagement() {
   const [message, setMessage] = useState('')
 
   useEffect(() => { supabase.from('assessments').select('id, title, type').in('type', ['quiz', 'domain_assessment']).order('created_at', { ascending: false }).then(({ data, error: queryError }) => { if (queryError) setError(queryError.message); setAssessments(data || []) }) }, [])
-  useEffect(() => { if (!assessmentId) return; supabase.from('assessment_questions').select('*').eq('assessment_id', assessmentId).order('order_index').then(({ data, error: queryError }) => { if (queryError) setError(queryError.message); setQuestions(data || []) }) }, [assessmentId])
+  useEffect(() => { if (!assessmentId) return; supabase.from('assessment_questions').select('id, assessment_id, prompt, question_type, options, points, order_index').eq('assessment_id', assessmentId).order('order_index').then(({ data, error: queryError }) => { if (queryError) setError(queryError.message); setQuestions(data || []) }) }, [assessmentId])
   const addQuestion = async (event) => {
     event.preventDefault(); setError(''); setMessage('')
     const options = form.question_type === 'short_answer' ? [] : form.options.split('\n').map((item) => item.trim()).filter(Boolean)
-    const { data, error: saveError } = await supabase.from('assessment_questions').insert({ assessment_id: Number(assessmentId), prompt: form.prompt.trim(), question_type: form.question_type, options, correct_answer: form.correct_answer.trim() || null, points: Number(form.points), order_index: questions.length }).select().single()
+    const { data, error: saveError } = await supabase.from('assessment_questions').insert({ assessment_id: Number(assessmentId), prompt: form.prompt.trim(), question_type: form.question_type, options, correct_answer: form.correct_answer.trim() || null, points: Number(form.points), order_index: questions.length }).select('id, assessment_id, prompt, question_type, options, points, order_index').single()
     if (saveError) setError(saveError.message)
     else { setQuestions((current) => [...current, data]); setForm(empty); setMessage('Question added.') }
   }

@@ -32,8 +32,8 @@ serve(async (req) => {
       const { data: profile } = await supabaseClient
         .from("users")
         .select("type")
-        .eq("id", data.user.id)
-        .single()
+        .eq("email", data.user.email)
+        .maybeSingle()
       userRole = profile?.type
       if (userRole !== "Administrator") {
         return new Response(

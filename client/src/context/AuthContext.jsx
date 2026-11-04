@@ -13,14 +13,24 @@ async function loadProfile(authUser) {
     .select('*')
     .eq('email', authUser.email)
     .maybeSingle()
-  return { ...authUser, ...(profile || {}) }
+  return {
+    ...authUser,
+    ...(profile || {}),
+    // DB column is force_password_change (snake_case); the UI reads camelCase.
+    forcePasswordChange: profile?.force_password_change === 1,
+  }
 }
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  // If Supabase is not configured, there is nothing to load.
+  const [loading, setLoading] = useState(Boolean(supabase))
 
   useEffect(() => {
+    // Without Supabase env vars the client is null. Calling into it here used
+    // to throw and render a blank page; fail visibly instead.
+    if (!supabase) return
+
     const initAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession()
@@ -37,8 +47,13 @@ export function AuthProvider({ children }) {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          setUser(session.user)
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Defer the profile lookup: awaiting Supabase inside this callback
+          // can deadlock. The raw session user has no role, so never set it
+          // directly.
+          setTimeout(() => {
+            loadProfile(session.user).then(setUser).catch(() => setUser(session.user))
+          }, 0)
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
           localStorage.removeItem('token')

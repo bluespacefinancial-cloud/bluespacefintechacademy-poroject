@@ -25,7 +25,9 @@ export default function Quiz() {
         const profile = await getCurrentProfile()
         const [{ data: assessmentRow, error: assessmentError }, { data: questionRows, error: questionsError }, { data: attempts, error: attemptsError }] = await Promise.all([
           supabase.from('assessments').select('*').eq('id', assessmentId).single(),
-          supabase.from('assessment_questions').select('*').eq('assessment_id', assessmentId).order('order_index'),
+          // correct_answer is intentionally not selectable by students; see
+          // supabase/migrations/010_security_hardening.sql.
+          supabase.from('assessment_questions').select('id, assessment_id, prompt, question_type, options, points, order_index').eq('assessment_id', assessmentId).order('order_index'),
           supabase.from('assessment_attempts').select('*').eq('assessment_id', assessmentId).eq('user_id', profile.id).order('started_at', { ascending: false }).limit(1),
         ])
         for (const queryError of [assessmentError, questionsError, attemptsError]) if (queryError) throw queryError

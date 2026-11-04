@@ -21,7 +21,8 @@ INSERT INTO public.users (name, email, type, avatar, is_active, force_password_c
   ('FinInfra Domain Lead', 'fininfra.domain@bluespacefintechacademy.com', 'Instructor', 'avatar.png', 1, 0),
   -- Administrators
   ('Academy Team Lead', 'academy.lead@bluespacefintechacademy.com', 'Administrator', 'avatar.png', 1, 0),
-  ('Cohort Coordinator', 'coordinator@bluespacefintechacademy.com', 'Administrator', 'avatar.png', 1, 0);
+  ('Cohort Coordinator', 'coordinator@bluespacefintechacademy.com', 'Administrator', 'avatar.png', 1, 0)
+ON CONFLICT (email) DO NOTHING;
 
 -- Insert Cohorts
 INSERT INTO public.cohorts (name, start_date, end_date, capacity, track_finsoft, track_finops, status) VALUES

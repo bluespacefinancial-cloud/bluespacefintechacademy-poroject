@@ -82,6 +82,29 @@ ALTER TABLE public.live_classes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.live_class_attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.google_integrations ENABLE ROW LEVEL SECURITY;
 
+-- Keep this migration rerunnable in the Supabase SQL editor.
+DROP POLICY IF EXISTS "academy staff manage live classes" ON public.live_classes;
+DROP POLICY IF EXISTS "students view cohort classes" ON public.live_classes;
+DROP POLICY IF EXISTS "academy staff manage attendance" ON public.live_class_attendance;
+DROP POLICY IF EXISTS "students view own attendance" ON public.live_class_attendance;
+DROP POLICY IF EXISTS "users manage own google integration" ON public.google_integrations;
+DROP POLICY IF EXISTS "users view own profile or staff view profiles" ON public.users;
+DROP POLICY IF EXISTS "users update own profile" ON public.users;
+DROP POLICY IF EXISTS "staff manage enrolments" ON public.enrolments;
+DROP POLICY IF EXISTS "students view own enrolments" ON public.enrolments;
+DROP POLICY IF EXISTS "academy users view published modules" ON public.modules;
+DROP POLICY IF EXISTS "academy staff manage modules" ON public.modules;
+DROP POLICY IF EXISTS "academy users view lessons for visible modules" ON public.lessons;
+DROP POLICY IF EXISTS "academy staff manage lessons" ON public.lessons;
+DROP POLICY IF EXISTS "students manage own lesson progress" ON public.lesson_progress;
+DROP POLICY IF EXISTS "students view own submissions" ON public.submissions;
+DROP POLICY IF EXISTS "students create own submissions" ON public.submissions;
+DROP POLICY IF EXISTS "staff grade submissions" ON public.submissions;
+DROP POLICY IF EXISTS "users view own certifications or staff view certifications" ON public.certifications;
+DROP POLICY IF EXISTS "students view own notifications" ON public.notifications;
+DROP POLICY IF EXISTS "students update own notifications" ON public.notifications;
+DROP POLICY IF EXISTS "administrators view audit logs" ON public.audit_logs;
+
 CREATE POLICY "academy staff manage live classes"
   ON public.live_classes FOR ALL
   USING (public.current_profile_role() IN ('Instructor', 'Administrator'))

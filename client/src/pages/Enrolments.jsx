@@ -177,7 +177,7 @@ export default function Enrolments() {
             <Search size={32} className="mx-auto mb-3 opacity-50" />
             <p>No enrolments found</p>
           </div>
-        ) : (
+        ) :
           filtered.map((enrolment) => (
             <Card
               key={enrolment.id}
@@ -224,7 +224,6 @@ export default function Enrolments() {
               </CardFooter>
             </Card>
           ))}
-        )}
       </div>
     </div>
   )

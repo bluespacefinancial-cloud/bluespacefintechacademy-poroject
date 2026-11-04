@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Clock, FileText, Search, Target } from 'lucide.react'
+import { Users, Clock, FileText, Search, Target } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -219,7 +219,7 @@ export default function Placement() {
             <Search size={32} className="mx-auto mb-3 opacity-50" />
             <p>No placements found</p>
           </div>
-        ) : (
+        ) :
           filtered.map((placement) => {
             const config = PLACEMENT_STATUS[placement.status]
             return (
@@ -266,15 +266,15 @@ export default function Placement() {
                     <span className="text-gray-400">60-</span>
                     <span className="text-gray-400">90-</span>
                   </div>
-                </div>
+                </CardContent>
                 <CardFooter className="flex items-center justify-between pt-3">
                   <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/placement/${placement.id}`) }}>
                     Manage
                   </Button>
                 </CardFooter>
               </Card>
-            )}
-        )}
+            )
+          })}
       </div>
     </div>
   )

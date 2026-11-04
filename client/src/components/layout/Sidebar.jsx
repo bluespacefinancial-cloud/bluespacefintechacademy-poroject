@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, Eye, CheckCircle, FileText, Video } from 'lucide-react'
+import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, CheckCircle, FileText, Video } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const navItems = {
@@ -136,7 +135,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                     to={item.to}
                     onClick={onClose}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                      active ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'
+                      location.pathname === item.to ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
                     <item.icon size={18} />

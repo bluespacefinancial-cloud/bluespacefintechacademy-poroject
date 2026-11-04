@@ -143,7 +143,7 @@ export default function Curriculum() {
             <BookOpen size={32} className="mx-auto mb-3 opacity-50" />
             <p>No modules found</p>
           </div>
-        ) : (
+        ) :
           filtered.map((module) => (
             <Card
               key={module.id}
@@ -192,7 +192,6 @@ export default function Curriculum() {
               </CardFooter>
             </Card>
           ))}
-        )}
       </div>
     </div>
   )

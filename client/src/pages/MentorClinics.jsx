@@ -100,7 +100,6 @@ export default function MentorClinics() {
                     </div>
                   </Card>
                 ))}
-              }
             </CardContent>
           </Card>
 

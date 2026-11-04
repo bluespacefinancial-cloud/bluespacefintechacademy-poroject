@@ -37,7 +37,6 @@ export default function LabsToReview() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Get submissions with lab and user info
       const { data: submissions } = await supabase
         .from('submissions')
         .select(`
@@ -61,19 +60,18 @@ export default function LabsToReview() {
         return
       }
 
-      // Transform data
-      const labsData = submissions.map((s) => ({
-        id: s.id,
-        title: s.labs?.title || 'Untitled Lab',
-        domain: s.labs?.modules?.domain || 'General',
-        module: s.labs?.modules?.title || 'Unknown Module',
-        student: s.users?.name || 'Unknown Student',
-        track: s.users?.track || 'Unknown',
-        squad: s.squad_id ? 'Squad Alpha' : 'Unassigned', // Simplified
-        status: s.status,
-        submittedAt: s.submitted_at,
-        score: s.score,
-        feedback: s.feedback,
+      const labsData = submissions.map((submission) => ({
+        id: submission.id,
+        title: submission.labs?.title || 'Untitled Lab',
+        domain: submission.labs?.modules?.domain || 'General',
+        module: submission.labs?.modules?.title || 'Unknown Module',
+        student: submission.users?.name || 'Unknown Student',
+        track: submission.users?.track || 'Unknown',
+        squad: submission.squad_id ? 'Squad Alpha' : 'Unassigned',
+        status: submission.status,
+        submittedAt: submission.submitted_at,
+        score: submission.score,
+        feedback: submission.feedback,
       }))
 
       setLabs(labsData)
@@ -112,7 +110,6 @@ export default function LabsToReview() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="flex gap-4 mb-6">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -136,7 +133,6 @@ export default function LabsToReview() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
@@ -153,7 +149,7 @@ export default function LabsToReview() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {labs.filter(l => l.status === 'graded').length}
+              {labs.filter((l) => l.status === 'graded').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Graded</p>
           </CardContent>
@@ -161,14 +157,13 @@ export default function LabsToReview() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {labs.filter(l => l.status === 'remediation').length}
+              {labs.filter((l) => l.status === 'remediation').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Needs Remediation</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Labs list */}
       <div className="space-y-3">
         {filteredLabs.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
@@ -234,7 +229,7 @@ export default function LabsToReview() {
                 </CardFooter>
               </Card>
             )
-          })}
+          })
         )}
       </div>
     </div>

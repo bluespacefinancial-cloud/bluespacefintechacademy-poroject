@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Plus, Edit3, Eye } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -33,7 +33,6 @@ export default function Curriculum() {
   const [modules, setModules] = useState([])
   const [filterStage, setFilterStage] = useState('all')
   const [filterTrack, setFilterTrack] = useState('all')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadModules()
@@ -51,7 +50,6 @@ export default function Curriculum() {
     } catch (err) {
       console.error('Error loading modules:', err)
     } finally {
-      setLoading(false)
     }
   }
 

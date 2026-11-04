@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { BarChart3, Clock, Users, Award } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
 
 const ASSESSMENT_COMPONENTS = [
   { key: 'attendance', label: 'Attendance & Participation', weight: '10%' },

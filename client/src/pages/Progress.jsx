@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Users, Award, FileText } from 'lucide-react'
+import { BarChart3, Clock, Award, FileText } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
@@ -201,7 +201,7 @@ export default function Progress() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {stages.map((stage) => (
+              {stages.map((stage, i) => (
                 <div key={stage.key} className="flex flex-col gap-2 relative">
                   {i > 0 && (
                     <div className="absolute -top-1 left-0 w-full h-[2px] bg-gray-200" />

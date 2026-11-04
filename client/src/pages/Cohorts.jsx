@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, GraduationCap, Plus, Edit3, Eye } from 'lucide-react'
+import { Plus, Edit3, Eye } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 
 const STATUS_COLORS = {
   planned: 'bg-gray-50 text-gray-600',
@@ -24,7 +25,6 @@ export default function Cohorts() {
   const navigate = useNavigate()
   const [cohorts, setCohorts] = useState([])
   const [filterStatus, setFilterStatus] = useState('all')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadCohorts()
@@ -42,7 +42,6 @@ export default function Cohorts() {
     } catch (err) {
       console.error('Error loading cohorts:', err)
     } finally {
-      setLoading(false)
     }
   }
 

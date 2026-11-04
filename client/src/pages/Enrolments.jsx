@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Users, Search, Edit3 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
@@ -29,7 +30,6 @@ export default function Enrolments() {
   const [search, setSearch] = useState('')
   const [filterTrack, setFilterTrack] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadEnrolments()
@@ -69,7 +69,6 @@ export default function Enrolments() {
     } catch (err) {
       console.error('Error loading enrolments:', err)
     } finally {
-      setLoading(false)
     }
   }
 

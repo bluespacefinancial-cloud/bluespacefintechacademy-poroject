@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Clock, FileText, Search, Target } from 'lucide-react'
+import { Search, Target } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
 
 const ROLE_COLORS = {
   'Project Manager': 'bg-brand-100 text-brand-700 border-brand-200',

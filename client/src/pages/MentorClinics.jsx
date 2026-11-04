@@ -7,7 +7,6 @@ import { supabase } from '../lib/supabase'
 
 export default function MentorClinics() {
   const [clinics, setClinics] = useState([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadClinics()
@@ -41,7 +40,6 @@ export default function MentorClinics() {
     } catch (err) {
       console.error('Error loading clinics:', err)
     } finally {
-      setLoading(false)
     }
   }
 

@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { BarChart3, Award, FileText, Calendar, MapPin, TrendingUp, TrendingDown, Users, Clock } from 'lucide-react'
+import { BarChart3, Award, FileText, Calendar, MapPin, TrendingUp, TrendingDown, Users, Clock, Target } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
 
 const DOMAIN_COLORS = {
   FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
@@ -40,11 +38,15 @@ const MONTHLY_TREND = [
 export default function Reports() {
   const [filterCohort, setFilterCohort] = useState('all')
   const [filterDomain, setFilterDomain] = useState('all')
+  const cohorts = MOCK_COHORTS
+  const domainData = DOMAIN_STATS
+  const stats = {
+    totalFellows: cohorts.reduce((sum, c) => sum + c.finsoft + c.finops, 0),
+    avgAttendance: Math.round(cohorts.reduce((sum, c) => sum + c.attendance, 0) / cohorts.length),
+    avgCompletion: Math.round(cohorts.reduce((sum, c) => sum + c.completion, 0) / cohorts.length),
+    avgPassRate: Math.round(cohorts.reduce((sum, c) => sum + c.passRate, 0) / cohorts.length),
+  }
 
-  const totalFellows = cohorts.reduce((sum, c) => sum + c.finsoft + c.finops, 0)
-  const avgAttendance = cohorts.reduce((sum, c) => sum + c.attendance, 0) / cohorts.length
-  const avgCompletion = cohorts.reduce((sum, c) => sum + c.completion, 0) / cohorts.length
-  const avgPassRate = cohorts.reduce((sum, c) => sum + c.passRate, 0) / cohorts.length
 
   return (
     <div className="min-h-screen bg-gray-50">

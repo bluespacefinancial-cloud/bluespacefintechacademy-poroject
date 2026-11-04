@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { BookOpen, Users, Activity, Award, Clock, Target, GraduationCap, MapPin, FileText, AlertCircle, ClipboardList } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
@@ -14,7 +13,6 @@ const DOMAIN_COLORS = {
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const navigate = useNavigate()
 
   const isStudent = user?.type === 'Student'
   const isInstructor = user?.type === 'Instructor'

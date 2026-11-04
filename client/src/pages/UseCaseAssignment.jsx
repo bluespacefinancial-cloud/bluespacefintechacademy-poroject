@@ -23,9 +23,59 @@ const STATUS_COLORS = {
   archived: 'bg-slate-50 text-slate-600 border-slate-100',
 }
 
+const MOCK_USE_CASES = [
+  {
+    id: 1,
+    title: 'FinCore Ledger Integration',
+    domain: 'FinCore',
+    cohort: 'Cohort 1 - December 2026',
+    stakeholder: 'BlueSPACE Engineering Team',
+    status: 'qualified',
+    squad: 'Squad Alpha',
+    sandboxAccess: true,
+    anonymisedData: true,
+    createdAt: '2026-10-20',
+  },
+  {
+    id: 2,
+    title: 'FaaS Partner API Onboarding',
+    domain: 'FaaS',
+    cohort: 'Cohort 1 - December 2026',
+    stakeholder: 'Code Partner - FinTech Solutions',
+    status: 'assigned',
+    squad: 'Squad Beta',
+    sandboxAccess: false,
+    anonymisedData: true,
+    createdAt: '2026-10-22',
+  },
+  {
+    id: 3,
+    title: 'FinOps Automated Reconciliation',
+    domain: 'FinOps',
+    cohort: 'Cohort 2 - March 2027',
+    stakeholder: 'Bank Partner - Ghana',
+    status: 'proposed',
+    squad: null,
+    sandboxAccess: false,
+    anonymisedData: true,
+    createdAt: '2026-10-25',
+  },
+  {
+    id: 4,
+    title: 'FinInfra CI/CD Pipeline',
+    domain: 'FinInfra',
+    cohort: 'Cohort 2 - March 2027',
+    stakeholder: 'Platform Team',
+    status: 'proposed',
+    squad: null,
+    sandboxAccess: true,
+    anonymisedData: false,
+    createdAt: '2026-10-28',
+  },
+]
+
 export default function UseCaseAssignment() {
   const navigate = useNavigate()
-  const [useCases, setUseCases] = useState([])
   const [search, setSearch] = useState('')
   const [filterDomain, setFilterDomain] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -69,8 +119,7 @@ export default function UseCaseAssignment() {
   }
 
   const filtered = useCases.filter((u) => {
-    const matchesSearch =
-      u.title.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch = u.title.toLowerCase().includes(search.toLowerCase()) ||
       u.stakeholder.toLowerCase().includes(search.toLowerCase())
     const domainMatch = filterDomain === 'all' || u.domain === filterDomain
     const statusMatch = filterStatus === 'all' || u.status === filterStatus

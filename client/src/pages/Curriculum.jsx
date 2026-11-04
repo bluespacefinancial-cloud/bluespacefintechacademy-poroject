@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { BookOpen, Plus, Edit3, Eye } from 'lucide-react'
+import { BookOpen, Plus, Edit3, Eye } from 'lucide.react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 import { supabase } from '../lib/supabase'
@@ -45,6 +44,7 @@ export default function Curriculum() {
         .from('modules')
         .select('*')
         .order('created_at', { ascending: true })
+
       if (error) throw error
       setModules(data || [])
     } catch (err) {
@@ -82,10 +82,7 @@ export default function Curriculum() {
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
             Stage
           </span>
-          <Select
-            value={filterStage}
-            onValueChange={(value) => setFilterStage(value)}
-          >
+          <Select value={filterStage} onValueChange={(value) => setFilterStage(value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="All stages" />
             </SelectTrigger>
@@ -102,10 +99,7 @@ export default function Curriculum() {
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
             Track
           </span>
-          <Select
-            value={filterTrack}
-            onValueChange={(value) => setFilterTrack(value)}
-          >
+          <Select value={filterTrack} onValueChange={(value) => setFilterTrack(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All tracks" />
             </SelectTrigger>
@@ -182,14 +176,7 @@ export default function Curriculum() {
                     {module.domain && ` · ${module.domain}`}
                   </span>
                   <div className="flex items-center gap-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigate(`/curriculum/${module.id}/edit`)
-                      }}
-                    >
+                    <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
                       <Edit3 size={12} />
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => e.stopPropagation()}>

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { BarChart3 } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
@@ -87,10 +86,7 @@ export default function Grading() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {ASSESSMENT_COMPONENTS.map((component) => (
-                    <div
-                      key={component.key}
-                      className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white"
-                    >
+                    <div key={component.key} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
                       <div>
                         <p className="text-xs font-medium text-deep-600">{component.label}</p>
                         <p className="text-[10px] text-gray-500">Weight: {component.weight}</p>
@@ -120,7 +116,9 @@ export default function Grading() {
                 <Button variant="outline" onClick={() => setGrades({})}>
                   Reset
                 </Button>
-                <Button onClick={() => alert('Grades saved!')}>Save Grades</Button>
+                <Button onClick={() => alert('Grades saved!')}>
+                  Save Grades
+                </Button>
               </CardFooter>
             </Card>
           </div>

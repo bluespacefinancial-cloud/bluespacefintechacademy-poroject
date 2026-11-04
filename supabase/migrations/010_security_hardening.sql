@@ -21,6 +21,8 @@ BEGIN;
 -- =====================================================================
 -- is_active is enforced here instead of in every policy, so all existing RLS
 -- policies that call these helpers fail closed for deactivated accounts.
+-- Preserves the auth_user_id bridge added in 002_academy_operations.sql, with
+-- the email fallback for rows that have not been migrated yet.
 CREATE OR REPLACE FUNCTION public.current_profile_id()
 RETURNS bigint
 LANGUAGE sql
@@ -29,8 +31,11 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT id FROM public.users
-  WHERE lower(email) = lower(auth.email())
-    AND is_active = 1
+  WHERE is_active = 1
+    AND (
+      auth_user_id = auth.uid()
+      OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
+    )
   LIMIT 1;
 $$;
 
@@ -42,8 +47,11 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT type FROM public.users
-  WHERE lower(email) = lower(auth.email())
-    AND is_active = 1
+  WHERE is_active = 1
+    AND (
+      auth_user_id = auth.uid()
+      OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
+    )
   LIMIT 1;
 $$;
 
@@ -56,6 +64,29 @@ $$;
 -- Role and activation changes must go through the service role / SQL.
 REVOKE UPDATE ON public.users FROM anon, authenticated;
 GRANT UPDATE (name, avatar, phone) ON public.users TO authenticated;
+
+-- Keep the caller's own profile readable even when deactivated, so the login
+-- screen can distinguish "deactivated" from "not provisioned". This does not
+-- weaken the rest of the app: every other policy still fails closed because
+-- current_profile_id()/current_profile_role() return NULL for deactivated
+-- accounts.
+DROP POLICY IF EXISTS "users view own profile or staff view profiles" ON public.users;
+CREATE POLICY "users view own profile or staff view profiles"
+  ON public.users FOR SELECT
+  USING (
+    id = public.current_profile_id()
+    OR lower(email) = lower(auth.email())
+    OR public.current_profile_role() IN ('Instructor', 'Administrator')
+  );
+
+-- public.users.password is a legacy column (Supabase Auth owns credentials) and
+-- is NULL in the seed data, but hide it defensively so select('*') can never
+-- leak it. All client reads use explicit column lists.
+REVOKE SELECT ON public.users FROM anon, authenticated;
+GRANT SELECT (
+  id, name, email, type, avatar, phone, is_active,
+  force_password_change, last_login_at, created_at, updated_at
+) ON public.users TO authenticated;
 
 -- Clear the forced-reset flag after the user sets a new password. Runs as the
 -- definer so it can touch force_password_change without granting that column.
@@ -72,6 +103,56 @@ $$;
 
 REVOKE ALL ON FUNCTION public.clear_my_force_password_change() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.clear_my_force_password_change() TO authenticated;
+
+-- =====================================================================
+-- Squad visibility: remove a self-referential RLS policy
+-- =====================================================================
+-- 003_student_squad_visibility.sql created a policy on enrolments that queried
+-- enrolments from inside its own USING clause. PostgreSQL rejects that with
+-- "infinite recursion detected in policy for relation enrolments", which breaks
+-- every users/enrolments query for students. A SECURITY DEFINER helper can read
+-- enrolments without re-entering RLS.
+CREATE OR REPLACE FUNCTION public.current_squad_ids()
+RETURNS SETOF bigint
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT squad_id
+  FROM public.enrolments
+  WHERE user_id = public.current_profile_id()
+    AND squad_id IS NOT NULL;
+$$;
+
+REVOKE ALL ON FUNCTION public.current_squad_ids() FROM PUBLIC;
+-- anon needs EXECUTE because the policy is evaluated even for unauthenticated
+-- requests; with no session the helper returns an empty set, so the policy is
+-- simply false instead of raising a permission error.
+GRANT EXECUTE ON FUNCTION public.current_squad_ids() TO anon, authenticated;
+
+DROP POLICY IF EXISTS "students view squad enrolments" ON public.enrolments;
+CREATE POLICY "students view squad enrolments"
+  ON public.enrolments FOR SELECT
+  USING (
+    user_id = public.current_profile_id()
+    OR public.current_profile_role() IN ('Instructor', 'Administrator')
+    OR squad_id IN (SELECT public.current_squad_ids())
+  );
+
+DROP POLICY IF EXISTS "students view squad profiles" ON public.users;
+CREATE POLICY "students view squad profiles"
+  ON public.users FOR SELECT
+  USING (
+    id = public.current_profile_id()
+    OR public.current_profile_role() IN ('Instructor', 'Administrator')
+    OR EXISTS (
+      SELECT 1
+      FROM public.enrolments e
+      WHERE e.user_id = users.id
+        AND e.squad_id IN (SELECT public.current_squad_ids())
+    )
+  );
 
 -- =====================================================================
 -- cohorts
@@ -117,6 +198,7 @@ CREATE POLICY "students view labs for visible modules"
     JOIN public.modules m ON m.id = l.module_id
     JOIN public.enrolments e ON e.cohort_id = m.cohort_id
     WHERE l.id = labs.lesson_id
+      AND m.is_published
       AND e.user_id = public.current_profile_id()
       AND e.status IN ('enrolled', 'active', 'completed')
   ));
@@ -151,6 +233,7 @@ CREATE POLICY "students view published assessments"
       FROM public.modules m
       JOIN public.enrolments e ON e.cohort_id = m.cohort_id
       WHERE m.id = assessments.module_id
+        AND m.is_published
         AND e.user_id = public.current_profile_id()
         AND e.status IN ('enrolled', 'active', 'completed')
     )

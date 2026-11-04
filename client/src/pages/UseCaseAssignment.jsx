@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, Plus } from 'lucide-react'
+import { Target, Plus, Eye } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import { supabase } from '../lib/supabase'
 
 const DOMAIN_COLORS = {
   FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
@@ -22,64 +23,52 @@ const STATUS_COLORS = {
   archived: 'bg-slate-50 text-slate-600 border-slate-100',
 }
 
-const MOCK_USE_CASES = [
-  {
-    id: 1,
-    title: 'FinCore Ledger Integration',
-    domain: 'FinCore',
-    cohort: 'Cohort 1 - December 2026',
-    stakeholder: 'BlueSPACE Engineering Team',
-    status: 'qualified',
-    squad: 'Squad Alpha',
-    sandboxAccess: true,
-    anonymisedData: true,
-    createdAt: '2026-10-20',
-  },
-  {
-    id: 2,
-    title: 'FaaS Partner API Onboarding',
-    domain: 'FaaS',
-    cohort: 'Cohort 1 - December 2026',
-    stakeholder: 'Code Partner - FinTech Solutions',
-    status: 'assigned',
-    squad: 'Squad Beta',
-    sandboxAccess: false,
-    anonymisedData: true,
-    createdAt: '2026-10-22',
-  },
-  {
-    id: 3,
-    title: 'FinOps Automated Reconciliation',
-    domain: 'FinOps',
-    cohort: 'Cohort 2 - March 2027',
-    stakeholder: 'Bank Partner - Ghana',
-    status: 'proposed',
-    squad: null,
-    sandboxAccess: false,
-    anonymisedData: true,
-    createdAt: '2026-10-25',
-  },
-  {
-    id: 4,
-    title: 'FinInfra CI/CD Pipeline',
-    domain: 'FinInfra',
-    cohort: 'Cohort 2 - March 2027',
-    stakeholder: 'Platform Team',
-    status: 'proposed',
-    squad: null,
-    sandboxAccess: true,
-    anonymisedData: false,
-    createdAt: '2026-10-28',
-  },
-]
-
 export default function UseCaseAssignment() {
   const navigate = useNavigate()
+  const [useCases, setUseCases] = useState([])
   const [search, setSearch] = useState('')
   const [filterDomain, setFilterDomain] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-  const filtered = MOCK_USE_CASES.filter((u) => {
+  useEffect(() => {
+    loadUseCases()
+  }, [])
+
+  const loadUseCases = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('use_cases')
+        .select(`
+          *,
+          squads (name)
+        `)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      const dataWithSquad = (data || []).map((uc) => ({
+        id: uc.id,
+        title: uc.title,
+        domain: uc.domain,
+        cohort: uc.cohort_id,
+        stakeholder: uc.stakeholder,
+        status: uc.status,
+        squad: uc.squads?.name || null,
+        sandboxAccess: uc.sandbox_access,
+        anonymisedData: uc.anonymised_data,
+        createdAt: uc.created_at,
+      }))
+
+      setUseCases(dataWithSquad)
+    } catch (err) {
+      console.error('Error loading use cases:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = useCases.filter((u) => {
     const matchesSearch = u.title.toLowerCase().includes(search.toLowerCase()) ||
       u.stakeholder.toLowerCase().includes(search.toLowerCase())
     const domainMatch = filterDomain === 'all' || u.domain === filterDomain
@@ -153,14 +142,14 @@ export default function UseCaseAssignment() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_USE_CASES.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{useCases.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Use Cases</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_USE_CASES.filter(u => u.status === 'assigned').length}
+              {useCases.filter(u => u.status === 'assigned').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Assigned to Squads</p>
           </CardContent>
@@ -168,7 +157,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_USE_CASES.filter(u => u.status === 'proposed').length}
+              {useCases.filter(u => u.status === 'proposed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed</p>
           </CardContent>
@@ -176,7 +165,7 @@ export default function UseCaseAssignment() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_USE_CASES.filter(u => u.sandboxAccess).length}
+              {useCases.filter(u => u.sandboxAccess).length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Sandbox Access</p>
           </CardContent>
@@ -239,7 +228,7 @@ export default function UseCaseAssignment() {
                 </Button>
               </CardFooter>
             </Card>
-          ))
+          ))}
         )}
       </div>
     </div>

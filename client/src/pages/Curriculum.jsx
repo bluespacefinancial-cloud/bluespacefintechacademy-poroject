@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import { supabase } from '../lib/supabase'
 
 const STAGE_COLORS = {
   foundations: 'text-brand-600',
@@ -27,75 +28,34 @@ const DOMAIN_COLORS = {
   FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
 }
 
-const MOCK_MODULES = [
-  {
-    id: 1,
-    title: 'Fintech and Payments Fundamentals',
-    stage: 'foundations',
-    domain: null,
-    track: 'All',
-    week: 'Week 1',
-    lessons: 4,
-    status: 'published',
-    createdBy: 'Academy Team Lead',
-    updatedAt: '2026-11-01',
-  },
-  {
-    id: 2,
-    title: 'Regulation, Compliance and Risk Basics',
-    stage: 'foundations',
-    domain: null,
-    track: 'All',
-    week: 'Week 1',
-    lessons: 3,
-    status: 'published',
-    createdBy: 'Academy Team Lead',
-    updatedAt: '2026-11-01',
-  },
-  {
-    id: 3,
-    title: 'AI in the Factory',
-    stage: 'foundations',
-    domain: null,
-    track: 'All',
-    week: 'Week 2',
-    lessons: 2,
-    status: 'draft',
-    createdBy: 'Finsoft Track Lead',
-    updatedAt: '2026-11-02',
-  },
-  {
-    id: 4,
-    title: 'FinCore: Ledger and Transaction Engineering',
-    stage: 'domain_immersion',
-    domain: 'FinCore',
-    track: 'Finsoft',
-    week: 'Weeks 5-6',
-    lessons: 5,
-    status: 'published',
-    createdBy: 'FinCore Domain Lead',
-    updatedAt: '2026-11-03',
-  },
-  {
-    id: 5,
-    title: 'FinOps: Reconciliation and Reporting Pipeline',
-    stage: 'domain_immersion',
-    domain: 'FinOps',
-    track: 'Finops',
-    week: 'Week 7',
-    lessons: 4,
-    status: 'draft',
-    createdBy: 'FinOps Domain Lead',
-    updatedAt: '2026-11-03',
-  },
-]
-
 export default function Curriculum() {
   const navigate = useNavigate()
+  const [modules, setModules] = useState([])
   const [filterStage, setFilterStage] = useState('all')
   const [filterTrack, setFilterTrack] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-  const filtered = MOCK_MODULES.filter((m) => {
+  useEffect(() => {
+    loadModules()
+  }, [])
+
+  const loadModules = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('modules')
+        .select('*')
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      setModules(data || [])
+    } catch (err) {
+      console.error('Error loading modules:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = modules.filter((m) => {
     const stageMatch = filterStage === 'all' || m.stage === filterStage
     const trackMatch = filterTrack === 'all' || m.track === filterTrack
     return stageMatch && trackMatch
@@ -165,14 +125,14 @@ export default function Curriculum() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_MODULES.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{modules.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Modules</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_MODULES.filter(m => m.status === 'published').length}
+              {modules.filter(m => m.status === 'published').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Published</p>
           </CardContent>
@@ -180,17 +140,9 @@ export default function Curriculum() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_MODULES.filter(m => m.status === 'draft').length}
+              {modules.filter(m => m.status === 'draft').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Draft</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {MOCK_MODULES.reduce((sum, m) => sum + m.lessons, 0)}
-            </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Lessons</p>
           </CardContent>
         </Card>
       </div>
@@ -217,7 +169,7 @@ export default function Curriculum() {
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-sm">{module.title}</CardTitle>
                     <CardDescription className="text-[10px]">
-                      {module.week} · {module.lessons} lessons · {module.track} track
+                      {module.week} · {module.track} track
                     </CardDescription>
                   </div>
                 </div>
@@ -243,7 +195,7 @@ export default function Curriculum() {
               </CardContent>
               <CardFooter className="flex items-center justify-between pt-3">
                 <span className="text-[10px] text-gray-400">
-                  {module.createdBy} · {module.updatedAt}
+                  {module.created_by || 'Admin'} · {module.created_at?.slice(0, 10)}
                 </span>
                 {module.domain && (
                   <Badge className={DOMAIN_COLORS[module.domain]}>
@@ -252,7 +204,7 @@ export default function Curriculum() {
                 )}
               </CardFooter>
             </Card>
-          ))
+          ))}
         )}
       </div>
     </div>

@@ -41,7 +41,6 @@ export default function Cohorts() {
       setCohorts(data || [])
     } catch (err) {
       console.error('Error loading cohorts:', err)
-    } finally {
     }
   }
 

@@ -76,7 +76,6 @@ export default function LabsToReview() {
       setLabs(labsData)
     } catch (err) {
       console.error('Error loading labs:', err)
-    } finally {
     }
   }
 

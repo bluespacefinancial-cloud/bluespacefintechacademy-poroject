@@ -87,11 +87,20 @@ npm run dev
 1. Create a new Supabase project
 2. Run `supabase/schema.sql` in the SQL Editor
 3. Run `supabase/storage.sql` to create storage buckets
-4. Deploy Edge Functions:
+4. Run `supabase/migrations/001_phase_one_academy.sql` to add live classes and RLS policies
+5. Deploy Edge Functions:
    ```bash
    npx supabase functions deploy
    ```
-5. Copy your Supabase URL and anon key to `.env`
+6. Copy your Supabase URL and anon key to `.env`
+
+### Google Meet and Calendar
+
+Live classes are free academy sessions, not paid products. The Phase 1 UI accepts a Google
+Meet URL and stores Google Calendar/Meet identifiers for the server-side OAuth integration.
+Configure Google OAuth and Calendar/Meet API credentials in Supabase Edge Function secrets;
+never place client secrets or refresh tokens in Vite environment variables. The
+`google_integrations` table provides server-side token storage fields for that integration.
 
 ### Environment Variables
 

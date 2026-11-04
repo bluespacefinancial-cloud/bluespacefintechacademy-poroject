@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { BarChart3, Clock, Users, Award, FileText, Calendar, MapPin, TrendingUp, TrendingDown } from 'lucide.react'
+import { BarChart3, Award, FileText, Calendar, MapPin, TrendingUp, TrendingDown, Users, Clock } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 import { supabase } from '../lib/supabase'
 
@@ -14,87 +14,37 @@ const DOMAIN_COLORS = {
   FinInfra: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-500' },
 }
 
+const MOCK_COHORTS = [
+  { id: 1, name: 'Cohort 1 - December 2026', finsoft: 22, finops: 15, attendance: 94, completion: 65, passRate: 87, placement: 76 },
+  { id: 2, name: 'Cohort 2 - March 2027', finsoft: 0, finops: 0, attendance: 0, completion: 0, passRate: 0, placement: 0 },
+  { id: 3, name: 'Cohort 3 - June 2027', finsoft: 0, finops: 0, attendance: 0, completion: 0, passRate: 0, placement: 0 },
+  { id: 4, name: 'Cohort 4 - September 2027', finsoft: 0, finops: 0, attendance: 0, completion: 0, passRate: 0, placement: 0 },
+]
+
+const DOMAIN_STATS = [
+  { key: 'FaaS', label: 'FaaS', passRate: 92, enrollment: 28, labsComplete: 85 },
+  { key: 'FinCore', label: 'FinCore', passRate: 85, enrollment: 32, labsComplete: 60 },
+  { key: 'FinOps', label: 'FinOps', passRate: 88, enrollment: 26, labsComplete: 75 },
+  { key: 'FinInfra', label: 'FinInfra', passRate: 79, enrollment: 22, labsComplete: 40 },
+]
+
+const MONTHLY_TREND = [
+  { month: 'Oct', applications: 45, enrolled: 30, certified: 0 },
+  { month: 'Nov', applications: 67, enrolled: 37, certified: 0 },
+  { month: 'Dec', applications: 89, enrolled: 37, certified: 0 },
+  { month: 'Jan', applications: 0, enrolled: 0, certified: 12 },
+  { month: 'Feb', applications: 0, enrolled: 0, certified: 0 },
+  { month: 'Mar', applications: 0, enrolled: 0, certified: 0 },
+]
+
 export default function Reports() {
   const [filterCohort, setFilterCohort] = useState('all')
   const [filterDomain, setFilterDomain] = useState('all')
-  const [stats, setStats] = useState({
-    totalFellows: 0,
-    avgAttendance: 0,
-    avgCompletion: 0,
-    avgPassRate: 0,
-  })
-  const [cohortData, setCohortData] = useState([])
-  const [domainData, setDomainData] = useState([])
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
-    try {
-      const { data: cohorts } = await supabase
-        .from('cohorts')
-        .select('*')
-
-      const { data: lessons } = await supabase
-        .from('lessons')
-        .select('domain')
-
-      const { data: progress } = await supabase
-        .from('lesson_progress')
-        .select('*')
-
-      const totalFellows = cohorts?.length || 0
-      const completedLessons = progress?.filter(p => p.is_completed).length || 0
-      const totalLessons = lessons?.length || 0
-      const avgCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
-
-      const domainMap = {}
-      lessons?.forEach(l => {
-        const domain = l.domain || 'Unknown'
-        if (!domainMap[domain]) {
-          domainMap[domain] = { total: 0, completed: 0 }
-        }
-        domainMap[domain].total++
-        if (progress?.find(p => p.lesson_id === l.id && p.is_completed)) {
-          domainMap[domain].completed++
-        }
-      })
-
-      const domainStats = Object.entries(domainMap).map(([domain, stats]) => ({
-        key: domain,
-        label: domain,
-        passRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
-        enrollment: stats.total,
-        labsComplete: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
-      }))
-
-      setStats({
-        totalFellows,
-        avgAttendance: 94,
-        avgCompletion,
-        avgPassRate: domainStats.length > 0 ? Math.round(domainStats.reduce((sum, d) => sum + d.passRate, 0) / domainStats.length) : 0,
-      })
-      setDomainData(domainStats)
-      setCohortData(cohorts || [])
-      setLoading(false)
-    } catch (err) {
-      console.error('Error loading reports:', err)
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Loading analytics...</span>
-        </div>
-      </div>
-    )
-  }
+  const totalFellows = cohorts.reduce((sum, c) => sum + c.finsoft + c.finops, 0)
+  const avgAttendance = cohorts.reduce((sum, c) => sum + c.attendance, 0) / cohorts.length
+  const avgCompletion = cohorts.reduce((sum, c) => sum + c.completion, 0) / cohorts.length
+  const avgPassRate = cohorts.reduce((sum, c) => sum + c.passRate, 0) / cohorts.length
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -116,16 +66,13 @@ export default function Reports() {
       <div className="flex gap-4 mb-6">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Cohort</span>
-          <Select
-            value={filterCohort}
-            onValueChange={(v) => setFilterCohort(v)}
-          >
+          <Select value={filterCohort} onValueChange={(v) => setFilterCohort(v)}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All cohorts" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Cohorts</SelectItem>
-              {cohortData.map((c) => (
+              {cohorts.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name}
                 </SelectItem>
@@ -229,25 +176,27 @@ export default function Reports() {
                     </tr>
                   </thead>
                   <tbody>
-                    {cohortData.map((c) => (
+                    {cohorts.map((c) => (
                       <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors duration-150">
                         <td className="py-3">
                           <p className="text-xs font-medium text-deep-600">{c.name}</p>
                         </td>
                         <td className="py-3">
-                          <p className="text-xs text-gray-600">37</p>
+                          <p className="text-xs text-gray-600">{c.finsoft + c.finops}</p>
                         </td>
                         <td className="py-3">
-                          <p className="text-xs text-gray-600">94%</p>
+                          <p className="text-xs text-gray-600">{c.attendance}%</p>
                         </td>
                         <td className="py-3">
-                          <p className="text-xs text-gray-600">65%</p>
+                          <p className="text-xs text-gray-600">{c.completion}%</p>
                         </td>
                         <td className="py-3">
-                          <p className="text-xs font-medium text-emerald-600">87%</p>
+                          <p className={`text-xs font-medium ${c.passRate >= 80 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                            {c.passRate}%
+                          </p>
                         </td>
                         <td className="py-3">
-                          <p className="text-xs text-gray-600">76%</p>
+                          <p className="text-xs text-gray-600">{c.placement}%</p>
                         </td>
                       </tr>
                     ))}
@@ -305,36 +254,18 @@ export default function Reports() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-2 rounded-lg border border-gray-100 bg-white">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-deep-600">Oct</span>
+              {MONTHLY_TREND.map((t) => (
+                <div key={t.month} className="flex items-center justify-between p-2 rounded-lg border border-gray-100 bg-white">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-deep-600">{t.month}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[10px]">
+                    <span className="text-gray-600">Applications: {t.applications}</span>
+                    <span className="text-gray-600">Enrolled: {t.enrolled}</span>
+                    <span className="text-gray-600">Certified: {t.certified}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 text-[10px]">
-                  <span className="text-gray-600">Applications: 45</span>
-                  <span className="text-gray-600">Enrolled: 30</span>
-                  <span className="text-gray-600">Certified: 0</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded-lg border border-gray-100 bg-white">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-deep-600">Nov</span>
-                </div>
-                <div className="flex items-center gap-3 text-[10px]">
-                  <span className="text-gray-600">Applications: 67</span>
-                  <span className="text-gray-600">Enrolled: 37</span>
-                  <span className="text-gray-600">Certified: 0</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded-lg border border-gray-100 bg-white">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-deep-600">Dec</span>
-                </div>
-                <div className="flex items-center gap-3 text-[10px]">
-                  <span className="text-gray-600">Applications: 89</span>
-                  <span className="text-gray-600">Enrolled: 37</span>
-                  <span className="text-gray-600">Certified: 0</span>
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
 

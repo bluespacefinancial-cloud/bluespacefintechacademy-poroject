@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { BookOpen, Plus, Edit3, Eye } from 'lucide.react'
+import { useNavigate } from 'react-router-dom'
+import { BookOpen, Plus, Edit3, Eye } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 import { supabase } from '../lib/supabase'
@@ -96,9 +97,7 @@ export default function Curriculum() {
           </Select>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Track
-          </span>
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Track</span>
           <Select value={filterTrack} onValueChange={(value) => setFilterTrack(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All tracks" />
@@ -169,14 +168,12 @@ export default function Curriculum() {
               </CardHeader>
               <CardContent className="pt-0 pb-3">
                 <div className="flex items-center justify-between">
-                  <span
-                    className={`text-[10px] font-medium ${STAGE_COLORS[module.stage] || 'text-gray-500'} uppercase tracking-wider`}
-                  >
+                  <span className={`text-[10px] font-medium ${STAGE_COLORS[module.stage] || 'text-gray-500'} uppercase tracking-wider`}>
                     {STAGE_LABELS[module.stage]}
                     {module.domain && ` · ${module.domain}`}
                   </span>
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/curriculum/${module.id}/edit`) }}>
                       <Edit3 size={12} />
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => e.stopPropagation()}>
@@ -190,13 +187,11 @@ export default function Curriculum() {
                   {module.created_by || 'Admin'} · {module.created_at?.slice(0, 10)}
                 </span>
                 {module.domain && (
-                  <Badge className={DOMAIN_COLORS[module.domain]}>
-                    {module.domain}
-                  </Badge>
+                  <Badge className={DOMAIN_COLORS[module.domain]}>{module.domain}</Badge>
                 )}
               </CardFooter>
             </Card>
-          )}
+          ))}
         )}
       </div>
     </div>

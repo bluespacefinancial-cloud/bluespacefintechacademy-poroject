@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BarChart3 } from 'lucide.react'
+import { BarChart3, Clock, Users, Award } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -40,9 +40,7 @@ export default function Grading() {
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-deep-600 mb-1">Grading Console</h1>
-        <p className="text-sm text-gray-500">
-          Record assessment scores and calculate final grades
-        </p>
+        <p className="text-sm text-gray-500">Record assessment scores and calculate final grades</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -116,9 +114,7 @@ export default function Grading() {
                 <Button variant="outline" onClick={() => setGrades({})}>
                   Reset
                 </Button>
-                <Button onClick={() => alert('Grades saved!')}>
-                  Save Grades
-                </Button>
+                <Button onClick={() => alert('Grades saved!')}>Save Grades</Button>
               </CardFooter>
             </Card>
           </div>

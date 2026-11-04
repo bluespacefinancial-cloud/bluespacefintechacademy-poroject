@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, Users } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -60,18 +60,18 @@ export default function LabsToReview() {
         return
       }
 
-      const labsData = submissions.map((submission) => ({
-        id: submission.id,
-        title: submission.labs?.title || 'Untitled Lab',
-        domain: submission.labs?.modules?.domain || 'General',
-        module: submission.labs?.modules?.title || 'Unknown Module',
-        student: submission.users?.name || 'Unknown Student',
-        track: submission.users?.track || 'Unknown',
-        squad: submission.squad_id ? 'Squad Alpha' : 'Unassigned',
-        status: submission.status,
-        submittedAt: submission.submitted_at,
-        score: submission.score,
-        feedback: submission.feedback,
+      const labsData = submissions.map((s) => ({
+        id: s.id,
+        title: s.labs?.title || 'Untitled Lab',
+        domain: s.labs?.modules?.domain || 'General',
+        module: s.labs?.modules?.title || 'Unknown Module',
+        student: s.users?.name || 'Unknown Student',
+        track: s.users?.track || 'Unknown',
+        squad: s.squad_id ? 'Squad Alpha' : 'Unassigned',
+        status: s.status,
+        submittedAt: s.submitted_at,
+        score: s.score,
+        feedback: s.feedback,
       }))
 
       setLabs(labsData)
@@ -82,7 +82,7 @@ export default function LabsToReview() {
     }
   }
 
-  const filteredLabs = labs.filter((l) => {
+  const filtered = labs.filter((l) => {
     if (filterStatus === 'all') return true
     return l.status === filterStatus
   })
@@ -111,14 +111,18 @@ export default function LabsToReview() {
       </div>
 
       <div className="flex gap-4 mb-6">
+        <div className="flex-1">
+          <Input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by squad name or use case..."
+            className="w-full"
+          />
+        </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Status
-          </span>
-          <Select
-            value={filterStatus}
-            onValueChange={(value) => setFilterStatus(value)}
-          >
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
+          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v)}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
@@ -165,13 +169,13 @@ export default function LabsToReview() {
       </div>
 
       <div className="space-y-3">
-        {filteredLabs.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <FileText size={32} className="mx-auto mb-3 opacity-50" />
             <p>No labs found</p>
           </div>
-        ) : (
-          filteredLabs.map((lab) => {
+        ) :
+          filtered.map((lab) => {
             const status = SUBMISSION_STATUS[lab.status]
             return (
               <Card
@@ -186,9 +190,7 @@ export default function LabsToReview() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-sm">{lab.title}</CardTitle>
-                      <CardDescription className="text-[10px]">
-                        {lab.module} · {lab.domain}
-                      </CardDescription>
+                      <CardDescription className="text-[10px]">{lab.module} · {lab.domain}</CardDescription>
                     </div>
                   </div>
                   <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
@@ -220,17 +222,14 @@ export default function LabsToReview() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex items-center justify-between pt-3">
-                  <Badge variant={status.variant} className={status.color}>
-                    {status.label}
-                  </Badge>
-                  <Button size="sm" variant="outline">
+                  <Badge variant={status.variant} className={status.color}>{status.label}</Badge>
+                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/labs/${lab.id}/review`) }}>
                     Review
                   </Button>
                 </CardFooter>
               </Card>
             )
-          })
-        )}
+          })}
       </div>
     </div>
   )

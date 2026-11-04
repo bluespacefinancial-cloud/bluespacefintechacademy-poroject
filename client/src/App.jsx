@@ -24,6 +24,7 @@ import CapstoneSubmission from './pages/CapstoneSubmission'
 import PanelReview from './pages/PanelReview'
 import SkillsProfile from './pages/SkillsProfile'
 import LessonPlayer from './pages/LessonPlayer'
+import LiveClasses from './pages/LiveClasses'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="use-case-assignment" element={<ProtectedRoute roles={['Administrator']}><UseCaseAssignment /></ProtectedRoute>} />
         <Route path="capstone" element={<ProtectedRoute><CapstoneSubmission /></ProtectedRoute>} />
         <Route path="lesson/:lessonId" element={<ProtectedRoute><LessonPlayer /></ProtectedRoute>} />
+        <Route path="live-classes" element={<ProtectedRoute><LiveClasses /></ProtectedRoute>} />
         <Route path="panel-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><PanelReview /></ProtectedRoute>} />
         <Route path="skills-profile" element={<ProtectedRoute><SkillsProfile /></ProtectedRoute>} />
         <Route path="cohorts" element={<ProtectedRoute roles={['Administrator']}><Cohorts /></ProtectedRoute>} />

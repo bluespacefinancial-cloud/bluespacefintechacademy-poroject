@@ -248,13 +248,15 @@ export default function MyLearning() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant={
-                    moduleStatus === 'completed'
-                      ? 'secondary'
+                  <Badge
+                    variant={
+                      moduleStatus === 'completed'
+                        ? 'secondary'
                         : moduleStatus === 'in_progress'
                         ? 'default'
                         : 'outline'
-                    }>
+                    }
+                  >
                     {STAGE_LABELS[module.stage]}
                     {module.domain && ` · ${module.domain}`}
                   </Badge>

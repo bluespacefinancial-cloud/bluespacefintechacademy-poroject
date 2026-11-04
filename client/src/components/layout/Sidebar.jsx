@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, CheckCircle, FileText } from 'lucide-react'
+import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, Eye, CheckCircle, FileText } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const navItems = {
@@ -16,10 +17,13 @@ const navItems = {
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/my-modules', icon: BookOpen, label: 'My Modules' },
     { to: '/squads', icon: Target, label: 'Squads' },
+    { to: '/sprints', icon: Activity, label: 'Sprints' },
+    { to: '/uat', icon: Eye, label: 'UAT Cycles' },
     { to: '/labs-to-review', icon: ClipboardList, label: 'Labs to Review' },
     { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics' },
     { to: '/grading', icon: BarChart3, label: 'Grading' },
     { to: '/announcements', icon: MapPin, label: 'Announcements' },
+    { to: '/capstone', icon: FileText, label: 'Capstone' },
     { to: '/panel-review', icon: ClipboardList, label: 'Panel Review' },
   ],
   Administrator: [
@@ -29,7 +33,13 @@ const navItems = {
     { to: '/curriculum', icon: BookOpen, label: 'Curriculum' },
     { to: '/use-case-assignment', icon: Target, label: 'Use Cases' },
     { to: '/placement', icon: MapPin, label: 'Placement' },
+    { to: '/squads', icon: Target, label: 'Squads' },
+    { to: '/sprints', icon: Activity, label: 'Sprints' },
+    { to: '/uat', icon: Eye, label: 'UAT Cycles' },
+    { to: '/capstone', icon: FileText, label: 'Capstone' },
+    { to: '/panel-review', icon: ClipboardList, label: 'Panel Review' },
     { to: '/reports', icon: BarChart3, label: 'Reports' },
+    { to: '/system-logs', icon: MoreHorizontal, label: 'System Logs' },
   ],
 }
 
@@ -119,12 +129,10 @@ export default function Sidebar({ open, onOpen, onClose }) {
             </div>
 
             <nav className="p-3 space-y-1 overflow-y-auto">
-              {overflow.length === 0 && (
+              {overflow.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-gray-400">No additional items</p>
-              )}
-              {overflow.map((item) => {
-                const active = location.pathname === item.to
-                return (
+              ) : (
+                overflow.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
@@ -136,8 +144,8 @@ export default function Sidebar({ open, onOpen, onClose }) {
                     <item.icon size={18} />
                     {item.label}
                   </NavLink>
-                )
-              })}
+                ))
+              )}
             </nav>
 
             <div className="p-3 border-t border-gray-100 shrink-0">

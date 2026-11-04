@@ -1,25 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-react'
+import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
-import { getCurrentProfile } from '../lib/profile'
 
 const STAGE_LABELS = {
   foundations: 'Foundations',
   domain_immersion: 'Domain Immersion',
   live_projects: 'Live Projects',
   certification: 'Certification',
-}
-const LESSON_TYPE_LABELS = {
-  concept: 'Concept',
-  demonstration: 'Demo',
-  video: 'Video',
-  audio: 'Audio',
-  lab: 'Lab',
-  assessment: 'Assessment',
 }
 
 const LESSON_TYPE_COLORS = {
@@ -58,13 +49,13 @@ export default function MyLearning() {
 
   const loadData = async () => {
     try {
-      const profile = await getCurrentProfile()
-      if (!profile) return
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
       const { data: enrolments } = await supabase
         .from('enrolments')
         .select('cohort_id, track, squad_id')
-        .eq('user_id', profile.id)
+        .eq('user_id', user.id)
         .eq('status', 'active')
 
       if (!enrolments || enrolments.length === 0) {
@@ -93,8 +84,8 @@ export default function MyLearning() {
         const { data: progressData } = await supabase
           .from('lesson_progress')
           .select('*')
-          .eq('user_id', profile.id)
-          .in('lesson_id', lessonsData.map(lesson => lesson.id))
+          .eq('user_id', user.id)
+          .in('lesson_id', lessonIds)
 
         const progressMap = {}
         progressData?.forEach(p => {
@@ -109,8 +100,7 @@ export default function MyLearning() {
         setOverallStats({
           overallCompletion,
           attendance: 0,
-          labsComplete: 0,
-          lessonsComplete: completedLessons,
+          labsComplete: completedLessons,
           currentGrade: 0,
         })
       }
@@ -286,11 +276,11 @@ export default function MyLearning() {
                       style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }}
                     />
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
+        )}
       </div>
 
       {currentModule && (

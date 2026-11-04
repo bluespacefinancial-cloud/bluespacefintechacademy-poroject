@@ -37,9 +37,19 @@ export default function LiveClasses() {
   }
 
   useEffect(() => {
-    loadClasses()
-      .catch((loadError) => setError(loadError.message || 'Unable to load live classes'))
-      .finally(() => setLoading(false))
+    let cancelled = false
+    const load = async () => {
+      try {
+        await loadClasses()
+      } catch (loadError) {
+        if (!cancelled) setError(loadError.message || 'Unable to load live classes')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
   }, [])
 
   const handleCreate = async (event) => {

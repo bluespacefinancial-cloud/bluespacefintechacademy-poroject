@@ -201,7 +201,6 @@ export default function SquadManagement() {
             </Card>
             )
           })}
-        }
       </div>
     </div>
   )

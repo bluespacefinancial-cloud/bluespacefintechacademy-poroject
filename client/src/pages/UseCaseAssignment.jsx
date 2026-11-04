@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, Plus, Eye, Clock, Users, FileText, Search } from 'lucide.react'
+import { Target, Plus, Eye, Clock, Users, FileText, Search } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -186,7 +186,7 @@ export default function UseCaseAssignment() {
             <Target size={32} className="mx-auto mb-3 opacity-50" />
             <p>No use cases found</p>
           </div>
-        ) : (
+        ) :
           filtered.map((useCase) => (
             <Card
               key={useCase.id}
@@ -235,7 +235,6 @@ export default function UseCaseAssignment() {
               </CardFooter>
             </Card>
           ))}
-        )}
       </div>
     </div>
   )

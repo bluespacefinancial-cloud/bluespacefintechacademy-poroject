@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Users, Award, FileText } from 'lucide.react'
+import { BarChart3, Clock, Users, Award, FileText } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'

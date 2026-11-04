@@ -133,10 +133,7 @@ export default function Announcements() {
               <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
                 Audience
               </label>
-              <Select
-                value={newAudience}
-                onValueChange={(value) => setNewAudience(value)}
-              >
+              <Select value={newAudience} onValueChange={(v) => setNewAudience(v)}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select audience" />
                 </SelectTrigger>
@@ -161,7 +158,7 @@ export default function Announcements() {
             <Bell size={32} className="mx-auto mb-3 opacity-50" />
             <p>No announcements yet</p>
           </div>
-        ) : (
+        ) :
           announcements.map((announcement) => (
             <Card
               key={announcement.id}
@@ -198,7 +195,6 @@ export default function Announcements() {
               </CardFooter>
             </Card>
           ))}
-        )}
       </div>
     </div>
   )

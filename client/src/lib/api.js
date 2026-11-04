@@ -1,98 +1,242 @@
-import { supabase, SUPABASE_ANON_KEY, EDGE_FUNCTION_URL } from './supabase'
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-
-async function getToken() {
-  return localStorage.getItem('token')
-}
-
-function authHeaders() {
-  const token = getToken()
-  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
-}
+const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`
 
 async function edgeFetch(path, options = {}) {
-  const res = await fetch(`${EDGE_FUNCTION_URL}${path}`, {
+  const token = localStorage.getItem('token')
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const res = await fetch(`${FUNCTIONS_BASE}${path}`, {
     ...options,
-    headers: { ...authHeaders(), ...options.headers },
+    headers,
   })
+
   const data = await res.json()
-  if (!res.ok) throw { response: { status: res.status, data } }
+  if (!res.ok) {
+    throw { response: { status: res.status, data } }
+  }
   return data
 }
 
-async function supabaseQuery(table, { select = '*', filters = [], order = null, single = false, count = false } = {}) {
-  let query = supabase.from(table).select(select, { count: count ? 'exact' : undefined })
-  for (const f of filters) {
-    if (f.op === 'eq') query = query.eq(f.col, f.val)
-    else if (f.op === 'neq') query = query.neq(f.col, f.val)
-    else if (f.op === 'gte') query = query.gte(f.col, f.val)
-    else if (f.op === 'lte') query = query.lte(f.col, f.val)
-    else if (f.op === 'gt') query = query.gt(f.col, f.val)
-    else if (f.op === 'lt') query = query.lt(f.col, f.val)
-    else if (f.op === 'in') query = query.in(f.col, f.val)
-    else if (f.op === 'like') query = query.like(f.col, f.val)
-    else if (f.op === 'ilike') query = query.ilike(f.col, f.val)
-  }
-  if (order) query = query.order(order.col, { ascending: order.asc ?? false })
-  if (single) query = query.maybeSingle()
-  const { data, error, count: cnt } = await query
+// Auth
+export const login = async (email, password) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw error
-  return single ? data : (count ? { data, count: cnt } : data)
+  const userData = {
+    ...data.user,
+    ...(data.user.user_metadata || {}),
+  }
+  localStorage.setItem('token', data.session.access_token)
+  localStorage.setItem('user', JSON.stringify(userData))
+  return userData
 }
 
-const api = {
-  get: async (path, params = {}) => {
-    const query = new URLSearchParams(params).toString()
-    const res = await fetch(`${supabaseUrl}/rest/v1${path}${query ? '?' + query : ''}`, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        ...authHeaders(),
-      },
-    })
-    return res.json()
-  },
-  post: async (path, body) => {
-    const res = await fetch(`${supabaseUrl}/rest/v1${path}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        ...authHeaders(),
-      },
-      body: JSON.stringify(body),
-    })
-    return res.json()
-  },
-  put: async (path, body) => {
-    const res = await fetch(`${supabaseUrl}/rest/v1${path}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        ...authHeaders(),
-      },
-      body: JSON.stringify(body),
-    })
-    return res.json()
-  },
-  delete: async (path) => {
-    const res = await fetch(`${supabaseUrl}/rest/v1${path}`, {
-      method: 'DELETE',
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        ...authHeaders(),
-      },
-    })
-    return res.json()
-  },
-  edgeFetch,
-  supabaseQuery,
-  supabase,
+export const logout = async () => {
+  await supabase.auth.signOut()
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
 }
 
-export default api
+export const getCurrentUser = async () => {
+  const { data } = await supabase.auth.getUser()
+  return data?.user || null
+}
+
+// Courses / Modules
+export const getModules = async (cohortId) => {
+  const { data, error } = await supabase
+    .from('modules')
+    .select('*')
+    .eq('cohort_id', cohortId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+// Lessons
+export const getLessons = async (moduleId) => {
+  return edgeFetch(`/lessons?module_id=${moduleId}`)
+}
+
+export const getLessonProgress = async (lessonId) => {
+  return edgeFetch(`/lessons/progress?lesson_id=${lessonId}`)
+}
+
+export const saveLessonProgress = async (lessonId, progressData) => {
+  return edgeFetch('/lessons/progress', {
+    method: 'POST',
+    body: JSON.stringify({ ...progressData, lesson_id: lessonId }),
+  })
+}
+
+// Labs & Assessments
+export const getLabs = async (moduleId) => {
+  const { data, error } = await supabase
+    .from('labs')
+    .select('*')
+    .eq('module_id', moduleId)
+  if (error) throw error
+  return data
+}
+
+export const getSubmissions = async (userId) => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('submitted_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export const submitLab = async (labId, contentUrl, squadId) => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .insert({
+      user_id: (await supabase.auth.getUser()).data.user.id,
+      lab_id: labId,
+      content_url: contentUrl,
+      squad_id,
+      status: 'submitted',
+      submitted_at: new Date().toISOString(),
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Cohorts (Admin)
+export const getCohorts = async () => {
+  const { data, error } = await supabase
+    .from('cohorts')
+    .select('*')
+    .order('start_date', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export const createCohort = async (cohortData) => {
+  const { data, error } = await supabase
+    .from('cohorts')
+    .insert(cohortData)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Enrolments (Admin)
+export const getEnrolments = async () => {
+  const { data, error } = await supabase
+    .from('enrolments')
+    .select(`
+      *,
+      users (name, email, type),
+      cohorts (name, start_date, end_date)
+    `)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+// Use Cases
+export const getUseCases = async () => {
+  const { data, error } = await supabase
+    .from('use_cases')
+    .select('*')
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+// Assign Use Case to Squad (Admin)
+export const assignUseCase = async (useCaseId, squadId) => {
+  const { data, error } = await supabase
+    .from('use_cases')
+    .update({ squad_id: squadId, status: 'assigned' })
+    .eq('id', useCaseId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Placements
+export const getPlacements = async () => {
+  const { data, error } = await supabase
+    .from('placements')
+    .select(`
+      *,
+      users (name, email, type, track)
+    `)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export const createPlacement = async (placementData) => {
+  const { data, error } = await supabase
+    .from('placements')
+    .insert(placementData)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Certifications
+export const getCertifications = async (userId) => {
+  const { data, error } = await supabase
+    .from('certifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+// Skills Profile
+export const saveSkillsProfile = async (profileData) => {
+  const { data, error } = await supabase
+    .from('users')
+    .update({
+      skills_profile: profileData.skills,
+      role_preferences: profileData.rolePreferences,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', (await supabase.auth.getUser()).data.user.id)
+    .select()
+  if (error) throw error
+  return data
+}
+
+// Reports (Admin)
+export const getCohortReports = async () => {
+  return edgeFetch('/reports/cohorts')
+}
+
+export const getDomainReports = async () => {
+  return edgeFetch('/reports/domains')
+}
+
+export const getPlacementReports = async () => {
+  return edgeFetch('/reports/placement')
+}
+
+export const exportReport = async (reportType) => {
+  return edgeFetch('/reports/export', {
+    method: 'POST',
+    body: JSON.stringify({ report_type: reportType }),
+  })
+}
+
+// Supabase client for direct access
+export { supabase }
+export { SUPABASE_URL, SUPABASE_ANON_KEY }

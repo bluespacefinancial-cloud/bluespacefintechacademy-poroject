@@ -13,6 +13,7 @@ if (supabaseUrl && supabaseAnonKey) {
 
 export { supabase }
 
+export const SUPABASE_URL = supabaseUrl || ''
 export const SUPABASE_ANON_KEY = supabaseAnonKey || ''
 export const EDGE_FUNCTIONS_BASE = supabaseUrl ? `${supabaseUrl}/functions/v1` : ''
 export const EDGE_FUNCTION_URL = EDGE_FUNCTIONS_BASE ? `${EDGE_FUNCTIONS_BASE}/auth-handler` : ''

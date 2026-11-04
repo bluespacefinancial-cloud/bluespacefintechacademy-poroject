@@ -1,0 +1,12 @@
+{
+  "framework": "vite",
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/dist",
+  "installCommand": "cd client && npm install",
+  "devCommand": "cd client && npm run dev",
+  "regions": ["iad1"],
+  "env": {
+    "VITE_SUPABASE_URL": "@bluespace-supabase-url",
+    "VITE_SUPABASE_ANON_KEY": "@bluespace-supabase-anon-key"
+  }
+}

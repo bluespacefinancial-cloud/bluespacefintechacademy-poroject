@@ -8,7 +8,7 @@ let supabase = null
 if (supabaseUrl && supabaseAnonKey) {
   supabase = createClient(supabaseUrl, supabaseAnonKey)
 } else {
-  console.warn('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY — Supabase client not initialized')
+  console.warn('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY: Supabase client not initialized')
 }
 
 export { supabase }

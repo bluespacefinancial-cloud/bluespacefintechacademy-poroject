@@ -1,5 +1,5 @@
 -- =============================================================
--- BlueSPACE Fintech Academy LMS — Supabase (PostgreSQL) Schema
+-- BlueSPACE Fintech Academy LMS: Supabase (PostgreSQL) Schema
 -- Phase 0: Foundation schema for design system + auth
 -- Run this FIRST in the Supabase SQL Editor
 -- =============================================================

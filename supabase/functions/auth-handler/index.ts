@@ -28,13 +28,52 @@ serve(async (req) => {
     const url = new URL(req.url)
     const path = url.pathname.replace("/functions/v1/auth-handler", "")
 
-    // Login is the only endpoint that does not require an existing session.
+    // Login and applications do not require an existing session.
     if (req.method === "POST" && path === "/login") {
       const { email, password } = await req.json()
       if (!email || !password) return json({ error: "Missing credentials" }, 400)
       const { data, error } = await admin.auth.signInWithPassword({ email, password })
       if (error) return json({ error: error.message }, 401)
       return json(data)
+    }
+
+    if (req.method === "POST" && (path === "/apply" || path === "")) {
+      const body = await req.json()
+      if (path === "" && body.action !== "apply") return json({ error: "Not found" }, 404)
+      const { email, password, name, phone, role, track, organisation, motivation } = body
+      if (!email || !password || !name || !["Student", "Instructor", "Partner"].includes(role)) {
+        return json({ error: "name, email, password and a valid role are required" }, 400)
+      }
+      if (role === "Student" && !["Finsoft", "Finops"].includes(track)) {
+        return json({ error: "Students must choose a valid track" }, 400)
+      }
+      const { data, error } = await admin.auth.signUp({
+        email,
+        password,
+        options: { data: { type: role, name } },
+      })
+      if (error) return json({ error: error.message }, 400)
+      if (!data.user) return json({ error: "Unable to create account" }, 500)
+
+      const { data: profile, error: profileError } = await admin.from("users").upsert(
+        { auth_user_id: data.user.id, name, email, type: role, phone: phone || null, is_active: 0 },
+        { onConflict: "email" }
+      ).select("id").single()
+      if (profileError) return json({ error: profileError.message }, 500)
+
+      const { error: applicationError } = await admin.from("academy_applications").insert({
+        auth_user_id: data.user.id,
+        user_id: profile.id,
+        name,
+        email,
+        phone: phone || null,
+        requested_role: role,
+        track: role === "Student" ? track : null,
+        organisation: organisation || null,
+        motivation: motivation || null,
+      })
+      if (applicationError) return json({ error: applicationError.message }, 500)
+      return json({ submitted: true }, 201)
     }
 
     // Everything below requires a valid session.
@@ -67,7 +106,7 @@ serve(async (req) => {
         return json({ error: "Administrator only" }, 403)
       }
       const { email, password, type, name } = await req.json()
-      if (!email || !password || !["Student", "Instructor", "Administrator"].includes(type)) {
+      if (!email || !password || !["Student", "Instructor", "Partner", "Administrator"].includes(type)) {
         return json({ error: "email, password and a valid type are required" }, 400)
       }
       const { data, error } = await admin.auth.signUp({

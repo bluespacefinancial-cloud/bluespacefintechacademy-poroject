@@ -1,5 +1,5 @@
 -- =============================================================
--- BlueSPACE Fintech Academy LMS — Seed Data
+-- BlueSPACE Fintech Academy LMS: Seed Data
 -- Run this AFTER schema.sql in the Supabase SQL Editor
 -- =============================================================
 

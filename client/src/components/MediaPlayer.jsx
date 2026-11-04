@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { getCurrentProfile } from '../lib/profile'
 import { Badge } from '../components/ui/badge'
 
 const COMPLETION_THRESHOLD = 90 // percent
@@ -37,10 +38,12 @@ export default function MediaPlayer({
   const loadProgress = async () => {
     if (!user || !lesson.id) return
     try {
+      const profile = await getCurrentProfile()
+      if (!profile) return
       const { data, error } = await supabase
         .from('lesson_progress')
         .select('is_completed, completion_percentage')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .eq('lesson_id', lesson.id)
         .single()
 
@@ -76,6 +79,8 @@ export default function MediaPlayer({
 
   const saveProgress = useCallback(async (currentTimeVal, isCompletedVal) => {
     if (!user || !lesson.id || !isMountedRef.current) return
+    const profile = await getCurrentProfile()
+    if (!profile) return
     const durationVal = duration || lesson.duration_minutes * 60
     const percent = durationVal > 0 ? (currentTimeVal / durationVal) * 100 : 0
     const completed = isCompletedVal || percent >= COMPLETION_THRESHOLD
@@ -84,7 +89,7 @@ export default function MediaPlayer({
       await supabase
         .from('lesson_progress')
         .upsert({
-          user_id: user.id,
+          user_id: profile.id,
           lesson_id: lesson.id,
           watch_time_seconds: Math.floor(currentTimeVal),
           completion_percentage: Math.round(percent * 100) / 100,

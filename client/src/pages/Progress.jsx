@@ -3,6 +3,7 @@ import { BarChart3, Clock, Award, FileText } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
+import { getCurrentProfile } from '../lib/profile'
 
 const DOMAIN_COLORS = {
   FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
@@ -30,12 +31,12 @@ export default function Progress() {
 
   const loadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      const profile = await getCurrentProfile()
+      if (!profile) return
 
       const { data: modules } = await supabase
         .from('modules')
-        .select('*')
+        .select('*, lessons(id)')
 
       const moduleIds = modules?.map(m => m.id) || []
 
@@ -46,15 +47,17 @@ export default function Progress() {
 
       const lessonIds = lessons?.map(l => l.id) || []
 
-      const { data: progress } = await supabase
-        .from('lesson_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('lesson_id', lessonIds)
+      const { data: progress } = lessonIds.length
+        ? await supabase
+          .from('lesson_progress')
+          .select('*')
+          .eq('user_id', profile.id)
+          .in('lesson_id', lessonIds)
+        : { data: [] }
 
       const domainMap = {}
       lessons?.forEach(l => {
-        const domain = l.domain || 'General'
+        const domain = modules?.find(m => m.id === l.module_id)?.domain || 'General'
         if (!domainMap[domain]) {
           domainMap[domain] = { total: 0, completed: 0 }
         }
@@ -104,9 +107,9 @@ export default function Progress() {
       setStages(stagesData)
       setStatCards([
         { label: 'Overall Completion', value: `${overallCompletion}%`, icon: BarChart3, color: 'bg-brand-500' },
-        { label: 'Attendance', value: '94%', icon: Clock, color: 'bg-emerald-500' },
-        { label: 'Labs Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
-        { label: 'Current Grade', value: '86%', icon: Award, color: 'bg-slate-500' },
+        { label: 'Attendance', value: 'Not available', icon: Clock, color: 'bg-emerald-500' },
+        { label: 'Lessons Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
+        { label: 'Current Grade', value: 'Not graded', icon: Award, color: 'bg-slate-500' },
       ])
       setLoading(false)
     } catch (err) {

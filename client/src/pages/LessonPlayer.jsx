@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/badge'
 import MediaPlayer from '../components/MediaPlayer'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import { getCurrentProfile } from '../lib/profile'
 
 export default function LessonPlayer() {
   const navigate = useNavigate()
@@ -32,10 +33,12 @@ export default function LessonPlayer() {
       setLesson(data)
 
       // Load progress
+      const profile = await getCurrentProfile()
+      if (!profile) return
       const { data: progress } = await supabase
         .from('lesson_progress')
         .select('is_completed, completion_percentage')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .eq('lesson_id', parseInt(lessonId))
         .single()
 

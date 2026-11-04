@@ -46,7 +46,13 @@ export default function Announcements() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user?.email) return
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('id, name')
+        .eq('email', user.email)
+        .single()
+      if (profileError) throw profileError
 
       const { error } = await supabase
         .from('announcements')
@@ -54,10 +60,9 @@ export default function Announcements() {
           title: newTitle,
           content: newContent,
           audience: newAudience,
-          author_name: user.user_metadata?.full_name || user.email,
-          author_id: user.id,
+          author_id: profile.id,
+          type: 'announcement',
           pinned: false,
-          created_at: new Date().toISOString(),
         })
 
       if (error) throw error
@@ -171,7 +176,7 @@ export default function Announcements() {
                   {announcement.pinned && (
                     <Badge variant="outline" className="text-[10px] mr-2">Pinned</Badge>
                   )}
-                  <Badge className={TYPE_CONFIG[announcement.type].color}>{TYPE_CONFIG[announcement.type].label}</Badge>
+                  <Badge className={(TYPE_CONFIG[announcement.type] || TYPE_CONFIG.announcement).color}>{(TYPE_CONFIG[announcement.type] || TYPE_CONFIG.announcement).label}</Badge>
                 </div>
                 <span className="text-[10px] text-gray-400">
                   {new Date(announcement.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}

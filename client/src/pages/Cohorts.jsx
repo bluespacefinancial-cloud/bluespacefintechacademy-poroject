@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Edit3, Eye } from 'lucide-react'
+import { Calendar, GraduationCap, Plus, Edit3, Eye } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { supabase } from '../lib/supabase'
 
 const STATUS_COLORS = {
   planned: 'bg-gray-50 text-gray-600',
@@ -19,70 +20,33 @@ const STATUS_LABELS = {
   archived: 'Archived',
 }
 
-const MOCK_COHORTS = [
-  {
-    id: 1,
-    name: 'Cohort 1 - December 2026',
-    startDate: '2026-12-01',
-    endDate: '2027-04-15',
-    capacity: 40,
-    finsoftTrack: true,
-    finopsTrack: true,
-    enrolledFinsoft: 22,
-    enrolledFinops: 15,
-    status: 'planned',
-    kickoffDate: '2026-12-01',
-    certificationDate: '2027-04-15',
-  },
-  {
-    id: 2,
-    name: 'Cohort 2 - March 2027',
-    startDate: '2027-03-01',
-    endDate: '2027-07-15',
-    capacity: 40,
-    finsoftTrack: true,
-    finopsTrack: true,
-    enrolledFinsoft: 0,
-    enrolledFinops: 0,
-    status: 'planned',
-    kickoffDate: '2027-03-01',
-    certificationDate: '2027-07-15',
-  },
-  {
-    id: 3,
-    name: 'Cohort 3 - June 2027',
-    startDate: '2027-06-01',
-    endDate: '2027-09-15',
-    capacity: 40,
-    finsoftTrack: true,
-    finopsTrack: true,
-    enrolledFinsoft: 0,
-    enrolledFinops: 0,
-    status: 'planned',
-    kickoffDate: '2027-06-01',
-    certificationDate: '2027-09-15',
-  },
-  {
-    id: 4,
-    name: 'Cohort 4 - September 2027',
-    startDate: '2027-09-01',
-    endDate: '2028-01-15',
-    capacity: 40,
-    finsoftTrack: true,
-    finopsTrack: true,
-    enrolledFinsoft: 0,
-    enrolledFinops: 0,
-    status: 'planned',
-    kickoffDate: '2027-09-01',
-    certificationDate: '2028-01-15',
-  },
-]
-
 export default function Cohorts() {
   const navigate = useNavigate()
+  const [cohorts, setCohorts] = useState([])
   const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-  const filteredCohorts = MOCK_COHORTS.filter((c) => {
+  useEffect(() => {
+    loadCohorts()
+  }, [])
+
+  const loadCohorts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cohorts')
+        .select('*')
+        .order('start_date', { ascending: true })
+
+      if (error) throw error
+      setCohorts(data || [])
+    } catch (err) {
+      console.error('Error loading cohorts:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredCohorts = cohorts.filter((c) => {
     if (filterStatus === 'all') return true
     return c.status === filterStatus
   })
@@ -132,14 +96,14 @@ export default function Cohorts() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_COHORTS.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{cohorts.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Cohorts</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_COHORTS.filter(c => c.status === 'active').length}
+              {cohorts.filter(c => c.status === 'active').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
           </CardContent>
@@ -147,15 +111,7 @@ export default function Cohorts() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_COHORTS.reduce((sum, c) => sum + c.enrolledFinsoft + c.enrolledFinops, 0)}
-            </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Enrolled</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {MOCK_COHORTS.reduce((sum, c) => sum + c.capacity, 0)}
+              {cohorts.reduce((sum, c) => sum + c.capacity, 0)}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Capacity</p>
           </CardContent>
@@ -171,7 +127,6 @@ export default function Cohorts() {
               <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
               <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
               <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Tracks</th>
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Enrolled</th>
               <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -179,7 +134,7 @@ export default function Cohorts() {
           <tbody>
             {filteredCohorts.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-gray-400">
+                <td colSpan={6} className="py-8 text-center text-gray-400">
                   No cohorts found
                 </td>
               </tr>
@@ -198,7 +153,7 @@ export default function Cohorts() {
                       <div>
                         <p className="text-xs font-medium text-deep-600">{cohort.name}</p>
                         <p className="text-[10px] text-gray-500">
-                          Kickoff: {cohort.kickoffDate}
+                          Kickoff: {cohort.kickoff_date || cohort.start_date}
                         </p>
                       </div>
                     </div>
@@ -206,10 +161,10 @@ export default function Cohorts() {
                   <td className="py-4">
                     <div className="flex flex-col gap-1">
                       <p className="text-xs text-gray-600">
-                        {new Date(cohort.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(cohort.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                       <p className="text-[10px] text-gray-400">
-                        → {new Date(cohort.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        → {new Date(cohort.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
                   </td>
@@ -218,26 +173,12 @@ export default function Cohorts() {
                   </td>
                   <td className="py-4">
                     <div className="flex gap-2">
-                      {cohort.finsoftTrack && (
+                      {cohort.track_finsoft && (
                         <Badge className="bg-indigo-50 text-indigo-700 border-indigo-100 text-[10px]">Finsoft</Badge>
                       )}
-                      {cohort.finopsTrack && (
+                      {cohort.track_finops && (
                         <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px]">Finops</Badge>
                       )}
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-medium text-deep-600">
-                        {cohort.enrolledFinsoft + cohort.enrolledFinops}
-                      </p>
-                      <p className="text-[10px] text-gray-400">/{cohort.capacity}</p>
-                    </div>
-                    <div className="h-1 w-full bg-gray-100 rounded-full mt-1">
-                      <div
-                        className="h-full rounded-full bg-brand-600"
-                        style={{ width: `${Math.round(((cohort.enrolledFinsoft + cohort.enrolledFinops) / cohort.capacity) * 100)}%` }}
-                      />
                     </div>
                   </td>
                   <td className="py-4">

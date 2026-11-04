@@ -1,17 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText } from 'lucide-react'
+import { FileText, Users } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-
-const DOMAIN_COLORS = {
-  FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
-  FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
-}
+import { supabase } from '../lib/supabase'
 
 const SUBMISSION_STATUS = {
   submitted: { label: 'Submitted', variant: 'default', color: 'text-brand-600' },
@@ -20,71 +15,86 @@ const SUBMISSION_STATUS = {
   failed: { label: 'Failed', variant: 'destructive', color: 'text-red-600' },
 }
 
-const MOCK_LABS = [
-  {
-    id: 1,
-    title: 'Lab: Build a Simple Ledger with Double-Entry Postings',
-    domain: 'FinCore',
-    module: 'FinCore: Ledger and Transaction Engineering',
-    student: 'Ada Okonkwo',
-    track: 'Finsoft',
-    squad: 'Squad Alpha',
-    status: 'submitted',
-    submittedAt: '2026-11-02 14:30',
-    score: null,
-    feedback: null,
-  },
-  {
-    id: 2,
-    title: 'Lab: Automate Reconciliation Pipeline',
-    domain: 'FinOps',
-    module: 'FinOps: Reconciliation and Reporting',
-    student: 'Kwame Asante',
-    track: 'Finsoft',
-    squad: 'Squad Alpha',
-    status: 'graded',
-    submittedAt: '2026-11-01 10:15',
-    score: 87,
-    feedback: 'Well implemented. Consider adding idempotency checks.',
-  },
-  {
-    id: 3,
-    title: 'Lab: Partner API Onboarding Flow',
-    domain: 'FaaS',
-    module: 'FaaS: Partner-Ready APIs',
-    student: 'Zainab Yusuf',
-    track: 'Finsoft',
-    squad: 'Squad Alpha',
-    status: 'remediation',
-    submittedAt: '2026-11-03 09:00',
-    score: 62,
-    feedback: 'Missing error handling for invalid partner credentials. Please revise.',
-  },
-  {
-    id: 4,
-    title: 'Lab: FinInfra CI/CD Pipeline',
-    domain: 'FinInfra',
-    module: 'FinInfra: CI/CD and Observability',
-    student: 'Fatima Diallo',
-    track: 'Finops',
-    squad: 'Squad Alpha',
-    status: 'submitted',
-    submittedAt: '2026-11-03 08:45',
-    score: null,
-    feedback: null,
-  },
-]
+const DOMAIN_COLORS = {
+  FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
+  FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
+}
 
 export default function LabsToReview() {
   const navigate = useNavigate()
+  const [labs, setLabs] = useState([])
   const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-  const filteredLabs = MOCK_LABS.filter((l) => {
+  useEffect(() => {
+    loadLabs()
+  }, [])
+
+  const loadLabs = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Get submissions with lab and user info
+      const { data: submissions } = await supabase
+        .from('submissions')
+        .select(`
+          *,
+          labs (
+            title,
+            modules (
+              title,
+              domain
+            )
+          ),
+          users (
+            name,
+            track
+          )
+        `)
+        .order('submitted_at', { ascending: false })
+
+      if (!submissions) {
+        setLoading(false)
+        return
+      }
+
+      // Transform data
+      const labsData = submissions.map((s) => ({
+        id: s.id,
+        title: s.labs?.title || 'Untitled Lab',
+        domain: s.labs?.modules?.domain || 'General',
+        module: s.labs?.modules?.title || 'Unknown Module',
+        student: s.users?.name || 'Unknown Student',
+        track: s.users?.track || 'Unknown',
+        squad: s.squad_id ? 'Squad Alpha' : 'Unassigned', // Simplified
+        status: s.status,
+        submittedAt: s.submitted_at,
+        score: s.score,
+        feedback: s.feedback,
+      }))
+
+      setLabs(labsData)
+    } catch (err) {
+      console.error('Error loading labs:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredLabs = labs.filter((l) => {
     if (filterStatus === 'all') return true
     return l.status === filterStatus
   })
 
-  const pendingCount = MOCK_LABS.filter((l) => l.status === 'submitted').length
+  const pendingCount = labs.filter((l) => l.status === 'submitted').length
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Unknown'
+    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -130,7 +140,7 @@ export default function LabsToReview() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_LABS.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{labs.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Labs</p>
           </CardContent>
         </Card>
@@ -142,13 +152,17 @@ export default function LabsToReview() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_LABS.filter(l => l.status === 'graded').length}</p>
+            <p className="text-2xl font-bold text-deep-600">
+              {labs.filter(l => l.status === 'graded').length}
+            </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Graded</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_LABS.filter(l => l.status === 'remediation').length}</p>
+            <p className="text-2xl font-bold text-deep-600">
+              {labs.filter(l => l.status === 'remediation').length}
+            </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Needs Remediation</p>
           </CardContent>
         </Card>
@@ -200,7 +214,7 @@ export default function LabsToReview() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-deep-600">Submitted</span>
-                      <span className="text-xs text-gray-600">{lab.submittedAt}</span>
+                      <span className="text-xs text-gray-600">{formatDate(lab.submittedAt)}</span>
                     </div>
                     {lab.status === 'graded' && (
                       <div className="flex items-center justify-between">
@@ -220,7 +234,7 @@ export default function LabsToReview() {
                 </CardFooter>
               </Card>
             )
-          })
+          })}
         )}
       </div>
     </div>

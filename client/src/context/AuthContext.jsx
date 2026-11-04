@@ -9,60 +9,37 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      if (!supabase) {
-        setLoading(false)
-        return
-      }
-
       try {
         const { data } = await supabase.auth.getSession()
         if (data.session) {
           setUser(data.session.user)
         }
       } catch {
-        // Supabase not configured or error
+        // Supabase not configured
       }
       setLoading(false)
     }
 
     initAuth()
 
-    if (supabase) {
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          if (event === 'SIGNED_IN' && session) {
-            setUser(session.user)
-          } else if (event === 'SIGNED_OUT') {
-            setUser(null)
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
-          }
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          setUser(session.user)
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
         }
-      )
-
-      return () => {
-        authListener.subscription.unsubscribe()
       }
+    )
+
+    return () => {
+      authListener.subscription.unsubscribe()
     }
   }, [])
 
   const login = async (email, password) => {
-    if (!supabase) {
-      // Mock login for development without Supabase
-      const mockUser = {
-        id: 1,
-        email,
-        name: email.split('@')[0],
-        type: 'Student',
-        avatar: 'avatar.png',
-        is_active: 1,
-      }
-      localStorage.setItem('token', 'mock-token')
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      setUser(mockUser)
-      return mockUser
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -89,9 +66,7 @@ export function AuthProvider({ children }) {
   }
 
   const logout = async () => {
-    if (supabase) {
-      await supabase.auth.signOut()
-    }
+    await supabase.auth.signOut()
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setUser(null)

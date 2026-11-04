@@ -43,8 +43,11 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-      <Route path="/" element={user ? <AppLayout /> : <Navigate to="/login" />}>
+      <Route path="/login" element={<Navigate to="/student-login" replace />} />
+      <Route path="/student-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/partner-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/admin-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/" element={user ? <AppLayout /> : <Navigate to="/student-login" replace />} />
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="my-learning" element={<ProtectedRoute><MyLearning /></ProtectedRoute>} />

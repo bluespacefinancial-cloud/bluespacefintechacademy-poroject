@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Target } from 'lucide-react'
+import { Users, Clock, FileText, Search, Target } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import { supabase } from '../lib/supabase'
 
 const ROLE_COLORS = {
   'Project Manager': 'bg-brand-100 text-brand-700 border-brand-200',
@@ -21,88 +22,61 @@ const PLACEMENT_STATUS = {
   pending: { label: 'Pending Match', variant: 'outline', color: 'bg-gray-50 text-gray-600 border-gray-100' },
 }
 
-const MOCK_PLACEMENTS = [
-  {
-    id: 1,
-    fellow: 'Ada Okonkwo',
-    track: 'Finsoft',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Technical Specialist',
-    project: 'FinCore Ledger Integration',
-    status: 'matched',
-    matchScore: 92,
-    startDate: '2027-04-16',
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 2,
-    fellow: 'Kwame Asante',
-    track: 'Finsoft',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Project Manager',
-    project: 'FaaS Partner API Onboarding',
-    status: 'interviewing',
-    matchScore: 88,
-    startDate: null,
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 3,
-    fellow: 'Emeka Ndiaye',
-    track: 'Finops',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Field Lead',
-    project: 'FinOps Automated Reconciliation',
-    status: 'placed',
-    matchScore: 85,
-    startDate: '2027-04-16',
-    checkin30: true,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 4,
-    fellow: 'Fatima Diallo',
-    track: 'Finops',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'UAT',
-    project: 'FinOps Reconciliation Testing',
-    status: 'matched',
-    matchScore: 81,
-    startDate: '2027-04-16',
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 5,
-    fellow: 'Zainab Yusuf',
-    track: 'Finsoft',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Technical Specialist',
-    project: null,
-    status: 'pending',
-    matchScore: null,
-    startDate: null,
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-]
-
 export default function Placement() {
   const navigate = useNavigate()
+  const [placements, setPlacements] = useState([])
   const [search, setSearch] = useState('')
   const [filterTrack, setFilterTrack] = useState('all')
-  const [filterStatus, setFilterStatus] = useState('all')
   const [filterRole, setFilterRole] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-  const filtered = MOCK_PLACEMENTS.filter((p) => {
-    const matchesSearch = p.fellow.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    loadPlacements()
+  }, [])
+
+  const loadPlacements = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('placements')
+        .select(`
+          *,
+          users (
+            name,
+            email,
+            type,
+            track
+          )
+        `)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      const dataWithNames = (data || []).map((p) => ({
+        id: p.id,
+        name: p.users?.name || 'Unknown',
+        track: p.users?.track || 'Unknown',
+        cohort: 'Cohort 1 - December 2026', // Simplified
+        role: p.role || 'Technical Specialist',
+        project: p.project_id || null,
+        status: p.status || 'pending',
+        matchScore: null,
+        startDate: p.start_date || null,
+        checkin30: false,
+        checkin60: false,
+        checkin90: false,
+      }))
+
+      setPlacements(dataWithNames)
+    } catch (err) {
+      console.error('Error loading placements:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = placements.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
     const matchesTrack = filterTrack === 'all' || p.track === filterTrack
     const matchesStatus = filterStatus === 'all' || p.status === filterStatus
     const matchesRole = filterRole === 'all' || p.role === filterRole
@@ -184,14 +158,14 @@ export default function Placement() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{placements.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Fellows</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_PLACEMENTS.filter(p => p.status === 'placed').length}
+              {placements.filter(p => p.status === 'placed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Placed</p>
           </CardContent>
@@ -199,7 +173,7 @@ export default function Placement() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_PLACEMENTS.filter(p => p.status === 'matched').length}
+              {placements.filter(p => p.status === 'matched').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Matched</p>
           </CardContent>
@@ -207,7 +181,7 @@ export default function Placement() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_PLACEMENTS.filter(p => p.checkin30).length}
+              0
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">30-Day Check-ins</p>
           </CardContent>
@@ -232,10 +206,10 @@ export default function Placement() {
                 <CardHeader className="flex flex-row items-center justify-between py-3">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
-                      {placement.fellow.charAt(0)}
+                      {placement.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-sm">{placement.fellow}</CardTitle>
+                      <CardTitle className="text-sm">{placement.name}</CardTitle>
                       <CardDescription className="text-[10px]">
                         {placement.track} · {placement.cohort}
                       </CardDescription>
@@ -256,23 +230,16 @@ export default function Placement() {
                       <span className="text-xs text-gray-600">{placement.project || 'Unassigned'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Match Score</span>
-                      <span className="text-xs text-gray-600">{placement.matchScore || 'N/A'}%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-deep-600">Start Date</span>
                       <span className="text-xs text-gray-600">{placement.startDate || 'TBD'}</span>
                     </div>
                   </div>
                   <div className="mt-3 flex gap-2 text-[10px]">
-                    {placement.checkin30 && <span className="text-emerald-600 font-medium">30✓</span>}
-                    {!placement.checkin30 && <span className="text-gray-400">30-</span>}
-                    {placement.checkin60 && <span className="text-emerald-600 font-medium">60✓</span>}
-                    {!placement.checkin60 && <span className="text-gray-400">60-</span>}
-                    {placement.checkin90 && <span className="text-emerald-600 font-medium">90✓</span>}
-                    {!placement.checkin90 && <span className="text-gray-400">90-</span>}
+                    <span className="text-gray-400">30-</span>
+                    <span className="text-gray-400">60-</span>
+                    <span className="text-gray-400">90-</span>
                   </div>
-                </CardContent>
+                </div>
                 <CardFooter className="flex items-center justify-between pt-3">
                   <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/placement/${placement.id}`) }}>
                     Manage
@@ -280,7 +247,7 @@ export default function Placement() {
                 </CardFooter>
               </Card>
             )
-          })
+          })}
         )}
       </div>
     </div>

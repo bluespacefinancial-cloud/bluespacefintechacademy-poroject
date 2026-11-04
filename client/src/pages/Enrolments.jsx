@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Search, Edit3 } from 'lucide-react'
+import { Users, FileText, Search, Edit3 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import { supabase } from '../lib/supabase'
 
 const STATUS_COLORS = {
   enrolled: 'bg-gray-50 text-gray-600',
@@ -23,66 +24,51 @@ const STATUS_LABELS = {
   suspended: 'Suspended',
 }
 
-const MOCK_ENROLMENTS = [
-  {
-    id: 1,
-    name: 'Ada Okonkwo',
-    email: 'ada@email.com',
-    cohort: 'Cohort 1 - December 2026',
-    track: 'Finsoft',
-    squad: 'Squad Alpha',
-    status: 'active',
-    enrolledAt: '2026-11-15',
-  },
-  {
-    id: 2,
-    name: 'Kwame Asante',
-    email: 'kwame@email.com',
-    cohort: 'Cohort 1 - December 2026',
-    track: 'Finsoft',
-    squad: 'Squad Alpha',
-    status: 'active',
-    enrolledAt: '2026-11-15',
-  },
-  {
-    id: 3,
-    name: 'Zainab Yusuf',
-    email: 'zainab@email.com',
-    cohort: 'Cohort 1 - December 2026',
-    track: 'Finsoft',
-    squad: 'Squad Alpha',
-    status: 'enrolled',
-    enrolledAt: '2026-11-16',
-  },
-  {
-    id: 4,
-    name: 'Emeka Ndiaye',
-    email: 'emeka@email.com',
-    cohort: 'Cohort 1 - December 2026',
-    track: 'Finops',
-    squad: 'Squad Alpha',
-    status: 'active',
-    enrolledAt: '2026-11-15',
-  },
-  {
-    id: 5,
-    name: 'Fatima Diallo',
-    email: 'fatima@email.com',
-    cohort: 'Cohort 1 - December 2026',
-    track: 'Finops',
-    squad: 'Squad Alpha',
-    status: 'enrolled',
-    enrolledAt: '2026-11-16',
-  },
-]
-
 export default function Enrolments() {
   const navigate = useNavigate()
+  const [enrolments, setEnrolments] = useState([])
   const [search, setSearch] = useState('')
   const [filterTrack, setFilterTrack] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-  const filtered = MOCK_ENROLMENTS.filter((e) => {
+  useEffect(() => {
+    loadEnrolments()
+  }, [])
+
+  const loadEnrolments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('enrolments')
+        .select(`
+          *,
+          users (name, email, track),
+          cohorts (name)
+        `)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      const dataWithNames = (data || []).map((e) => ({
+        id: e.id,
+        name: e.users?.name || 'Unknown',
+        email: e.users?.email || 'Unknown',
+        cohort: e.cohorts?.name || 'Unknown',
+        track: e.users?.track || e.track,
+        squad: e.squad_id ? 'Squad Alpha' : 'Unassigned',
+        status: e.status,
+        enrolledAt: e.created_at,
+      }))
+
+      setEnrolments(dataWithNames)
+    } catch (err) {
+      console.error('Error loading enrolments:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = enrolments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase()) || e.email.toLowerCase().includes(search.toLowerCase())
     const matchesTrack = filterTrack === 'all' || e.track === filterTrack
     const matchesStatus = filterStatus === 'all' || e.status === filterStatus
@@ -158,14 +144,14 @@ export default function Enrolments() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_ENROLMENTS.length}</p>
+            <p className="text-2xl font-bold text-deep-600">{enrolments.length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Total Enrolments</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_ENROLMENTS.filter(e => e.track === 'Finsoft').length}
+              {enrolments.filter(e => e.track === 'Finsoft').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Finsoft</p>
           </CardContent>
@@ -173,7 +159,7 @@ export default function Enrolments() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_ENROLMENTS.filter(e => e.track === 'Finops').length}
+              {enrolments.filter(e => e.track === 'Finops').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Finops</p>
           </CardContent>
@@ -181,7 +167,7 @@ export default function Enrolments() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_ENROLMENTS.filter(e => e.status === 'active').length}
+              {enrolments.filter(e => e.status === 'active').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
           </CardContent>
@@ -234,7 +220,7 @@ export default function Enrolments() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-deep-600">Enrolled</span>
-                    <span className="text-xs text-gray-600">{enrolment.enrolledAt}</span>
+                    <span className="text-xs text-gray-600">{new Date(enrolment.enrolledAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   </div>
                 </div>
               </CardContent>
@@ -247,7 +233,7 @@ export default function Enrolments() {
                 </Badge>
               </CardFooter>
             </Card>
-          ))
+          ))}
         )}
       </div>
     </div>

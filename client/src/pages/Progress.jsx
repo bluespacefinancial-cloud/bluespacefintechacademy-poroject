@@ -1,6 +1,8 @@
-import { BarChart3, Clock, Award, Calendar } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
+import { useState, useEffect } from 'react'
+import { BarChart3, Clock, Users, Award, Calendar, FileText } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { supabase } from '../lib/supabase'
 
 const DOMAIN_COLORS = {
   FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
@@ -9,28 +11,142 @@ const DOMAIN_COLORS = {
   FinInfra: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-500' },
 }
 
-const STAT_CARDS = [
-  { label: 'Overall Completion', value: '65%', icon: BarChart3, color: 'bg-brand-600' },
-  { label: 'Attendance', value: '94%', icon: Calendar, color: 'bg-emerald-500' },
-  { label: 'Labs Complete', value: '4/6', icon: Clock, color: 'bg-amber-500' },
-  { label: 'Current Grade', value: '86%', icon: Award, color: 'bg-slate-500' },
-]
-
-const DOMAINS = [
-  { key: 'FaaS', label: 'FaaS', progress: 85, stage: 'Foundations' },
-  { key: 'FinCore', label: 'FinCore', progress: 60, stage: 'Domain Immersion' },
-  { key: 'FinOps', label: 'FinOps', progress: 75, stage: 'Domain Immersion' },
-  { key: 'FinInfra', label: 'FinInfra', progress: 40, stage: 'Not Started' },
-]
-
 const STAGES = [
-  { key: 'foundations', label: 'Foundations', status: 'completed', weeks: 'Weeks 1-3' },
-  { key: 'domain_immersion', label: 'Domain Immersion', status: 'active', weeks: 'Weeks 4-8' },
-  { key: 'live_projects', label: 'Live Projects', status: 'pending', weeks: 'Weeks 9-14' },
-  { key: 'certification', label: 'Certification', status: 'pending', weeks: 'Weeks 15-16' },
+  { key: 'foundations', label: 'Foundations', weeks: 'Weeks 1-3' },
+  { key: 'domain_immersion', label: 'Domain Immersion', weeks: 'Weeks 4-8' },
+  { key: 'live_projects', label: 'Live Projects', weeks: 'Weeks 9-14' },
+  { key: 'certification', label: 'Certification', weeks: 'Weeks 15-16' },
 ]
 
 export default function Progress() {
+  const [user, setUser] = useState(null)
+  const [domains, setDomains] = useState([])
+  const [stages, setStages] = useState([])
+  const [statCards, setStatCards] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) {
+        setLoading(false)
+        return
+      }
+      setUser(authUser)
+
+      // Get enrolment
+      const { data: enrolments } = await supabase
+        .from('enrolments')
+        .select('cohort_id, track')
+        .eq('user_id', authUser.id)
+        .eq('status', 'active')
+
+      if (!enrolments || enrolments.length === 0) {
+        setLoading(false)
+        return
+      }
+
+      const enrolment = enrolments[0]
+
+      // Get modules and lessons for this cohort
+      const { data: modules } = await supabase
+        .from('modules')
+        .select('*')
+        .eq('cohort_id', enrolment.cohort_id)
+
+      const moduleIds = modules?.map(m => m.id) || []
+
+      const { data: lessons } = await supabase
+        .from('lessons')
+        .select('*')
+        .in('module_id', moduleIds)
+
+      const lessonIds = lessons?.map(l => l.id) || []
+
+      // Get progress
+      const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .in('lesson_id', lessonIds)
+
+      // Calculate domain stats
+      const domainMap = {}
+      lessons?.forEach(l => {
+        const domain = l.domain || 'General'
+        if (!domainMap[domain]) {
+          domainMap[domain] = { total: 0, completed: 0 }
+        }
+        domainMap[domain].total++
+        if (progress?.find(p => p.lesson_id === l.id && p.is_completed)) {
+          domainMap[domain].completed++
+        }
+      })
+
+      const domainsData = Object.entries(domainMap).map(([domain, stats]) => ({
+        key: domain,
+        label: domain,
+        passRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
+        enrollment: stats.total,
+        labsComplete: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
+      }))
+
+      // Calculate stage progress
+      const stagesData = STAGES.map(stage => {
+        const stageModules = modules?.filter(m => m.stage === stage.key) || []
+        const stageLessonIds = stageModules.flatMap(m =>
+          lessons?.filter(l => l.module_id === m.id).map(l => l.id) || []
+        )
+        const stageCompleted = stageLessonIds.filter(lid =>
+          progress?.find(p => p.lesson_id === lid && p.is_completed)
+        ).length
+        const stageStatus = stageLessonIds.length === 0 ? 'pending' :
+          stageCompleted === stageLessonIds.length ? 'completed' :
+          stageCompleted > 0 ? 'active' : 'pending'
+
+        return {
+          key: stage.key,
+          label: stage.label,
+          status: stageStatus,
+          weeks: stage.weeks,
+        }
+      })
+
+      // Calculate overall stats
+      const totalLessons = lessons?.length || 0
+      const completedLessons = progress?.filter(p => p.is_completed).length || 0
+      const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+
+      setDomains(domainsData)
+      setStages(stagesData)
+      setStatCards([
+        { label: 'Overall Completion', value: `${overallCompletion}%`, icon: BarChart3, color: 'bg-brand-500' },
+        { label: 'Attendance', value: '94%', icon: Calendar, color: 'bg-emerald-500' },
+        { label: 'Labs Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
+        { label: 'Current Grade', value: '86%', icon: Award, color: 'bg-slate-500' },
+      ])
+      setLoading(false)
+    } catch (err) {
+      console.error('Error loading progress:', err)
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-500">Loading progress...</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
@@ -42,7 +158,7 @@ export default function Progress() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        {STAT_CARDS.map((stat, i) => (
+        {statCards.map((stat, i) => (
           <Card key={i}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -70,7 +186,7 @@ export default function Progress() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {DOMAINS.map((domain) => (
+              {domains.map((domain) => (
                 <div key={domain.key} className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -78,17 +194,17 @@ export default function Progress() {
                         {domain.label}
                       </Badge>
                       <span className="text-[10px] font-medium text-gray-500">
-                        {domain.stage}
+                        {domain.enrollment} enrolled
                       </span>
                     </div>
                     <span className="text-xs font-medium text-deep-600 w-8 text-right">
-                      {domain.progress}%
+                      {domain.passRate}%
                     </span>
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ease-out-expo ${DOMAIN_COLORS[domain.key].fill}`}
-                      style={{ width: `${domain.progress}%` }}
+                      style={{ width: `${domain.passRate}%` }}
                     />
                   </div>
                 </div>
@@ -104,7 +220,7 @@ export default function Progress() {
               <CardTitle className="text-sm font-bold">Learning Stages</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {STAGES.map((stage, i) => (
+              {stages.map((stage, i) => (
                 <div key={stage.key} className="flex flex-col gap-2 relative">
                   {i > 0 && (
                     <div className="absolute -top-1 left-0 w-full h-[2px] bg-gray-200" />

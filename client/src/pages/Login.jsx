@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Lock, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -11,10 +11,29 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 
 const ease = [0.23, 1, 0.32, 1]
 
+const ROUTE_TO_ROLE = {
+  '/student-login': 'Student',
+  '/partner-login': 'Instructor',
+  '/admin-login': 'Administrator',
+}
+
+const ROLE_TO_DASHBOARD = {
+  Student: '/dashboard',
+  Instructor: '/dashboard',
+  Administrator: '/dashboard',
+}
+
+const ROLE_LABELS = {
+  Student: 'Student',
+  Instructor: 'Instructor',
+  Administrator: 'Administrator',
+}
+
 export default function Login() {
   const { login, setUser } = useAuth()
   const navigate = useNavigate()
-  const [role, setRole] = useState('Student')
+  const { pathname } = useParams()
+  const [role, setRole] = useState(ROUTE_TO_ROLE[pathname] || 'Student')
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -24,6 +43,8 @@ export default function Login() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [changing, setChanging] = useState(false)
+
+  const isRoleFixed = ROUTE_TO_ROLE[pathname] !== undefined
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -39,7 +60,7 @@ export default function Login() {
         toast('Your password was reset by admin. Please set a new password.', { icon: '🔐' })
       } else {
         toast.success(`Welcome back, ${user.name}`)
-        navigate('/design-system')
+        navigate(ROLE_TO_DASHBOARD[role] || '/dashboard')
       }
     } catch (err) {
       toast.error(err.message || 'Invalid credentials')
@@ -69,7 +90,7 @@ export default function Login() {
       localStorage.setItem('user', JSON.stringify(stored))
       setUser(prev => ({ ...prev, forcePasswordChange: false }))
       toast.success('Password updated successfully')
-      navigate('/design-system')
+      navigate(ROLE_TO_DASHBOARD[role] || '/dashboard')
     } catch (err) {
       toast.error(err.message || 'Failed to update password')
     } finally {
@@ -204,36 +225,37 @@ export default function Login() {
                     <CardDescription>Access your learning management portal</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
-                      <button
-                        onClick={() => setRole('Student')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-out-expo ${
-                          role === 'Student' ? 'bg-white text-deep-600 shadow-sm' : 'text-gray-500 hover:text-deep-600'
-                        }`}
-                      >
-                        <Users size={15} />
-                        Student
-                      </button>
-                      <button
-                        onClick={() => setRole('Instructor')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-out-expo ${
-                          role === 'Instructor' ? 'bg-white text-deep-600 shadow-sm' : 'text-gray-500 hover:text-deep-600'
-                        }`}
-                      >
-                        <Users size={15} />
-                        Instructor
-                      </button>
-                      <button
-                        onClick={() => setRole('Administrator')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-out-expo ${
-                          role === 'Administrator' ? 'bg-white text-deep-600 shadow-sm' : 'text-gray-500 hover:text-deep-600'
-                        }`}
-                      >
-                        <Users size={15} />
-                        Administrator
-                      </button>
-                    </div>
-
+                    {!isRoleFixed && (
+                      <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+                        <button
+                          onClick={() => setRole('Student')}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-out-expo ${
+                            role === 'Student' ? 'bg-white text-deep-600 shadow-sm' : 'text-gray-500 hover:text-deep-600'
+                          }`}
+                        >
+                          <Users size={15} />
+                          Student
+                        </button>
+                        <button
+                          onClick={() => setRole('Instructor')}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-out-expo ${
+                            role === 'Instructor' ? 'bg-white text-deep-600 shadow-sm' : 'text-gray-500 hover:text-deep-600'
+                          }`}
+                        >
+                          <Users size={15} />
+                          Instructor
+                        </button>
+                        <button
+                          onClick={() => setRole('Administrator')}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-out-expo ${
+                            role === 'Administrator' ? 'bg-white text-deep-600 shadow-sm' : 'text-gray-500 hover:text-deep-600'
+                          }`}
+                        >
+                          <Users size={15} />
+                          Administrator
+                        </button>
+                      </div>
+                    )}
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
@@ -279,7 +301,7 @@ export default function Login() {
                             </span>
                           ) : (
                             <span className="flex items-center gap-2">
-                              Sign in as {role}
+                              Sign in as {ROLE_LABELS[role]}
                               <ArrowRight size={15} />
                             </span>
                           )}

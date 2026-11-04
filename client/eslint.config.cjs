@@ -35,6 +35,7 @@ module.exports = [
       ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
+      'react-hooks/immutability': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'warn',
       'react-hooks/rules-of-hooks': 'error',

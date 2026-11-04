@@ -102,7 +102,7 @@ export const submitLab = async (labId, contentUrl, squadId) => {
       user_id: (await supabase.auth.getUser()).data.user.id,
       lab_id: labId,
       content_url: contentUrl,
-      squad_id,
+      squad_id: squadId,
       status: 'submitted',
       submitted_at: new Date().toISOString(),
     })

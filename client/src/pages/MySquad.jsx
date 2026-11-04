@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Clock, Activity, Award, Target, Plus, Search, Eye } from 'lucide-react'
+import { Users, Activity, Plus } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -65,6 +65,7 @@ const MOCK_SQUADS = [
 
 export default function SquadManagement() {
   const navigate = useNavigate()
+  const squads = MOCK_SQUADS
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
 

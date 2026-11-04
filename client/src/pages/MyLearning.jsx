@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 
@@ -11,6 +11,14 @@ const STAGE_LABELS = {
   domain_immersion: 'Domain Immersion',
   live_projects: 'Live Projects',
   certification: 'Certification',
+}
+const LESSON_TYPE_LABELS = {
+  concept: 'Concept',
+  demonstration: 'Demo',
+  video: 'Video',
+  audio: 'Audio',
+  lab: 'Lab',
+  assessment: 'Assessment',
 }
 
 const LESSON_TYPE_COLORS = {
@@ -85,7 +93,7 @@ export default function MyLearning() {
           .from('lesson_progress')
           .select('*')
           .eq('user_id', user.id)
-          .in('lesson_id', lessonIds)
+          .in('lesson_id', lessonsData.map(lesson => lesson.id))
 
         const progressMap = {}
         progressData?.forEach(p => {

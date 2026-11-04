@@ -4,6 +4,7 @@ import { BookOpen, Plus, Edit3, Trash2, Eye } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 
 const STAGE_COLORS = {
   foundations: 'text-brand-600',

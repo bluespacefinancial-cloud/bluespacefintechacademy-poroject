@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Users } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -25,8 +25,8 @@ const DOMAIN_COLORS = {
 export default function LabsToReview() {
   const navigate = useNavigate()
   const [labs, setLabs] = useState([])
+  const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadLabs()
@@ -56,7 +56,6 @@ export default function LabsToReview() {
         .order('submitted_at', { ascending: false })
 
       if (!submissions) {
-        setLoading(false)
         return
       }
 
@@ -78,7 +77,6 @@ export default function LabsToReview() {
     } catch (err) {
       console.error('Error loading labs:', err)
     } finally {
-      setLoading(false)
     }
   }
 

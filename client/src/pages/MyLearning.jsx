@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-react'
+import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -222,7 +222,8 @@ export default function MyLearning() {
             const moduleStatus = moduleLessonsCount > 0 && moduleCompleted === moduleLessonsCount ? 'completed' :
               moduleLessonsCount > 0 && moduleCompleted > 0 ? 'in_progress' : 'locked'
 
-            return <Card
+            return (
+              <Card
                 key={module.id}
                 onClick={() => setActiveModuleId(module.id)}
                 className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
@@ -231,7 +232,7 @@ export default function MyLearning() {
               >
                 <CardHeader className="flex flex-row items-center justify-between py-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold">
+                    <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
                       {moduleStatus === 'completed' ? (
                         <CheckCircle className="text-white" />
                       ) : moduleStatus === 'in_progress' ? (
@@ -247,15 +248,7 @@ export default function MyLearning() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge
-                    variant={
-                      moduleStatus === 'completed'
-                        ? 'secondary'
-                        : moduleStatus === 'in_progress'
-                        ? 'default'
-                        : 'outline'
-                    }
-                  >
+                  <Badge variant={moduleStatus === 'completed' ? 'secondary' : moduleStatus === 'in_progress' ? 'default' : 'outline'}>
                     {STAGE_LABELS[module.stage]}
                     {module.domain && ` · ${module.domain}`}
                   </Badge>
@@ -274,10 +267,12 @@ export default function MyLearning() {
                       className="h-full rounded-full bg-brand-600"
                       style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }}
                     />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          })}
+          )}
+        )}
       </div>
 
       {currentModule && (

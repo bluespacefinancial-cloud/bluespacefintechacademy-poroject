@@ -178,7 +178,7 @@ export default function LabsToReview() {
               <Card
                 key={lab.id}
                 className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-                onClick={() => navigate(`/labs/${lab.id}/review`)}
+                onClick={() => navigate(`/grading?submission=${lab.id}`)}
               >
                 <CardHeader className="flex flex-row items-center justify-between py-3">
                   <div className="flex items-center gap-3">
@@ -220,7 +220,7 @@ export default function LabsToReview() {
                 </CardContent>
                 <CardFooter className="flex items-center justify-between pt-3">
                   <Badge variant={status.variant} className={status.color}>{status.label}</Badge>
-                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/labs/${lab.id}/review`) }}>
+                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/grading?submission=${lab.id}`) }}>
                     Review
                   </Button>
                 </CardFooter>

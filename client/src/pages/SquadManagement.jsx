@@ -1,227 +1,71 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Users, Activity, Plus } from 'lucide-react'
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useMemo, useState } from 'react'
+import { Plus, Users } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-
-const TRACK_COLORS = {
-  Finsoft: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  Finops: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-}
-
-const MOCK_SQUADS = [
-  {
-    id: 1,
-    name: 'Squad Alpha',
-    cohort: 'Cohort 1 - December 2026',
-    useCase: 'FinCore Ledger Integration',
-    members: 7,
-    finsoftCount: 4,
-    finopsCount: 3,
-    sprint: 'Sprint 1 of 3',
-    status: 'active',
-    lead: 'Ada Okonkwo',
-  },
-  {
-    id: 2,
-    name: 'Squad Beta',
-    cohort: 'Cohort 1 - December 2026',
-    useCase: 'FaaS Partner API Onboarding',
-    members: 7,
-    finsoftCount: 4,
-    finopsCount: 3,
-    sprint: 'Sprint 1 of 3',
-    status: 'active',
-    lead: 'Kwame Asante',
-  },
-  {
-    id: 3,
-    name: 'Squad Gamma',
-    cohort: 'Cohort 1 - December 2026',
-    useCase: 'FinOps Automated Reconciliation',
-    members: 6,
-    finsoftCount: 3,
-    finopsCount: 3,
-    sprint: 'Sprint 2 of 3',
-    status: 'active',
-    lead: 'Zainab Yusuf',
-  },
-  {
-    id: 4,
-    name: 'Squad Delta',
-    cohort: 'Cohort 2 - March 2027',
-    useCase: 'FinInfra CI/CD Pipeline',
-    members: 7,
-    finsoftCount: 4,
-    finopsCount: 3,
-    sprint: 'Not Started',
-    status: 'forming',
-    lead: 'Fatima Diallo',
-  },
-]
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { supabase } from '../lib/supabase'
 
 export default function SquadManagement() {
-  const navigate = useNavigate()
+  const [squads, setSquads] = useState([])
+  const [cohorts, setCohorts] = useState([])
   const [search, setSearch] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
+  const [status, setStatus] = useState('all')
+  const [showCreate, setShowCreate] = useState(false)
+  const [form, setForm] = useState({ name: '', cohort_id: '' })
+  const [memberChoices, setMemberChoices] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const filtered = MOCK_SQUADS.filter((s) => {
-    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.useCase.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || s.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+  const load = async () => {
+    const [{ data, error: squadError }, { data: cohortRows, error: cohortError }, { data: enrolments, error: enrolmentError }, { data: users, error: usersError }] = await Promise.all([
+      supabase.from('squads').select('*').order('created_at', { ascending: false }),
+      supabase.from('cohorts').select('id, name'),
+      supabase.from('enrolments').select('squad_id, track, user_id'),
+      supabase.from('users').select('id, name'),
+    ])
+    if (squadError) throw squadError
+    if (cohortError) throw cohortError
+    if (enrolmentError) throw enrolmentError
+    if (usersError) throw usersError
+    const cohortMap = new Map((cohortRows || []).map((item) => [item.id, item.name]))
+    const userMap = new Map((users || []).map((item) => [item.id, item.name]))
+    setCohorts(cohortRows || [])
+    setMemberChoices((enrolments || []).filter((item) => !item.squad_id).map((item) => ({ ...item, name: userMap.get(item.user_id) || `Student ${item.user_id}` })))
+    setSquads((data || []).map((squad) => {
+      const members = (enrolments || []).filter((item) => item.squad_id === squad.id)
+      return { ...squad, cohortName: cohortMap.get(squad.cohort_id) || 'Unknown cohort', members, leadName: userMap.get(squad.squad_lead_id) || 'Not assigned', finsoft: members.filter((item) => item.track === 'Finsoft').length, finops: members.filter((item) => item.track === 'Finops').length }
+    }))
+  }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">Squad Management</h1>
-            <p className="text-sm text-gray-500">
-              Manage mixed-track squads for live project delivery
-            </p>
-          </div>
-          <Button onClick={() => navigate('/squads/create')}>
-            <Plus size={16} className="mr-2" />
-            Create Squad
-          </Button>
-        </div>
-      </div>
+  useEffect(() => { load().catch((loadError) => setError(loadError.message || 'Unable to load squads')).finally(() => setLoading(false)) }, [])
 
-      <div className="flex gap-4 mb-6">
-        <div className="flex-1">
-          <Input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by squad name or use case..."
-            className="w-full"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Status
-          </span>
-          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="forming">Forming</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+  const createSquad = async (event) => {
+    event.preventDefault()
+    const { error: createError } = await supabase.from('squads').insert({ name: form.name.trim(), cohort_id: Number(form.cohort_id) })
+    if (createError) { setError(createError.message); return }
+    setForm({ name: '', cohort_id: '' }); setShowCreate(false); await load()
+  }
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_SQUADS.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Squads</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {MOCK_SQUADS.filter(s => s.status === 'active').length}
-            </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {MOCK_SQUADS.reduce((sum, s) => sum + s.members, 0)}
-            </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Members</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {MOCK_SQUADS.filter(s => s.status === 'active').reduce((sum, s) => sum + s.finsoftCount, 0)}
-            </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Finsoft Members</p>
-          </CardContent>
-        </Card>
-      </div>
+  const assignMember = async (squadId, userId) => {
+    if (!userId) return
+    const { error: assignError } = await supabase.from('enrolments').update({ squad_id: Number(squadId), updated_at: new Date().toISOString() }).eq('user_id', Number(userId)).in('status', ['enrolled', 'active'])
+    if (assignError) { setError(assignError.message); return }
+    await load()
+  }
 
-      <div className="space-y-3">
-        {filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <Users size={32} className="mx-auto mb-3 opacity-50" />
-            <p>No squads found</p>
-          </div>
-        ) : (
-          filtered.map((squad) => (
-            <Card
-              key={squad.id}
-              className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-              onClick={() => navigate(`/squads/${squad.id}`)}
-            >
-              <CardHeader className="flex flex-row items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
-                    {squad.id}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-sm">{squad.name}</CardTitle>
-                    <CardDescription className="text-[10px]">
-                      {squad.cohort} · {squad.useCase}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Badge className={squad.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-600 border-slate-100'}>
-                  {squad.status}
-                </Badge>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Sprint</span>
-                    <span className="text-xs text-gray-600">{squad.sprint}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Squad Lead</span>
-                    <span className="text-xs text-gray-600">{squad.lead}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Members</span>
-                    <span className="text-xs text-gray-600">
-                      {squad.finsoftCount} Finsoft + {squad.finopsCount} Finops
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <Badge className={TRACK_COLORS.Finsoft}>
-                    {squad.finsoftCount} Finsoft
-                  </Badge>
-                  <Badge className={TRACK_COLORS.Finops}>
-                    {squad.finopsCount} Finops
-                  </Badge>
-                </div>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between pt-3">
-                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/squads/${squad.id}/members`) }}>
-                  <Users size={12} className="mr-1" />
-                  View Members
-                </Button>
-                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/squads/${squad.id}/sprints`) }}>
-                  <Activity size={12} className="mr-1" />
-                  Sprints
-                </Button>
-              </CardFooter>
-            </Card>
-          ))
-        )}
-      </div>
-    </div>
-  )
+  const filtered = useMemo(() => squads.filter((squad) => (!search || `${squad.name} ${squad.cohortName}`.toLowerCase().includes(search.toLowerCase())) && (status === 'all' || (squad.members.length ? 'active' : 'forming') === status)), [squads, search, status])
+  const totalMembers = squads.reduce((sum, squad) => sum + squad.members.length, 0)
+
+  return <div className="min-h-screen bg-gray-50"><div className="mb-6 flex items-center justify-between"><div><h1 className="text-2xl font-bold text-deep-600">Squad Management</h1><p className="text-sm text-gray-500">Manage live project squads and their enrolments.</p></div><Button onClick={() => setShowCreate(!showCreate)}><Plus size={16} className="mr-2" />Create Squad</Button></div>
+    {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+    {showCreate && <Card className="mb-6"><CardHeader><CardTitle className="text-sm">Create squad</CardTitle></CardHeader><CardContent><form onSubmit={createSquad} className="grid gap-3 md:grid-cols-3"><Input placeholder="Squad name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /><Select value={form.cohort_id} onValueChange={(value) => setForm({ ...form, cohort_id: value })}><SelectTrigger><SelectValue placeholder="Select cohort" /></SelectTrigger><SelectContent>{cohorts.map((cohort) => <SelectItem key={cohort.id} value={String(cohort.id)}>{cohort.name}</SelectItem>)}</SelectContent></Select><Button type="submit">Create</Button></form></CardContent></Card>}
+    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3"><Card><CardContent className="p-4"><p className="text-2xl font-bold">{squads.length}</p><p className="text-xs uppercase text-gray-500">Squads</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-2xl font-bold">{squads.filter((squad) => squad.members.length).length}</p><p className="text-xs uppercase text-gray-500">Active squads</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-2xl font-bold">{totalMembers}</p><p className="text-xs uppercase text-gray-500">Members</p></CardContent></Card></div>
+    <div className="mb-5 flex gap-3"><Input placeholder="Search squads or cohorts" value={search} onChange={(event) => setSearch(event.target.value)} /><Select value={status} onValueChange={setStatus}><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="forming">Forming</SelectItem></SelectContent></Select></div>
+    {loading && <p className="py-10 text-center text-sm text-gray-500">Loading squads...</p>}
+    {!loading && filtered.length === 0 && <p className="py-10 text-center text-sm text-gray-500">No squads found.</p>}
+    <div className="space-y-3">{filtered.map((squad) => <Card key={squad.id}><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="text-sm">{squad.name}</CardTitle><p className="text-xs text-gray-500">{squad.cohortName} · Lead: {squad.leadName}</p></div><Badge variant="outline">{squad.members.length ? 'Active' : 'Forming'}</Badge></CardHeader><CardContent><div className="mb-3 flex items-center gap-2 text-xs"><Users size={14} /> {squad.members.length} members <Badge variant="outline">{squad.finsoft} Finsoft</Badge><Badge variant="outline">{squad.finops} Finops</Badge></div><select className="w-full rounded border p-2 text-xs" value="" onChange={(event) => assignMember(squad.id, event.target.value)}><option value="">Assign an unassigned enrolment...</option>{memberChoices.filter((member) => member.cohort_id === squad.cohort_id).map((member) => <option key={member.user_id} value={member.user_id}>{member.name} · {member.track}</option>)}</select></CardContent></Card>)}</div>
+  </div>
 }

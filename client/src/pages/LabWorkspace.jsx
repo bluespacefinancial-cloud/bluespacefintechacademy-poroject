@@ -17,6 +17,11 @@ export default function LabWorkspace() {
   const navigate = useNavigate()
   const [submissionUrl, setSubmissionUrl] = useState('')
   const [submissionStatus, setSubmissionStatus] = useState('draft')
+  const [ledgerEntries, setLedgerEntries] = useState([
+    { transactionId: 'TX-001', account: 'Cash', debit: 100, credit: 0 },
+    { transactionId: 'TX-001', account: 'Revenue', debit: 0, credit: 100 },
+  ])
+  const [ledgerMessage, setLedgerMessage] = useState('')
 
   const lab = {
     id: 1,
@@ -94,6 +99,19 @@ Submit your solution as a GitHub repository link or upload your code files.
     setSubmissionStatus('submitted')
   }
 
+  const validateLedger = () => {
+    const ids = ledgerEntries.map((entry) => entry.transactionId.trim()).filter(Boolean)
+    const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index)
+    const debits = ledgerEntries.reduce((total, entry) => total + Number(entry.debit || 0), 0)
+    const credits = ledgerEntries.reduce((total, entry) => total + Number(entry.credit || 0), 0)
+    const invalidAmounts = ledgerEntries.some((entry) => Number(entry.debit || 0) < 0 || Number(entry.credit || 0) < 0 || (Number(entry.debit || 0) > 0 && Number(entry.credit || 0) > 0))
+    if (!ledgerEntries.length || duplicateIds.length || invalidAmounts || Math.round(debits * 100) !== Math.round(credits * 100)) {
+      setLedgerMessage(`Validation failed: debits ${debits.toFixed(2)} / credits ${credits.toFixed(2)}. Each transaction must balance and each line must contain either a debit or credit.`)
+      return
+    }
+    setLedgerMessage(`Ledger valid: ${ledgerEntries.length} entries balance at ${debits.toFixed(2)}.`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex items-center justify-between mb-6">
@@ -166,6 +184,22 @@ Submit your solution as a GitHub repository link or upload your code files.
                 <pre className="bg-white p-3 rounded-md text-xs overflow-x-auto font-mono text-gray-600 border border-gray-100">
                   {lab.starterCode}
                 </pre>
+              </div>
+              <div className="mt-6 rounded-lg border border-indigo-100 bg-indigo-50 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-deep-600">Double-entry validator</h4>
+                  <Button size="sm" variant="outline" onClick={validateLedger}>Validate ledger</Button>
+                </div>
+                <div className="space-y-2">
+                  {ledgerEntries.map((entry, index) => <div key={`${entry.transactionId}-${index}`} className="grid grid-cols-4 gap-2 text-xs">
+                    <Input value={entry.transactionId} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, transactionId: event.target.value } : item))} placeholder="Transaction ID" />
+                    <Input value={entry.account} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, account: event.target.value } : item))} placeholder="Account" />
+                    <Input type="number" min="0" value={entry.debit} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, debit: event.target.value } : item))} placeholder="Debit" />
+                    <Input type="number" min="0" value={entry.credit} onChange={(event) => setLedgerEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} placeholder="Credit" />
+                  </div>)}
+                </div>
+                <Button className="mt-3" size="sm" variant="ghost" onClick={() => setLedgerEntries((current) => [...current, { transactionId: '', account: '', debit: 0, credit: 0 }])}>Add posting line</Button>
+                {ledgerMessage && <p className={`mt-2 text-xs ${ledgerMessage.startsWith('Ledger valid') ? 'text-emerald-700' : 'text-red-700'}`}>{ledgerMessage}</p>}
               </div>
             </CardContent>
             <CardFooter className="flex items-center justify-between pt-4">

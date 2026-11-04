@@ -56,6 +56,7 @@ export default function Certificates() {
               <div><CardTitle className="text-sm">BlueSPACE Fellow - {certificate.track} Track</CardTitle><p className="text-[10px] text-gray-500">{certificate.cohortName}</p></div>
               {certificate.final_grade !== null && <div className="flex justify-between"><span className="text-xs font-medium">Final Grade</span><span className="text-sm font-bold text-brand-600">{certificate.final_grade}%</span></div>}
               {certificate.certificate_url && <div className="flex justify-between"><span className="text-xs font-medium">Certificate file</span><a className="text-xs text-brand-700 hover:underline" href={certificate.certificate_url} target="_blank" rel="noreferrer">Open</a></div>}
+              {certificate.verification_token && <div className="flex justify-between"><span className="text-xs font-medium">Verification</span><a className="text-xs text-brand-700 hover:underline" href={`/verify-certificate/${certificate.verification_token}`}>Verify certificate</a></div>}
             </CardContent>
             <CardFooter className="pt-4">{certificate.certificate_url ? <Button variant="outline" size="sm" className="w-full" onClick={() => window.open(certificate.certificate_url, '_blank')}><Download size={14} className="mr-2" />Download</Button> : <Button variant="outline" size="sm" className="w-full" disabled>Not Available</Button>}</CardFooter>
           </Card>

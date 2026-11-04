@@ -6,9 +6,11 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
+import { getCurrentProfile } from '../lib/profile'
 
 const EMPTY_FORM = {
   title: '',
+  cohort_id: '',
   starts_at: '',
   ends_at: '',
   meet_url: '',
@@ -23,6 +25,7 @@ export default function LiveClasses() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [cohorts, setCohorts] = useState([])
 
   const canManage = ['Instructor', 'Administrator'].includes(user?.type)
 
@@ -58,19 +61,12 @@ export default function LiveClasses() {
     setError('')
 
     try {
-      const { data: authData } = await supabase.auth.getUser()
-      if (!authData.user?.email) throw new Error('You must be signed in to schedule a class')
-
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', authData.user.email)
-        .single()
-
-      if (profileError) throw profileError
+        const profile = await getCurrentProfile()
+        if (!profile) throw new Error('You must be signed in to schedule a class')
 
       const { error: createError } = await supabase.from('live_classes').insert({
         ...form,
+        cohort_id: form.cohort_id ? Number(form.cohort_id) : null,
         instructor_id: profile.id,
         created_by: profile.id,
       })
@@ -85,6 +81,13 @@ export default function LiveClasses() {
       setSaving(false)
     }
   }
+
+  useEffect(() => {
+    supabase.from('cohorts').select('id, name').order('start_date').then(({ data, error: cohortError }) => {
+      if (cohortError) setError(cohortError.message)
+      setCohorts(data || [])
+    })
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,6 +112,10 @@ export default function LiveClasses() {
           <CardContent>
             <form onSubmit={handleCreate} className="grid gap-4 md:grid-cols-2">
               <Input placeholder="Class title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+              <select className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm" value={form.cohort_id} onChange={(e) => setForm({ ...form, cohort_id: e.target.value })} required>
+                <option value="">Select cohort</option>
+                {cohorts.map((cohort) => <option key={cohort.id} value={cohort.id}>{cohort.name}</option>)}
+              </select>
               <Input placeholder="Google Meet URL (optional until connected)" value={form.meet_url} onChange={(e) => setForm({ ...form, meet_url: e.target.value })} type="url" />
               <Input value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} type="datetime-local" required />
               <Input value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} type="datetime-local" required />

@@ -10,6 +10,13 @@
     "lint": "cd client && npm run lint",
     "lint:fix": "cd client && npm run lint:fix",
     "format": "cd client && npm run format",
-    "format:check": "cd client && npm run format:check"
+    "format:check": "cd client && npm run format:check",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:db:push": "npx supabase db push",
+    "supabase:functions:deploy": "npx supabase functions deploy"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

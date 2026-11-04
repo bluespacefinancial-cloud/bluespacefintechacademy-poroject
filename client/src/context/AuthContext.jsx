@@ -7,18 +7,28 @@ const AuthContext = createContext(null)
 // this lookup, a page refresh restores a user with no `type`, which breaks
 // every role-gated route and sidebar until the next login.
 async function loadProfile(authUser) {
-  if (!authUser?.email) return authUser
+  if (!authUser?.email) return { ...authUser, hasProfile: false }
   const { data: profile } = await supabase
     .from('users')
-    .select('*')
+    // Explicit columns: public.users.password is deliberately not selectable
+    // (see supabase/migrations/010_security_hardening.sql).
+    .select('id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at')
     .eq('email', authUser.email)
     .maybeSingle()
   return {
     ...authUser,
     ...(profile || {}),
+    hasProfile: Boolean(profile),
     // DB column is force_password_change (snake_case); the UI reads camelCase.
     forcePasswordChange: profile?.force_password_change === 1,
   }
+}
+
+// A missing profile or a deactivated account must not be restored into the app.
+// RLS already denies their data; clearing the session avoids rendering an empty
+// dashboard and makes the block explicit.
+function isBlocked(profile) {
+  return !profile?.hasProfile || profile?.is_active === 0
 }
 
 export function AuthProvider({ children }) {
@@ -35,7 +45,13 @@ export function AuthProvider({ children }) {
       try {
         const { data } = await supabase.auth.getSession()
         if (data.session?.user) {
-          setUser(await loadProfile(data.session.user))
+          const profile = await loadProfile(data.session.user)
+          if (isBlocked(profile)) {
+            await supabase.auth.signOut()
+            setUser(null)
+          } else {
+            setUser(profile)
+          }
         }
       } catch {
         // Supabase not configured
@@ -52,7 +68,16 @@ export function AuthProvider({ children }) {
           // can deadlock. The raw session user has no role, so never set it
           // directly.
           setTimeout(() => {
-            loadProfile(session.user).then(setUser).catch(() => setUser(session.user))
+            loadProfile(session.user)
+              .then(async (profile) => {
+                if (isBlocked(profile)) {
+                  await supabase.auth.signOut()
+                  setUser(null)
+                  return
+                }
+                setUser(profile)
+              })
+              .catch(() => setUser(null))
           }, 0)
         } else if (event === 'SIGNED_OUT') {
           setUser(null)

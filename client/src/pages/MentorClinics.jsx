@@ -39,7 +39,6 @@ export default function MentorClinics() {
       setClinics(clinicsData)
     } catch (err) {
       console.error('Error loading clinics:', err)
-    } finally {
     }
   }
 

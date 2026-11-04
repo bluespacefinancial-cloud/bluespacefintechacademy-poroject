@@ -49,7 +49,6 @@ export default function Curriculum() {
       setModules(data || [])
     } catch (err) {
       console.error('Error loading modules:', err)
-    } finally {
     }
   }
 

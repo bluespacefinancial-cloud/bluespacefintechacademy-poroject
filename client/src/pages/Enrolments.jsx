@@ -68,7 +68,6 @@ export default function Enrolments() {
       setEnrolments(dataWithNames)
     } catch (err) {
       console.error('Error loading enrolments:', err)
-    } finally {
     }
   }
 

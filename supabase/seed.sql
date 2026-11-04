@@ -31,12 +31,12 @@ INSERT INTO public.cohorts (name, start_date, end_date, capacity, track_finsoft,
   ('Cohort 4 - September 2027', '2027-09-01', '2028-01-15', 40, true, true, 'planned');
 
 -- Enrol Cohort 1 students
-INSERT INTO public.enrolments (cohort_id, user_id, track, status, enrolled_at) VALUES
-  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'ada.okonkwo@bluespacefintechacademy.com'), 'Finsoft', 'active', '2026-11-15'),
-  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'kwame.asante@bluespacefintechacademy.com'), 'Finsoft', 'active', '2026-11-15'),
-  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'zainab.yusuf@bluespacefintechacademy.com'), 'Finsoft', 'active', '2026-11-16'),
-  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'emeka.ndiaye@bluespacefintechacademy.com'), 'Finops', 'active', '2026-11-15'),
-  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'fatima.diallo@bluespacefintechacademy.com'), 'Finops', 'active', '2026-11-16');
+INSERT INTO public.enrolments (cohort_id, user_id, track, status) VALUES
+  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'ada.okonkwo@bluespacefintechacademy.com'), 'Finsoft', 'active'),
+  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'kwame.asante@bluespacefintechacademy.com'), 'Finsoft', 'active'),
+  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'zainab.yusuf@bluespacefintechacademy.com'), 'Finsoft', 'active'),
+  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'emeka.ndiaye@bluespacefintechacademy.com'), 'Finops', 'active'),
+  ((SELECT id FROM public.cohorts WHERE name = 'Cohort 1 - December 2026'), (SELECT id FROM public.users WHERE email = 'fatima.diallo@bluespacefintechacademy.com'), 'Finops', 'active');
 
 -- Create Squad Alpha
 INSERT INTO public.squads (cohort_id, name, squad_lead_id) VALUES

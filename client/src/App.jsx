@@ -46,7 +46,8 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Navigate to="/student-login" replace />} />
       <Route path="/student-login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/partner-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/instructor-login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/partner-login" element={<Navigate to="/instructor-login" replace />} />
       <Route path="/admin-login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/" element={user ? <AppLayout /> : <Navigate to="/student-login" replace />}>
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

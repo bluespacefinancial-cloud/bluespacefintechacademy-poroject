@@ -43,11 +43,9 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
         </div>
       </aside>
       <main className="relative flex min-h-screen w-full flex-col lg:w-1/2">
-        <img
-          src="/logo-dark.png"
-          alt="BlueSPACE Fintech Academy"
-          className="absolute left-6 top-6 z-20 h-9 w-auto lg:hidden"
-        />
+        <div className="absolute left-6 top-6 z-20 rounded-md bg-bluespace-700 px-2 py-1.5 lg:hidden">
+          <img src="/logo-white.png" alt="BlueSPACE Fintech Academy" className="h-8 w-auto" />
+        </div>
         {children}
       </main>
     </div>

@@ -96,6 +96,9 @@ export default function ApplicationReview() {
             </CardHeader>
             <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-0">
               <p className="text-xs text-gray-500">{application.requested_role}{application.track ? ` · ${application.track}` : ''}</p>
+              {application.requested_role === 'Student' && application.motivation && <p className="mt-2 w-full text-sm text-gray-600">Learning goals: {application.motivation}</p>}
+              {application.requested_role === 'Instructor' && <div className="mt-2 w-full space-y-1 text-sm text-gray-600"><p>Teaching domains: {(application.teaching_domains || []).join(', ') || 'Not provided'}</p><p>Experience: {application.teaching_experience || 'Not provided'}</p></div>}
+              {application.requested_role === 'Partner' && <div className="mt-2 w-full space-y-1 text-sm text-gray-600"><p>Partnership focus: {application.partnership_focus || 'Not provided'}</p>{application.website && <p>Website: {application.website}</p>}<p>Contribution: {application.partnership_details || 'Not provided'}</p></div>}
               {application.status === 'pending' && <div className="flex gap-2"><Button size="sm" onClick={() => review(application, 'approved')}><Check size={14} className="mr-1" /> Approve</Button><Button size="sm" variant="outline" onClick={() => review(application, 'rejected')}><X size={14} className="mr-1" /> Reject</Button></div>}
             </CardContent>
           </Card>

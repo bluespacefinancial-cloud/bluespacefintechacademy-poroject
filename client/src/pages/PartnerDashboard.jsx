@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
+import WelcomeGuide from '../components/WelcomeGuide'
 
 const emptyData = { partner: null, courses: [], linked: false }
 
@@ -58,19 +59,22 @@ export default function PartnerDashboard({ user }) {
 
   const count = (statuses) => data.courses.filter((course) => statuses.includes(course.status)).length
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4"><div><h1 className="text-2xl font-bold text-deep-600">Partner dashboard</h1><p className="mt-1 text-sm text-gray-500">{data.partner.name} · Manage courses and academy reviews.</p></div><Button asChild className="bg-deep-600 text-white hover:bg-deep-700"><Link to="/partner-courses"><Plus size={15} className="mr-2" />Open course studio</Link></Button></header>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label="Total courses" value={data.courses.length} Icon={BookOpen} />
-        <Metric label="Drafts" value={count(['draft', 'changes_requested'])} Icon={Plus} />
-        <Metric label="In review" value={count(['submitted', 'under_review'])} Icon={Clock} />
-        <Metric label="Published" value={count(['published'])} Icon={CheckCircle} />
+    <>
+      <div className="space-y-6">
+        <header className="flex flex-wrap items-end justify-between gap-4"><div><h1 className="text-2xl font-bold text-deep-600">Partner dashboard</h1><p className="mt-1 text-sm text-gray-500">{data.partner.name} · Manage courses and academy reviews.</p></div><Button asChild className="bg-deep-600 text-white hover:bg-deep-700"><Link to="/partner-courses"><Plus size={15} className="mr-2" />Open course studio</Link></Button></header>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Metric label="Total courses" value={data.courses.length} Icon={BookOpen} />
+          <Metric label="Drafts" value={count(['draft', 'changes_requested'])} Icon={Plus} />
+          <Metric label="In review" value={count(['submitted', 'under_review'])} Icon={Clock} />
+          <Metric label="Published" value={count(['published'])} Icon={CheckCircle} />
+        </div>
+        <Card>
+          <CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Your courses</CardTitle><Button asChild variant="outline" size="sm"><Link to="/partner-courses">Manage courses <ArrowRight size={14} className="ml-2" /></Link></Button></CardHeader>
+          <CardContent className="space-y-3">{data.courses.length === 0 ? <div className="rounded-md border border-dashed p-6 text-center"><p className="text-sm font-medium text-deep-600">No courses yet</p><p className="mt-1 text-sm text-gray-500">Create a course draft and submit it for academy review.</p><Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700"><Link to="/partner-courses">Create your first course</Link></Button></div> : data.courses.slice(0, 6).map((course) => <div key={course.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3"><div><p className="text-sm font-medium text-deep-600">{course.title}</p><p className="text-xs text-gray-500">Updated {new Date(course.updated_at).toLocaleDateString()}</p></div><Badge variant={course.status === 'published' ? 'secondary' : 'outline'}>{course.status.replace('_', ' ')}</Badge></div>)}</CardContent>
+        </Card>
       </div>
-      <Card>
-        <CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Your courses</CardTitle><Button asChild variant="outline" size="sm"><Link to="/partner-courses">Manage courses <ArrowRight size={14} className="ml-2" /></Link></Button></CardHeader>
-        <CardContent className="space-y-3">{data.courses.length === 0 ? <div className="rounded-md border border-dashed p-6 text-center"><p className="text-sm font-medium text-deep-600">No courses yet</p><p className="mt-1 text-sm text-gray-500">Create a course draft and submit it for academy review.</p><Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700"><Link to="/partner-courses">Create your first course</Link></Button></div> : data.courses.slice(0, 6).map((course) => <div key={course.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3"><div><p className="text-sm font-medium text-deep-600">{course.title}</p><p className="text-xs text-gray-500">Updated {new Date(course.updated_at).toLocaleDateString()}</p></div><Badge variant={course.status === 'published' ? 'secondary' : 'outline'}>{course.status.replace('_', ' ')}</Badge></div>)}</CardContent>
-      </Card>
-    </div>
+      <WelcomeGuide role="Partner" />
+    </>
   )
 }
 

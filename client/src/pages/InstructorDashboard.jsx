@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { getCurrentProfile } from '../lib/profile'
 import { supabase } from '../lib/supabase'
+import WelcomeGuide from '../components/WelcomeGuide'
 
 const initialData = { profile: null, cohorts: [], squads: [], modules: [], submissions: [] }
 
@@ -98,7 +99,7 @@ export default function InstructorDashboard({ user }) {
 
   const publishedModules = data.modules.filter((item) => item.is_published).length
   return (
-    <div className="space-y-6">
+    <>
       <header><h1 className="text-2xl font-bold text-deep-600">Teaching dashboard</h1><p className="mt-1 text-sm text-gray-500">Welcome, {data.profile?.name || user?.name}. Here are your assigned cohorts, modules and reviews.</p></header>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric label="Assigned cohorts" value={data.cohorts.length} Icon={GraduationCap} />
@@ -122,11 +123,10 @@ export default function InstructorDashboard({ user }) {
         <CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Submissions waiting for review</CardTitle><Button asChild variant="outline" size="sm"><Link to="/labs-to-review">Review labs <ArrowRight size={14} className="ml-2" /></Link></Button></CardHeader>
         <CardContent className="space-y-2">{data.submissions.length === 0 ? <p className="text-sm text-gray-500">No lab submissions are waiting for your review.</p> : data.submissions.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 border-b py-2 last:border-0"><div><p className="text-sm font-medium">{item.labTitle}</p><p className="text-xs text-gray-500">{item.studentName} · {item.moduleTitle}</p></div><p className="text-xs text-gray-500">{new Date(item.submitted_at).toLocaleDateString()}</p></div>)}</CardContent>
       </Card>
-    </div>
+      <WelcomeGuide role="Instructor" />
+    </>
   )
 }
-
-InstructorDashboard.propTypes = { user: PropTypes.object }
 
 function cohortNamesFor(item, cohorts) {
   return cohorts.find((cohort) => cohort.id === item.cohort_id)?.name || 'Cohort not assigned'

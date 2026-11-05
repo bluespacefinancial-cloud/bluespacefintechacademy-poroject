@@ -6,6 +6,7 @@ import { Badge } from '../components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
+import WelcomeGuide from '../components/WelcomeGuide'
 
 const initialData = {
   profile: null,
@@ -147,6 +148,7 @@ export default function StudentDashboard({ user }) {
         </Card>
       </div>
       <Card className="mt-6"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><CheckCircle size={14} /> Recent activity</CardTitle></CardHeader><CardContent>{data.progress.length === 0 && data.submissions.length === 0 ? <p className="text-sm text-gray-500">Your learning activity will appear here as you complete lessons and submit work.</p> : <div className="space-y-2">{data.progress.filter((item) => item.is_completed).slice(0, 5).map((item) => <div key={`lesson-${item.lesson_id}`} className="flex justify-between text-xs"><span>Lesson completed</span><span className="text-gray-500">{new Date(item.completed_at || item.updated_at).toLocaleDateString()}</span></div>)}{data.submissions.slice(0, 5).map((item) => <div key={`submission-${item.lab_id || item.assessment_id}-${item.submitted_at}`} className="flex justify-between text-xs"><span>Submission {item.status}</span><span className="text-gray-500">{new Date(item.submitted_at).toLocaleDateString()}</span></div>)}</div>}</CardContent></Card>
+      <WelcomeGuide role="Student" />
     </div>
   )
 }

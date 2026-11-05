@@ -9,7 +9,7 @@ import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '.
 import { supabase } from '../lib/supabase'
 
 const DOMAIN_COLORS = {
-  FaaS: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  FaaS: 'bg-brand-100 text-brand-700 border-brand-200',
   FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
   FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',

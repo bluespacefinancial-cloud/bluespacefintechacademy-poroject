@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
 const DOMAIN_COLORS = {
-  FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
+  FaaS: { bg: 'bg-brand-100', text: 'text-brand-700', border: 'border-brand-200', fill: 'bg-brand-500' },
   FinCore: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', fill: 'bg-emerald-500' },
   FinOps: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-500' },
   FinInfra: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-500' },
@@ -225,7 +225,7 @@ export default function Progress() {
                     <div className="flex items-center gap-2">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold z-10 ${
                         stage.status === 'completed' ? 'bg-brand-600 text-white' :
-                        stage.status === 'active' ? 'bg-brand-600 text-white animate-pulse' :
+                        stage.status === 'active' ? 'bg-brand-600 text-white' :
                         'bg-gray-100 text-gray-400'
                       }`}>
                         {i + 1}

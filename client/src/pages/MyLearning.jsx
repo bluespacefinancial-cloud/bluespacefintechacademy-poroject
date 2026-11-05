@@ -15,8 +15,8 @@ const STAGE_LABELS = {
 }
 
 const LESSON_TYPE_COLORS = {
-  concept: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  demonstration: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  concept: 'bg-brand-100 text-brand-700 border-brand-200',
+  demonstration: 'bg-brand-50 text-brand-700 border-brand-200',
   video: 'bg-brand-50 text-brand-700 border-brand-200',
   audio: 'bg-purple-50 text-purple-700 border-purple-200',
   lab: 'bg-emerald-50 text-emerald-700 border-emerald-200',

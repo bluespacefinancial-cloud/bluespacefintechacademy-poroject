@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase'
 const ROLE_COLORS = {
   'Project Manager': 'bg-brand-100 text-brand-700 border-brand-200',
   'Field Lead': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  UAT: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  UAT: 'bg-brand-100 text-brand-700 border-brand-200',
   'Technical Specialist': 'bg-amber-100 text-amber-700 border-amber-200',
 }
 

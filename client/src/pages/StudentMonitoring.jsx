@@ -155,7 +155,7 @@ export default function StudentMonitoring() {
           ['Students', metrics.total, Users, 'text-brand-600 bg-brand-100'],
           ['Active this week', metrics.active, Activity, 'text-emerald-600 bg-emerald-100'],
           ['At risk', metrics.atRisk, AlertTriangle, 'text-amber-600 bg-amber-100'],
-          ['Average completion', `${metrics.averageCompletion}%`, CheckCircle, 'text-indigo-600 bg-indigo-100'],
+          ['Average completion', `${metrics.averageCompletion}%`, CheckCircle, 'text-brand-600 bg-brand-100'],
         ].map(([label, value, Icon, color]) => <Card key={label}><CardContent className="flex items-center justify-between p-4"><div><p className="text-2xl font-bold text-deep-600">{value}</p><p className="text-xs uppercase tracking-wider text-gray-500">{label}</p></div><div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}><Icon size={16} /></div></CardContent></Card>)}
       </div>
       <Card>

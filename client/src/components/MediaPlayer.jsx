@@ -468,7 +468,7 @@ export default function MediaPlayer({
       {/* Lesson Info Below Media */}
       <div className="p-6 bg-gray-50 border-t border-gray-200">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-bold shrink-0">
+          <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 text-sm font-bold shrink-0">
             {lesson.order_index}
           </div>
           <div className="flex-1">

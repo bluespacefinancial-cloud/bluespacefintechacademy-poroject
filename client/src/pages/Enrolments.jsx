@@ -43,8 +43,7 @@ export default function Enrolments() {
           *,
           users (
             name,
-            email,
-            track
+            email
           ),
           cohorts (
             name
@@ -59,7 +58,7 @@ export default function Enrolments() {
         name: e.users?.name || 'Unknown',
         email: e.users?.email || 'Unknown',
         cohort: e.cohorts?.name || 'Unknown',
-        track: e.users?.track || e.track,
+        track: e.track,
         squad: e.squad_id ? 'Squad Alpha' : 'Unassigned',
         status: e.status,
         enrolledAt: e.created_at,

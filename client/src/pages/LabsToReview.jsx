@@ -43,7 +43,7 @@ export default function LabsToReview() {
         .select(`
           *,
           labs (title, lessons (module_id, modules (title, domain))),
-          users (id, name, email),
+          users!submissions_user_id_fkey (id, name, email),
           squads (name)
         `)
         .order('submitted_at', { ascending: false })

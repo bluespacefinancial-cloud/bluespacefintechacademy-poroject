@@ -8,6 +8,8 @@ import toast from 'react-hot-toast'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
+import AuthSplitLayout from '../components/auth/AuthSplitLayout'
+import { AUTH_ARTWORK } from '../components/auth/artwork'
 
 const ease = [0.23, 1, 0.32, 1]
 
@@ -17,22 +19,26 @@ const ease = [0.23, 1, 0.32, 1]
 const PORTALS = {
   '/student-login': {
     role: 'Student',
+    artwork: AUTH_ARTWORK.Student,
     title: 'Student Sign In',
     description: 'Access your learning portal, modules and progress',
   },
   '/instructor-login': {
     role: 'Instructor',
+    artwork: AUTH_ARTWORK.Instructor,
     displayRole: 'Teacher',
     title: 'Teacher Sign In',
     description: 'Access your modules, squads, grading and clinics',
   },
   '/admin-login': {
     role: 'Administrator',
+    artwork: AUTH_ARTWORK.Administrator,
     title: 'Administrator Sign In',
     description: 'Access cohorts, enrolments, reports and academy operations',
   },
   '/partner-login': {
     role: 'Partner',
+    artwork: AUTH_ARTWORK.Partner,
     title: 'Partner Sign In',
     description: 'Create and manage partner courses for academy students',
   },
@@ -56,6 +62,7 @@ export default function Login() {
   const pathname = rawPathname.replace(/\/+$/, '').toLowerCase() || '/'
   const portal = PORTALS[pathname] || DEFAULT_PORTAL
   const { role } = portal
+  const { artwork } = portal
   const displayRole = portal.displayRole || role
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -144,43 +151,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full flex bg-gray-50">
-      <div
-        className="hidden lg:flex w-1/2 min-h-screen relative overflow-hidden items-center justify-center bg-deep-600 bg-cover bg-center"
-        style={{
-          backgroundImage: 'url("https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=1600")',
-        }}
-      >
-        <div className="absolute inset-0 bg-deep-900/70" />
-        <div className="relative z-10 text-center px-12 max-w-md">
-          <motion.img
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease }}
-            src="/logo-white.png"
-            alt="BlueSPACE"
-            className="h-14 w-auto mx-auto mb-6"
-          />
-          <motion.h1
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease, delay: 0.1 }}
-            className="text-3xl font-bold text-white mb-3"
-          >
-            BlueSPACE Fintech Academy
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease, delay: 0.2 }}
-            className="text-blue-200 text-sm leading-relaxed"
-          >
-            Learning Management System - training Finsoft and Finops Fellows on the AI Fintech Factory domains: FaaS, FinCore, FinOps and FinInfra.
-          </motion.p>
-        </div>
-      </div>
-
-      <div className="w-full lg:w-1/2 min-h-screen flex flex-col">
+    <AuthSplitLayout
+      image={artwork.image}
+      imageAlt={artwork.alt}
+      headline={artwork.headline}
+      description={artwork.description}
+    >
         <div className="flex-1 flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -213,7 +189,8 @@ export default function Login() {
                             type={showNewPassword ? 'text' : 'password'}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="Enter new password"
+                            autoComplete="new-password"
+                            placeholder="Create a new password"
                             required
                             minLength={4}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -235,7 +212,8 @@ export default function Login() {
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Confirm new password"
+                          autoComplete="new-password"
+                          placeholder="Enter your new password again"
                           required
                           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         />
@@ -278,9 +256,10 @@ export default function Login() {
                         </label>
                         <Input
                           type="email"
+                          autoComplete="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="you@bluespacefintechacademy.com"
+                          placeholder="you@example.com"
                           required
                         />
                       </div>
@@ -291,6 +270,7 @@ export default function Login() {
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
@@ -336,7 +316,6 @@ export default function Login() {
         <footer className="shrink-0 px-6 pb-6 text-center text-xs text-gray-400">
           BlueSPACE Fintech Academy &copy; 2026
         </footer>
-      </div>
-    </div>
+    </AuthSplitLayout>
   )
 }

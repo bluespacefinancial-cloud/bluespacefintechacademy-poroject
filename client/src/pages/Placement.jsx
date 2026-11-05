@@ -191,13 +191,17 @@ export default function Placement() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.filter((p) => p.status === 'placed').length}</p>
+            <p className="text-2xl font-bold text-deep-600">
+              {MOCK_PLACEMENTS.filter((p) => p.status === 'placed').length}
+            </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Placed</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.filter((p) => p.status === 'matched').length}</p>
+            <p className="text-2xl font-bold text-deep-600">
+              {MOCK_PLACEMENTS.filter((p) => p.status === 'matched').length}
+            </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Matched</p>
           </CardContent>
         </Card>
@@ -231,7 +235,9 @@ export default function Placement() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-sm">{placement.name}</CardTitle>
-                      <CardDescription className="text-[10px]">{placement.track} · {placement.cohort}</CardDescription>
+                      <CardDescription className="text-[10px]">
+                        {placement.track} &middot; {placement.cohort}
+                      </CardDescription>
                     </div>
                   </div>
                   <Badge className={config.color}>{config.label}</Badge>
@@ -240,7 +246,9 @@ export default function Placement() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-deep-600">Role</span>
-                      <Badge className={ROLE_COLORS[placement.role] || 'bg-gray-50 text-gray-600'}>{placement.role}</Badge>
+                      <Badge className={ROLE_COLORS[placement.role] || 'bg-gray-50 text-gray-600'}>
+                        {placement.role}
+                      </Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-deep-600">Project</span>
@@ -256,20 +264,23 @@ export default function Placement() {
                     </div>
                   </div>
                   <div className="mt-3 flex gap-2 text-[10px]">
-                    <span className="text-gray-400">30-</span>
-                    <span className="text-gray-400">60-</span>
-                    <span className="text-gray-400">90-</span>
+                    {placement.checkin30 && <span className="text-emerald-600">30✓</span>}
+                    {!placement.checkin30 && <span className="text-gray-400">30-</span>}
+                    {placement.checkin60 && <span className="text-emerald-600">60✓</span>}
+                    {!placement.checkin60 && <span className="text-gray-400">60-</span>}
+                    {placement.checkin90 && <span className="text-emerald-600">90✓</span>}
+                    {!placement.checkin90 && <span className="text-gray-400">90-</span>}
                   </div>
-                </div>
+                </CardContent>
                 <CardFooter className="flex items-center justify-between pt-3">
-                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/placement/${placement.id}`) }}>
+                  <Button variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/placement/${placement.id}`) }}>
                     Manage
                   </Button>
                 </CardFooter>
               </Card>
             )}
           )}
-        )}
+        </div>
       </div>
     </div>
   )

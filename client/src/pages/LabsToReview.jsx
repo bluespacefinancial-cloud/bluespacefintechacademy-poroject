@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText } from 'lucide-react'
+import { FileText, Users, Search } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -12,7 +12,7 @@ const SUBMISSION_STATUS = {
   submitted: { label: 'Submitted', variant: 'default', color: 'text-brand-600' },
   graded: { label: 'Graded', variant: 'secondary', color: 'text-emerald-600' },
   remediation: { label: 'Remediation', variant: 'outline', color: 'text-amber-600' },
-  failed: { label: 'Failed', variant: 'destructive', color: 'text-red-600' },
+  failed: { label: 'Failed', variant: 'danger', color: 'text-red-600' },
 }
 
 const DOMAIN_COLORS = {
@@ -25,8 +25,9 @@ const DOMAIN_COLORS = {
 export default function LabsToReview() {
   const navigate = useNavigate()
   const [labs, setLabs] = useState([])
-  const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadLabs()
@@ -37,51 +38,53 @@ export default function LabsToReview() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: submissions } = await supabase
+      const { data, error } = await supabase
         .from('submissions')
         .select(`
           *,
-          labs (
-            title,
-            modules (
-              title,
-              domain
-            )
-          ),
-          users (
-            name,
-            track
-          )
+          labs (title),
+          users (id, name, email)
         `)
         .order('submitted_at', { ascending: false })
 
-      if (!submissions) {
-        return
+      if (error) throw error
+
+      const userIds = [...new Set((data || []).map((s) => s.user_id))]
+      const trackMap = {}
+      if (userIds.length > 0) {
+        const { data: enrolments } = await supabase
+          .from('enrolments')
+          .select('user_id, track')
+          .in('user_id', userIds)
+        enrolments?.forEach((e) => { trackMap[e.user_id] = e.track })
       }
 
-      const labsData = submissions.map((s) => ({
-        id: s.id,
-        title: s.labs?.title || 'Untitled Lab',
-        domain: s.labs?.modules?.domain || 'General',
-        module: s.labs?.modules?.title || 'Unknown Module',
-        student: s.users?.name || 'Unknown Student',
-        track: s.users?.track || 'Unknown',
-        squad: s.squad_id ? 'Squad Alpha' : 'Unassigned',
-        status: s.status,
-        submittedAt: s.submitted_at,
-        score: s.score,
-        feedback: s.feedback,
+      const labsData = (data || []).map((submission) => ({
+        id: submission.id,
+        title: submission.labs?.title || 'Untitled Lab',
+        domain: 'General',
+        module: 'Unknown Module',
+        student: submission.users?.name || 'Unknown Student',
+        track: trackMap[submission.user_id] || 'Unknown',
+        squad: submission.squad_id ? 'Squad Alpha' : 'Unassigned',
+        status: submission.status,
+        submittedAt: submission.submitted_at,
+        score: submission.score,
+        feedback: submission.feedback,
       }))
 
       setLabs(labsData)
     } catch (err) {
       console.error('Error loading labs:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
   const filtered = labs.filter((l) => {
-    if (filterStatus === 'all') return true
-    return l.status === filterStatus
+    const matchesSearch = l.student.toLowerCase().includes(search.toLowerCase()) || l.track.toLowerCase().includes(search.toLowerCase())
+    if (filterStatus === 'all') return matchesSearch
+    return matchesSearch && l.status === filterStatus
   })
 
   const pendingCount = labs.filter((l) => l.status === 'submitted').length
@@ -91,15 +94,15 @@ export default function LabsToReview() {
     return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
+  const statusConfig = (status) => SUBMISSION_STATUS[status] || { label: status, variant: 'secondary', color: 'text-gray-600' }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-deep-600 mb-1">Labs to Review</h1>
-            <p className="text-sm text-gray-500">
-              Review and grade student lab submissions
-            </p>
+            <p className="text-sm text-gray-500">Review and grade student lab submissions</p>
           </div>
           {pendingCount > 0 && (
             <Badge variant="default">{pendingCount} pending</Badge>
@@ -113,14 +116,16 @@ export default function LabsToReview() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by squad name or use case..."
+            placeholder="Search by student name or track..."
             className="w-full"
           />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Status
+          </span>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v)}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -143,23 +148,19 @@ export default function LabsToReview() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{pendingCount}</p>
+            <p className="text-2xl font-bold text-deep-600">{labs.filter((l) => l.status === 'submitted').length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Pending Review</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {labs.filter((l) => l.status === 'graded').length}
-            </p>
+            <p className="text-2xl font-bold text-deep-600">{labs.filter((l) => l.status === 'graded').length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Graded</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
-              {labs.filter((l) => l.status === 'remediation').length}
-            </p>
+            <p className="text-2xl font-bold text-deep-600">{labs.filter((l) => l.status === 'remediation').length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Needs Remediation</p>
           </CardContent>
         </Card>
@@ -171,62 +172,64 @@ export default function LabsToReview() {
             <FileText size={32} className="mx-auto mb-3 opacity-50" />
             <p>No labs found</p>
           </div>
-        ) :
-          filtered.map((lab) => {
-            const status = SUBMISSION_STATUS[lab.status]
-            return (
-              <Card
-                key={lab.id}
-                className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-                onClick={() => navigate(`/grading?submission=${lab.id}`)}
-              >
-                <CardHeader className="flex flex-row items-center justify-between py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
-                      <FileText size={14} className="text-deep-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-sm">{lab.title}</CardTitle>
-                      <CardDescription className="text-[10px]">{lab.module} · {lab.domain}</CardDescription>
-                    </div>
+        ) : (
+          filtered.map((lab) => (
+            <Card
+              key={lab.id}
+              className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
+              onClick={() => navigate(`/labs/${lab.id}/review`)}
+            >
+              <CardHeader className="flex flex-row items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
+                    <FileText size={14} className="text-deep-600" />
                   </div>
-                  <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Student</span>
-                      <span className="text-xs text-gray-600">{lab.student}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Track</span>
-                      <span className="text-xs text-gray-600">{lab.track}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Squad</span>
-                      <span className="text-xs text-gray-600">{lab.squad}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Submitted</span>
-                      <span className="text-xs text-gray-600">{formatDate(lab.submittedAt)}</span>
-                    </div>
-                    {lab.status === 'graded' && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-deep-600">Score</span>
-                        <span className="text-xs font-bold text-emerald-600">{lab.score}</span>
-                      </div>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-sm">{lab.title}</CardTitle>
+                    <CardDescription className="text-[10px]">
+                      {lab.module} · {lab.domain}
+                    </CardDescription>
                   </div>
-                </CardContent>
-                <CardFooter className="flex items-center justify-between pt-3">
-                  <Badge variant={status.variant} className={status.color}>{status.label}</Badge>
-                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/grading?submission=${lab.id}`) }}>
-                    Review
-                  </Button>
-                </CardFooter>
-              </Card>
-            )
-          })}
+                </div>
+                <Badge className={DOMAIN_COLORS[lab.domain]}>{lab.domain}</Badge>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-deep-600">Student</span>
+                    <span className="text-xs text-gray-600">{lab.student}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-deep-600">Track</span>
+                    <span className="text-xs text-gray-600">{lab.track}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-deep-600">Squad</span>
+                    <span className="text-xs text-gray-600">{lab.squad}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-deep-600">Submitted</span>
+                    <span className="text-xs text-gray-600">{formatDate(lab.submittedAt)}</span>
+                  </div>
+                  {lab.status === 'graded' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-deep-600">Score</span>
+                      <span className="text-xs font-bold text-emerald-600">{lab.score}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="flex items-center justify-between pt-3">
+                <Badge variant={statusConfig(lab.status).variant} className={statusConfig(lab.status).color}>
+                  {statusConfig(lab.status).label}
+                </Badge>
+                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/labs/${lab.id}/review`) }}>
+                  Review
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        )}
       </div>
     </div>
   )

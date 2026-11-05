@@ -31,10 +31,16 @@ serve(async (req) => {
       }
       const { data: profile } = await supabaseClient
         .from("users")
-        .select("type")
+        .select("type, is_active")
         .eq("email", data.user.email)
         .maybeSingle()
       userRole = profile?.type
+      if (!profile || profile.is_active !== 1) {
+        return new Response(
+          JSON.stringify({ error: "Account deactivated" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        )
+      }
       if (userRole !== "Administrator") {
         return new Response(
           JSON.stringify({ error: "Admin only" }),
@@ -114,8 +120,7 @@ serve(async (req) => {
         .select(`
           *,
           users (
-            name,
-            track
+            name
           )
         `)
         .order("created_at", { ascending: false })

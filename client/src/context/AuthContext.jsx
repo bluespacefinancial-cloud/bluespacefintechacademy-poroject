@@ -8,13 +8,13 @@ const AuthContext = createContext(null)
 // every role-gated route and sidebar until the next login.
 async function loadProfile(authUser) {
   if (!authUser?.email) return { ...authUser, hasProfile: false }
-  const { data: profile } = await supabase
-    .from('users')
-    // Explicit columns: public.users.password is deliberately not selectable
-    // (see supabase/migrations/010_security_hardening.sql).
-    .select('id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at')
-    .eq('email', authUser.email)
-    .maybeSingle()
+    const { data: profile } = await supabase
+      .from('users')
+      // Explicit columns: public.users.password is deliberately not selectable
+      // (see supabase/migrations/010_security_hardening.sql).
+      .select('id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at, student_id')
+      .eq('email', authUser.email)
+      .maybeSingle()
   return {
     ...authUser,
     ...(profile || {}),

@@ -301,18 +301,19 @@ export default function StudentDashboard({ user }) {
         subtitle={`${data.profile?.name || user?.name || user?.email || 'Fellow'} • ${data.profile?.track || 'Fintech Core'} Track • ${data.cohort?.name}`}
         onStartTour={() => setTourOpen(true)}
         actions={
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 bg-white border border-gray-200/90 rounded-lg px-3 py-1.5 shadow-sm text-xs">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-200/90 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm text-[11px] sm:text-xs">
               <span className="font-semibold text-gray-900">{overallPercent}%</span>
               <span className="text-gray-400">•</span>
-              <span className="text-gray-600">{completedLessons}/{totalLessons} lessons</span>
-              <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden ml-1">
+              <span className="text-gray-600 hidden xs:inline">{completedLessons}/{totalLessons} lessons</span>
+              <span className="text-gray-600 xs:hidden">{completedLessons}/{totalLessons}</span>
+              <div className="w-10 sm:w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden ml-0.5 sm:ml-1">
                 <div className="h-full bg-deep-600 rounded-full" style={{ width: `${overallPercent}%` }} />
               </div>
             </div>
-            <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
+            <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold h-8 sm:h-9">
               <Link to="/my-learning">
-                <BookOpen size={14} className="mr-1.5" />
+                <BookOpen size={13} className="mr-1.5" />
                 View Curriculum
               </Link>
             </Button>
@@ -498,8 +499,8 @@ export default function StudentDashboard({ user }) {
           </div>
 
           <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-center">
-            <Link to="/live-classes" className="text-xs font-semibold text-deep-600 hover:text-deep-700">
-              View upcoming cohort masterclasses & clinics →
+            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 hover:text-deep-700">
+              Need 1-on-1 guidance? Book a slot in Mentor Clinics →
             </Link>
           </div>
         </Card>
@@ -679,28 +680,28 @@ export default function StudentDashboard({ user }) {
           </Link>
 
           <Link
-            to="/peer-reviews"
+            to="/my-squad"
             className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm hover:border-deep-600/50 hover:shadow-md transition-all flex flex-col justify-between"
           >
             <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-3">
               <Users size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Peer Reviews</p>
-              <p className="text-xs text-gray-500 mt-0.5">Review teammate deliverables</p>
+              <p className="text-sm font-bold text-gray-900">Squad Workspace</p>
+              <p className="text-xs text-gray-500 mt-0.5">Sprint deliverables & team roster</p>
             </div>
           </Link>
 
           <Link
-            to="/capstone"
+            to="/partner-catalog"
             className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm hover:border-deep-600/50 hover:shadow-md transition-all flex flex-col justify-between"
           >
             <div className="w-9 h-9 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 mb-3">
-              <GraduationCap size={18} />
+              <Compass size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Capstone Project</p>
-              <p className="text-xs text-gray-500 mt-0.5">Final graduation submission</p>
+              <p className="text-sm font-bold text-gray-900">Partner Courses</p>
+              <p className="text-xs text-gray-500 mt-0.5">Industry-certified external modules</p>
             </div>
           </Link>
         </div>

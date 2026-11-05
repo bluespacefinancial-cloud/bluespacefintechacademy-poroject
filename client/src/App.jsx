@@ -90,11 +90,11 @@ export default function App() {
         <Route path="my-learning" element={<ProtectedRoute roles={['Student']}><MyLearning /></ProtectedRoute>} />
         <Route path="lab-workspace" element={<ProtectedRoute roles={['Student']}><LabWorkspace /></ProtectedRoute>} />
         <Route path="progress" element={<ProtectedRoute roles={['Student']}><Progress /></ProtectedRoute>} />
-        <Route path="my-squad" element={<ProtectedRoute roles={['Student']}><MySquad /></ProtectedRoute>} />
+        <Route path="my-squad" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MySquad /></ProtectedRoute>} />
         <Route path="certificates" element={<ProtectedRoute roles={['Student']}><Certificates /></ProtectedRoute>} />
         <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="quiz/:assessmentId" element={<ProtectedRoute roles={['Student']}><Quiz /></ProtectedRoute>} />
-        <Route path="project-workspace" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><ProjectWorkspace /></ProtectedRoute>} />
+        <Route path="project-workspace" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MySquad /></ProtectedRoute>} />
         <Route path="partner-courses" element={<ProtectedRoute roles={['Partner']}><PartnerCourses /></ProtectedRoute>} />
         <Route path="partner-catalog" element={<ProtectedRoute roles={['Student']}><PartnerCatalog /></ProtectedRoute>} />
         <Route path="partner-course/:courseId" element={<ProtectedRoute roles={['Student']}><PartnerCourseLearning /></ProtectedRoute>} />

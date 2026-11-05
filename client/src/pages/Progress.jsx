@@ -117,7 +117,7 @@ export default function Progress() {
         : 0
       const currentGrade = gradedWork?.length
         ? `${Math.round(gradedWork.reduce((total, item) => total + item.score, 0) / gradedWork.length)}%`
-        : '—'
+        : 'N/A'
 
       setDomains(domainsData)
       setStages(stagesData)

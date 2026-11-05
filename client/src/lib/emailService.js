@@ -84,7 +84,7 @@ export const emailService = {
 
   async sendCertificationEmail(email, name, track, grade) {
     const safeTrack = escapeHtml(track || 'fellowship')
-    const safeGrade = escapeHtml(grade ?? '—')
+    const safeGrade = escapeHtml(grade ?? 'N/A')
     const message = `You have completed the ${safeTrack} track with a final grade of ${safeGrade}. Your certification is ready in your academy account.`
     return this.sendEmail(email, 'Your BlueSPACE certification is ready', emailLayout({ heading: 'Congratulations on your certification', greeting: `Hello ${escapeHtml(name || 'there')},`, content: paragraph(message), actionLabel: 'View your certification', actionUrl: `${appOrigin()}/certificates` }), `Congratulations ${name || 'there'}. ${message}`)
   },

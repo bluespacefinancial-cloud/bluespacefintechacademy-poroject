@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Activity, Award, BookOpen, CheckCircle, Users, Calendar } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import { Activity, BookOpen, CheckCircle, Users, Calendar, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
 import WelcomeGuide from '../components/WelcomeGuide'
+import DashboardHeader from '../components/dashboard/DashboardHeader'
+import MetricCard from '../components/dashboard/MetricCard'
 
 const initialData = {
   profile: null,
@@ -25,6 +28,7 @@ export default function StudentDashboard({ user }) {
   const [data, setData] = useState(initialData)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [tourOpen, setTourOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -101,8 +105,22 @@ export default function StudentDashboard({ user }) {
     return () => { cancelled = true }
   }, [])
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">Loading your learning dashboard...</div>
-  if (error) return <div className="min-h-screen bg-gray-50 p-6"><p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p></div>
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-sm font-medium text-gray-500">Loading your learning dashboard...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <p className="font-semibold">Unable to load dashboard</p>
+        <p className="mt-1 text-xs">{error}</p>
+      </div>
+    )
+  }
 
   const completedLessons = data.progress.filter((item) => item.is_completed).length
   const completion = data.lessons.length ? Math.round((completedLessons / data.lessons.length) * 100) : 0
@@ -118,118 +136,241 @@ export default function StudentDashboard({ user }) {
   const currentCompleted = currentLessons.filter((lesson) => data.progress.find((item) => item.lesson_id === lesson.id)?.is_completed).length
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-8">
-        <h1 className="mb-1 text-2xl font-bold text-deep-600">My Learning Dashboard</h1>
-        <p className="text-sm text-gray-500">{data.profile?.name || user?.email} · {data.profile?.track || 'Academy'} Track · {data.cohort?.name || 'No cohort assigned'}</p>
+    <div className="space-y-6">
+      <DashboardHeader
+        dataTour="student-header"
+        title="My Learning Dashboard"
+        subtitle={`${data.profile?.name || user?.email || 'Fellow'} • ${data.profile?.track || 'Academy'} Track • ${data.cohort?.name || 'No cohort assigned'}`}
+        onStartTour={() => setTourOpen(true)}
+        actions={
+          <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
+            <Link to="/my-learning">
+              <BookOpen size={14} className="mr-1.5" />
+              Go to My Learning
+            </Link>
+          </Button>
+        }
+      />
+
+      {/* Metrics Grid */}
+      <div data-tour="student-metrics" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <MetricCard
+          label="Course completion"
+          value={`${completion}%`}
+          icon={BookOpen}
+          helper={`${completedLessons} of ${data.lessons.length} lessons`}
+          to="/my-learning"
+        />
+        <MetricCard
+          label="Class attendance"
+          value={attendance === null ? 'No data' : `${attendance}%`}
+          icon={Users}
+          helper={data.attendance.length ? `${attended} of ${data.attendance.length} sessions` : 'No live sessions recorded'}
+          to="/live-classes"
+        />
+        <MetricCard
+          label="Average grade"
+          value={grade === null ? 'Not graded' : `${grade}%`}
+          icon={CheckCircle}
+          helper={graded.length ? `${graded.length} evaluations scored` : 'No graded submissions yet'}
+          to="/progress"
+        />
+        <MetricCard
+          label="Lessons finished"
+          value={`${completedLessons}/${data.lessons.length}`}
+          icon={Activity}
+          helper="Total completed modules"
+          to="/my-learning"
+        />
       </div>
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          ['Course Completion', `${completion}%`, BookOpen, 'bg-brand-100 text-brand-600'],
-          ['Attendance', attendance === null ? 'No data' : `${attendance}%`, Users, 'bg-emerald-100 text-emerald-600'],
-          ['Current Grade', grade === null ? 'Not graded' : `${grade}%`, Award, 'bg-slate-100 text-slate-600'],
-          ['Lessons Complete', `${completedLessons}/${data.lessons.length}`, Activity, 'bg-amber-100 text-amber-600'],
-        ].map(([label, value, Icon, color]) => (
-          <Card key={label}>
-            <CardContent className="flex items-center justify-between p-4">
-              <div>
-                <p className="text-2xl font-bold text-deep-600">{value}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-500">{label}</p>
-              </div>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}>
-                <Icon size={16} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><BookOpen size={14} /> Current Learning</CardTitle></CardHeader>
-          <CardContent>
+
+      {/* Current Learning + My Squad */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card data-tour="student-current-learning" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <CardTitle className="text-base font-bold text-gray-900">Current learning</CardTitle>
+              <p className="mt-0.5 text-xs text-gray-500">Pick up where you left off</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+              <Link to="/my-learning">
+                View curriculum
+                <ArrowRight size={13} className="ml-1.5" />
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-5">
             {!currentModule ? (
-              <p className="text-sm text-gray-500">No published modules are available for your cohort.</p>
+              <div className="rounded-lg border border-dashed border-gray-200 p-8 text-center">
+                <BookOpen size={24} className="mx-auto text-gray-400 mb-2" />
+                <p className="text-sm font-semibold text-gray-900">No published modules</p>
+                <p className="mt-1 text-xs text-gray-500">No active modules are published for your cohort at this time.</p>
+              </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-deep-600">{currentModule.title}</p>
-                    <p className="text-xs text-gray-500">{currentModule.stage} · Weeks {currentModule.week_start}-{currentModule.week_end}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{currentModule.title}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {currentModule.stage ? currentModule.stage.replace('_', ' ') : 'Foundations'} • Weeks {currentModule.week_start}-{currentModule.week_end}
+                    </p>
                   </div>
-                  <Badge variant="secondary">{currentCompleted}/{currentLessons.length} complete</Badge>
+                  <Badge variant="secondary" className="text-[11px] font-medium shrink-0 self-start sm:self-auto">
+                    {currentCompleted}/{currentLessons.length} lessons complete
+                  </Badge>
                 </div>
+
                 <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                  <div className="h-full rounded-full bg-brand-600" style={{ width: currentLessons.length ? (currentCompleted / currentLessons.length) * 100 : 0 }} />
+                  <div
+                    className="h-full rounded-full bg-deep-600 transition-all duration-300"
+                    style={{
+                      width: `${currentLessons.length ? (currentCompleted / currentLessons.length) * 100 : 0}%`,
+                    }}
+                  />
                 </div>
-                <Button size="sm" onClick={() => navigate('/my-learning')}>Continue learning</Button>
+
+                <div className="pt-2">
+                  <Button size="sm" onClick={() => navigate('/my-learning')} className="bg-deep-600 text-white hover:bg-deep-700">
+                    Continue learning
+                    <ArrowRight size={13} className="ml-1.5" />
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Users size={14} /> My Squad</CardTitle></CardHeader>
-          <CardContent>
+
+        {/* Squad Card */}
+        <Card data-tour="student-squad" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <CardTitle className="text-base font-bold text-gray-900">My squad</CardTitle>
+              <p className="mt-0.5 text-xs text-gray-500">Team collaboration unit</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+              <Link to="/my-squad">View squad</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-5 space-y-3">
             {data.squad ? (
               <div className="space-y-3">
-                <p className="font-medium text-deep-600">{data.squad.name}</p>
-                {data.members.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between text-xs">
-                    <span>{member.name}</span>
-                    <Badge variant="outline">{member.track || 'Student'}</Badge>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-900">{data.squad.name}</p>
+                  <span className="text-[11px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                    {data.members.length} members
+                  </span>
+                </div>
+                <div className="divide-y divide-gray-100 pt-1">
+                  {data.members.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between py-2 text-xs first:pt-0 last:pb-0">
+                      <span className="font-medium text-gray-800">{member.name}</span>
+                      <Badge variant="outline" className="text-[10px] font-normal capitalize">
+                        {member.track || 'Student'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
+                <Users size={22} className="mx-auto text-gray-400 mb-1.5" />
+                <p className="text-sm font-medium text-gray-900">No squad assigned</p>
+                <p className="mt-1 text-xs text-gray-500">You will be placed in a collaborative squad soon.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Deadlines & Recent Activity Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card data-tour="student-deadlines" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <CardTitle className="text-base font-bold text-gray-900">Upcoming deadlines</CardTitle>
+              <p className="mt-0.5 text-xs text-gray-500">Module milestones and schedules</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+              <Link to="/my-learning">All modules</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-5 space-y-3">
+            {data.modules.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
+                <Calendar size={22} className="mx-auto text-gray-400 mb-1.5" />
+                <p className="text-sm font-medium text-gray-900">No upcoming deadlines</p>
+                <p className="mt-1 text-xs text-gray-500">Check back as new cohorts and modules launch.</p>
+              </div>
+            ) : (
+              data.modules.slice(0, 5).map((module) => (
+                <div key={module.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{module.title}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Weeks {module.week_start}-{module.week_end} • {module.stage ? module.stage.replace('_', ' ') : 'Foundations'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium">
+                      {module.is_published ? 'Published' : 'Draft'}
+                    </Badge>
+                    <Button size="sm" variant="outline" onClick={() => navigate('/my-learning')} className="h-8 px-2.5 text-xs border-gray-200">
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <CardTitle className="text-base font-bold text-gray-900">Recent activity</CardTitle>
+              <p className="mt-0.5 text-xs text-gray-500">Completed lessons and lab submissions</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+              <Link to="/progress">View history</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-5">
+            {data.progress.length === 0 && data.submissions.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
+                <CheckCircle size={22} className="mx-auto text-gray-400 mb-1.5" />
+                <p className="text-sm font-medium text-gray-900">No activity yet</p>
+                <p className="mt-1 text-xs text-gray-500">Completed lessons and graded submissions will show here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {data.progress.filter((item) => item.is_completed).slice(0, 3).map((item) => (
+                  <div key={`lesson-${item.lesson_id}`} className="flex items-center justify-between py-2.5 text-xs first:pt-0">
+                    <span className="font-medium text-gray-800">Lesson completed</span>
+                    <span className="text-gray-500">{new Date(item.completed_at || item.updated_at).toLocaleDateString()}</span>
+                  </div>
+                ))}
+                {data.submissions.slice(0, 3).map((item) => (
+                  <div key={`submission-${item.lab_id || item.assessment_id}-${item.submitted_at}`} className="flex items-center justify-between py-2.5 text-xs last:pb-0">
+                    <span className="font-medium text-gray-800 capitalize">Submission {item.status}</span>
+                    <span className="text-gray-500">{new Date(item.submitted_at).toLocaleDateString()}</span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-gray-500">You have not been assigned to a squad yet.</p>
             )}
           </CardContent>
         </Card>
       </div>
-      <Card className="mt-6">
-        <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><CheckCircle size={14} /> Recent activity</CardTitle></CardHeader>
-        <CardContent>
-          {data.progress.length === 0 && data.submissions.length === 0 ? (
-            <p className="text-sm text-gray-500">Your learning activity will appear here as you complete lessons and submit work.</p>
-          ) : (
-            <div className="space-y-2">
-              {data.progress.filter((item) => item.is_completed).slice(0, 5).map((item) => (
-                <div key={`lesson-${item.lesson_id}`} className="flex justify-between text-xs">
-                  <span>Lesson completed</span>
-                  <span className="text-gray-500">{new Date(item.completed_at || item.updated_at).toLocaleDateString()}</span>
-                </div>
-              ))}
-              {data.submissions.slice(0, 5).map((item) => (
-                <div key={`submission-${item.lab_id || item.assessment_id}-${item.submitted_at}`} className="flex justify-between text-xs">
-                  <span>Submission {item.status}</span>
-                  <span className="text-gray-500">{new Date(item.submitted_at).toLocaleDateString()}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      <Card className="mt-6">
-        <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Calendar size={14} /> Upcoming Deadlines</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {data.modules.length === 0 ? (
-            <p className="text-sm text-gray-500">No upcoming deadlines.</p>
-          ) : (
-            data.modules.slice(0, 5).map((module) => (
-              <div key={module.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-deep-600">{module.title}</p>
-                  <p className="text-xs text-gray-500">{module.week} · {module.stage}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={module.is_published ? 'secondary' : 'outline'}>{module.is_published ? 'Published' : 'Draft'}</Badge>
-                  <Button size="sm" variant="outline" onClick={() => navigate('/my-learning')}>View</Button>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-      <WelcomeGuide role="Student" />
+
+      <WelcomeGuide
+        role="Student"
+        forceOpen={tourOpen}
+        onClose={() => setTourOpen(false)}
+      />
     </div>
   )
+}
+
+StudentDashboard.propTypes = {
+  user: PropTypes.object,
 }

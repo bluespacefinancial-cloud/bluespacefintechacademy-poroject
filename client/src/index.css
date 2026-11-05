@@ -191,14 +191,14 @@
   }
 
   .form-label {
-    @apply block font-semibold uppercase tracking-wider;
+    @apply block font-semibold normal-case tracking-normal;
     font-size: 12px;
-    color: #3b82f6;
+    color: #0f172a;
   }
 
   .form-input {
     @apply flex w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-sm text-deep-600 placeholder:text-gray-400;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-1;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
     transition-property: border-color, box-shadow;
     transition-timing-function: var(--ease-out);
@@ -211,7 +211,7 @@
 
   .form-select {
     @apply flex w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-sm text-deep-600 placeholder:text-gray-400;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-1;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
     transition-property: border-color, box-shadow;
     transition-timing-function: var(--ease-out);

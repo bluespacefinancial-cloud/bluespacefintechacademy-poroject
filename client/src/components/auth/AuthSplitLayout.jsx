@@ -36,7 +36,7 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease, delay: 0.2 }}
-            className="text-sm leading-relaxed text-blue-100"
+            className="text-sm leading-relaxed text-white/90"
           >
             {description}
           </motion.p>

@@ -181,8 +181,8 @@ export default function Login() {
                   <CardContent>
                     <form onSubmit={handleForceChange} className="space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                          New Password
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
+                          New password
                         </label>
                         <div className="relative">
                           <input
@@ -193,7 +193,7 @@ export default function Login() {
                             placeholder="Create a new password"
                             required
                             minLength={4}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           />
                           <button
                             type="button"
@@ -205,8 +205,8 @@ export default function Login() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                          Confirm New Password
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
+                          Confirm New password
                         </label>
                         <input
                           type="password"
@@ -215,10 +215,10 @@ export default function Login() {
                           autoComplete="new-password"
                           placeholder="Enter your new password again"
                           required
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </div>
-                      <Button type="submit" className="w-full" disabled={changing}>
+                      <Button type="submit" className="w-full bg-deep-600 text-white hover:bg-deep-700" disabled={changing}>
                         {changing ? (
                           <span className="flex items-center gap-2">
                             <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -251,7 +251,7 @@ export default function Login() {
                   <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
                           Email
                         </label>
                         <Input
@@ -264,7 +264,7 @@ export default function Login() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
                           Password
                         </label>
                         <div className="relative">
@@ -275,7 +275,7 @@ export default function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             required
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
                           />
                           <button
                             type="button"
@@ -288,7 +288,7 @@ export default function Login() {
                       </div>
 
                       <div className="pt-2">
-                        <Button type="submit" className="w-full" disabled={loading}>
+                        <Button type="submit" className="w-full bg-deep-600 text-white hover:bg-deep-700" disabled={loading}>
                           {loading ? (
                             <span className="flex items-center gap-2">
                               <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -304,7 +304,7 @@ export default function Login() {
                       </div>
                     </form>
                     <p className="mt-5 text-center text-xs text-gray-500">
-                      Need an account? <Link to="/register" className="font-semibold text-brand-600 hover:underline">Submit an application</Link>
+                      Need an account? <Link to="/register" className="font-semibold text-deep-700 hover:underline">Submit an application</Link>
                     </p>
                   </CardContent>
                 </Card>

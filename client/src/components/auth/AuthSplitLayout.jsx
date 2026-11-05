@@ -15,15 +15,15 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
           onError={(event) => { event.currentTarget.style.display = 'none' }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-900/85 via-deep-800/75 to-brand-900/75" />
+        <motion.img
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease }}
+          src="/logo-white.png"
+          alt="BlueSPACE Fintech Academy"
+          className="absolute left-8 top-8 z-20 h-12 w-auto"
+        />
         <div className="relative z-10 max-w-lg px-12 text-center">
-          <motion.img
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease }}
-            src="/logo-white.png"
-            alt="BlueSPACE Fintech Academy"
-            className="mx-auto mb-8 h-14 w-auto"
-          />
           <motion.h1
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -42,7 +42,12 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
           </motion.p>
         </div>
       </aside>
-      <main className="flex min-h-screen w-full flex-col lg:w-1/2">
+      <main className="relative flex min-h-screen w-full flex-col lg:w-1/2">
+        <img
+          src="/logo-dark.png"
+          alt="BlueSPACE Fintech Academy"
+          className="absolute left-6 top-6 z-20 h-9 w-auto lg:hidden"
+        />
         {children}
       </main>
     </div>

@@ -1,17 +1,27 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, Clock, Users, Award } from 'lucide.react'
+import { BarChart3, Clock, Award, FileText } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 const DOMAIN_COLORS = {
   FaaS: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', fill: 'bg-indigo-500' },
   FinCore: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', fill: 'bg-emerald-500' },
   FinOps: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-500' },
   FinInfra: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-500' },
+  General: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', fill: 'bg-gray-500' },
 }
 
+const STAGES = [
+  { key: 'foundations', label: 'Foundations', weeks: 'Weeks 1–4' },
+  { key: 'domain_immersion', label: 'Domain Immersion', weeks: 'Weeks 5–8' },
+  { key: 'live_projects', label: 'Live Projects', weeks: 'Weeks 9–12' },
+  { key: 'certification', label: 'Certification', weeks: 'Weeks 13–16' },
+]
+
 export default function Progress() {
+  const { user } = useAuth()
   const [domains, setDomains] = useState([])
   const [stages, setStages] = useState([])
   const [statCards, setStatCards] = useState([])
@@ -19,19 +29,24 @@ export default function Progress() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [user?.id])
 
   const loadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user?.id) { setLoading(false); return }
+
+      const { data: enrolments } = await supabase.from('enrolments').select('cohort_id, track').eq('user_id', user.id).in('status', ['enrolled', 'active'])
+      const cohortIds = [...new Set((enrolments || []).map((enrolment) => enrolment.cohort_id))]
+      if (!cohortIds.length) { setLoading(false); return }
 
       const { data: modules } = await supabase
         .from('modules')
         .select('*')
+        .in('cohort_id', cohortIds)
 
       const moduleIds = modules?.map(m => m.id) || []
 
+      if (!moduleIds.length) { setLoading(false); return }
       const { data: lessons } = await supabase
         .from('lessons')
         .select('*')
@@ -39,15 +54,16 @@ export default function Progress() {
 
       const lessonIds = lessons?.map(l => l.id) || []
 
-      const { data: progress } = await supabase
+      const { data: progress } = lessonIds.length ? await supabase
         .from('lesson_progress')
         .select('*')
         .eq('user_id', user.id)
-        .in('lesson_id', lessonIds)
+        .in('lesson_id', lessonIds) : { data: [] }
 
+      const moduleById = Object.fromEntries((modules || []).map((module) => [module.id, module]))
       const domainMap = {}
       lessons?.forEach(l => {
-        const domain = l.domain || 'General'
+        const domain = moduleById[l.module_id]?.domain || 'General'
         if (!domainMap[domain]) {
           domainMap[domain] = { total: 0, completed: 0 }
         }
@@ -92,14 +108,24 @@ export default function Progress() {
       const totalLessons = lessons?.length || 0
       const completedLessons = progress?.filter(p => p.is_completed).length || 0
       const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+      const [{ data: attendance }, { data: gradedWork }] = await Promise.all([
+        supabase.from('live_class_attendance').select('status').eq('user_id', user.id),
+        supabase.from('submissions').select('score').eq('user_id', user.id).eq('status', 'graded').not('score', 'is', null),
+      ])
+      const attendanceRate = attendance?.length
+        ? Math.round((attendance.filter((item) => item.status === 'attended').length / attendance.length) * 100)
+        : 0
+      const currentGrade = gradedWork?.length
+        ? `${Math.round(gradedWork.reduce((total, item) => total + item.score, 0) / gradedWork.length)}%`
+        : '—'
 
       setDomains(domainsData)
       setStages(stagesData)
       setStatCards([
         { label: 'Overall Completion', value: `${overallCompletion}%`, icon: BarChart3, color: 'bg-brand-500' },
-        { label: 'Attendance', value: '94%', icon: Clock, color: 'bg-emerald-500' },
+        { label: 'Attendance', value: `${attendanceRate}%`, icon: Clock, color: 'bg-emerald-500' },
         { label: 'Labs Complete', value: `${completedLessons}/${totalLessons}`, icon: FileText, color: 'bg-amber-500' },
-        { label: 'Current Grade', value: '86%', icon: Award, color: 'bg-slate-500' },
+        { label: 'Current Grade', value: currentGrade, icon: Award, color: 'bg-slate-500' },
       ])
       setLoading(false)
     } catch (err) {
@@ -190,7 +216,7 @@ export default function Progress() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {stages.map((stage) => (
+              {stages.map((stage, i) => (
                 <div key={stage.key} className="flex flex-col gap-2 relative">
                   {i > 0 && (
                     <div className="absolute -top-1 left-0 w-full h-[2px] bg-gray-200" />

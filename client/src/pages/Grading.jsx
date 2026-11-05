@@ -1,152 +1,92 @@
-import { useState } from 'react'
-import { BarChart3 } from 'lucide.react'
-import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
+import { useCallback, useEffect, useState } from 'react'
+import { CheckCircle, ClipboardList, Save } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { supabase } from '../lib/supabase'
 
-const ASSESSMENT_COMPONENTS = [
-  { key: 'attendance', label: 'Attendance & Participation', weight: '10%' },
-  { key: 'labs', label: 'Domain Labs & Assessments', weight: '25%' },
-  { key: 'project', label: 'Live Project Contribution', weight: '40%' },
-  { key: 'capstone', label: 'Capstone & Panel Review', weight: '25%' },
-]
-
-const MOCK_STUDENTS = [
-  { id: 1, name: 'Ada Okonkwo', track: 'Finsoft', squad: 'Squad Alpha', attendance: 95, labs: 82, project: 88, capstone: null, status: 'in_progress' },
-  { id: 2, name: 'Kwame Asante', track: 'Finsoft', squad: 'Squad Alpha', attendance: 92, labs: 87, project: 91, capstone: null, status: 'in_progress' },
-  { id: 3, name: 'Zainab Yusuf', track: 'Finsoft', squad: 'Squad Alpha', attendance: 88, labs: 76, project: 79, capstone: null, status: 'at_risk' },
-  { id: 4, name: 'Emeka Ndiaye', track: 'Finops', squad: 'Squad Alpha', attendance: 96, labs: 90, project: 85, capstone: null, status: 'in_progress' },
-  { id: 5, name: 'Fatima Diallo', track: 'Finops', squad: 'Squad Alpha', attendance: 90, labs: 84, project: 82, capstone: null, status: 'in_progress' },
-]
-
 export default function Grading() {
-  const [selectedStudent, setSelectedStudent] = useState(null)
-  const [grades, setGrades] = useState({})
+  const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const [submissions, setSubmissions] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [score, setScore] = useState('')
+  const [feedback, setFeedback] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
-  const student = selectedStudent ? MOCK_STUDENTS.find((s) => s.id === selectedStudent) : null
-  const finalGrade = student && grades.attendance && grades.labs && grades.project && grades.capstone
-    ? (
-        (parseFloat(grades.attendance) * 0.1 +
-          parseFloat(grades.labs) * 0.25 +
-          parseFloat(grades.project) * 0.4 +
-          parseFloat(grades.capstone) * 0.25
-        ).toFixed(1)
-      )
-    : null
+  const loadSubmissions = useCallback(async () => {
+    const { data, error: loadError } = await supabase
+      .from('submissions')
+      .select('id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at, labs(title, max_score), assessments(title, max_score), users(name, email)')
+      .in('status', ['submitted', 'graded', 'remediation'])
+      .order('submitted_at', { ascending: false })
+    if (loadError) throw loadError
+    const rows = data || []
+    setSubmissions(rows)
+    const requestedId = Number(searchParams.get('submission'))
+    const current = rows.find((row) => row.id === requestedId) || rows[0] || null
+    setSelected(current)
+    setScore(current?.score === null || current?.score === undefined ? '' : String(current.score))
+    setFeedback(current?.feedback || '')
+  }, [searchParams])
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-deep-600 mb-1">Grading Console</h1>
-        <p className="text-sm text-gray-500">Record assessment scores and calculate final grades</p>
-      </div>
+  useEffect(() => {
+    let mounted = true
+    Promise.resolve().then(loadSubmissions).catch((loadError) => mounted && setError(loadError.message || 'Unable to load submissions.')).finally(() => mounted && setLoading(false))
+    return () => { mounted = false }
+  }, [loadSubmissions])
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-bold">Students</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 p-3">
-              {MOCK_STUDENTS.map((s) => {
-                const isSelected = selectedStudent === s.id
-                return (
-                  <div
-                    key={s.id}
-                    onClick={() => setSelectedStudent(s.id)}
-                    className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-colors ${
-                      isSelected ? 'bg-brand-50 border-brand-200' : 'bg-white border-gray-100 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-deep-600 truncate">{s.name}</p>
-                      <p className="text-[10px] text-gray-500 truncate">{s.track} · {s.squad}</p>
-                    </div>
-                    <Badge variant={s.status === 'at_risk' ? 'outline' : 'secondary'} className="text-[10px]">
-                      {s.status === 'at_risk' ? 'At Risk' : 'Active'}
-                    </Badge>
-                  </div>
-                )
-              })}
-            </CardContent>
-          </Card>
-        </div>
+  function choose(submission) {
+    setSelected(submission)
+    setScore(submission.score === null || submission.score === undefined ? '' : String(submission.score))
+    setFeedback(submission.feedback || '')
+    setMessage('')
+    setError('')
+  }
 
-        {selectedStudent && student && (
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Grade: {student.name}</CardTitle>
-                <Badge variant="secondary">{student.track} · {student.squad}</Badge>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {ASSESSMENT_COMPONENTS.map((component) => (
-                    <div key={component.key} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
-                      <div>
-                        <p className="text-xs font-medium text-deep-600">{component.label}</p>
-                        <p className="text-[10px] text-gray-500">Weight: {component.weight}</p>
-                      </div>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={grades[component.key] || ''}
-                        onChange={(e) => setGrades({ ...grades, [component.key]: e.target.value })}
-                        placeholder="0-100"
-                        className="w-[80px]"
-                      />
-                    </div>
-                  ))}
-                </div>
-                {finalGrade !== null && (
-                  <div className="mt-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-deep-600">Final Grade</span>
-                      <span className="text-sm font-bold text-brand-600">{finalGrade}</span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-end pt-4">
-                <Button variant="outline" onClick={() => setGrades({})}>
-                  Reset
-                </Button>
-                <Button onClick={() => alert('Grades saved!')}>Save Grades</Button>
-              </CardFooter>
-            </Card>
-          </div>
-        )}
-      </div>
+  async function saveGrade(status) {
+    if (!selected) return
+    const numericScore = Number(score)
+    const maxScore = selected.labs?.max_score || selected.assessments?.max_score || 100
+    if (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > maxScore) {
+      setError(`Enter a score between 0 and ${maxScore}.`)
+      return
+    }
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const { data, error: updateError } = await supabase.from('submissions').update({
+        score: numericScore,
+        feedback: feedback.trim() || null,
+        status,
+        graded_by: user.id,
+        graded_at: new Date().toISOString(),
+      }).eq('id', selected.id).select('id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at, labs(title, max_score), assessments(title, max_score), users(name, email)').single()
+      if (updateError) throw updateError
+      setSubmissions((previous) => previous.map((row) => row.id === data.id ? data : row))
+      setSelected(data)
+      setMessage(status === 'graded' ? 'Grade saved.' : 'Remediation requested.')
+    } catch (saveError) {
+      setError(saveError.message || 'Unable to save this grade.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
-      <div className="mt-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <BarChart3 size={14} className="mr-1.5" />
-              Assessment Weights (per Academy Framework)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {ASSESSMENT_COMPONENTS.map((component) => (
-              <div key={component.key} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-full bg-brand-100 flex items-center justify-center">
-                    <BarChart3 size={12} className="text-brand-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-deep-600">{component.label}</p>
-                    <p className="text-[10px] text-gray-500">Component of final grade</p>
-                  </div>
-                </div>
-                <Badge className="bg-brand-50 text-brand-700 border-brand-100">{component.weight}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
+  const title = (item) => item.labs?.title || item.assessments?.title || 'Submission'
+  return <div className="min-h-screen bg-gray-50">
+    <div className="mb-6"><h1 className="text-2xl font-bold text-deep-600">Grading Console</h1><p className="mt-1 text-sm text-gray-500">Review student work and record scores and feedback.</p></div>
+    {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}{message && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+    {loading ? <p className="py-12 text-center text-sm text-gray-500">Loading submissions…</p> : <div className="grid gap-5 lg:grid-cols-3">
+      <Card><CardHeader><CardTitle className="text-sm">Submissions ({submissions.length})</CardTitle></CardHeader><CardContent className="space-y-2">{submissions.length === 0 ? <p className="text-sm text-gray-500">No submissions are ready for review.</p> : submissions.map((item) => <button key={item.id} type="button" onClick={() => choose(item)} className={`w-full rounded-md border p-3 text-left ${selected?.id === item.id ? 'border-brand-300 bg-brand-50' : 'border-gray-100 hover:bg-gray-50'}`}><span className="block text-sm font-medium text-deep-600">{title(item)}</span><span className="mt-1 block text-xs text-gray-500">{item.users?.name || item.users?.email || 'Student'}</span><Badge variant="outline" className="mt-2">{item.status}</Badge></button>)}</CardContent></Card>
+      <Card className="lg:col-span-2"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><ClipboardList size={16} />{selected ? title(selected) : 'Select a submission'}</CardTitle></CardHeader><CardContent>{selected ? <div className="space-y-4"><p className="text-sm text-gray-600">Submitted by {selected.users?.name || selected.users?.email || 'Student'}</p>{selected.content_url && <a href={selected.content_url} target="_blank" rel="noreferrer" className="break-all text-sm text-brand-700 underline">Open submitted work</a>}<Input type="number" min="0" max={selected.labs?.max_score || selected.assessments?.max_score || 100} value={score} onChange={(event) => setScore(event.target.value)} placeholder="Score" aria-label="Score" /><textarea rows={5} value={feedback} onChange={(event) => setFeedback(event.target.value)} className="w-full rounded-md border p-3 text-sm" placeholder="Feedback for the student" aria-label="Feedback" /><div className="flex flex-wrap gap-2"><Button disabled={saving} onClick={() => saveGrade('graded')}><Save size={14} className="mr-2" />{saving ? 'Saving…' : 'Save grade'}</Button><Button variant="outline" disabled={saving} onClick={() => saveGrade('remediation')}><CheckCircle size={14} className="mr-2" />Request remediation</Button></div></div> : <p className="py-12 text-center text-sm text-gray-500">Select a submission to review.</p>}</CardContent></Card>
+    </div>}
+  </div>
 }

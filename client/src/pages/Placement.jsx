@@ -1,7 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { MapPin, Users, Clock, FileText, Search, Target } from 'lucide.react'
-import { Button } from '../components/ui/button'
+import { useEffect, useMemo, useState } from 'react'
+import { Search } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
@@ -19,96 +17,48 @@ const PLACEMENT_STATUS = {
   matched: { label: 'Matched', variant: 'secondary', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
   interviewing: { label: 'Interviewing', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
   placed: { label: 'Placed', variant: 'secondary', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  pending: { label: 'Pending Match', variant: 'outline', color: 'bg-gray-50 text-gray-600 border-gray-100' },
+  completed: { label: 'Completed', variant: 'outline', color: 'bg-gray-50 text-gray-600 border-gray-100' },
 }
 
-const MOCK_PLACEMENTS = [
-  {
-    id: 1,
-    fellow: 'Ada Okonkwo',
-    track: 'Finsoft',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Technical Specialist',
-    project: 'FinCore Ledger Integration',
-    status: 'matched',
-    matchScore: 92,
-    startDate: '2027-04-16',
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 2,
-    fellow: 'Kwame Asante',
-    track: 'Finsoft',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Project Manager',
-    project: 'FaaS Partner API Onboarding',
-    status: 'interviewing',
-    matchScore: 88,
-    startDate: null,
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 3,
-    fellow: 'Emeka Ndiaye',
-    track: 'Finops',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Field Lead',
-    project: 'FinOps Automated Reconciliation',
-    status: 'placed',
-    matchScore: 85,
-    startDate: '2027-04-16',
-    checkin30: true,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 4,
-    fellow: 'Fatima Diallo',
-    track: 'Finops',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'UAT',
-    project: 'FinOps Reconciliation Testing',
-    status: 'matched',
-    matchScore: 81,
-    startDate: '2027-04-16',
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-  {
-    id: 5,
-    fellow: 'Zainab Yusuf',
-    track: 'Finsoft',
-    cohort: 'Cohort 1 - December 2026',
-    role: 'Technical Specialist',
-    project: null,
-    status: 'pending',
-    matchScore: null,
-    startDate: null,
-    checkin30: false,
-    checkin60: false,
-    checkin90: false,
-  },
-]
-
 export default function Placement() {
-  const navigate = useNavigate()
+  const [placements, setPlacements] = useState([])
   const [search, setSearch] = useState('')
   const [filterTrack, setFilterTrack] = useState('all')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const filtered = MOCK_PLACEMENTS.filter((p) => {
+  useEffect(() => {
+    let mounted = true
+    supabase.from('placements').select('id, user_id, role, project_id, start_date, status, checkin_30_days, checkin_60_days, checkin_90_days, users(name, email), certifications(track, cohort_id, cohorts(name))').order('created_at', { ascending: false })
+      .then(({ data, error: loadError }) => {
+        if (!mounted) return
+        if (loadError) setError(loadError.message)
+        else setPlacements((data || []).map((row) => ({
+          ...row,
+          name: row.users?.name || row.users?.email || 'Fellow',
+          track: row.certifications?.track || 'Unassigned',
+          cohort: row.certifications?.cohorts?.name || 'Cohort unavailable',
+          project: row.project_id,
+          startDate: row.start_date,
+          checkin30: Boolean(row.checkin_30_days),
+          checkin60: Boolean(row.checkin_60_days),
+          checkin90: Boolean(row.checkin_90_days),
+        })))
+        setLoading(false)
+      })
+      .catch((loadError) => { if (mounted) { setError(loadError.message || 'Unable to load placements.'); setLoading(false) } })
+    return () => { mounted = false }
+  }, [])
+
+  const filtered = useMemo(() => placements.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
     const matchesTrack = filterTrack === 'all' || p.track === filterTrack
     const matchesStatus = filterStatus === 'all' || p.status === filterStatus
     const matchesRole = filterRole === 'all' || p.role === filterRole
     return matchesSearch && matchesTrack && matchesStatus && matchesRole
-  })
+  }), [placements, search, filterTrack, filterStatus, filterRole])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,10 +70,6 @@ export default function Placement() {
               Match certified Fellows to project roles and track placements
             </p>
           </div>
-          <Button>
-            <Target size={16} className="mr-2" />
-            New Match
-          </Button>
         </div>
       </div>
 
@@ -176,7 +122,7 @@ export default function Placement() {
               <SelectItem value="matched">Matched</SelectItem>
               <SelectItem value="interviewing">Interviewing</SelectItem>
               <SelectItem value="placed">Placed</SelectItem>
-              <SelectItem value="pending">Pending Match</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -185,14 +131,14 @@ export default function Placement() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Fellows</p>
+            <p className="text-2xl font-bold text-deep-600">{placements.length}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Placements</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_PLACEMENTS.filter((p) => p.status === 'placed').length}
+              {placements.filter((p) => p.status === 'placed').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Placed</p>
           </CardContent>
@@ -200,21 +146,24 @@ export default function Placement() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-deep-600">
-              {MOCK_PLACEMENTS.filter((p) => p.status === 'matched').length}
+              {placements.filter((p) => p.status === 'matched').length}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Matched</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{MOCK_PLACEMENTS.filter((p) => p.checkin30).length}</p>
+            <p className="text-2xl font-bold text-deep-600">{placements.filter((p) => p.checkin30).length}</p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">30-Day Check-ins</p>
           </CardContent>
         </Card>
       </div>
 
+      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {loading && <p className="py-6 text-center text-sm text-gray-500">Loading placements…</p>}
+
       <div className="space-y-3">
-        {filtered.length === 0 ? (
+        {!loading && filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <Search size={32} className="mx-auto mb-3 opacity-50" />
             <p>No placements found</p>
@@ -226,7 +175,6 @@ export default function Placement() {
               <Card
                 key={placement.id}
                 className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-                onClick={() => navigate(`/placement/${placement.id}`)}
               >
                 <CardHeader className="flex flex-row items-center justify-between py-3">
                   <div className="flex items-center gap-3">
@@ -255,10 +203,6 @@ export default function Placement() {
                       <span className="text-xs text-gray-600">{placement.project || 'Unassigned'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Match Score</span>
-                      <span className="text-xs text-gray-600">{placement.matchScore || 'N/A'}%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-deep-600">Start Date</span>
                       <span className="text-xs text-gray-600">{placement.startDate || 'TBD'}</span>
                     </div>
@@ -273,14 +217,12 @@ export default function Placement() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex items-center justify-between pt-3">
-                  <Button variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/placement/${placement.id}`) }}>
-                    Manage
-                  </Button>
+                  <Badge variant="outline">{placement.status}</Badge>
                 </CardFooter>
               </Card>
-            )}
-          )}
-        </div>
+            )
+          })
+        )}
       </div>
     </div>
   )

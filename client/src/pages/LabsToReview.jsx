@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Users, Search } from 'lucide.react'
+import { FileText } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -42,8 +42,9 @@ export default function LabsToReview() {
         .from('submissions')
         .select(`
           *,
-          labs (title),
-          users (id, name, email)
+          labs (title, lessons (module_id, modules (title, domain))),
+          users (id, name, email),
+          squads (name)
         `)
         .order('submitted_at', { ascending: false })
 
@@ -62,11 +63,11 @@ export default function LabsToReview() {
       const labsData = (data || []).map((submission) => ({
         id: submission.id,
         title: submission.labs?.title || 'Untitled Lab',
-        domain: 'General',
-        module: 'Unknown Module',
+        domain: submission.labs?.lessons?.modules?.domain || 'General',
+        module: submission.labs?.lessons?.modules?.title || 'Unknown Module',
         student: submission.users?.name || 'Unknown Student',
         track: trackMap[submission.user_id] || 'Unknown',
-        squad: submission.squad_id ? 'Squad Alpha' : 'Unassigned',
+        squad: submission.squads?.name || 'Unassigned',
         status: submission.status,
         submittedAt: submission.submitted_at,
         score: submission.score,
@@ -166,7 +167,7 @@ export default function LabsToReview() {
         </Card>
       </div>
 
-      <div className="space-y-3">
+      {loading ? <p className="py-10 text-center text-sm text-gray-500">Loading submissions…</p> : <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <FileText size={32} className="mx-auto mb-3 opacity-50" />
@@ -177,7 +178,7 @@ export default function LabsToReview() {
             <Card
               key={lab.id}
               className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-              onClick={() => navigate(`/labs/${lab.id}/review`)}
+              onClick={() => navigate(`/grading?submission=${lab.id}`)}
             >
               <CardHeader className="flex flex-row items-center justify-between py-3">
                 <div className="flex items-center gap-3">
@@ -223,14 +224,14 @@ export default function LabsToReview() {
                 <Badge variant={statusConfig(lab.status).variant} className={statusConfig(lab.status).color}>
                   {statusConfig(lab.status).label}
                 </Badge>
-                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/labs/${lab.id}/review`) }}>
+                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/grading?submission=${lab.id}`) }}>
                   Review
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+          ))
         )}
-      </div>
+      </div>}
     </div>
   )
 }

@@ -1,5 +1,13 @@
 import { supabase } from './supabase'
 
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+}[character]))
+
 export const emailService = {
   async sendEmail(to, subject, htmlContent, textContent) {
     try {
@@ -132,6 +140,22 @@ export const emailService = {
         </div>
       `,
       `You have been matched to role ${role} for project ${project}`
+    )
+  },
+
+  async sendApplicationStatusEmail(email, name, status, reason = '') {
+    const approved = status === 'approved'
+    const safeName = escapeHtml(name || 'applicant')
+    const safeReason = escapeHtml(reason)
+    const heading = approved ? 'Your application was approved' : 'Your application was not approved'
+    const message = approved
+      ? 'Your BlueSPACE Fintech Academy account is active. You can now sign in with the password you created.'
+      : (safeReason || 'Please contact the academy team if you would like more information.')
+    return this.sendEmail(
+      email,
+      `BlueSPACE application update: ${approved ? 'approved' : 'not approved'}`,
+      `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px"><h1 style="color:#152c4f">${heading}</h1><p>Hello ${safeName},</p><p>${message}</p><p>BlueSPACE Fintech Academy</p></div>`,
+      `Hello ${name || 'applicant'}, ${heading}. ${approved ? 'Your account is active. You can now sign in.' : (reason || 'Please contact the academy team for more information.')}`,
     )
   },
 }

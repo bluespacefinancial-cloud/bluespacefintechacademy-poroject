@@ -1,6 +1,7 @@
 -- =============================================================
 -- BlueSPACE Fintech Academy LMS: Seed Data
--- Run this AFTER schema.sql in the Supabase SQL Editor
+-- Run this AFTER the latest schema migrations. Migration 013 is required for
+-- the shared "All" track used by the foundation modules below.
 -- =============================================================
 
 -- 1. Insert test users

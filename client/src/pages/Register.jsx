@@ -69,7 +69,7 @@ export default function Register() {
     }
     setLoading(true)
     try {
-      const { error } = await supabase.functions.invoke('auth-handler', {
+      const { data, error } = await supabase.functions.invoke('auth-handler', {
         body: {
           action: 'apply',
           email: form.email.trim().toLowerCase(),
@@ -83,8 +83,13 @@ export default function Register() {
         },
       })
       if (error) throw error
-      toast.success('Application submitted. The academy team will review it shortly.')
-      navigate('/student-login', { replace: true })
+      toast.success(data?.emailConfirmationRequired
+        ? 'Application received. Check your email to verify your address.'
+        : 'Application submitted. The academy team will review it shortly.')
+      navigate('/student-login?pendingVerification=1', {
+        replace: true,
+        state: { registeredEmail: form.email.trim().toLowerCase() },
+      })
     } catch (error) {
       toast.error(error.message || 'Unable to submit application')
     } finally {

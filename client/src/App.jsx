@@ -49,6 +49,17 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import MarketingHome from './pages/MarketingHome'
 
+function Placeholder({ title }) {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12">
+      <div className="text-center">
+        <h2 className="text-xl font-medium text-deep-600 mb-2">{title}</h2>
+        <p className="text-sm text-gray-500">This section is coming soon.</p>
+      </div>
+    </div>
+  )
+}
+
 function RootRoute({ user }) {
   const location = useLocation()
   if (user) return <AppLayout />
@@ -122,6 +133,14 @@ export default function App() {
         <Route path="curriculum" element={<ProtectedRoute roles={['Administrator']}><Curriculum /></ProtectedRoute>} />
         <Route path="placement" element={<ProtectedRoute roles={['Administrator']}><Placement /></ProtectedRoute>} />
         <Route path="reports" element={<ProtectedRoute roles={['Administrator']}><Reports /></ProtectedRoute>} />
+        <Route path="cohorts/create" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Create Cohort" /></ProtectedRoute>} />
+        <Route path="cohorts/:cohortId/edit" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Edit Cohort" /></ProtectedRoute>} />
+        <Route path="curriculum/create" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Create Module" /></ProtectedRoute>} />
+        <Route path="curriculum/:moduleId/edit" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Edit Module" /></ProtectedRoute>} />
+        <Route path="enrolments/create" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Add Trainee" /></ProtectedRoute>} />
+        <Route path="enrolments/:enrolmentId/edit" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Edit Enrolment" /></ProtectedRoute>} />
+        <Route path="modules/create" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Create Module" /></ProtectedRoute>} />
+        <Route path="use-cases/create" element={<ProtectedRoute roles={['Administrator']}><Placeholder title="Create Use Case" /></ProtectedRoute>} />
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />

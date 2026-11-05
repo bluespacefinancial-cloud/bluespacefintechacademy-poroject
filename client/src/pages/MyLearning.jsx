@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Input } from '../components/ui/input'
 import { supabase } from '../lib/supabase'
 
 const STAGE_LABELS = {
@@ -15,7 +14,7 @@ const STAGE_LABELS = {
 }
 
 const LESSON_TYPE_COLORS = {
-  concept: 'bg-blue-50 text-blue-700 border-blue-200',
+  concept: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   demonstration: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   video: 'bg-brand-50 text-brand-700 border-brand-200',
   audio: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -38,7 +37,7 @@ export default function MyLearning() {
   const [loading, setLoading] = useState(true)
   const [progress, setProgress] = useState({})
   const [overallStats, setOverallStats] = useState({
-    overallCompletion: 0,
+    completion: 0,
     attendance: 0,
     labsComplete: 0,
     currentGrade: 0,
@@ -50,29 +49,24 @@ export default function MyLearning() {
 
   const loadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: user } = await supabase.auth.getUser()
       if (!user) return
-
       const { data: enrolments } = await supabase
         .from('enrolments')
         .select('cohort_id, track, squad_id')
         .eq('user_id', user.id)
         .eq('status', 'active')
-
       if (!enrolments || enrolments.length === 0) {
         setLoading(false)
         return
       }
-
       const enrolment = enrolments[0]
-
       const { data: modulesData } = await supabase
         .from('modules')
         .select('*')
         .eq('cohort_id', enrolment.cohort_id)
         .order('created_at', { ascending: true })
       setModules(modulesData || [])
-
       const moduleIds = modulesData?.map(m => m.id) || []
       if (moduleIds.length > 0) {
         const { data: lessonsData } = await supabase
@@ -81,23 +75,20 @@ export default function MyLearning() {
           .in('module_id', moduleIds)
           .order('order_index', { ascending: true })
         setLessons(lessonsData || [])
-
+        const lessonIds = lessonsData?.map(l => l.id) || []
         const { data: progressData } = await supabase
           .from('lesson_progress')
           .select('*')
           .eq('user_id', user.id)
           .in('lesson_id', lessonIds)
-
         const progressMap = {}
         progressData?.forEach(p => {
           progressMap[p.lesson_id] = p
         })
         setProgress(progressMap)
-
         const totalLessons = lessonsData.length
         const completedLessons = progressData?.filter(p => p.is_completed).length || 0
         const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
-
         setOverallStats({
           overallCompletion,
           attendance: 0,
@@ -105,7 +96,6 @@ export default function MyLearning() {
           currentGrade: 0,
         })
       }
-
       setActiveModuleId(modulesData?.[0]?.id || null)
       setLoading(false)
     } catch (err) {
@@ -125,7 +115,7 @@ export default function MyLearning() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+          <div className="h-8 w-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm text-gray-500">Loading your learning...</span>
         </div>
       </div>
@@ -159,7 +149,7 @@ export default function MyLearning() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-deep-600">{overallStats.overallCompletion}%</p>
+                <p className="text-2xl font-bold text-deep-600">{overallStats.completion}%</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Overall Completion</p>
               </div>
               <div className="h-8 w-8 rounded-full border-4 border-brand-600 border-t-transparent flex items-center justify-center">
@@ -172,7 +162,7 @@ export default function MyLearning() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-deep-600">{overallStats.lessonsComplete}</p>
+                <p className="text-2xl font-bold text-deep-600">{overallStats.labsComplete}</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Lessons Complete</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center">
@@ -220,16 +210,15 @@ export default function MyLearning() {
             const moduleCompleted = moduleLessonsCount > 0
               ? lessons.filter(l => l.module_id === module.id).filter(l => progress[l.id]?.is_completed).length
               : 0
-            const moduleStatus = moduleLessonsCount > 0 && moduleCompleted === moduleLessonsCount ? 'completed' :
-              moduleLessonsCount > 0 && moduleCompleted > 0 ? 'in_progress' : 'locked'
+            const moduleStatus = moduleLessonsCount > 0 && moduleCompleted === moduleLessonsCount ? 'completed' : moduleLessonsCount > 0 && moduleCompleted > 0 ? 'in_progress' : 'locked'
 
             return (
               <Card
                 key={module.id}
-                onClick={() => setActiveModuleId(module.id)}
                 className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
                   moduleStatus === 'locked' ? 'opacity-75 pointer-events-none' : ''
                 }`}
+                onClick={() => setActiveModuleId(module.id)}
               >
                 <CardHeader className="flex flex-row items-center justify-between py-3">
                   <div className="flex items-center gap-3">
@@ -245,17 +234,11 @@ export default function MyLearning() {
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-sm">{module.title}</CardTitle>
                       <CardDescription className="text-[10px]">
-                        {module.week} · {module.track} track
+                        {module.week} · {module.track}
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant={
-                    moduleStatus === 'completed'
-                      ? 'secondary'
-                        : moduleStatus === 'in_progress'
-                        ? 'default'
-                        : 'outline'
-                    }>
+                  <Badge variant={moduleStatus === 'completed' ? 'secondary' : moduleStatus === 'in_progress' ? 'default' : 'outline'}>
                     {STAGE_LABELS[module.stage]}
                     {module.domain && ` · ${module.domain}`}
                   </Badge>
@@ -270,10 +253,7 @@ export default function MyLearning() {
                     </Button>
                   </div>
                   <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-brand-600"
-                      style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }}
-                    />
+                    <div className="h-full rounded-full bg-brand-600" style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }} />
                   </div>
                 </CardContent>
               </Card>
@@ -299,7 +279,6 @@ export default function MyLearning() {
                 return (
                   <Card
                     key={lesson.id}
-                    onClick={() => handleLessonClick(lesson)}
                     className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
                       isCompleted ? 'border-brand-100 bg-brand-50' : ''
                     }`}
@@ -316,7 +295,7 @@ export default function MyLearning() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <CardTitle className="text-sm">{lesson.title}</CardTitle>
-                            <Badge className={LESSON_TYPE_COLORS[lesson.type]}>{LESSON_TYPE_LABELS[lesson.type]}</Badge>
+                            <Badge className={LESSON_TYPE_COLORS[lesson.type]}>{lesson.type}</Badge>
                           </div>
                           <p className="text-[10px] text-gray-500">{formatTime(lesson.duration_minutes)}</p>
                         </div>

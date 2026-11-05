@@ -12,7 +12,8 @@ export default function InstructorAssignments() {
   const [squads, setSquads] = useState([])
   const [cohortAssignments, setCohortAssignments] = useState([])
   const [squadAssignments, setSquadAssignments] = useState([])
-  const [instructorId, setInstructorId] = useState('')
+  const [cohortInstructorId, setCohortInstructorId] = useState('')
+  const [squadInstructorId, setSquadInstructorId] = useState('')
   const [cohortId, setCohortId] = useState('')
   const [squadId, setSquadId] = useState('')
   const [error, setError] = useState('')
@@ -66,15 +67,15 @@ export default function InstructorAssignments() {
     {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     <div className="grid gap-6 lg:grid-cols-2">
       <Card><CardHeader><CardTitle className="text-sm">Assign a cohort</CardTitle></CardHeader><CardContent className="space-y-3">
-        <Select value={instructorId} onValueChange={setInstructorId}><SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger><SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent></Select>
+        <Select value={cohortInstructorId} onValueChange={setCohortInstructorId}><SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger><SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent></Select>
         <Select value={cohortId} onValueChange={setCohortId}><SelectTrigger><SelectValue placeholder="Select cohort" /></SelectTrigger><SelectContent>{cohorts.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}</SelectContent></Select>
-        <Button onClick={() => addAssignment('instructor_cohort_assignments', { instructor_id: Number(instructorId), cohort_id: Number(cohortId) }, () => { setInstructorId(''); setCohortId('') })}>Add cohort assignment</Button>
+        <Button onClick={() => addAssignment('instructor_cohort_assignments', { instructor_id: Number(cohortInstructorId), cohort_id: Number(cohortId) }, () => { setCohortInstructorId(''); setCohortId('') })}>Add cohort assignment</Button>
         <div className="space-y-2 pt-3">{cohortAssignments.map((item) => <div key={item.id} className="flex items-center justify-between rounded border bg-white p-2 text-sm"><span>{instructorName(item.instructor_id)} · {cohortName(item.cohort_id)}</span><Button variant="ghost" size="icon" onClick={() => removeAssignment('instructor_cohort_assignments', item.id)} aria-label="Remove cohort assignment"><Trash2 size={15} /></Button></div>)}</div>
       </CardContent></Card>
       <Card><CardHeader><CardTitle className="text-sm">Assign a squad</CardTitle></CardHeader><CardContent className="space-y-3">
-        <Select value={instructorId} onValueChange={setInstructorId}><SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger><SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent></Select>
+        <Select value={squadInstructorId} onValueChange={setSquadInstructorId}><SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger><SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent></Select>
         <Select value={squadId} onValueChange={setSquadId}><SelectTrigger><SelectValue placeholder="Select squad" /></SelectTrigger><SelectContent>{squads.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}</SelectContent></Select>
-        <Button onClick={() => addAssignment('instructor_squad_assignments', { instructor_id: Number(instructorId), squad_id: Number(squadId) }, () => { setInstructorId(''); setSquadId('') })}>Add squad assignment</Button>
+        <Button onClick={() => addAssignment('instructor_squad_assignments', { instructor_id: Number(squadInstructorId), squad_id: Number(squadId) }, () => { setSquadInstructorId(''); setSquadId('') })}>Add squad assignment</Button>
         <div className="space-y-2 pt-3">{squadAssignments.map((item) => <div key={item.id} className="flex items-center justify-between rounded border bg-white p-2 text-sm"><span>{instructorName(item.instructor_id)} · {squadName(item.squad_id)}</span><Button variant="ghost" size="icon" onClick={() => removeAssignment('instructor_squad_assignments', item.id)} aria-label="Remove squad assignment"><Trash2 size={15} /></Button></div>)}</div>
       </CardContent></Card>
     </div>

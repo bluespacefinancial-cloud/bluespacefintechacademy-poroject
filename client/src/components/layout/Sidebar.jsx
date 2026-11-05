@@ -43,6 +43,7 @@ const navItems = {
   ],
   Administrator: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
+    { to: '/user-management', icon: Users, label: 'User Management', ariaLabel: 'User Management' },
     { to: '/cohorts', icon: GraduationCap, label: 'Cohorts', ariaLabel: 'Cohorts' },
     { to: '/enrolments', icon: Users, label: 'Enrolments', ariaLabel: 'Enrolments' },
     { to: '/applications', icon: ClipboardList, label: 'Applications', ariaLabel: 'Applications' },

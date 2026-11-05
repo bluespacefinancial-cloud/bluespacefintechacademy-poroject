@@ -7,11 +7,13 @@ import { supabase } from '../lib/supabase'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import AuthSplitLayout from '../components/auth/AuthSplitLayout'
+import { AUTH_ARTWORK } from '../components/auth/artwork'
 
 const ROLES = [
-  { value: 'Student', label: 'Student', description: 'Apply for a Finsoft or Finops fellowship.' },
-  { value: 'Instructor', label: 'Teacher', description: 'Teach modules, mentor squads and review work.' },
-  { value: 'Partner', label: 'Partner agency', description: 'Publish learning content for academy students.' },
+  { value: 'Student', label: 'Student', description: 'Apply for a Finsoft or Finops fellowship.', artwork: AUTH_ARTWORK.Student },
+  { value: 'Instructor', label: 'Teacher', description: 'Teach modules, mentor squads and review work.', artwork: AUTH_ARTWORK.Instructor },
+  { value: 'Partner', label: 'Partner agency', description: 'Publish learning content for academy students.', artwork: AUTH_ARTWORK.Partner },
 ]
 
 const slide = {
@@ -39,6 +41,7 @@ export default function Register() {
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const selectedRole = ROLES.find((role) => role.value === form.role)
+  const { artwork } = selectedRole
 
   const next = () => {
     if (step === 1 && !form.role) return
@@ -90,7 +93,8 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <AuthSplitLayout image={artwork.image} imageAlt={artwork.alt} headline={artwork.headline} description={artwork.description}>
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center justify-between">
           <Link to="/student-login" className="flex items-center gap-2 text-sm text-gray-500 hover:text-deep-600">
@@ -123,19 +127,19 @@ export default function Register() {
                 {step === 2 && (
                   <div className="space-y-4">
                     <div className="grid gap-4 md:grid-cols-2">
-                      <label className="space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Full name<Input value={form.name} onChange={(event) => update('name', event.target.value)} required /></label>
-                      <label className="space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Email<Input type="email" value={form.email} onChange={(event) => update('email', event.target.value)} required /></label>
+                      <label className="space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Full name<Input autoComplete="name" placeholder="Your full name" value={form.name} onChange={(event) => update('name', event.target.value)} required /></label>
+                      <label className="space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Email<Input type="email" autoComplete="email" placeholder="you@example.com" value={form.email} onChange={(event) => update('email', event.target.value)} required /></label>
                     </div>
-                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Phone (optional)<Input value={form.phone} onChange={(event) => update('phone', event.target.value)} /></label>
+                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Phone (optional)<Input type="tel" autoComplete="tel" placeholder="+233 24 000 0000" value={form.phone} onChange={(event) => update('phone', event.target.value)} /></label>
                     {form.role === 'Student' && <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Preferred fellowship track<select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.track} onChange={(event) => update('track', event.target.value)}><option>Finsoft</option><option>Finops</option></select></label>}
-                    {form.role === 'Partner' && <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Organisation name<Input value={form.organisation} onChange={(event) => update('organisation', event.target.value)} /></label>}
+                    {form.role === 'Partner' && <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Organisation name<Input autoComplete="organization" placeholder="Your agency or organisation" value={form.organisation} onChange={(event) => update('organisation', event.target.value)} /></label>}
                   </div>
                 )}
                 {step === 3 && (
                   <div className="space-y-4">
-                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Password<Input type="password" value={form.password} onChange={(event) => update('password', event.target.value)} /></label>
-                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Confirm password<Input type="password" value={form.confirmPassword} onChange={(event) => update('confirmPassword', event.target.value)} /></label>
-                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Why are you applying? (optional)<textarea className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={form.motivation} onChange={(event) => update('motivation', event.target.value)} /></label>
+                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Password<Input type="password" autoComplete="new-password" placeholder="At least 8 characters" minLength={8} value={form.password} onChange={(event) => update('password', event.target.value)} /></label>
+                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Confirm password<Input type="password" autoComplete="new-password" placeholder="Enter your password again" value={form.confirmPassword} onChange={(event) => update('confirmPassword', event.target.value)} /></label>
+                    <label className="block space-y-2 text-xs font-semibold uppercase tracking-wider text-brand-500">Why are you applying? (optional)<textarea placeholder="Share what you hope to learn or contribute." maxLength={2000} className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground" value={form.motivation} onChange={(event) => update('motivation', event.target.value)} /></label>
                   </div>
                 )}
                 {step === 4 && (
@@ -154,6 +158,8 @@ export default function Register() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+      <footer className="shrink-0 px-6 pb-6 text-center text-xs text-gray-400">BlueSPACE Fintech Academy &copy; 2026</footer>
+    </AuthSplitLayout>
   )
 }

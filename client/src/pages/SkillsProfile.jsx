@@ -1,16 +1,54 @@
 import { useEffect, useState } from 'react'
-import { Award, CheckCircle, Save, Users, ArrowRight, Clock } from 'lucide-react'
+import {
+  Award,
+  Check,
+  Save,
+  Users,
+  Compass,
+  Briefcase,
+  FileText,
+  Clock,
+  Sparkles,
+  Layers,
+  CheckCircle2,
+} from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
 import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
+import DashboardHeader from '../components/dashboard/DashboardHeader'
 
-const roles = ['Project Manager', 'Field Lead', 'UAT', 'Technical Specialist', 'Not Sure Yet']
-const domains = ['FaaS', 'FinCore', 'FinOps', 'FinInfra']
-const skills = ['API Design', 'Ledger Engineering', 'CI/CD', 'Reconciliation', 'Reporting', 'Cloud Platforms', 'Project Management', 'Stakeholder Communication', 'UAT', 'Team Leadership']
+const ROLES = [
+  { id: 'Project Manager', label: 'Project Manager', desc: 'Team execution, sprint roadmaps, and stakeholder alignment' },
+  { id: 'Field Lead', label: 'Field Lead', desc: 'Fintech deployment, field integrations, and merchant operations' },
+  { id: 'UAT', label: 'UAT & Quality Analyst', desc: 'Quality assurance, ISO test scripts, and compliance verification' },
+  { id: 'Technical Specialist', label: 'Technical Specialist', desc: 'Core architecture, payment APIs, microservices, and databases' },
+  { id: 'Not Sure Yet', label: 'General / Undecided', desc: 'Exploring fellowship tracks and cross-functional opportunities' },
+]
+
+const DOMAINS = [
+  { id: 'FaaS', name: 'Fintech-as-a-Service (FaaS)', desc: 'Banking-as-a-service, open banking APIs, and financial middleware' },
+  { id: 'FinCore', name: 'Core Banking (FinCore)', desc: 'Double-entry ledgers, transaction switching, and core account systems' },
+  { id: 'FinOps', name: 'Fintech Operations (FinOps)', desc: 'Settlement rails, reconciliation engines, and dispute handling' },
+  { id: 'FinInfra', name: 'Fintech Infrastructure (FinInfra)', desc: 'High-availability payment gateways, HSM security, and cloud infra' },
+]
+
+const SKILLS = [
+  'API Design',
+  'Ledger Engineering',
+  'CI/CD Pipelines',
+  'Reconciliation',
+  'Regulatory Reporting',
+  'Cloud Platforms',
+  'Project Management',
+  'Stakeholder Communication',
+  'UAT & Test Suites',
+  'Team Leadership',
+  'SQL & TimescaleDB',
+  'Message Queues (Kafka/RabbitMQ)',
+]
 
 export default function SkillsProfile() {
   const [profile, setProfile] = useState(null)
@@ -23,234 +61,380 @@ export default function SkillsProfile() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  const completion = Math.min(100, (role ? 40 : 0) + (selectedDomains.length ? 30 : 0) + (selectedSkills.length ? 20 : 0))
+  const completion = Math.min(
+    100,
+    (role ? 40 : 0) + (selectedDomains.length ? 30 : 0) + (selectedSkills.length ? 20 : 0) + (notes.trim() ? 10 : 0)
+  )
 
   useEffect(() => {
+    let cancelled = false
     const load = async () => {
       try {
         const current = await getCurrentProfile()
-        if (!current) throw new Error('You must be signed in')
-        const { data, error: loadError } = await supabase.from('skills_profiles').select('*').eq('user_id', current.id).maybeSingle()
+        if (!current) throw new Error('You must be signed in to access your skills profile.')
+        const { data, error: loadError } = await supabase
+          .from('skills_profiles')
+          .select('*')
+          .eq('user_id', current.id)
+          .maybeSingle()
         if (loadError) throw loadError
-        setProfile(current)
-        if (data) { setRole(data.role_preference || ''); setSelectedDomains(data.domains || []); setSelectedSkills(data.skills?.selected || []); setNotes(data.notes || '') }
-      } catch (loadError) { setError(loadError.message || 'Unable to load skills profile') } finally { setLoading(false) }
+
+        if (!cancelled) {
+          setProfile(current)
+          if (data) {
+            setRole(data.role_preference || '')
+            setSelectedDomains(data.domains || [])
+            setSelectedSkills(data.skills?.selected || [])
+            setNotes(data.notes || '')
+          }
+        }
+      } catch (loadErr) {
+        if (!cancelled) setError(loadErr.message || 'Unable to load skills profile.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
     load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const save = async () => {
-    if (!profile || !role || selectedDomains.length === 0) { setError('Choose a role and at least one domain'); return }
-    setSaving(true); setError(''); setMessage('')
-    const { error: saveError } = await supabase.from('skills_profiles').upsert({ user_id: profile.id, role_preference: role, domains: selectedDomains, skills: { selected: selectedSkills }, notes: notes.trim() || null, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
-    if (saveError) setError(saveError.message)
-    else { setMessage('Skills profile saved for placement matching.'); setSaving(false); setTimeout(() => setMessage(''), 3000) }
-    setSaving(false)
+    if (!profile) return
+    if (!role) {
+      setError('Please choose your preferred fellowship role.')
+      return
+    }
+    if (selectedDomains.length === 0) {
+      setError('Please select at least one domain track interest.')
+      return
+    }
+
+    setSaving(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const { error: saveError } = await supabase.from('skills_profiles').upsert(
+        {
+          user_id: profile.id,
+          role_preference: role,
+          domains: selectedDomains,
+          skills: { selected: selectedSkills },
+          notes: notes.trim() || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      )
+      if (saveError) throw saveError
+
+      setMessage('Your skills profile has been saved. Faculty will use this for cohort squad placement.')
+      setTimeout(() => setMessage(''), 4000)
+    } catch (saveErr) {
+      setError(saveErr.message || 'Unable to save profile.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const toggle = (items, value, setter, limit) => setter(items.includes(value) ? items.filter((item) => item !== value) : items.length < limit ? [...items, value] : items)
+  const toggleDomain = (domainId) => {
+    setSelectedDomains((prev) => {
+      if (prev.includes(domainId)) {
+        return prev.filter((d) => d !== domainId)
+      }
+      if (prev.length >= 2) {
+        // limit to max 2 domains
+        return [prev[1], domainId]
+      }
+      return [...prev, domainId]
+    })
+  }
+
+  const toggleSkill = (skillName) => {
+    setSelectedSkills((prev) =>
+      prev.includes(skillName) ? prev.filter((s) => s !== skillName) : [...prev, skillName]
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="py-24 text-center">
+        <p className="text-sm font-medium text-gray-500">Loading skills profile...</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-deep-600">Skills Profile</h1>
-            <p className="text-sm text-gray-500">Keep your role preferences and skills current for project matching.</p>
+    <div className="w-full space-y-6">
+      {/* Header with Completion Progress */}
+      <DashboardHeader
+        title="Fellowship Skills Profile"
+        subtitle="Keep your role preferences, domain interests, and technical strengths up to date for collaborative squad placement."
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white border border-gray-200/90 rounded-lg px-3 py-1.5 shadow-xs text-xs">
+              <span className="font-semibold text-gray-900">{completion}%</span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-600">Profile Complete</span>
+              <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden ml-1">
+                <div
+                  className="h-full bg-deep-600 rounded-full transition-all duration-300"
+                  style={{ width: `${completion}%` }}
+                />
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={save}
+              disabled={saving}
+              className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
+            >
+              <Save size={13} className="mr-1.5" />
+              {saving ? 'Saving...' : 'Save Profile'}
+            </Button>
           </div>
-        </div>
-        <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-bold text-deep-600 uppercase tracking-wider">Profile Completion</span>
-            <span className="text-xs text-gray-500 ml-auto">{completion}%</span>
-          </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${completion < 100 ? 'bg-brand-600' : 'bg-emerald-600'}`} style={{ width: `${completion}%` }} />
-          </div>
-        </div>
-      </div>
+        }
+      />
 
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
-
-      {loading ? (
-        <div className="py-10 text-center text-sm text-gray-500">Loading profile...</div>
-      ) : (
-        <div className="max-w-5xl space-y-6">
-          {/* Section 1: Role Selection */}
-          <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-            <CardHeader className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-2">
-                <span className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
-                  <Award size={14} />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-sm font-bold text-deep-600">Preferred Role</CardTitle>
-                  <CardDescription className="text-[10px] text-gray-500">Choose your target role for project matching</CardDescription>
-                </div>
-              </div>
-              <Badge className={`text-[11px] font-bold text-deep-600 bg-deep-50 border border-deep-200 ${role ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : ''}`}>
-                {role || 'Not selected'}
-              </Badge>
-            </CardHeader>
-            <CardContent className="p-5">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {roles.map((item) => (
-                  <Button
-                    key={item}
-                    variant={role === item ? 'default' : 'outline'}
-                    className={`flex flex-col items-center gap-2 text-[11px] ${role === item ? 'bg-deep-600 text-white border-deep-600' : 'border-gray-200 text-gray-600 hover:bg-deep-50 hover:text-deep-600'}`}
-                    onClick={() => setRole(item)}
-                  >
-                    <CheckCircle size={14} className={role === item ? 'text-white' : 'text-deep-600 opacity-50'} />
-                    {item}
-                  </Button>
-                ))}
-              </div>
-              {!role && <p className="mt-2 text-[10px] text-red-600">Please select a role</p>}
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Section 2: Domain Interests */}
-            <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-              <CardHeader className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-2">
-                  <span className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
-                    <Users size={14} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-sm font-bold text-deep-600">Domain Interests</CardTitle>
-                    <CardDescription className="text-[10px] text-gray-500">Select up to two domain tracks</CardDescription>
-                  </div>
-                </div>
-                <Badge className={`text-[11px] font-bold ${selectedDomains.length >= 2 ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-deep-600 bg-deep-50 border-deep-200'}`}>
-                  {selectedDomains.length} of 2
-                </Badge>
-              </CardHeader>
-              <CardContent className="p-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {domains.map((item) => {
-                    const isSelected = selectedDomains.includes(item)
-                    return (
-                      <Button
-                        key={item}
-                        variant={isSelected ? 'default' : 'outline'}
-                        className={`flex flex-col items-center gap-2 text-[11px] ${isSelected ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 text-gray-600 hover:bg-brand-50 hover:text-deep-600'}`}
-                        onClick={() => toggle(selectedDomains, item, setSelectedDomains, 2)}
-                      >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${isSelected ? 'text-white bg-deep-600' : 'text-gray-400 bg-gray-100'}`}>
-                          {isSelected ? '✓' : item.charAt(0)}
-                        </div>
-                        {item}
-                      </Button>
-                    )
-                  })}
-                </div>
-                {selectedDomains.length === 0 && <p className="mt-2 text-[10px] text-red-600">Please select at least one domain</p>}
-                {selectedDomains.length === 2 && <p className="mt-2 text-[10px] text-emerald-600">Selection complete</p>}
-              </CardContent>
-            </Card>
-
-            {/* Section 3: Skills */}
-            <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-              <CardHeader className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-2">
-                  <span className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600 shrink-0">
-                    <Users size={14} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-sm font-bold text-deep-600">Skills &amp; Expertise</CardTitle>
-                    <CardDescription className="text-[10px] text-gray-500">Select all that apply</CardDescription>
-                  </div>
-                </div>
-                <Badge className={`text-[11px] font-bold ${selectedSkills.length > 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-deep-600 bg-deep-50 border-deep-200'}`}>
-                  {selectedSkills.length} selected
-                </Badge>
-              </CardHeader>
-              <CardContent className="p-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {skills.map((item) => {
-                    const isSelected = selectedSkills.includes(item)
-                    return (
-                      <Button
-                        key={item}
-                        variant={isSelected ? 'default' : 'outline'}
-                        className={`flex flex-col items-center gap-2 text-[11px] ${isSelected ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600'}`}
-                        onClick={() => toggle(selectedSkills, item, setSelectedSkills, skills.length)}
-                      >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${isSelected ? 'text-white bg-emerald-600' : 'text-gray-400 bg-gray-100'}`}>
-                          {isSelected ? '✓' : item.charAt(0)}
-                        </div>
-                        {item}
-                      </Button>
-                    )
-                  })}
-                </div>
-                {selectedSkills.length === 0 && <p className="mt-2 text-[10px] text-gray-500">Select skills that match your expertise</p>}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Section 4: Career Notes */}
-          <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-            <CardHeader className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-2">
-                <span className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-600 shrink-0">
-                  <Clock size={14} />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-sm font-bold text-deep-600">Career Notes</CardTitle>
-                  <CardDescription className="text-[10px] text-gray-500">Optional — share your goals with the academy team</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-5">
-              <Textarea
-                rows={5}
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Tell us about your career goals, previous experience, or anything that helps us match you with the right projects..."
-                className="w-full rounded-md border-gray-200 bg-white focus-visible:border-deep-500 focus-visible:ring-1 focus-visible:ring-deep-500"
-              />
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-[10px] text-gray-500">{notes.length} characters</span>
-                <span className="text-[10px] text-gray-400">•</span>
-                <span className="text-[10px] text-gray-500">Optional</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Action Bar */}
-          <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-            <CardContent className="p-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex-1 text-left">
-                <p className="text-xs font-bold text-deep-600 uppercase tracking-wider">Ready to apply?</p>
-                <p className="text-xs text-gray-500">
-                  Your profile will be used for project and squad matching. Update anytime.
-                </p>
-              </div>
-              <Button
-                onClick={save}
-                disabled={saving || !role || selectedDomains.length === 0}
-                className="w-full sm:w-auto bg-deep-600 text-white hover:bg-deep-700 disabled:bg-deep-200 disabled:text-deep-300 font-semibold py-3"
-              >
-                {saving ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span className="text-sm">Saving...</span>
-                  </div>
-                ) : (
-                  <>
-                    <Save size={14} className="mr-2" />
-                    Save Profile &amp; Get Matched
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+      {error && (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
+          <p className="font-semibold">Notice</p>
+          <p className="mt-0.5">{error}</p>
         </div>
       )}
+
+      {message && (
+        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-800">
+          <p className="font-semibold">Saved</p>
+          <p className="mt-0.5">{message}</p>
+        </div>
+      )}
+
+      {/* Section 1: Preferred Fellowship Role */}
+      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+              <Briefcase size={16} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 leading-tight">1. Preferred Fellowship Role</h3>
+              <p className="text-xs text-gray-500">Select your primary role contribution within cohort sprint teams</p>
+            </div>
+          </div>
+          <Badge
+            variant={role ? 'secondary' : 'outline'}
+            className="text-[11px] font-medium border-gray-200"
+          >
+            {role || 'Select one'}
+          </Badge>
+        </div>
+
+        <CardContent className="p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {ROLES.map((r) => {
+              const isSelected = role === r.id
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setRole(r.id)}
+                  className={`text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                    isSelected
+                      ? 'border-deep-600 bg-deep-50/30 ring-1 ring-deep-600 shadow-2xs'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/60 bg-white'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-xs font-bold text-gray-900">{r.label}</p>
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 mt-0.5 ${
+                        isSelected
+                          ? 'border-deep-600 bg-deep-600 text-white'
+                          : 'border-gray-300 bg-white'
+                      }`}
+                    >
+                      {isSelected && <Check size={10} strokeWidth={3} />}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">{r.desc}</p>
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 2: Domain Interests (2/3) & Skills (1/3 or 2-col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Domain Interests */}
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+                  <Compass size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 leading-tight">2. Domain Specialization</h3>
+                  <p className="text-xs text-gray-500">Pick up to 2 target fintech tracks</p>
+                </div>
+              </div>
+              <Badge
+                variant={selectedDomains.length > 0 ? 'secondary' : 'outline'}
+                className="text-[11px] font-medium border-gray-200"
+              >
+                {selectedDomains.length}/2 selected
+              </Badge>
+            </div>
+
+            <CardContent className="p-5 space-y-3">
+              {DOMAINS.map((d) => {
+                const isSelected = selectedDomains.includes(d.id)
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => toggleDomain(d.id)}
+                    className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
+                      isSelected
+                        ? 'border-deep-600 bg-deep-50/30 ring-1 ring-deep-600 shadow-2xs'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/60 bg-white'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-gray-900">{d.name}</p>
+                      <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{d.desc}</p>
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 ${
+                        isSelected
+                          ? 'border-deep-600 bg-deep-600 text-white'
+                          : 'border-gray-300 bg-white'
+                      }`}
+                    >
+                      {isSelected && <Check size={10} strokeWidth={3} />}
+                    </div>
+                  </button>
+                )
+              })}
+            </CardContent>
+          </div>
+
+          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-[11px] text-gray-500">
+            Selected domains determine which lab modules and use-case challenges you tackle.
+          </div>
+        </Card>
+
+        {/* Technical Strengths & Skills */}
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+                  <Layers size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 leading-tight">3. Skills & Competencies</h3>
+                  <p className="text-xs text-gray-500">Tag competencies you bring to your squad</p>
+                </div>
+              </div>
+              <Badge
+                variant={selectedSkills.length > 0 ? 'secondary' : 'outline'}
+                className="text-[11px] font-medium border-gray-200"
+              >
+                {selectedSkills.length} selected
+              </Badge>
+            </div>
+
+            <CardContent className="p-5">
+              <div className="flex flex-wrap gap-2">
+                {SKILLS.map((skill) => {
+                  const isSelected = selectedSkills.includes(skill)
+                  return (
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => toggleSkill(skill)}
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-2 ${
+                        isSelected
+                          ? 'border-deep-600 bg-deep-50 text-deep-800 shadow-2xs'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 rounded flex items-center justify-center border shrink-0 ${
+                          isSelected
+                            ? 'border-deep-600 bg-deep-600 text-white'
+                            : 'border-gray-300 bg-white'
+                        }`}
+                      >
+                        {isSelected && <Check size={9} strokeWidth={3} />}
+                      </div>
+                      <span>{skill}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </div>
+
+          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-[11px] text-gray-500">
+            Skills are matched against sprint challenge requirements to ensure balanced teams.
+          </div>
+        </Card>
+      </div>
+
+      {/* Section 4: Experience & Career Notes */}
+      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+              <FileText size={16} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 leading-tight">4. Background & Career Goals</h3>
+              <p className="text-xs text-gray-500">Share your prior software or banking experience and career aspirations</p>
+            </div>
+          </div>
+        </div>
+
+        <CardContent className="p-5 space-y-3">
+          <Textarea
+            rows={4}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Tell us about your technical background, programming languages you're comfortable with, and specific fintech areas you want to master during this fellowship..."
+            className="w-full rounded-lg border border-gray-200 p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-deep-600"
+          />
+          <div className="flex items-center justify-between text-[11px] text-gray-400">
+            <span>{notes.length} characters</span>
+            <span>Reviewed by faculty advisors during squad allocation</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bottom Save Bar */}
+      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <CardContent className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 className="text-sm font-bold text-gray-900">Ready to update your matching profile?</h4>
+            <p className="text-xs text-gray-500 mt-0.5">
+              You can return to update your role preference or skill tags at any point during your fellowship.
+            </p>
+          </div>
+
+          <Button
+            onClick={save}
+            disabled={saving}
+            className="w-full sm:w-auto bg-deep-600 text-white hover:bg-deep-700 font-semibold px-6 text-xs h-9"
+          >
+            <Save size={14} className="mr-1.5" />
+            {saving ? 'Saving Profile...' : 'Save Skills Profile'}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }

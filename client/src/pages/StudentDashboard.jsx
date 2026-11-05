@@ -21,6 +21,7 @@ import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
+import { getDeadlineInfo } from '../lib/deadlines'
 
 const initialData = {
   profile: null,
@@ -539,6 +540,7 @@ export default function StudentDashboard({ user }) {
               <div className="divide-y divide-gray-100">
                 {pendingLabs.slice(0, 4).map((lab) => {
                   const isSubmitted = lab.status === 'submitted'
+                  const deadline = getDeadlineInfo(lab.due_date)
                   return (
                     <div key={lab.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="min-w-0 flex-1">
@@ -548,10 +550,12 @@ export default function StudentDashboard({ user }) {
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                           <span>Max score: {lab.max_score} pts</span>
-                          {lab.due_date && (
+                          {deadline && (
                             <>
                               <span>•</span>
-                              <span>Due {new Date(lab.due_date).toLocaleDateString()}</span>
+                              <span className={`px-2 py-0.5 rounded text-[11px] ${deadline.badgeClass}`}>
+                                {deadline.label}
+                              </span>
                             </>
                           )}
                         </div>

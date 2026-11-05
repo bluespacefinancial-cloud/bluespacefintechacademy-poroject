@@ -105,9 +105,9 @@ export default function App() {
         <Route path="mentor-evaluation" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MentorEvaluation /></ProtectedRoute>} />
         <Route path="quiz-management" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><QuizManagement /></ProtectedRoute>} />
         <Route path="my-modules" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MyModules /></ProtectedRoute>} />
-        <Route path="labs-to-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><LabsToReview /></ProtectedRoute>} />
+        <Route path="labs-to-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
         <Route path="grading" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
-        <Route path="mentor-clinics" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MentorClinics /></ProtectedRoute>} />
+        <Route path="mentor-clinics" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MentorClinics /></ProtectedRoute>} />
         <Route path="announcements" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Announcements /></ProtectedRoute>} />
         <Route path="squads" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><SquadManagement /></ProtectedRoute>} />
         <Route path="use-case-assignment" element={<ProtectedRoute roles={['Administrator']}><UseCaseAssignment /></ProtectedRoute>} />

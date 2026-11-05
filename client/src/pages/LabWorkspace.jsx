@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
+import { getDeadlineInfo } from '../lib/deadlines'
 
 export default function LabWorkspace() {
   const navigate = useNavigate()
@@ -180,6 +181,7 @@ export default function LabWorkspace() {
         <div className="grid gap-6 lg:grid-cols-2">
           {orderedLabs.map((lab) => {
             const submission = submissions[lab.id]
+            const deadline = getDeadlineInfo(lab.due_date)
             return (
               <Card key={lab.id} className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
                 <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-gray-100">
@@ -188,9 +190,19 @@ export default function LabWorkspace() {
                       <FileText size={16} className="text-deep-600 shrink-0" />
                       {lab.title}
                     </h3>
-                    <p className="mt-1 text-xs text-gray-500 truncate">
-                      {lab.module?.title || lab.lesson?.title}{lab.module?.domain ? ` • ${lab.module.domain}` : ''}
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                      <span className="truncate">{lab.module?.title || lab.lesson?.title}</span>
+                      <span>•</span>
+                      <span>{lab.max_score} pts</span>
+                      {deadline && (
+                        <>
+                          <span>•</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] ${deadline.badgeClass}`}>
+                            {deadline.label}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <Badge variant={submission?.status === 'graded' ? 'secondary' : submission?.status === 'submitted' ? 'default' : 'outline'} className="text-[11px] font-medium shrink-0 capitalize">
                     {submission?.status || 'Not submitted'}

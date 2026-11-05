@@ -13,8 +13,8 @@ export default function AppLayout() {
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar open={sidebarOpen} onOpen={() => setSidebarOpen(true)} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-60">
-        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
           <div className="flex items-center lg:hidden mr-3">
             <img src="/logo-dark.png" alt="BlueSPACE" className="h-6 w-auto" />
           </div>
@@ -30,8 +30,10 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 px-4 lg:px-6 pt-14 lg:pt-6 overflow-auto pb-6">
-          <Outlet />
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-10 overflow-y-auto min-w-0">
+          <div className="w-full max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

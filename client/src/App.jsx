@@ -41,6 +41,7 @@ import PartnerCatalog from './pages/PartnerCatalog'
 import PartnerManagement from './pages/PartnerManagement'
 import PartnerCourseReview from './pages/PartnerCourseReview'
 import PartnerCourseLearning from './pages/PartnerCourseLearning'
+import UserManagement from './pages/UserManagement'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 import Register from './pages/Register'
@@ -122,6 +123,7 @@ export default function App() {
         <Route path="curriculum" element={<ProtectedRoute roles={['Administrator']}><Curriculum /></ProtectedRoute>} />
         <Route path="placement" element={<ProtectedRoute roles={['Administrator']}><Placement /></ProtectedRoute>} />
         <Route path="reports" element={<ProtectedRoute roles={['Administrator']}><Reports /></ProtectedRoute>} />
+        <Route path="user-management" element={<ProtectedRoute roles={['Administrator']}><UserManagement /></ProtectedRoute>} />
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />

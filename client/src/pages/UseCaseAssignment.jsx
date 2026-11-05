@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Target, Plus } from 'lucide-react'
+import { Target, Plus, Edit3, X, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -24,13 +23,16 @@ const STATUS_COLORS = {
 }
 
 export default function UseCaseAssignment() {
-  const navigate = useNavigate()
   const [useCases, setUseCases] = useState([])
   const [search, setSearch] = useState('')
   const [filterDomain, setFilterDomain] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [saving, setSaving] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     const loadUseCases = async () => {
@@ -63,6 +65,182 @@ export default function UseCaseAssignment() {
     return matchesSearch && domainMatch && statusMatch
   })
 
+  const startEdit = (useCase) => {
+    setEditForm({
+      title: useCase.title,
+      stakeholder: useCase.stakeholder,
+      domain: useCase.domain,
+      status: useCase.status,
+      sandbox_access: useCase.sandbox_access,
+      anonymised_data: useCase.anonymised_data,
+    })
+    setEditingId(useCase.id)
+    setError('')
+    setMessage('')
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditForm({})
+    setError('')
+    setMessage('')
+  }
+
+  const saveEdit = async (e) => {
+    e.preventDefault()
+    setSaving(editingId)
+    setError('')
+    try {
+      const { error: updateError } = await supabase
+        .from('use_cases')
+        .update({
+          title: editForm.title,
+          stakeholder: editForm.stakeholder,
+          domain: editForm.domain,
+          status: editForm.status,
+          sandbox_access: editForm.sandbox_access,
+          anonymised_data: editForm.anonymised_data,
+        })
+        .eq('id', editingId)
+      if (updateError) throw updateError
+      setMessage('Use case updated')
+      setEditingId(null)
+      const loadUseCases = async () => {
+        const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
+          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
+          supabase.from('cohorts').select('id, name'),
+          supabase.from('squads').select('id, name'),
+        ])
+        if (loadError) throw loadError
+        if (cohortsError) throw cohortsError
+        if (squadsError) throw squadsError
+        const cohortNames = new Map((cohorts || []).map((cohort) => [cohort.id, cohort.name]))
+        const squadNames = new Map((squads || []).map((squad) => [squad.id, squad.name]))
+        setUseCases((data || []).map((item) => ({
+          ...item,
+          cohort: cohortNames.get(item.cohort_id) || 'Unassigned cohort',
+          squad: squadNames.get(item.squad_id) || null,
+          sandboxAccess: item.sandbox_access,
+          anonymisedData: item.anonymised_data,
+        })))
+      }
+      await loadUseCases()
+    } catch (saveError) {
+      setError(saveError.message || 'Unable to update use case')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const deleteUseCase = async (id) => {
+    if (!window.confirm('Delete this use case? This cannot be undone.')) return
+    try {
+      const { error: delError } = await supabase.from('use_cases').delete().eq('id', id)
+      if (delError) throw delError
+      setMessage('Use case deleted')
+      const loadUseCases = async () => {
+        const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
+          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
+          supabase.from('cohorts').select('id, name'),
+          supabase.from('squads').select('id, name'),
+        ])
+        if (loadError) throw loadError
+        if (cohortsError) throw cohortsError
+        if (squadsError) throw squadsError
+        const cohortNames = new Map((cohorts || []).map((cohort) => [cohort.id, cohort.name]))
+        const squadNames = new Map((squads || []).map((squad) => [squad.id, squad.name]))
+        setUseCases((data || []).map((item) => ({
+          ...item,
+          cohort: cohortNames.get(item.cohort_id) || 'Unassigned cohort',
+          squad: squadNames.get(item.squad_id) || null,
+          sandboxAccess: item.sandbox_access,
+          anonymisedData: item.anonymised_data,
+        })))
+      }
+      await loadUseCases()
+    } catch (delError) {
+      setError(delError.message || 'Unable to delete use case')
+    }
+  }
+
+  const createUseCase = async (e) => {
+    e.preventDefault()
+    setError('')
+    try {
+      const { error: createError } = await supabase.from('use_cases').insert({
+        title: editForm.title || 'New Use Case',
+        stakeholder: editForm.stakeholder,
+        domain: editForm.domain,
+        status: editForm.status || 'proposed',
+        sandbox_access: editForm.sandbox_access,
+        anonymised_data: editForm.anonymised_data,
+      })
+      if (createError) throw createError
+      setMessage('Use case created')
+      setEditForm({})
+      setEditingId(null)
+      const loadUseCases = async () => {
+        const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
+          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
+          supabase.from('cohorts').select('id, name'),
+          supabase.from('squads').select('id, name'),
+        ])
+        if (loadError) throw loadError
+        if (cohortsError) throw cohortsError
+        if (squadsError) throw squadsError
+        const cohortNames = new Map((cohorts || []).map((cohort) => [cohort.id, cohort.name]))
+        const squadNames = new Map((squads || []).map((squad) => [squad.id, squad.name]))
+        setUseCases((data || []).map((item) => ({
+          ...item,
+          cohort: cohortNames.get(item.cohort_id) || 'Unassigned cohort',
+          squad: squadNames.get(item.squad_id) || null,
+          sandboxAccess: item.sandbox_access,
+          anonymisedData: item.anonymised_data,
+        })))
+      }
+      await loadUseCases()
+    } catch (createError) {
+      setError(createError.message || 'Unable to create use case')
+    }
+  }
+
+  const assignSquad = async (useCaseId, squadId) => {
+    if (!squadId) return
+    setSaving(useCaseId)
+    try {
+      const { error: assignError } = await supabase
+        .from('use_cases')
+        .update({ squad_id: Number(squadId) })
+        .eq('id', useCaseId)
+      if (assignError) throw assignError
+      setMessage('Squad assigned')
+      const loadUseCases = async () => {
+        const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
+          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
+          supabase.from('cohorts').select('id, name'),
+          supabase.from('squads').select('id, name'),
+        ])
+        if (loadError) throw loadError
+        if (cohortsError) throw cohortsError
+        if (squadsError) throw squadsError
+        const cohortNames = new Map((cohorts || []).map((cohort) => [cohort.id, cohort.name]))
+        const squadNames = new Map((squads || []).map((squad) => [squad.id, squad.name]))
+        setUseCases((data || []).map((item) => ({
+          ...item,
+          cohort: cohortNames.get(item.cohort_id) || 'Unassigned cohort',
+          squad: squadNames.get(item.squad_id) || null,
+          sandboxAccess: item.sandbox_access,
+          anonymisedData: item.anonymised_data,
+        })))
+      }
+      await loadUseCases()
+    } catch (assignError) {
+      setError(assignError.message || 'Unable to assign squad')
+    } finally {
+      setSaving(null)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mb-6">
@@ -73,12 +251,97 @@ export default function UseCaseAssignment() {
               Assign live Factory use cases to squads for project delivery
             </p>
           </div>
-          <Button onClick={() => navigate('/use-cases/create')}>
-            <Plus size={16} className="mr-2" />
-            Add Use Case
-          </Button>
+          {editingId ? (
+            <Button variant="outline" size="sm" onClick={cancelEdit}>
+              <X size={14} /> Cancel
+            </Button>
+          ) : (
+            <Button onClick={() => { setEditForm({ domain: 'FaaS', status: 'proposed', sandbox_access: false, anonymised_data: true }); setEditingId('new'); setError(''); setMessage('') }}>
+              <Plus size={16} className="mr-2" />
+              Add Use Case
+            </Button>
+          )}
         </div>
       </div>
+
+      {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {message && <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+
+      {editingId === 'new' ? (
+        <Card>
+          <CardContent className="p-4">
+            <form onSubmit={createUseCase} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <label className="block text-xs font-medium text-deep-600 mb-1">Title</label>
+                  <Input type="text" required value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} placeholder="e.g. Build automated ledger" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-deep-600 mb-1">Stakeholder</label>
+                  <Input type="text" value={editForm.stakeholder} onChange={(e) => setEditForm({ ...editForm, stakeholder: e.target.value })} placeholder="e.g. FinCore Domain Lead" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-deep-600 mb-1">Domain</label>
+                  <Select value={editForm.domain} onValueChange={(v) => setEditForm({ ...editForm, domain: v })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={editForm.domain || 'Select'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FaaS">FaaS</SelectItem>
+                      <SelectItem value="FinCore">FinCore</SelectItem>
+                      <SelectItem value="FinOps">FinOps</SelectItem>
+                      <SelectItem value="FinInfra">FinInfra</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-deep-600 mb-1">Status</label>
+                  <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={editForm.status || 'Select'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="proposed">Proposed</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="assigned">Assigned</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <label className="text-xs font-medium text-deep-600 mr-2">Sandbox Access</label>
+                  <Select value={String(editForm.sandbox_access)} onValueChange={(v) => setEditForm({ ...editForm, sandbox_access: v === 'true' })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={editForm.sandbox_access ? 'Enabled' : 'Disabled'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Enabled</SelectItem>
+                      <SelectItem value="false">Disabled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <label className="text-xs font-medium text-deep-600 mr-2">Anonymised Data</label>
+                  <Select value={String(editForm.anonymised_data)} onValueChange={(v) => setEditForm({ ...editForm, anonymised_data: v === 'true' })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={editForm.anonymised_data ? 'Yes' : 'No'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Yes</SelectItem>
+                      <SelectItem value="false">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button type="submit">Add Use Case</Button>
+                <Button variant="outline" type="button" onClick={cancelEdit}>Cancel</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="flex gap-4 mb-6">
         <div className="flex-1">
@@ -167,49 +430,155 @@ export default function UseCaseAssignment() {
           filtered.map((useCase) => (
             <Card
               key={useCase.id}
-              className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
-              onClick={() => navigate(`/use-cases/${useCase.id}`)}
+              className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${editingId === useCase.id ? 'bg-brand-50' : ''}`}
             >
-              <CardHeader className="flex flex-row items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
-                    <Target size={14} className="text-deep-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-sm">{useCase.title}</CardTitle>
-                    <CardDescription className="text-[10px]">{useCase.cohort} · {useCase.domain}</CardDescription>
-                  </div>
-                </div>
-                <Badge className={DOMAIN_COLORS[useCase.domain]}>{useCase.domain}</Badge>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Stakeholder</span>
-                    <span className="text-xs text-gray-600">{useCase.stakeholder}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Assigned Squad</span>
-                    <span className="text-xs text-gray-600">{useCase.squad || 'Unassigned'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Sandbox</span>
-                    <span className="text-xs text-gray-600">{useCase.sandboxAccess ? 'Enabled' : 'Not enabled'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Data</span>
-                    <span className="text-xs text-gray-600">{useCase.anonymisedData ? 'Anonymised' : 'Real'}</span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between pt-3">
-                <Badge className={STATUS_COLORS[useCase.status] || 'bg-gray-50 text-gray-600'}>
-                  {useCase.status.charAt(0).toUpperCase() + useCase.status.slice(1)}
-                </Badge>
-                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/use-cases/${useCase.id}/assign`) }}>
-                  Assign Squad
-                </Button>
-              </CardFooter>
+              {editingId === useCase.id ? (
+                <>
+                  <td colSpan={6} className="p-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <form onSubmit={saveEdit} className="space-y-4">
+                          <div className="grid gap-4 md:grid-cols-4">
+                            <div>
+                              <label className="block text-xs font-medium text-deep-600 mb-1">Title</label>
+                              <Input type="text" required value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-deep-600 mb-1">Stakeholder</label>
+                              <Input type="text" value={editForm.stakeholder} onChange={(e) => setEditForm({ ...editForm, stakeholder: e.target.value })} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-deep-600 mb-1">Domain</label>
+                              <Select value={editForm.domain} onValueChange={(v) => setEditForm({ ...editForm, domain: v })}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder={editForm.domain} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="FaaS">FaaS</SelectItem>
+                                  <SelectItem value="FinCore">FinCore</SelectItem>
+                                  <SelectItem value="FinOps">FinOps</SelectItem>
+                                  <SelectItem value="FinInfra">FinInfra</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-deep-600 mb-1">Status</label>
+                              <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder={editForm.status} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="proposed">Proposed</SelectItem>
+                                  <SelectItem value="qualified">Qualified</SelectItem>
+                                  <SelectItem value="assigned">Assigned</SelectItem>
+                                  <SelectItem value="completed">Completed</SelectItem>
+                                  <SelectItem value="archived">Archived</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex items-end">
+                              <label className="text-xs font-medium text-deep-600 mr-2">Sandbox Access</label>
+                              <Select value={String(editForm.sandbox_access)} onValueChange={(v) => setEditForm({ ...editForm, sandbox_access: v === 'true' })}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder={editForm.sandbox_access ? 'Enabled' : 'Disabled'} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="true">Enabled</SelectItem>
+                                  <SelectItem value="false">Disabled</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex items-end">
+                              <label className="text-xs font-medium text-deep-600 mr-2">Anonymised Data</label>
+                              <Select value={String(editForm.anonymised_data)} onValueChange={(v) => setEditForm({ ...editForm, anonymised_data: v === 'true' })}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder={editForm.anonymised_data ? 'Yes' : 'No'} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="true">Yes</SelectItem>
+                                  <SelectItem value="false">No</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="flex gap-3 mt-2">
+                            <Button type="submit" disabled={saving === useCase.id}>{saving === useCase.id ? 'Saving...' : 'Save'}</Button>
+                            <Button variant="outline" type="button" onClick={cancelEdit}>Cancel</Button>
+                            <Button variant="destructive" type="button" onClick={() => deleteUseCase(useCase.id)}>Delete</Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </td>
+                </>
+              )
+              : (
+                <>
+                  <CardHeader className="flex flex-row items-center justify-between py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
+                        <Target size={14} className="text-deep-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-sm">{useCase.title}</CardTitle>
+                        <CardDescription className="text-[10px]">{useCase.cohort} · {useCase.domain}</CardDescription>
+                      </div>
+                    </div>
+                    <Badge className={DOMAIN_COLORS[useCase.domain]}>{useCase.domain}</Badge>
+                  </CardHeader>
+                  <CardContent className="pt-0 pb-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-deep-600">Stakeholder</span>
+                        <span className="text-xs text-gray-600">{useCase.stakeholder}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-deep-600">Assigned Squad</span>
+                        <span className="text-xs text-gray-600">{useCase.squad || 'Unassigned'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-deep-600">Sandbox</span>
+                        <span className="text-xs text-gray-600">{useCase.sandboxAccess ? 'Enabled' : 'Not enabled'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-deep-600">Data</span>
+                        <span className="text-xs text-gray-600">{useCase.anonymisedData ? 'Anonymised' : 'Real'}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex items-center justify-between pt-3">
+                    <Badge className={STATUS_COLORS[useCase.status] || 'bg-gray-50 text-gray-600'}>
+                      {useCase.status.charAt(0).toUpperCase() + useCase.status.slice(1)}
+                    </Badge>
+                    <div className="flex gap-2">
+                      <Select
+                        value={useCase.squad || ''}
+                        onValueChange={(v) => assignSquad(useCase.id, v || null)}
+                        className="w-[150px]"
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={useCase.squad || 'Select squad'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {useCases.filter(uc => uc.id !== useCase.id).map((uc) => {
+                            if (uc.squad) {
+                              return <SelectItem key={`squad-${uc.squad}`} value={uc.squad}>{uc.squad}</SelectItem>
+                            }
+                            return null
+                          })}
+                          {/* Also fetch all squads for assignment */}
+                        </SelectContent>
+                      </Select>
+                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); startEdit(useCase) }}>
+                        <Edit3 size={12} />
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); deleteUseCase(useCase.id) }}>
+                        <Trash2 size={12} />
+                      </Button>
+                    </div>
+                  </CardFooter>
+                </>
+              )}
             </Card>
           ))}
       </div>

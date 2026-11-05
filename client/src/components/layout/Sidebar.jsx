@@ -64,6 +64,7 @@ const sidebarGroups = {
       icon: Shield,
       items: [
         { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
+        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
   ],
@@ -106,6 +107,7 @@ const sidebarGroups = {
       icon: Shield,
       items: [
         { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
+        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
   ],
@@ -123,6 +125,7 @@ const sidebarGroups = {
       icon: Shield,
       items: [
         { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
+        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
   ],
@@ -174,6 +177,7 @@ const sidebarGroups = {
       icon: Shield,
       items: [
         { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
+        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
   ],
@@ -246,31 +250,26 @@ export default function Sidebar({ open, onOpen, onClose }) {
         </div>
       </aside>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
-        {groups
-          .slice(0, 3)
-          .flatMap((g) => g.items.slice(0, 3))
-          .slice(0, 4)
-          .map((item) => {
-            const active = location.pathname === item.to
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors ${
-                  active ? 'text-deep-600' : 'text-gray-400'
-                }`}
-                aria-current={active ? 'page' : undefined}
-              >
-                <item.icon size={20} aria-hidden="true" />
-                <span className="visually-hidden">{item.label}</span>
-              </NavLink>
-            )
-          })}
-
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)] overflow-x-auto scrollbar-hide whitespace-nowrap">
+        {groups.flatMap((g) => g.items).map((item) => {
+          const active = location.pathname === item.to
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={`flex-none flex flex-col items-center justify-center gap-1 py-2 px-3 text-[10px] font-medium transition-colors ${
+                active ? 'text-deep-600' : 'text-gray-400'
+              }`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <item.icon size={20} aria-hidden="true" />
+              <span className="visually-hidden">{item.label}</span>
+            </NavLink>
+          )
+        })}
         <button
           onClick={onOpen}
-          className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium text-gray-400"
+          className="flex-none flex flex-col items-center justify-center gap-1 py-2 px-3 text-[10px] font-medium text-gray-400"
           aria-label="More options"
         >
           <MoreHorizontal size={20} />
@@ -281,7 +280,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[80vh] flex flex-col animate-sheet-up">
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-sheet-up">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
               <span className="text-sm font-bold text-deep-600">More</span>
               <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-deep-600 rounded-md">
@@ -291,28 +290,22 @@ export default function Sidebar({ open, onOpen, onClose }) {
             </div>
 
             <nav className="p-3 space-y-1 overflow-y-auto" aria-label="More options">
-              {groups
-                .slice(3)
-                .flatMap((g) => g.items)
-                .length === 0 ? (
+              {groups.flatMap((g) => g.items).length === 0 ? (
                 <p className="px-4 py-3 text-xs text-gray-400">No additional items</p>
               ) : (
-                groups
-                  .slice(3)
-                  .flatMap((g) => g.items)
-                  .map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      onClick={onClose}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        location.pathname === item.to ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <item.icon size={18} />
-                      {item.label}
-                    </NavLink>
-                  ))
+                groups.flatMap((g) => g.items).map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                      location.pathname === item.to ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <item.icon size={18} />
+                    {item.label}
+                  </NavLink>
+                ))
               )}
             </nav>
 

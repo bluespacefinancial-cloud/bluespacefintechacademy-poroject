@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS public.live_classes (
   meet_url varchar(500),
   google_event_id varchar(255),
   recording_url varchar(500),
+  is_offline boolean NOT NULL DEFAULT false,
+  venue varchar(500),
   notes text,
   created_by bigint NOT NULL REFERENCES public.users(id),
   created_at timestamptz NOT NULL DEFAULT now(),

@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
     const initAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession()
-        if (data.session?.user) {
+        if (data.session?.user && window.location.pathname !== '/reset-password') {
           const profile = await loadProfile(data.session.user)
           if (isBlocked(profile)) {
             await supabase.auth.signOut()
@@ -63,6 +63,9 @@ export function AuthProvider({ children }) {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // Password recovery sessions belong to the reset form. Keep them alive
+        // here even when an applicant is not active in the academy yet.
+        if (window.location.pathname === '/reset-password') return
         if (event === 'SIGNED_IN' && session?.user) {
           // Defer the profile lookup: awaiting Supabase inside this callback
           // can deadlock. The raw session user has no role, so never set it

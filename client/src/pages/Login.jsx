@@ -315,6 +315,10 @@ export default function Login() {
                         </div>
                       </div>
 
+                      <div className="-mt-2 flex justify-end">
+                        <Link to="/forgot-password" state={{ email, from: pathname }} className="text-sm font-medium text-deep-700 hover:underline">Forgot password?</Link>
+                      </div>
+
                       <div className="pt-2">
                         <Button type="submit" className="w-full bg-deep-600 text-white hover:bg-deep-700" disabled={loading}>
                           {loading ? (

@@ -111,8 +111,10 @@ Resend without exposing the provider key in the browser. Configure
 Supabase Auth confirmation emails use the project's SMTP settings separately:
 configure a production SMTP provider in **Authentication → SMTP Settings**, keep
 email confirmation enabled, set the production frontend as the Auth Site URL, and
-allow its `/student-login` redirect URL. The registration screen reports that the
+allow its `/student-login` and `/reset-password` redirect URLs. The registration screen reports that the
 applicant must verify their email before academy staff review the application.
+Password recovery uses Supabase Auth's `resetPasswordForEmail` and `updateUser`
+flows; the recovery email template must preserve the generated `{{ .ConfirmationURL }}` link.
 The function permits users to email their own verified address; only active
 administrators can send to other recipients.
 

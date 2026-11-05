@@ -40,7 +40,10 @@ serve(async (req) => {
     if (req.method === "POST" && (path === "/apply" || path === "")) {
       const body = await req.json()
       if (path === "" && body.action !== "apply") return json({ error: "Not found" }, 404)
-      const { email, password, name, phone, role, track, organisation, motivation } = body
+      const {
+        email, password, name, phone, role, track, organisation, motivation,
+        website, teachingDomains, teachingExperience, partnershipFocus, partnershipDetails,
+      } = body
       if (!email || !password || !name || !["Student", "Instructor", "Partner"].includes(role)) {
         return json({ error: "name, email, password and a valid role are required" }, 400)
       }
@@ -50,11 +53,38 @@ serve(async (req) => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 191 || name.trim().length > 191) {
         return json({ error: "Enter a valid email address and a name under 192 characters" }, 400)
       }
-      if ((phone && String(phone).length > 191) || (organisation && String(organisation).length > 200) || (motivation && String(motivation).length > 2000)) {
+      if ((phone && String(phone).length > 191) || (organisation && String(organisation).length > 200) ||
+          (motivation && String(motivation).length > 2000) || (website && String(website).length > 500) ||
+          (teachingExperience && String(teachingExperience).length > 3000) ||
+          (partnershipDetails && String(partnershipDetails).length > 3000)) {
         return json({ error: "One or more application fields are too long" }, 400)
       }
       if (role === "Student" && !["Finsoft", "Finops"].includes(track)) {
         return json({ error: "Students must choose a valid track" }, 400)
+      }
+      const validTeachingDomains = ["FaaS", "FinCore", "FinOps", "FinInfra"]
+      if (role === "Instructor" && (
+        !Array.isArray(teachingDomains) || teachingDomains.length === 0 ||
+        teachingDomains.some((domain) => !validTeachingDomains.includes(domain)) ||
+        typeof teachingExperience !== "string" || !teachingExperience.trim()
+      )) {
+        return json({ error: "Choose teaching domains and describe your relevant experience" }, 400)
+      }
+      const validPartnershipFocus = ["Learning content", "Project briefs", "Mentorship", "Internships and hiring", "Other"]
+      if (role === "Partner" && (
+        typeof organisation !== "string" || !organisation.trim() ||
+        !validPartnershipFocus.includes(partnershipFocus) ||
+        typeof partnershipDetails !== "string" || !partnershipDetails.trim()
+      )) {
+        return json({ error: "Partner applications require an organisation, partnership focus, and details" }, 400)
+      }
+      if (website) {
+        try {
+          const websiteUrl = new URL(website)
+          if (!["http:", "https:"].includes(websiteUrl.protocol)) throw new Error("Unsupported website protocol")
+        } catch {
+          return json({ error: "Enter a valid website URL" }, 400)
+        }
       }
       const normalizedEmail = email.trim().toLowerCase()
       const appOrigin = Deno.env.get("APP_ORIGIN") || req.headers.get("origin")
@@ -86,8 +116,13 @@ serve(async (req) => {
         phone: phone || null,
         requested_role: role,
         track: role === "Student" ? track : null,
-        organisation: organisation || null,
+        organisation: role === "Partner" ? organisation.trim() : null,
         motivation: motivation || null,
+        website: role === "Partner" ? website?.trim() || null : null,
+        teaching_domains: role === "Instructor" ? teachingDomains : [],
+        teaching_experience: role === "Instructor" ? teachingExperience.trim() : null,
+        partnership_focus: role === "Partner" ? partnershipFocus : null,
+        partnership_details: role === "Partner" ? partnershipDetails.trim() : null,
       })
       if (applicationError) return json({ error: applicationError.message }, 500)
       return json({ submitted: true, emailConfirmationRequired: !data.user.email_confirmed_at }, 201)

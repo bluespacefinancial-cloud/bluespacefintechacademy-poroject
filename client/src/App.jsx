@@ -44,6 +44,8 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 import Register from './pages/Register'
 import ApplicationReview from './pages/ApplicationReview'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -67,6 +69,8 @@ export default function App() {
       <Route path="/partner-login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/admin-login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-certificate/:token" element={<CertificateVerify />} />
       <Route path="/" element={user ? <AppLayout /> : <Navigate to="/student-login" replace />}>
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { BookOpen, ClipboardList, GraduationCap, ArrowRight, Users, Plus, CheckCircle2 } from 'lucide-react'
+import { BookOpen, ClipboardList, GraduationCap, ArrowRight, Users, Plus, CheckCircle2, Video } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -11,7 +11,7 @@ import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import MetricCard from '../components/dashboard/MetricCard'
 
-const initialData = { profile: null, cohorts: [], squads: [], modules: [], submissions: [] }
+const initialData = { profile: null, cohorts: [], squads: [], modules: [], submissions: [], liveClasses: [] }
 
 export default function InstructorDashboard({ user }) {
   const [data, setData] = useState(initialData)
@@ -38,14 +38,16 @@ export default function InstructorDashboard({ user }) {
         const squadIds = squadResult.data.map((item) => item.squad_id)
         const modules = moduleResult.data.filter((item) => cohortIds.includes(item.cohort_id) || item.created_by === profile.id)
         const moduleIds = modules.map((item) => item.id)
-        const [cohortRows, squadRows, lessonResult] = await Promise.all([
+        const [cohortRows, squadRows, lessonResult, liveClassResult] = await Promise.all([
           cohortIds.length ? supabase.from('cohorts').select('id, name, status').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
           squadIds.length ? supabase.from('squads').select('id, name, cohort_id').in('id', squadIds) : Promise.resolve({ data: [], error: null }),
           moduleIds.length ? supabase.from('lessons').select('id, module_id').in('module_id', moduleIds) : Promise.resolve({ data: [], error: null }),
+          cohortIds.length ? supabase.from('live_classes').select('id, title, starts_at, ends_at, is_offline, venue').in('cohort_id', cohortIds).eq('status', 'scheduled').order('starts_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
         ])
         if (cohortRows.error) throw cohortRows.error
         if (squadRows.error) throw squadRows.error
         if (lessonResult.error) throw lessonResult.error
+        if (liveClassResult.error) throw liveClassResult.error
 
         const lessonIds = lessonResult.data.map((item) => item.id)
         const labResult = lessonIds.length
@@ -74,7 +76,7 @@ export default function InstructorDashboard({ user }) {
           studentName: studentsById.get(item.user_id) || 'Student',
         }))
 
-        if (!cancelled) setData({ profile, cohorts: cohortRows.data, squads: squadRows.data, modules, submissions })
+        if (!cancelled) setData({ profile, cohorts: cohortRows.data, squads: squadRows.data, modules, submissions, liveClasses: liveClassResult.data || [] })
       } catch (loadError) {
         if (!cancelled) setError(loadError.message || 'Unable to load instructor dashboard')
       } finally {
@@ -119,6 +121,14 @@ export default function InstructorDashboard({ user }) {
                 Review labs
               </Link>
             </Button>
+            {data.liveClasses.length > 0 && (
+              <Button asChild size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700">
+                <Link to="/live-classes">
+                  <Video size={14} className="mr-1.5" />
+                  Join live class
+                </Link>
+              </Button>
+            )}
             <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
               <Link to="/my-modules">
                 <Plus size={14} className="mr-1.5" />

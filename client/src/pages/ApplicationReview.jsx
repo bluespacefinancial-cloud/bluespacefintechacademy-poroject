@@ -57,6 +57,7 @@ export default function ApplicationReview() {
       application.name,
       decision,
       reviewReason,
+      application.requested_role,
     )
     if (notification.success) {
       toast.success(`Application ${decision}; email sent`)

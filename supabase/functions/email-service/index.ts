@@ -44,7 +44,7 @@ serve(async (req) => {
       .select('type, is_active')
       .eq('email', authUser.email)
       .maybeSingle()
-    if (profileError || !profile || profile.is_active !== 1) return json({ error: 'Active academy account required' }, 403)
+    if (profileError || !profile || Number(profile.is_active) !== 1) return json({ error: 'Active academy account required' }, 403)
 
     const body = await req.json()
     const { to, subject, html, text } = body
@@ -63,8 +63,13 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ from, to: [to], subject: subject.trim(), html, ...(text ? { text } : {}) }),
     })
-    if (!response.ok) return json({ error: 'Email provider rejected the request' }, 502)
-    return json({ sent: true, data: await response.json() }, 202)
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const providerMessage = typeof result?.message === 'string' ? result.message : 'No provider details were returned'
+      console.error('Resend rejected email', { status: response.status, message: providerMessage })
+      return json({ error: `Email provider rejected the request (${response.status}): ${providerMessage}` }, 502)
+    }
+    return json({ sent: true, data: result }, 202)
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : 'Email delivery failed' }, 500)
   }

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
+import { Badge } from '../ui/badge'
 import {
   LayoutDashboard,
   BookOpen,
@@ -64,7 +65,7 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications', badge: unreadCount },
+        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -125,7 +126,7 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications', badge: unreadCount },
+        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -190,13 +191,11 @@ export default function Sidebar({ open, onOpen, onClose }) {
   const groups = sidebarGroups[user?.type] || sidebarGroups.Student
   const [openCategories, setOpenCategories] = useState({})
   const [unreadCount, setUnreadCount] = useState(0)
-  const [notifLoading, setNotifLoading] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     const loadUnreadCount = async () => {
       if (!user) return
-      setNotifLoading(true)
       try {
         const { count, error } = await supabase
           .from('notifications')
@@ -207,8 +206,6 @@ export default function Sidebar({ open, onOpen, onClose }) {
         if (!cancelled) setUnreadCount(count || 0)
       } catch {
         // silently fail - notification count is non-critical
-      } finally {
-        if (!cancelled) setNotifLoading(false)
       }
     }
     loadUnreadCount()
@@ -245,6 +242,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                 {group.items.map((item) => {
                   const active = location.pathname === item.to
                   const itemTourTag = `tour-nav-${item.to.replace(/^\//, '').replace(/[^a-z0-9]/g, '-') || 'dashboard'}`
+                  const badgeCount = item.to === '/notifications' ? unreadCount : null
                   return (
                     <NavLink
                       key={item.to}
@@ -259,6 +257,11 @@ export default function Sidebar({ open, onOpen, onClose }) {
                     >
                       <item.icon size={16} aria-hidden="true" className={active ? 'text-white' : 'text-slate-400'} />
                       <span>{item.label}</span>
+                      {badgeCount && badgeCount > 0 && (
+                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 bg-red-50 border-red-200 shrink-0 ml-1">
+                          {badgeCount}
+                        </Badge>
+                      )}
                     </NavLink>
                   )
                 })}
@@ -281,6 +284,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
         {groups.flatMap((g) => g.items).slice(0, 5).map((item) => {
           const active = location.pathname === item.to
+          const badgeCount = item.to === '/notifications' ? unreadCount : null
           return (
             <NavLink
               key={item.to}
@@ -291,6 +295,11 @@ export default function Sidebar({ open, onOpen, onClose }) {
               aria-current={active ? 'page' : undefined}
             >
               <item.icon size={20} aria-hidden="true" />
+              {badgeCount && badgeCount > 0 && (
+                <Badge variant="outline" className="text-[9px] font-bold text-red-600 bg-red-50 border-red-200 shrink-0 absolute top-1 right-1">
+                  {badgeCount}
+                </Badge>
+              )}
               <span className="visually-hidden">{item.label}</span>
             </NavLink>
           )

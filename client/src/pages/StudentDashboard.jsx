@@ -8,14 +8,12 @@ import {
   ArrowRight,
   PlayCircle,
   Video,
-  ExternalLink,
   CheckCircle2,
   Code2,
-  FileText,
   Clock,
-  Compass,
   GraduationCap,
-  Sparkles,
+  Award,
+  Compass,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
@@ -196,13 +194,111 @@ export default function StudentDashboard({ user }) {
     })
     .filter((l) => l.status !== 'graded')
 
+  // If student has not been assigned to a cohort yet, show clear onboarding state
+  if (!data.cohort) {
+    return (
+      <div className="w-full space-y-6">
+        <DashboardHeader
+          dataTour="student-header"
+          title="Fellowship Dashboard"
+          subtitle={`Welcome, ${data.profile?.name || user?.name || user?.email || 'Fellow'}. Your admission to BlueSPACE Fintech Academy is confirmed.`}
+          onStartTour={() => setTourOpen(true)}
+          actions={
+            <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
+              <Link to="/skills-profile">
+                <Compass size={14} className="mr-1.5" />
+                Complete Skills Profile
+              </Link>
+            </Button>
+          }
+        />
+
+        <div className="rounded-xl border border-gray-200/90 bg-white p-6 shadow-sm">
+          <div className="max-w-2xl">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 bg-deep-50 px-2.5 py-1 rounded border border-deep-100">
+              Cohort Placement in Progress
+            </span>
+            <h2 className="text-xl font-bold text-gray-900 mt-3 leading-tight">
+              Welcome to the Academy
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+              Your fellowship account is active. Our academic team is currently finalizing cohort schedules, instructor assignments, and collaborative squad groupings. Once your cohort is activated, your weekly syllabus, live masterclasses, lab workspaces, and squad channels will unlock here automatically.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              to="/skills-profile"
+              className="rounded-lg border border-gray-200/90 p-4 hover:border-deep-600/40 hover:shadow-sm transition-all bg-white flex flex-col justify-between"
+            >
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 mb-3">
+                  <Compass size={18} />
+                </div>
+                <h3 className="text-sm font-bold text-gray-900">1. Update Skills Profile</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Share your technical background, programming proficiency, and career goals to help faculty group your squad.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-deep-600 mt-4 flex items-center gap-1">
+                Complete profile <ArrowRight size={12} />
+              </span>
+            </Link>
+
+            <Link
+              to="/partner-catalog"
+              className="rounded-lg border border-gray-200/90 p-4 hover:border-deep-600/40 hover:shadow-sm transition-all bg-white flex flex-col justify-between"
+            >
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-3">
+                  <BookOpen size={18} />
+                </div>
+                <h3 className="text-sm font-bold text-gray-900">2. Explore Partner Electives</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Start learning right away with certified courses provided by industry partner agencies in payments and banking.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-deep-600 mt-4 flex items-center gap-1">
+                Browse catalog <ArrowRight size={12} />
+              </span>
+            </Link>
+
+            <Link
+              to="/notifications"
+              className="rounded-lg border border-gray-200/90 p-4 hover:border-deep-600/40 hover:shadow-sm transition-all bg-white flex flex-col justify-between"
+            >
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-3">
+                  <Calendar size={18} />
+                </div>
+                <h3 className="text-sm font-bold text-gray-900">3. Orientation Alerts</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Receive notifications and live calendar invites as soon as your cohort orientation session is published.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-deep-600 mt-4 flex items-center gap-1">
+                View alerts <ArrowRight size={12} />
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        <WelcomeGuide
+          role="Student"
+          forceOpen={tourOpen}
+          onClose={() => setTourOpen(false)}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="w-full space-y-6">
       {/* Dashboard Top Header & Progress Ribbon */}
       <DashboardHeader
         dataTour="student-header"
         title="My Learning Dashboard"
-        subtitle={`${data.profile?.name || user?.name || user?.email || 'Fellow'} • ${data.profile?.track || 'Fintech Core'} Track • ${data.cohort?.name || 'Cohort 2026-A'}`}
+        subtitle={`${data.profile?.name || user?.name || user?.email || 'Fellow'} • ${data.profile?.track || 'Fintech Core'} Track • ${data.cohort?.name}`}
         onStartTour={() => setTourOpen(true)}
         actions={
           <div className="flex items-center gap-3">
@@ -402,8 +498,8 @@ export default function StudentDashboard({ user }) {
           </div>
 
           <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-center">
-            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 hover:text-deep-700">
-              Need 1-on-1 help? Book a Mentor Clinic →
+            <Link to="/live-classes" className="text-xs font-semibold text-deep-600 hover:text-deep-700">
+              View upcoming cohort masterclasses & clinics →
             </Link>
           </div>
         </Card>

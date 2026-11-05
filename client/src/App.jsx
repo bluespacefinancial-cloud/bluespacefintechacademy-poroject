@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -46,6 +47,15 @@ import Register from './pages/Register'
 import ApplicationReview from './pages/ApplicationReview'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import MarketingHome from './pages/MarketingHome'
+
+function RootRoute({ user }) {
+  const location = useLocation()
+  if (user) return <AppLayout />
+  if (location.pathname === '/') return <MarketingHome />
+  return <Navigate to="/student-login" replace />
+}
+RootRoute.propTypes = { user: PropTypes.object }
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -72,7 +82,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-certificate/:token" element={<CertificateVerify />} />
-      <Route path="/" element={user ? <AppLayout /> : <Navigate to="/student-login" replace />}>
+      <Route path="/" element={<RootRoute user={user} />}>
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="my-learning" element={<ProtectedRoute roles={['Student']}><MyLearning /></ProtectedRoute>} />

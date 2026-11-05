@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide.react'
+import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 const STAGE_LABELS = {
   foundations: 'Foundations',
@@ -31,6 +32,7 @@ const formatTime = (minutes) => {
 
 export default function MyLearning() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [modules, setModules] = useState([])
   const [lessons, setLessons] = useState([])
   const [activeModuleId, setActiveModuleId] = useState(null)
@@ -45,17 +47,16 @@ export default function MyLearning() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [user?.id])
 
   const loadData = async () => {
     try {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user?.id) { setLoading(false); return }
       const { data: enrolments } = await supabase
         .from('enrolments')
         .select('cohort_id, track, squad_id')
         .eq('user_id', user.id)
-        .eq('status', 'active')
+        .in('status', ['enrolled', 'active'])
       if (!enrolments || enrolments.length === 0) {
         setLoading(false)
         return
@@ -90,7 +91,7 @@ export default function MyLearning() {
         const completedLessons = progressData?.filter(p => p.is_completed).length || 0
         const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
         setOverallStats({
-          overallCompletion,
+          completion: overallCompletion,
           attendance: 0,
           labsComplete: completedLessons,
           currentGrade: 0,
@@ -279,6 +280,7 @@ export default function MyLearning() {
                 return (
                   <Card
                     key={lesson.id}
+                    onClick={() => handleLessonClick(lesson)}
                     className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
                       isCompleted ? 'border-brand-100 bg-brand-50' : ''
                     }`}
@@ -300,7 +302,7 @@ export default function MyLearning() {
                           <p className="text-[10px] text-gray-500">{formatTime(lesson.duration_minutes)}</p>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
+                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleLessonClick(lesson) }}>
                         {isCompleted ? 'Review' : 'Start'}
                       </Button>
                     </CardContent>

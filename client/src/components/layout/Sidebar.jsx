@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, Eye, CheckCircle, FileText, Video, Bell, Briefcase, ListPlus } from 'lucide.react'
+import { LayoutDashboard, BookOpen, GraduationCap, Users, Activity, Award, Target, LogOut, X, ClipboardList, BarChart3, MapPin, MoreHorizontal, CheckCircle, FileText, Video, Bell, Briefcase, ListPlus } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const navItems = {
   Student: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
     { to: '/my-learning', icon: BookOpen, label: 'My Learning', ariaLabel: 'My Learning' },
+    { to: '/lab-workspace', icon: ClipboardList, label: 'Lab Workspace', ariaLabel: 'Lab Workspace' },
     { to: '/my-squad', icon: Users, label: 'My Squad', ariaLabel: 'My Squad' },
     { to: '/progress', icon: Activity, label: 'Progress', ariaLabel: 'Progress' },
     { to: '/capstone', icon: FileText, label: 'Capstone', ariaLabel: 'Capstone' },
@@ -16,8 +17,6 @@ const navItems = {
     { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace', ariaLabel: 'Project Workspace' },
     { to: '/peer-reviews', icon: ClipboardList, label: 'Peer Reviews', ariaLabel: 'Peer Reviews' },
     { to: '/partner-catalog', icon: BookOpen, label: 'Partner Courses', ariaLabel: 'Partner Catalog' },
-    { to: '/project-review', icon: ClipboardList, label: 'Project Review', ariaLabel: 'Project Review' },
-    { to: '/mentor-evaluation', icon: CheckCircle, label: 'Mentor Evaluation', ariaLabel: 'Mentor Evaluation' },
   ],
   Instructor: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },

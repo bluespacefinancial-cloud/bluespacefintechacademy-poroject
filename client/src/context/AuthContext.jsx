@@ -101,6 +101,10 @@ export function AuthProvider({ children }) {
     if (error) throw error
 
     const fullUser = await loadProfile(data.user)
+    if (isBlocked(fullUser)) {
+      await supabase.auth.signOut()
+      throw new Error('This account is not active in the academy. Contact an administrator for help.')
+    }
 
     localStorage.setItem('token', data.session.access_token)
     localStorage.setItem('user', JSON.stringify(fullUser))

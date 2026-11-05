@@ -105,6 +105,12 @@ npm run dev
    ```
 17. Copy your Supabase URL and anon key to `.env`
 
+The `email-service` Edge Function sends mail through Resend without exposing the
+provider key in the browser. Configure `RESEND_API_KEY`, `EMAIL_FROM`, and
+`APP_ORIGIN` as Supabase function secrets before using email notifications.
+The function permits users to email their own verified address; only active
+administrators can send to other recipients.
+
 After migration 009, administrators can manage instructor boundaries from
 `/instructor-assignments`. Create cohort and squad assignments before relying on
 instructor-specific monitoring and mentor evaluation visibility.

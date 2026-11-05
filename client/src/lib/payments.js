@@ -1,8 +1,6 @@
-import { supabase } from '../lib/supabase'
+import { SUPABASE_URL, supabase } from '../lib/supabase'
 
-const EDGE_FUNCTIONS_BASE = import.meta.env.VITE_SUPABASE_URL
-  ? `${supabaseUrl}/functions/v1`
-  : ''
+const EDGE_FUNCTIONS_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : ''
 
 export const payments = {
   async createCheckoutSession(amount, currency, description, metadata = {}) {

@@ -1,31 +1,14 @@
-import { supabase } from '../lib/supabase'
-
-const EMAIL_SERVICE_URL = 'https://api.resend.com/v1/emails'
-const EMAIL_API_KEY = process.env.RESEND_API_KEY || ''
+import { supabase } from './supabase'
 
 export const emailService = {
   async sendEmail(to, subject, htmlContent, textContent) {
     try {
-      const response = await fetch(EMAIL_SERVICE_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${EMAIL_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'BlueSPACE Academy <notifications@bluespacefintechacademy.com>',
-          to: [to],
-          subject,
-          html: htmlContent,
-          text: textContent,
-        }),
+      if (!supabase) throw new Error('Email delivery is not configured.')
+      const { data, error } = await supabase.functions.invoke('email-service', {
+        body: { to, subject, html: htmlContent, text: textContent },
       })
-
-      if (!response.ok) {
-        throw new Error(`Email API error: ${response.statusText}`)
-      }
-
-      return { success: true, data: await response.json() }
+      if (error) throw error
+      return { success: true, data }
     } catch (err) {
       console.error('Email error:', err)
       return { success: false, error: err.message }
@@ -34,7 +17,7 @@ export const emailService = {
 
   async sendWelcomeEmail(email, name, role) {
     return this.sendEmail(
-      to,
+      email,
       'Welcome to BlueSPACE Fintech Academy',
       `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

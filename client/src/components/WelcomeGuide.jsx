@@ -79,7 +79,15 @@ const WELCOME_STEPS = {
       target: 'instructor-metrics',
       badge: 'Teaching Metrics',
       title: 'Cohort & workload indicators',
-      content: 'Monitor your assigned cohorts, authored and published modules, and pending student submissions awaiting evaluation.',
+      content: 'Monitor your assigned cohorts, authored modules, and pending student submissions awaiting evaluation.',
+    },
+    {
+      target: 'instructor-reviews',
+      badge: 'Grading Queue',
+      title: 'Priority lab grading queue',
+      content: 'Access pending student lab submissions directly from your dashboard to review code, provide feedback, and assign grades.',
+      action: 'Grade Labs',
+      route: '/labs-to-review',
     },
     {
       target: 'instructor-modules',

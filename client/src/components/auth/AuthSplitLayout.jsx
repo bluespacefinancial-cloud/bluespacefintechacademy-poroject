@@ -14,7 +14,7 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
           fetchPriority="high"
           onError={(event) => { event.currentTarget.style.display = 'none' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-deep-900/85 via-deep-800/75 to-brand-900/75" />
+        <div className="absolute inset-0 bg-gradient-to-b from-deep-900/75 via-deep-900/35 to-transparent" />
         <motion.img
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}

@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Bell, Users } from 'lucide-react'
-import { Button } from '../components/ui/button'
+import { Bell, Users, Eye, CheckCircle } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
 import { supabase } from '../lib/supabase'
+import { getCurrentProfile } from '../lib/profile'
 
 const TYPE_CONFIG = {
   announcement: { label: 'Announcement', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
@@ -15,13 +13,12 @@ const TYPE_CONFIG = {
 
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState([])
-  const [newTitle, setNewTitle] = useState('')
-  const [newContent, setNewContent] = useState('')
-  const [newAudience, setNewAudience] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [readAnnouncements, setReadAnnouncements] = useState(new Set())
 
   useEffect(() => {
     loadAnnouncements()
+    loadReadState()
   }, [])
 
   const loadAnnouncements = async () => {
@@ -40,40 +37,40 @@ export default function Announcements() {
     }
   }
 
-  const handleCreate = async (e) => {
-    e.preventDefault()
-    if (!newTitle || !newContent) return
+  const loadReadState = async () => {
+    const profile = await getCurrentProfile()
+    if (!profile) return
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user?.email) return
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('id, name')
-        .eq('email', user.email)
-        .single()
-      if (profileError) throw profileError
+      const { data } = await supabase
+        .from('announcement_reads')
+        .select('announcement_id')
+        .eq('user_id', profile.id)
 
-      const { error } = await supabase
-        .from('announcements')
-        .insert({
-          title: newTitle,
-          content: newContent,
-          audience: newAudience,
-          author_id: profile.id,
-          type: 'announcement',
-          pinned: false,
-        })
-
-      if (error) throw error
-      setNewTitle('')
-      setNewContent('')
-      setNewAudience('all')
-      await loadAnnouncements()
-    } catch (err) {
-      console.error('Error creating announcement:', err)
-      alert('Failed to create announcement')
+      if (data) {
+        setReadAnnouncements(new Set(data.map((d) => d.announcement_id)))
+      }
+    } catch {
+      // announcement_reads table may not exist yet
     }
+  }
+
+  const markAsRead = (announcementId) => {
+    if (readAnnouncements.has(announcementId)) return
+    const profile = getCurrentProfile()
+    if (!profile) return
+    profile.then((p) => {
+      if (!p) return
+      supabase
+        .from('announcement_reads')
+        .insert({ announcement_id: announcementId, user_id: p.id })
+        .then(() => {
+          setReadAnnouncements((prev) => new Set([...prev, announcementId]))
+        })
+        .catch(() => {
+          // Ignore - table may not exist
+        })
+    })
   }
 
   if (loading) {
@@ -94,68 +91,11 @@ export default function Announcements() {
           <div>
             <h1 className="text-2xl font-bold text-deep-600 mb-1">Announcements</h1>
             <p className="text-sm text-gray-500">
-              Communicate with Fellows across cohorts
+              Academy announcements and important updates
             </p>
           </div>
-          <Button>
-            <MapPin size={16} className="mr-2" />
-            New Announcement
-          </Button>
         </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-bold">Create New Announcement</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form onSubmit={handleCreate} className="space-y-4">
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                Title
-              </label>
-              <Input
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Enter announcement title"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                Content
-              </label>
-              <textarea
-                value={newContent}
-                onChange={(e) => setNewContent(e.target.value)}
-                placeholder="Enter announcement content"
-                required
-                rows={3}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-deep-600 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-brand-500">
-                Audience
-              </label>
-              <Select value={newAudience} onValueChange={(v) => setNewAudience(v)}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select audience" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Fellows</SelectItem>
-                  <SelectItem value="finsoft">Finsoft Fellows</SelectItem>
-                  <SelectItem value="finops">Finops Fellows</SelectItem>
-                  <SelectItem value="cohort1">Cohort 1 Only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" className="w-full">
-              Publish Announcement
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
 
       <div className="mt-6 space-y-3">
         {announcements.length === 0 ? (
@@ -164,42 +104,52 @@ export default function Announcements() {
             <p>No announcements yet</p>
           </div>
         ) :
-          announcements.map((announcement) => (
-            <Card
-              key={announcement.id}
-              className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
-                announcement.pinned ? 'border-brand-200 bg-brand-50' : ''
-              }`}
-            >
-              <CardHeader className="flex flex-row items-center justify-between py-3">
-                <div className="flex items-center gap-2">
-                  {announcement.pinned && (
-                    <Badge variant="outline" className="text-[10px] mr-2">Pinned</Badge>
-                  )}
-                  <Badge className={(TYPE_CONFIG[announcement.type] || TYPE_CONFIG.announcement).color}>{(TYPE_CONFIG[announcement.type] || TYPE_CONFIG.announcement).label}</Badge>
-                </div>
-                <span className="text-[10px] text-gray-400">
-                  {new Date(announcement.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3">
-                <div className="space-y-2">
-                  <CardTitle className="text-sm">{announcement.title}</CardTitle>
-                  <p className="text-sm text-gray-600">{announcement.content}</p>
-                </div>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between pt-3">
-                <div className="flex items-center gap-3">
-                  <Users size={12} className="text-gray-400" />
-                  <span className="text-xs text-gray-500">{announcement.audience}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Bell size={12} className="text-gray-400" />
-                  <span className="text-xs text-gray-500">{announcement.author_name}</span>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+          announcements.map((announcement) => {
+            const isRead = readAnnouncements.has(announcement.id)
+            const typeConfig = TYPE_CONFIG[announcement.type] || TYPE_CONFIG.announcement
+
+            return (
+              <Card
+                key={announcement.id}
+                onClick={() => markAsRead(announcement.id)}
+                className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 p-4 ${
+                  announcement.pinned ? 'border-brand-200 bg-brand-50' : ''
+                } ${!isRead ? 'border-l-4 border-brand-600 bg-white' : 'border-l-4 border-transparent bg-gray-50'}`}
+              >
+                <CardHeader className="flex flex-row items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    {announcement.pinned && (
+                      <Badge variant="outline" className="text-[10px] mr-2">Pinned</Badge>
+                    )}
+                    <Badge className={typeConfig.color}>{typeConfig.label}</Badge>
+                  </div>
+                  <span className="text-[10px] text-gray-400">
+                    {new Date(announcement.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </CardHeader>
+                <CardContent className="pt-2 pb-2">
+                  <div className="space-y-2">
+                    <CardTitle className="text-sm font-semibold">{announcement.title}</CardTitle>
+                    <p className="text-sm text-gray-600">{announcement.content}</p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-3">
+                    <Users size={12} className="text-gray-400" />
+                    <span className="text-xs text-gray-500">{announcement.audience}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {!isRead ? (
+                      <Eye size={12} className="text-gray-400" />
+                    ) : (
+                      <CheckCircle size={12} className="text-emerald-500" />
+                    )}
+                    <span className="text-xs text-gray-500">{isRead ? 'Read' : 'Unread'}</span>
+                  </div>
+                </CardFooter>
+              </Card>
+            )
+          })}
       </div>
     </div>
   )

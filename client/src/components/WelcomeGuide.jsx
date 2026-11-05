@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { ChevronRight, ArrowLeft, X, ExternalLink } from 'lucide-react'
+import { ChevronRight, ArrowLeft, X, ExternalLink, Compass } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { useNavigate } from 'react-router-dom'
@@ -8,124 +8,153 @@ import { useNavigate } from 'react-router-dom'
 const WELCOME_STEPS = {
   Student: [
     {
-      target: 'student-header',
-      title: 'Welcome to your learning dashboard',
-      content: 'This dashboard gives you a complete overview of your academy journey, track progress, and key tasks.',
+      target: 'tour-sidebar',
+      badge: 'Sidebar Navigation',
+      title: 'Academy command center',
+      content: 'This sidebar is your primary navigation. Access live classes, interactive labs, squad projects, and graduation credentials from any screen.',
     },
     {
-      target: 'student-metrics',
-      title: 'Performance & progress indicators',
-      content: 'Monitor your course completion rate, live class attendance, current grade, and completed lessons at a glance.',
-    },
-    {
-      target: 'student-current-learning',
-      title: 'Current module in progress',
-      content: 'Jump directly back into your lessons, watch videos, read materials, and complete hands-on lab exercises.',
+      target: 'tour-nav-my-learning',
+      badge: 'Coursework & Curriculum',
+      title: 'My Learning & lesson modules',
+      content: '"My Learning" contains your complete weekly syllabus, video lectures, and reading materials. Start and review lesson content at your own pace.',
       action: 'Go to My Learning',
       route: '/my-learning',
     },
     {
-      target: 'student-squad',
-      title: 'Your assigned squad',
-      content: 'Meet your squad teammates, collaborate on projects, and prepare for group mentoring clinics.',
+      target: 'tour-nav-lab-workspace',
+      badge: 'Practical Coding Labs',
+      title: 'Lab Workspace & grading',
+      content: 'Complete hands-on fintech labs, submit your GitHub repositories for evaluation, and read detailed grading feedback from instructors.',
+      action: 'Open Lab Workspace',
+      route: '/lab-workspace',
+    },
+    {
+      target: 'tour-nav-my-squad',
+      badge: 'Team Collaboration',
+      title: 'My Squad & team challenges',
+      content: 'Work together with your assigned peer squad. Collaborate on real-world use-case challenges, conduct peer reviews, and attend mentoring clinics.',
       action: 'View My Squad',
       route: '/my-squad',
     },
     {
-      target: 'student-deadlines',
-      title: 'Upcoming deadlines',
-      content: 'Keep track of module milestones and deliverable timelines to stay on schedule for graduation.',
+      target: 'student-metrics',
+      badge: 'Performance Indicators',
+      title: 'Real-time learning metrics',
+      content: 'Track your overall course completion rate, attendance at required live sessions, graded lab scores, and completed module milestones.',
+    },
+    {
+      target: 'student-current-learning',
+      badge: 'Active Module',
+      title: 'Resume active coursework',
+      content: 'Jump directly back into your in-progress module with one click, or check your upcoming project milestones and squad teammates below.',
+      action: 'Continue Learning',
+      route: '/my-learning',
     },
   ],
   Instructor: [
     {
-      target: 'instructor-header',
-      title: 'Instructor teaching dashboard',
-      content: 'Welcome to your teaching workspace. Manage cohorts, author modules, and evaluate student work from one central console.',
+      target: 'tour-sidebar',
+      badge: 'Sidebar Navigation',
+      title: 'Teaching console navigation',
+      content: 'Quickly switch between assigned cohorts, curriculum modules, grading queues, live clinic schedules, and student squads.',
+    },
+    {
+      target: 'tour-nav-labs-to-review',
+      badge: 'Grading Queue',
+      title: 'Labs to Review & evaluations',
+      content: 'Review incoming student lab submissions, inspect code repositories, assign rubric scores, and return constructive feedback.',
+      action: 'Review Labs',
+      route: '/labs-to-review',
     },
     {
       target: 'instructor-metrics',
-      title: 'Teaching overview metrics',
-      content: 'Key numbers for your assigned cohorts, authored and published modules, and pending lab submissions waiting for your review.',
+      badge: 'Teaching Metrics',
+      title: 'Cohort & workload indicators',
+      content: 'Monitor your assigned cohorts, authored and published modules, and pending student submissions awaiting evaluation.',
     },
     {
       target: 'instructor-modules',
-      title: 'Your teaching modules',
-      content: 'Access course modules for your assigned cohorts. Create lessons, attach practical labs, and update publication status.',
-      action: 'Open modules',
+      badge: 'Curriculum Management',
+      title: 'Author & manage teaching modules',
+      content: 'View modules assigned to your cohorts, author new lesson content, attach practical labs, and update publication status.',
+      action: 'Open Modules',
       route: '/my-modules',
     },
     {
       target: 'instructor-squads',
+      badge: 'Mentorship',
       title: 'Assigned student squads',
-      content: 'View squads under your mentorship. Coordinate clinic sessions, answer student questions, and support practical work.',
-      action: 'View squads',
+      content: 'Mentor your squads through practical fintech challenges and schedule office hours in Mentor Clinics.',
+      action: 'View Squads',
       route: '/squads',
-    },
-    {
-      target: 'instructor-reviews',
-      title: 'Submissions waiting for review',
-      content: 'Review and grade student lab code and assessments. Provide detailed rubric feedback to help students progress.',
-      action: 'Review labs',
-      route: '/labs-to-review',
     },
   ],
   Partner: [
     {
-      target: 'partner-header',
-      title: 'Partner agency workspace',
-      content: 'Welcome to your partner portal. Build specialized fintech courses, submit them for review, and reach academy fellows.',
-    },
-    {
-      target: 'partner-metrics',
-      title: 'Course portfolio breakdown',
-      content: 'Keep tabs on courses currently in draft, courses under review by academy staff, and published offerings.',
+      target: 'tour-sidebar',
+      badge: 'Sidebar Navigation',
+      title: 'Partner portal navigation',
+      content: 'Access your Course Studio, manage your partner agency profile, and view academy curriculum distributions.',
     },
     {
       target: 'partner-action',
-      title: 'Course Studio access',
-      content: 'Launch the Course Studio to build curriculum structure, write module descriptions, and author practical labs.',
-      action: 'Open course studio',
+      badge: 'Course Studio',
+      title: 'Launch Course Studio',
+      content: 'Author specialized fintech curriculum with video/audio lessons, reading material, and practical lab assignments.',
+      action: 'Open Studio',
       route: '/partner-courses',
     },
     {
+      target: 'partner-metrics',
+      badge: 'Portfolio Metrics',
+      title: 'Course pipeline status',
+      content: 'Track drafts in progress, modules submitted for academy review, and live published courses available to students.',
+    },
+    {
       target: 'partner-courses',
-      title: 'Your course directory',
-      content: 'Review the current status of each course draft, check reviewer feedback, and submit revisions for approval.',
-      action: 'Manage courses',
+      badge: 'Course Directory',
+      title: 'Manage course revisions & submissions',
+      content: 'View academy review status, inspect reviewer feedback, and update published curriculum.',
+      action: 'Manage Courses',
       route: '/partner-courses',
     },
   ],
   Administrator: [
     {
-      target: 'admin-header',
-      title: 'Academy operations console',
-      content: 'High-level administration for user permissions, cohorts, admissions queues, and partner content approvals.',
+      target: 'tour-sidebar',
+      badge: 'Sidebar Navigation',
+      title: 'System administration console',
+      content: 'Full administrative control over user accounts, admissions queues, cohort schedules, curriculum approval, and placement tracking.',
     },
     {
       target: 'admin-metrics',
-      title: 'Academy operational metrics',
-      content: 'Monitor active cohorts, total enrolled fellows, pending admissions applications, and partner courses under review.',
+      badge: 'Operations Metrics',
+      title: 'Academy indicators',
+      content: 'Real-time counters for active cohorts, enrolled fellows, pending admissions applicants, and partner course submissions.',
     },
     {
       target: 'admin-applications',
-      title: 'Pending applications queue',
-      content: 'Review candidate applications for student seats, instructor roles, and partner agencies.',
-      action: 'Open queue',
+      badge: 'Admissions Pipeline',
+      title: 'Review candidate applications',
+      content: 'Audit and approve applicant submissions for student seats, instructor credentials, and partner organizations.',
+      action: 'Open Queue',
       route: '/applications',
     },
     {
       target: 'admin-partner-reviews',
+      badge: 'Curriculum Quality',
       title: 'Partner course approvals',
-      content: 'Review submitted curricula from partner institutions, verify standards, and approve for student enrolment.',
-      action: 'Review courses',
+      content: 'Evaluate partner course drafts, ensure academy pedagogy standards, and approve for student enrolment.',
+      action: 'Review Courses',
       route: '/partner-course-review',
     },
     {
       target: 'admin-cohorts',
-      title: 'Active & planned cohorts',
-      content: 'Track scheduled cohort start dates, student capacities, and assigned tracks across the academy.',
-      action: 'Manage cohorts',
+      badge: 'Cohort Scheduling',
+      title: 'Cohort management',
+      content: 'Configure cohort start dates, student capacities, and tracks for upcoming academic cycles.',
+      action: 'Manage Cohorts',
       route: '/cohorts',
     },
   ],
@@ -140,12 +169,10 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
   })
   const [step, setStep] = useState(0)
   const [targetRect, setTargetRect] = useState(null)
-  const [placement, setPlacement] = useState('bottom')
   const tooltipRef = useRef(null)
 
   const steps = WELCOME_STEPS[role] || WELCOME_STEPS.Student
 
-  // If forceOpen prop changes, reset dismissed state
   useEffect(() => {
     if (forceOpen) {
       setDismissed(false)
@@ -153,7 +180,6 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
     }
   }, [forceOpen])
 
-  // Listen for custom trigger events to reopen tour
   useEffect(() => {
     const handleReopen = () => {
       setDismissed(false)
@@ -186,21 +212,8 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
       bottom: rect.bottom,
       right: rect.right,
     })
-
-    // Determine vertical placement based on viewport space
-    const spaceBelow = window.innerHeight - rect.bottom
-    const spaceAbove = rect.top
-
-    if (spaceBelow >= 240) {
-      setPlacement('bottom')
-    } else if (spaceAbove >= 240) {
-      setPlacement('top')
-    } else {
-      setPlacement('bottom')
-    }
   }, [dismissed, step, steps])
 
-  // Scroll target into view and update coordinates when step changes
   useEffect(() => {
     if (dismissed) return
 
@@ -209,15 +222,22 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
 
     const targetEl = document.querySelector(`[data-tour="${current.target}"]`)
     if (targetEl) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // If target is in the main body (not the fixed sidebar), scroll to it leaving header offset
+      const isSidebar = current.target.startsWith('tour-sidebar') || current.target.startsWith('tour-nav')
+      if (!isSidebar) {
+        const elementTop = targetEl.getBoundingClientRect().top + window.scrollY
+        const headerOffset = 80 // 56px sticky topbar + 24px breathing space
+        window.scrollTo({
+          top: Math.max(0, elementTop - headerOffset),
+          behavior: 'smooth',
+        })
+      }
     }
 
-    // Allow smooth scroll to settle before measuring
     const timeout = setTimeout(updatePosition, 180)
     return () => clearTimeout(timeout)
   }, [step, dismissed, steps, updatePosition])
 
-  // Reposition on scroll and resize
   useEffect(() => {
     if (dismissed) return
 
@@ -254,99 +274,133 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
   const current = steps[step] || steps[0]
   const isLast = step === steps.length - 1
 
-  // Compute tooltip position
   const CARD_WIDTH = 380
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
-  let style = {}
+  let tooltipStyle = {}
+  let isTargetingSidebar = false
+
   if (!isMobile && targetRect) {
-    const horizontalMargin = 20
-    const desiredLeft = targetRect.left
-    const maxLeft = window.innerWidth - CARD_WIDTH - horizontalMargin
-    const clampedLeft = Math.max(horizontalMargin, Math.min(desiredLeft, maxLeft))
+    isTargetingSidebar = targetRect.left < 200
 
-    if (placement === 'bottom') {
-      style = {
+    if (isTargetingSidebar) {
+      // Place cleanly to the RIGHT of the sidebar
+      const cardTop = Math.max(76, Math.min(targetRect.top + targetRect.height / 2 - 80, window.innerHeight - 300))
+      tooltipStyle = {
         position: 'fixed',
-        top: `${Math.min(targetRect.bottom + 12, window.innerHeight - 260)}px`,
-        left: `${clampedLeft}px`,
+        top: `${cardTop}px`,
+        left: `${Math.min(targetRect.right + 20, window.innerWidth - CARD_WIDTH - 24)}px`,
         width: `${CARD_WIDTH}px`,
         zIndex: 50,
       }
     } else {
-      style = {
+      // Main canvas element
+      const spaceBelow = window.innerHeight - targetRect.bottom
+      const spaceAbove = targetRect.top
+
+      let cardTop = targetRect.bottom + 16
+      if (spaceBelow < 260 && spaceAbove > 260) {
+        cardTop = Math.max(76, targetRect.top - 240)
+      } else {
+        cardTop = Math.min(cardTop, window.innerHeight - 280)
+      }
+
+      // Clamp horizontally beside sidebar
+      const minLeft = 280
+      const maxLeft = window.innerWidth - CARD_WIDTH - 24
+      const desiredLeft = targetRect.left
+      const cardLeft = Math.max(minLeft, Math.min(desiredLeft, maxLeft))
+
+      tooltipStyle = {
         position: 'fixed',
-        bottom: `${Math.max(window.innerHeight - targetRect.top + 12, 20)}px`,
-        left: `${clampedLeft}px`,
+        top: `${cardTop}px`,
+        left: `${cardLeft}px`,
         width: `${CARD_WIDTH}px`,
         zIndex: 50,
       }
     }
   } else {
-    // Mobile or fallback: neatly positioned at bottom
-    style = {
+    // Mobile or fallback: fixed bottom sheet
+    tooltipStyle = {
       position: 'fixed',
       bottom: '16px',
       left: '16px',
       right: '16px',
-      maxWidth: '440px',
+      maxWidth: '460px',
       margin: '0 auto',
       zIndex: 50,
     }
   }
 
+  // Generous padding around target so highlight NEVER intersects text
+  const PADDING = 8
+
   return (
     <>
-      {/* Target spotlight border overlay (no gradient, clean solid highlight) */}
+      {/* Dimmed backdrop to focus eye */}
+      <div
+        className="fixed inset-0 z-40 bg-slate-950/25 pointer-events-none transition-opacity duration-300"
+        aria-hidden="true"
+      />
+
+      {/* Target highlight box with generous padding */}
       {targetRect && !isMobile && (
         <div
-          className="fixed pointer-events-none z-40 transition-all duration-200 ease-out rounded-xl border-2 border-deep-600 ring-4 ring-deep-600/15"
+          className="fixed pointer-events-none z-40 transition-all duration-200 ease-out rounded-xl border-2 border-deep-600 bg-deep-600/5 ring-4 ring-deep-600/20"
           style={{
-            top: `${targetRect.top - 4}px`,
-            left: `${targetRect.left - 4}px`,
-            width: `${targetRect.width + 8}px`,
-            height: `${targetRect.height + 8}px`,
+            top: `${targetRect.top - PADDING}px`,
+            left: `${targetRect.left - PADDING}px`,
+            width: `${targetRect.width + PADDING * 2}px`,
+            height: `${targetRect.height + PADDING * 2}px`,
           }}
           aria-hidden="true"
         />
       )}
 
-      {/* Floating Tour Guide Tooltip */}
+      {/* Tour Guide Card */}
       <div
         ref={tooltipRef}
-        style={style}
-        className="transition-all duration-200 ease-out"
+        style={tooltipStyle}
+        className="transition-all duration-200 ease-out max-h-[calc(100vh-100px)] flex flex-col"
         role="dialog"
-        aria-label="Interactive guide"
+        aria-label="Interactive tour guide"
       >
-        <Card className="border border-gray-200 bg-white text-gray-900 shadow-xl rounded-xl overflow-hidden">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-3 pb-2">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-deep-600 bg-deep-50 px-2 py-0.5 rounded">
-                    Step {step + 1} of {steps.length}
+        <Card className="border border-gray-200/90 bg-white text-gray-900 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
+          <CardContent className="p-5 flex flex-col justify-between">
+            <div>
+              {/* Header: Badge & Step count */}
+              <div className="flex items-center justify-between gap-2 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-deep-600 bg-deep-50 px-2 py-0.5 rounded border border-deep-100">
+                    <Compass size={12} />
+                    {current.badge || `Step ${step + 1}`}
+                  </span>
+                  <span className="text-xs text-gray-400 font-medium">
+                    {step + 1} of {steps.length}
                   </span>
                 </div>
-                <h2 className="text-base font-bold text-gray-900 tracking-tight leading-snug">
-                  {current.title}
-                </h2>
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  aria-label="Close guide"
+                >
+                  <X size={16} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={dismiss}
-                className="p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
-                aria-label="Close guide"
-              >
-                <X size={16} />
-              </button>
+
+              {/* Title & Body */}
+              <h2 className="text-base font-bold text-gray-900 tracking-tight leading-snug mt-1">
+                {current.title}
+              </h2>
+
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mt-1.5">
+                {current.content}
+              </p>
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mt-1">
-              {current.content}
-            </p>
-
-            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            {/* Actions Bar */}
+            <div className="mt-5 pt-3.5 border-t border-gray-100 flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={dismiss}

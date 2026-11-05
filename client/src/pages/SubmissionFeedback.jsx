@@ -37,7 +37,7 @@ export default function SubmissionFeedback() {
           *,
           labs (title, domain),
           assessments (title, module_id),
-          users (name, email)
+          users!submissions_user_id_fkey (name, email)
         `)
         .eq('id', submissionId)
         .single()

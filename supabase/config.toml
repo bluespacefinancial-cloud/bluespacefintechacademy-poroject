@@ -5,3 +5,39 @@ verify_jwt = false
 [functions.email-service]
 # The function validates the caller's Supabase access token and academy role.
 verify_jwt = false
+
+# These templates apply to local Supabase development. Copy the matching HTML
+# into Authentication > Email Templates in the hosted project as well.
+[auth.email.template.confirmation]
+subject = "Confirm your BlueSPACE email address"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your BlueSPACE password"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.magic_link]
+subject = "Your BlueSPACE sign-in link"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.invite]
+subject = "Your BlueSPACE Academy invitation"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new BlueSPACE email address"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.reauthentication]
+subject = "Your BlueSPACE verification code"
+content_path = "./supabase/templates/reauthentication.html"
+
+[auth.email.notification.password_changed]
+enabled = true
+subject = "Your BlueSPACE password changed"
+content_path = "./supabase/templates/password_changed_notification.html"
+
+[auth.email.notification.email_changed]
+enabled = true
+subject = "Your BlueSPACE email address changed"
+content_path = "./supabase/templates/email_changed_notification.html"

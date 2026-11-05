@@ -17,8 +17,8 @@ const tracks = [
   { title: 'Finops', label: 'Run reliable operations', text: 'Practice reconciliation, reporting and the workflows that keep financial services dependable.', image: images.operations, alt: 'Team discussing operational work around a table', icon: Workflow },
 ]
 const domains = [
-  { name: 'FaaS', detail: 'Fintech APIs and partner services', color: 'bg-blue-50 text-[#0000ff]' },
-  { name: 'FinCore', detail: 'Ledgers and transaction systems', color: 'bg-sky-50 text-sky-700' },
+  { name: 'FaaS', detail: 'Fintech APIs and partner services', color: 'bg-brand-50 text-brand-700' },
+  { name: 'FinCore', detail: 'Ledgers and transaction systems', color: 'bg-brand-50 text-brand-700' },
   { name: 'FinOps', detail: 'Reconciliation and reporting', color: 'bg-amber-50 text-amber-700' },
   { name: 'FinInfra', detail: 'Cloud, delivery and observability', color: 'bg-slate-100 text-slate-700' },
 ]
@@ -27,7 +27,7 @@ const steps = [
   { number: '02', title: 'Practice with your cohort', text: 'Work through guided labs, collaborate in squads and get feedback from instructors.' },
   { number: '03', title: 'Show what you can do', text: 'Complete practical projects and build evidence of your skills for what comes next.' },
 ]
-const reveal = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.23, 1, 0.32, 1] } } }
+const reveal = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.35, ease: 'easeOut' } } }
 
 function Reveal({ children, className = '', delay = 0 }) {
   return <motion.div className={className} variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.14 }} transition={{ delay }}>{children}</motion.div>
@@ -60,7 +60,7 @@ export default function MarketingHome() {
       <main>
         <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-14 pt-10 sm:pt-14 md:grid-cols-[0.92fr_1.08fr] md:gap-12 md:pb-20 md:pt-16 lg:px-8 lg:pt-20">
           <Reveal>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#0000ff]"><span className="h-1.5 w-1.5 rounded-full bg-[#0000ff]" /> BlueSPACE Fintech Academy</div>
+            <p className="mb-5 text-sm font-semibold text-brand-600">BlueSPACE Fintech Academy</p>
             <h1 className="max-w-2xl text-4xl font-bold leading-[1.1] tracking-tight text-deep-700 sm:text-5xl lg:text-[3.65rem]">Build practical fintech skills. <span className="text-[#0000ff]">Deliver real work.</span></h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-gray-600 sm:text-lg">A hands-on learning experience for people ready to understand, build and operate the systems behind financial services.</p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -97,8 +97,8 @@ export default function MarketingHome() {
           <Reveal className="max-w-2xl"><p className="text-sm font-bold text-[#0000ff]">Fellowship tracks</p><h2 className="mt-2 text-3xl font-bold tracking-tight text-deep-700 sm:text-4xl">Choose a path that fits your goals</h2><p className="mt-4 leading-7 text-gray-600">Both tracks start with shared fintech foundations, then move into practical domain work with guidance and feedback.</p></Reveal>
           <div className="mt-9 grid gap-5 md:grid-cols-2">
             {tracks.map(({ title, label, text, image, alt, icon: Icon }, index) => <Reveal key={title} delay={index * 0.1}>
-              <article className="group h-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-950/5">
-                <div className="relative overflow-hidden"><img src={image} alt={alt} loading="lazy" className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.03] sm:h-60" /><span className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#0000ff] shadow-sm"><Icon size={20} /></span></div>
+              <article className="group h-full overflow-hidden rounded-xl border border-gray-200 bg-white transition-colors duration-200 hover:border-brand-300">
+                <div className="relative overflow-hidden"><img src={image} alt={alt} loading="lazy" className="h-52 w-full object-cover sm:h-60" /><span className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white text-brand-600"><Icon size={20} /></span></div>
                 <div className="p-5 sm:p-6"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#0000ff]">{label}</p><div className="mt-2 flex items-center justify-between"><h3 className="text-2xl font-bold text-deep-700">{title}</h3><ArrowUpRight size={19} className="text-gray-400 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#0000ff]" /></div><p className="mt-2 max-w-lg text-sm leading-6 text-gray-600">{text}</p></div>
               </article>
             </Reveal>)}
@@ -113,13 +113,13 @@ export default function MarketingHome() {
         </section>
 
         <section id="domains" className="scroll-mt-24 mx-auto max-w-7xl px-5 py-16 sm:py-20 lg:px-8">
-          <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-2xl"><p className="text-sm font-bold text-[#0000ff]">AI Fintech Factory</p><h2 className="mt-2 text-3xl font-bold tracking-tight text-deep-700 sm:text-4xl">Explore the systems behind fintech</h2></div><p className="max-w-md text-sm leading-6 text-gray-600">Build a wider view of the technology and operations that make modern financial services work.</p></Reveal>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{domains.map((domain, index) => <Reveal key={domain.name} delay={index * 0.05}><article className="h-full rounded-xl border border-gray-200 p-5 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"><span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-bold ${domain.color}`}>{domain.name}</span><p className="mt-4 text-sm leading-6 text-gray-600">{domain.detail}</p></article></Reveal>)}</div>
+          <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-2xl"><p className="text-sm font-bold text-brand-600">Fintech domains</p><h2 className="mt-2 text-3xl font-bold tracking-tight text-deep-700 sm:text-4xl">Explore the systems behind fintech</h2></div><p className="max-w-md text-sm leading-6 text-gray-600">Build a wider view of the technology and operations that make modern financial services work.</p></Reveal>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{domains.map((domain, index) => <Reveal key={domain.name} delay={index * 0.05}><article className="h-full rounded-lg border border-gray-200 p-5 transition-colors duration-200 hover:border-brand-300"><span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-bold ${domain.color}`}>{domain.name}</span><p className="mt-4 text-sm leading-6 text-gray-600">{domain.detail}</p></article></Reveal>)}</div>
         </section>
 
         <section className="mx-auto max-w-7xl px-5 pb-16 sm:pb-20 lg:px-8">
           <Reveal><div className="grid overflow-hidden rounded-2xl bg-deep-800 md:grid-cols-[1fr_0.85fr]">
-            <div className="p-7 text-white sm:p-10 lg:p-12"><span className="inline-flex items-center gap-2 text-sm font-semibold text-blue-200"><Layers3 size={16} /> Learn together. Build with purpose.</span><h2 className="mt-4 max-w-xl text-3xl font-bold leading-tight sm:text-4xl">Ready to build your fintech skills?</h2><p className="mt-3 max-w-xl text-sm leading-6 text-white/75">Join a learning community focused on practical skills, meaningful projects and the future of financial services.</p><div className="mt-6 flex flex-wrap gap-3"><Button asChild className="bg-[#0000ff] text-white hover:bg-[#0000cc]"><Link to="/register">Start an application <ArrowRight size={15} className="ml-2" /></Link></Button><Button asChild variant="outline" className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/student-login">Sign in</Link></Button></div></div>
+            <div className="p-7 text-white sm:p-10 lg:p-12"><span className="inline-flex items-center gap-2 text-sm font-semibold text-brand-200"><Layers3 size={16} /> Learn together. Build with purpose.</span><h2 className="mt-4 max-w-xl text-3xl font-bold leading-tight sm:text-4xl">Ready to build your fintech skills?</h2><p className="mt-3 max-w-xl text-sm leading-6 text-white/75">Join a learning community focused on practical skills, meaningful projects and the future of financial services.</p><div className="mt-6 flex flex-wrap gap-3"><Button asChild className="bg-brand-600 text-white hover:bg-brand-700"><Link to="/register">Start an application <ArrowRight size={15} className="ml-2" /></Link></Button><Button asChild variant="outline" className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/student-login">Sign in</Link></Button></div></div>
             <div className="min-h-52 md:min-h-full"><img src={images.project} alt="Colleagues collaborating on a project" loading="lazy" className="h-full min-h-52 w-full object-cover" /></div>
           </div></Reveal>
         </section>

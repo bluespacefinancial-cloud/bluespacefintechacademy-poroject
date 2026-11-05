@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 240 100% 50%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -30,37 +30,37 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 240 100% 50%;
 
     --radius: 0.625rem;
 
     /* Bluespace design tokens (from DESIGN.md) */
     --bs-brand: #0000ff;
-    --bs-brand-50: #eef2ff;
-    --bs-brand-100: #dbeafe;
-    --bs-brand-200: #bfdbfe;
-    --bs-brand-300: #93c5fd;
-    --bs-brand-400: #60a5fa;
-    --bs-brand-500: #3b82f6;
+    --bs-brand-50: #f0f0ff;
+    --bs-brand-100: #e0e0ff;
+    --bs-brand-200: #c2c2ff;
+    --bs-brand-300: #9999ff;
+    --bs-brand-400: #6666ff;
+    --bs-brand-500: #0000ff;
     --bs-brand-600: #0000ff;
     --bs-brand-700: #0000cc;
     --bs-brand-800: #000099;
     --bs-brand-900: #000066;
 
-    --bs-deep: #152c4f;
-    --bs-deep-50: #f1f5f9;
-    --bs-deep-100: #e2e8f0;
-    --bs-deep-200: #cbd5e1;
-    --bs-deep-300: #94a3b8;
-    --bs-deep-400: #64748b;
-    --bs-deep-500: #1a365d;
-    --bs-deep-600: #152c4f;
-    --bs-deep-700: #0f2240;
-    --bs-deep-800: #0a1832;
-    --bs-deep-900: #050e23;
+    --bs-deep: #0000ff;
+    --bs-deep-50: #f0f0ff;
+    --bs-deep-100: #e0e0ff;
+    --bs-deep-200: #c2c2ff;
+    --bs-deep-300: #9999ff;
+    --bs-deep-400: #6666ff;
+    --bs-deep-500: #0000ff;
+    --bs-deep-600: #0000ff;
+    --bs-deep-700: #0000cc;
+    --bs-deep-800: #000099;
+    --bs-deep-900: #000066;
 
     /* Domain colors */
-    --bs-domain-faas: #6366f1;
+    --bs-domain-faas: #0000ff;
     --bs-domain-fincore: #10b981;
     --bs-domain-finops: #f59e0b;
     --bs-domain-fininfra: #64748b;
@@ -81,7 +81,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 240 100% 50%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -98,7 +98,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 240 100% 50%;
   }
 
   *,

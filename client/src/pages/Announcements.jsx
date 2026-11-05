@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase'
 const TYPE_CONFIG = {
   announcement: { label: 'Announcement', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
   reminder: { label: 'Reminder', variant: 'default', color: 'bg-amber-50 text-amber-700 border-amber-100' },
-  update: { label: 'Update', variant: 'default', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
+  update: { label: 'Update', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
 }
 
 export default function Announcements() {

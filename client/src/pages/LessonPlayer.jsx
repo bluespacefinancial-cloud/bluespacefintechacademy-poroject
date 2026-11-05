@@ -132,7 +132,7 @@ export default function LessonPlayer() {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-deep-600">Type</span>
-                  <Badge className={isVideo ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-amber-100 text-amber-700 border-amber-200'}>
+                  <Badge className={isVideo ? 'bg-brand-100 text-brand-700 border-brand-200' : 'bg-amber-100 text-amber-700 border-amber-200'}>
                     {isVideo ? 'Video Lesson' : 'Audio Lesson'}
                   </Badge>
                 </div>

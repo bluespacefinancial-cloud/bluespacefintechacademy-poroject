@@ -172,7 +172,7 @@ export default function Cohorts() {
                   <td className="py-4">
                     <div className="flex gap-2">
                       {cohort.track_finsoft && (
-                        <Badge className="bg-indigo-50 text-indigo-700 border-indigo-100 text-[10px]">Finsoft</Badge>
+                        <Badge className="bg-brand-50 text-brand-700 border-brand-100 text-[10px]">Finsoft</Badge>
                       )}
                       {cohort.track_finops && (
                         <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px]">Finops</Badge>

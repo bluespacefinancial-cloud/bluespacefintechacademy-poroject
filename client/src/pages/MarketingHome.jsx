@@ -118,9 +118,9 @@ export default function MarketingHome() {
         </section>
 
         <section className="mx-auto max-w-7xl px-5 pb-16 sm:pb-20 lg:px-8">
-          <Reveal><div className="grid overflow-hidden rounded-2xl bg-deep-800 md:grid-cols-[1fr_0.85fr]">
+          <Reveal><div className="grid overflow-hidden rounded-2xl bg-deep-800 grid-cols-[1fr_0.85fr]">
             <div className="p-7 text-white sm:p-10 lg:p-12"><span className="inline-flex items-center gap-2 text-sm font-semibold text-brand-200"><Layers3 size={16} /> Learn together. Build with purpose.</span><h2 className="mt-4 max-w-xl text-3xl font-bold leading-tight sm:text-4xl">Ready to build your fintech skills?</h2><p className="mt-3 max-w-xl text-sm leading-6 text-white/75">Join a learning community focused on practical skills, meaningful projects and the future of financial services.</p><div className="mt-6 flex flex-wrap gap-3"><Button asChild className="bg-brand-600 text-white hover:bg-brand-700"><Link to="/register">Start an application <ArrowRight size={15} className="ml-2" /></Link></Button><Button asChild variant="outline" className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/student-login">Sign in</Link></Button></div></div>
-            <div className="min-h-52 md:min-h-full"><img src={images.project} alt="Colleagues collaborating on a project" loading="lazy" className="h-full min-h-52 w-full object-cover" /></div>
+            <div className="min-h-[300px] sm:min-h-[410px] lg:min-h-full"><img src={images.project} alt="Colleagues collaborating on a project" loading="lazy" className="h-full w-full object-cover" /></div>
           </div></Reveal>
         </section>
       </main>

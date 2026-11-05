@@ -148,9 +148,56 @@ Five deployable edge functions in `supabase/functions/`:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_ANON_KEY`
 
+
+
+## 6. Email Configuration
+
+Two email systems are used in parallel:
+
+### Supabase Auth Emails (confirmation, password reset, magic link, invite)
+
+These are sent by Supabase Auth using SMTP. Configure in the Supabase dashboard under **Authentication → Email Templates** and **Authentication → SMTP Settings**:
+
+**SMTP Settings (Resend recommended):**
+- Host: `smtp.resend.com`
+- Port: `465`
+- Username: `resend`
+- Password: Your Resend API key
+- From: A verified sender address (e.g., `noreply@yourdomain.com`)
+
+**Auth Site URL:** Set to your production frontend origin (e.g., `https://app.bluespacefintechacademy.com`)
+
+**Redirect URLs:** Allow `/student-login`, `/instructor-login`, `/admin-login`, `/partner-login`, and `/reset-password`
+
+**Email Templates:** Copy the HTML from `supabase/templates/` into the matching template in **Authentication → Email Templates**:
+- `confirmation.html` → Confirmation email
+- `recovery.html` → Password recovery
+- `magic_link.html` → Magic link
+- `invite.html` → Invitation
+- `email_change.html` → Email change confirmation
+- `email_changed_notification.html` → Email changed notification
+- `password_changed_notification.html` → Password changed notification
+- `reauthentication.html` → Reauthentication code
+
+All templates include the BlueSPACE logo (`{{ .SiteURL }}/logo-dark.png`), brand color buttons, and fallback plain-text links. The logo requires your Auth Site URL to serve the frontend's public `logo-dark.png`.
+
+### Application Status Emails (Resend Edge Function)
+
+Application approval/rejection emails are sent via the `email-service` edge function using Resend directly.
+
+**Required Supabase Edge Function secrets:**
+- `RESEND_API_KEY`
+- `EMAIL_FROM` (verified sender domain)
+- `APP_ORIGIN` (production frontend origin)
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_ANON_KEY`
+
+**Authorization:** Callers must have an active academy profile. Non-administrators can only email themselves; administrators can email any recipient.
+
 ---
 
-## 6. Frontend Structure
+## 7. Frontend Structure
 
 ```
 client/src/
@@ -203,7 +250,7 @@ client/src/
 
 ---
 
-## 7. Adding Test Accounts
+## 8. Adding Test Accounts
 
 Passwords are managed by **Supabase Auth**, not the `public.users` table. The `public.users.password` column is legacy and unused.
 
@@ -245,7 +292,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 8. Common Issues & Troubleshooting
+## 9. Common Issues & Troubleshooting
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
@@ -258,7 +305,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 9. Deployment Checklist
+## 10. Deployment Checklist
 
 - [ ] Create `.env` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
 - [ ] Apply migrations 001–011 to production Supabase project
@@ -272,7 +319,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 10. Contributing
+## 11. Contributing
 
 1. Create a branch from `main`
 2. Make changes
@@ -283,7 +330,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 11. File Reference
+## 12. File Reference
 
 | File | Purpose |
 |------|---------|
@@ -303,7 +350,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 12. Security Notes
+## 13. Security Notes
 
 - **Never commit `.env` files or PAT tokens** to git
 - **Never insert passwords into `public.users.password`** — column is revoked from client reads

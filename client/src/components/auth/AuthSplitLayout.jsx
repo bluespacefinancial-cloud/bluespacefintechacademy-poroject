@@ -44,10 +44,9 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
       </aside>
       <main className="relative flex min-h-screen w-full flex-col lg:w-1/2">
         <img
-          src="/logo-white.png"
+          src="/logo-dark.png"
           alt="BlueSPACE Fintech Academy"
           className="absolute left-5 top-5 z-20 h-8 w-auto lg:hidden"
-          style={{ filter: 'brightness(0) saturate(100%) invert(15%) sepia(26%) saturate(1532%) hue-rotate(179deg) brightness(92%) contrast(94%)' }}
         />
         {children}
       </main>

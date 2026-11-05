@@ -12,7 +12,6 @@ import {
   Code2,
   Clock,
   GraduationCap,
-  Award,
   Compass,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'

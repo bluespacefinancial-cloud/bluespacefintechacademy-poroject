@@ -1,7 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { BookOpen, ClipboardList, GraduationCap, ArrowRight, Users, Plus, CheckCircle2, Video } from 'lucide-react'
+import {
+  BookOpen,
+  ClipboardList,
+  GraduationCap,
+  ArrowRight,
+  Users,
+  Plus,
+  CheckCircle2,
+  Video,
+  Calendar,
+  Clock,
+  MessageSquare,
+  Award,
+} from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -42,7 +55,7 @@ export default function InstructorDashboard({ user }) {
           cohortIds.length ? supabase.from('cohorts').select('id, name, status').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
           squadIds.length ? supabase.from('squads').select('id, name, cohort_id').in('id', squadIds) : Promise.resolve({ data: [], error: null }),
           moduleIds.length ? supabase.from('lessons').select('id, module_id').in('module_id', moduleIds) : Promise.resolve({ data: [], error: null }),
-          cohortIds.length ? supabase.from('live_classes').select('id, title, starts_at, ends_at, is_offline, venue').in('cohort_id', cohortIds).eq('status', 'scheduled').order('starts_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
+          cohortIds.length ? supabase.from('live_classes').select('id, title, starts_at, ends_at, is_offline, venue, meet_url, cohort_id').in('cohort_id', cohortIds).eq('status', 'scheduled').order('starts_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
         ])
         if (cohortRows.error) throw cohortRows.error
         if (squadRows.error) throw squadRows.error
@@ -104,35 +117,33 @@ export default function InstructorDashboard({ user }) {
     )
   }
 
-  const publishedModules = data.modules.filter((item) => item.is_published).length
+  const nextLiveClass = data.liveClasses.length > 0 ? data.liveClasses[0] : null
 
   return (
     <div className="w-full space-y-6">
       <DashboardHeader
         dataTour="instructor-header"
-        title="Teaching dashboard"
-        subtitle={`Welcome back, ${data.profile?.name || user?.name || 'Instructor'}. Oversee your assigned cohorts, authored modules, and student evaluations.`}
+        title="Faculty Teaching Dashboard"
+        subtitle={`Welcome back, ${data.profile?.name || user?.name || 'Instructor'}. Oversee your cohort evaluations, scheduled masterclasses, and squad mentorship.`}
         onStartTour={() => setTourOpen(true)}
         actions={
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="outline" className="border-gray-200">
               <Link to="/labs-to-review">
                 <ClipboardList size={14} className="mr-1.5" />
-                Review labs
+                Review Labs ({data.submissions.length})
               </Link>
             </Button>
-            {data.liveClasses.length > 0 && (
-              <Button asChild size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700">
-                <Link to="/live-classes">
-                  <Video size={14} className="mr-1.5" />
-                  Join live class
-                </Link>
-              </Button>
-            )}
+            <Button asChild size="sm" variant="outline" className="border-gray-200">
+              <Link to="/live-classes">
+                <Calendar size={14} className="mr-1.5" />
+                Live Schedule
+              </Link>
+            </Button>
             <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
               <Link to="/my-modules">
                 <Plus size={14} className="mr-1.5" />
-                Create module
+                Create Module
               </Link>
             </Button>
           </div>
@@ -142,45 +153,204 @@ export default function InstructorDashboard({ user }) {
       {/* Metrics Row */}
       <div data-tour="instructor-metrics" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard
+          label="Pending lab evaluations"
+          value={data.submissions.length}
+          icon={ClipboardList}
+          helper="Submissions awaiting grades"
+          to="/labs-to-review"
+        />
+        <MetricCard
           label="Assigned cohorts"
           value={data.cohorts.length}
           icon={GraduationCap}
-          helper="Cohorts assigned to you"
+          helper="Cohorts under instruction"
         />
         <MetricCard
-          label="Managed modules"
-          value={data.modules.length}
-          icon={BookOpen}
-          helper="Total authored or assigned"
-          to="/my-modules"
+          label="Mentored squads"
+          value={data.squads.length}
+          icon={Users}
+          helper="Student collaborative teams"
+          to="/squads"
         />
         <MetricCard
-          label="Published modules"
-          value={publishedModules}
-          icon={CheckCircle2}
-          helper={`${data.modules.length - publishedModules} unpublished drafts`}
-          to="/my-modules"
-        />
-        <MetricCard
-          label="Pending lab reviews"
-          value={data.submissions.length}
-          icon={ClipboardList}
-          helper="Student submissions to grade"
-          to="/labs-to-review"
+          label="Upcoming live classes"
+          value={data.liveClasses.length}
+          icon={Video}
+          helper="Scheduled masterclasses"
+          to="/live-classes"
         />
       </div>
 
-      {/* Main Content Grid: Modules & Squads */}
+      {/* Primary Section: Priority Grading Queue (2/3) + Next Live Teaching Session (1/3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* SUBMISSIONS WAITING FOR REVIEW */}
+        <Card data-tour="instructor-reviews" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 leading-tight">Priority Grading Queue</h3>
+                <p className="mt-0.5 text-xs text-gray-500">Student lab exercises submitted and awaiting evaluation</p>
+              </div>
+              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+                <Link to="/labs-to-review">
+                  Review all
+                  <ArrowRight size={13} className="ml-1.5" />
+                </Link>
+              </Button>
+            </div>
+
+            <CardContent className="p-5">
+              {data.submissions.length === 0 ? (
+                <div className="py-8 text-center">
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto mb-2">
+                    <CheckCircle2 size={18} />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">Grading queue is clear</p>
+                  <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
+                    All student lab submissions have been reviewed. New submissions will appear here as fellows complete their exercises.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {data.submissions.map((item) => (
+                    <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{item.labTitle}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                          <span className="font-semibold text-gray-800">{item.studentName}</span>
+                          <span>•</span>
+                          <span className="truncate">{item.moduleTitle}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-xs text-gray-500">
+                          {new Date(item.submitted_at).toLocaleDateString()}
+                        </span>
+                        <Button asChild size="sm" className="h-8 px-3 text-xs bg-deep-600 text-white hover:bg-deep-700">
+                          <Link to="/labs-to-review">Grade</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </div>
+
+          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 flex items-center justify-between text-xs">
+            <span className="text-gray-500">
+              Need to review cohort project deliverables?
+            </span>
+            <Link to="/project-review" className="font-semibold text-deep-600 hover:text-deep-700">
+              Project Review Queue →
+            </Link>
+          </div>
+        </Card>
+
+        {/* UPCOMING LIVE TEACHING SESSION */}
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <h3 className="text-base font-bold text-gray-900 leading-tight">Teaching Schedule</h3>
+              </div>
+              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+                <Link to="/live-classes">Calendar</Link>
+              </Button>
+            </div>
+
+            <CardContent className="p-5 space-y-4">
+              {nextLiveClass ? (
+                <>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                      Next Scheduled Class
+                    </span>
+                    <h4 className="text-base font-bold text-gray-900 leading-snug pt-1">
+                      {nextLiveClass.title}
+                    </h4>
+                    <p className="text-xs text-gray-500">
+                      {cohortNamesFor(nextLiveClass, data.cohorts)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Calendar size={13} className="text-deep-600 shrink-0" />
+                      <span className="font-semibold text-gray-900">
+                        {new Date(nextLiveClass.starts_at).toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {new Date(nextLiveClass.starts_at).toLocaleTimeString(undefined, {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <Video size={13} className="text-deep-600 shrink-0" />
+                      <span>{nextLiveClass.is_offline ? nextLiveClass.venue : 'Virtual Live Stream'}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-1">
+                    {nextLiveClass.meet_url ? (
+                      <Button asChild className="w-full bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-semibold">
+                        <a href={nextLiveClass.meet_url} target="_blank" rel="noreferrer">
+                          <Video size={14} className="mr-1.5" />
+                          Launch Live Class
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200">
+                        <Link to="/live-classes">View Class Roster</Link>
+                      </Button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto">
+                    <Calendar size={18} />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">No classes scheduled today</p>
+                  <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                    Schedule weekly cohort masterclasses or open office hours in the calendar.
+                  </p>
+                  <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-gray-200">
+                    <Link to="/live-classes">Schedule Class</Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </div>
+
+          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-center">
+            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 hover:text-deep-700">
+              Manage 1-on-1 Mentor Clinic Hours →
+            </Link>
+          </div>
+        </Card>
+      </div>
+
+      {/* Secondary Section: Cohort Modules (2/3) + Faculty Toolkit (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card data-tour="instructor-modules" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Your teaching modules</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Modules from your assigned cohorts and modules you created</p>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Teaching Modules</h3>
+              <p className="mt-0.5 text-xs text-gray-500">Curricula taught across your assigned cohorts</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
               <Link to="/my-modules">
-                Open modules
+                All Modules
                 <ArrowRight size={13} className="ml-1.5" />
               </Link>
             </Button>
@@ -193,15 +363,15 @@ export default function InstructorDashboard({ user }) {
                 </div>
                 <p className="text-sm font-semibold text-gray-900">No modules assigned yet</p>
                 <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
-                  Your administrator can assign cohort modules, or you can author a new module.
+                  Cohort modules will appear here once assigned by the curriculum director, or you can author a custom module.
                 </p>
                 <Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700">
-                  <Link to="/my-modules">Create a module</Link>
+                  <Link to="/my-modules">Author Module</Link>
                 </Button>
               </div>
             ) : (
               <div className="space-y-3">
-                {data.modules.slice(0, 6).map((module) => (
+                {data.modules.slice(0, 5).map((module) => (
                   <div
                     key={module.id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white"
@@ -228,101 +398,82 @@ export default function InstructorDashboard({ user }) {
           </CardContent>
         </Card>
 
-        {/* Assigned Squads */}
-        <Card data-tour="instructor-squads" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Assigned squads</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Student squads in your cohorts</p>
+        {/* Faculty Toolkit */}
+        <Card data-tour="instructor-squads" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 leading-tight">Faculty Toolkit</h3>
+                <p className="mt-0.5 text-xs text-gray-500">Quick actions for teaching operations</p>
+              </div>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
-              <Link to="/squads">View all</Link>
+            <CardContent className="p-4 space-y-2">
+              <Link
+                to="/labs-to-review"
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ClipboardList size={16} className="text-deep-600 shrink-0" />
+                  <span>Grade Student Labs</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-medium">
+                  {data.submissions.length} pending
+                </Badge>
+              </Link>
+
+              <Link
+                to="/project-review"
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Award size={16} className="text-deep-600 shrink-0" />
+                  <span>Project Deliverables</span>
+                </div>
+                <ArrowRight size={13} className="text-gray-400" />
+              </Link>
+
+              <Link
+                to="/mentor-clinics"
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Clock size={16} className="text-deep-600 shrink-0" />
+                  <span>Mentor Clinic Hours</span>
+                </div>
+                <ArrowRight size={13} className="text-gray-400" />
+              </Link>
+
+              <Link
+                to="/squads"
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Users size={16} className="text-deep-600 shrink-0" />
+                  <span>Assigned Squads ({data.squads.length})</span>
+                </div>
+                <ArrowRight size={13} className="text-gray-400" />
+              </Link>
+
+              <Link
+                to="/announcements"
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <MessageSquare size={16} className="text-deep-600 shrink-0" />
+                  <span>Post Cohort Announcement</span>
+                </div>
+                <ArrowRight size={13} className="text-gray-400" />
+              </Link>
+            </CardContent>
+          </div>
+
+          <div className="p-4 bg-gray-50/60 border-t border-gray-100">
+            <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200">
+              <Link to="/squads">View Mentored Squads ({data.squads.length})</Link>
             </Button>
           </div>
-          <CardContent className="p-5">
-            {data.squads.length === 0 ? (
-              <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
-                  <Users size={18} />
-                </div>
-                <p className="text-sm font-semibold text-gray-900">No squads assigned</p>
-                <p className="mt-1 text-xs text-gray-500">
-                  Your administrator will assign squads to your mentoring queue.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {data.squads.map((squad) => (
-                  <div key={squad.id} className="rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{squad.name}</p>
-                      <span className="text-[11px] font-medium text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                        Squad
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {cohortNamesFor({ cohort_id: squad.cohort_id }, data.cohorts)}
-                    </p>
-                  </div>
-                ))}
-                <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 mt-2">
-                  <Link to="/squads">Manage all squads</Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
         </Card>
       </div>
-
-      {/* Submissions Waiting for Review */}
-      <Card data-tour="instructor-reviews" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div>
-            <h3 className="text-base font-bold text-gray-900 leading-tight">Submissions waiting for review</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Student lab exercises submitted and awaiting grading</p>
-          </div>
-          <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
-            <Link to="/labs-to-review">
-              Review labs
-              <ArrowRight size={13} className="ml-1.5" />
-            </Link>
-          </Button>
-        </div>
-        <CardContent className="p-5">
-          {data.submissions.length === 0 ? (
-            <div className="py-8 text-center">
-              <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto mb-2.5">
-                <CheckCircle2 size={18} />
-              </div>
-              <p className="text-sm font-semibold text-gray-900">All submissions up to date</p>
-              <p className="mt-1 text-xs text-gray-500">No lab submissions are currently waiting for your review.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {data.submissions.map((item) => (
-                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{item.labTitle}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                      <span className="font-medium text-gray-700">{item.studentName}</span>
-                      <span>•</span>
-                      <span className="truncate">{item.moduleTitle}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs text-gray-500">
-                      Submitted {new Date(item.submitted_at).toLocaleDateString()}
-                    </span>
-                    <Button asChild size="sm" variant="outline" className="h-8 px-3 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
-                      <Link to="/labs-to-review">Review</Link>
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       <WelcomeGuide
         role="Instructor"

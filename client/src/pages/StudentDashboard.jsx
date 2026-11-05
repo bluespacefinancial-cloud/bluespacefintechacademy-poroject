@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, Award, BookOpen, CheckCircle, Clock, Users } from 'lucide-react'
+import { Activity, Award, BookOpen, CheckCircle, Users, Calendar } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Badge } from '../components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
 import WelcomeGuide from '../components/WelcomeGuide'
@@ -126,28 +126,109 @@ export default function StudentDashboard({ user }) {
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
           ['Course Completion', `${completion}%`, BookOpen, 'bg-brand-100 text-brand-600'],
-          ['Attendance', attendance === null ? 'No data' : `${attendance}%`, Clock, 'bg-emerald-100 text-emerald-600'],
+          ['Attendance', attendance === null ? 'No data' : `${attendance}%`, Users, 'bg-emerald-100 text-emerald-600'],
           ['Current Grade', grade === null ? 'Not graded' : `${grade}%`, Award, 'bg-slate-100 text-slate-600'],
           ['Lessons Complete', `${completedLessons}/${data.lessons.length}`, Activity, 'bg-amber-100 text-amber-600'],
-        ].map(([label, value, Icon, color]) => <Card key={label}><CardContent className="flex items-center justify-between p-4"><div><p className="text-2xl font-bold text-deep-600">{value}</p><p className="text-xs uppercase tracking-wider text-gray-500">{label}</p></div><div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}><Icon size={16} /></div></CardContent></Card>)}
+        ].map(([label, value, Icon, color]) => (
+          <Card key={label}>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-2xl font-bold text-deep-600">{value}</p>
+                <p className="text-xs uppercase tracking-wider text-gray-500">{label}</p>
+              </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}>
+                <Icon size={16} />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><BookOpen size={14} /> Current Learning</CardTitle></CardHeader>
           <CardContent>
-            {!currentModule ? <p className="text-sm text-gray-500">No published modules are available for your cohort.</p> : <div className="space-y-4">
-              <div className="flex items-center justify-between"><div><p className="font-medium text-deep-600">{currentModule.title}</p><p className="text-xs text-gray-500">{currentModule.stage} · Weeks {currentModule.week_start}-{currentModule.week_end}</p></div><Badge variant="secondary">{currentCompleted}/{currentLessons.length} complete</Badge></div>
-              <div className="h-2 overflow-hidden rounded-full bg-gray-100"><div className="h-full rounded-full bg-brand-600" style={{ width: `${currentLessons.length ? (currentCompleted / currentLessons.length) * 100 : 0}%` }} /></div>
-              <Button size="sm" onClick={() => navigate('/my-learning')}>Continue learning</Button>
-            </div>}
+            {!currentModule ? (
+              <p className="text-sm text-gray-500">No published modules are available for your cohort.</p>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-deep-600">{currentModule.title}</p>
+                    <p className="text-xs text-gray-500">{currentModule.stage} · Weeks {currentModule.week_start}-{currentModule.week_end}</p>
+                  </div>
+                  <Badge variant="secondary">{currentCompleted}/{currentLessons.length} complete</Badge>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-full rounded-full bg-brand-600" style={{ width: currentLessons.length ? (currentCompleted / currentLessons.length) * 100 : 0 }} />
+                </div>
+                <Button size="sm" onClick={() => navigate('/my-learning')}>Continue learning</Button>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Users size={14} /> My Squad</CardTitle></CardHeader>
-          <CardContent>{data.squad ? <div className="space-y-3"><p className="font-medium text-deep-600">{data.squad.name}</p>{data.members.map((member) => <div key={member.id} className="flex items-center justify-between text-xs"><span>{member.name}</span><Badge variant="outline">{member.track || 'Student'}</Badge></div>)}</div> : <p className="text-sm text-gray-500">You have not been assigned to a squad yet.</p>}</CardContent>
+          <CardContent>
+            {data.squad ? (
+              <div className="space-y-3">
+                <p className="font-medium text-deep-600">{data.squad.name}</p>
+                {data.members.map((member) => (
+                  <div key={member.id} className="flex items-center justify-between text-xs">
+                    <span>{member.name}</span>
+                    <Badge variant="outline">{member.track || 'Student'}</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">You have not been assigned to a squad yet.</p>
+            )}
+          </CardContent>
         </Card>
       </div>
-      <Card className="mt-6"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><CheckCircle size={14} /> Recent activity</CardTitle></CardHeader><CardContent>{data.progress.length === 0 && data.submissions.length === 0 ? <p className="text-sm text-gray-500">Your learning activity will appear here as you complete lessons and submit work.</p> : <div className="space-y-2">{data.progress.filter((item) => item.is_completed).slice(0, 5).map((item) => <div key={`lesson-${item.lesson_id}`} className="flex justify-between text-xs"><span>Lesson completed</span><span className="text-gray-500">{new Date(item.completed_at || item.updated_at).toLocaleDateString()}</span></div>)}{data.submissions.slice(0, 5).map((item) => <div key={`submission-${item.lab_id || item.assessment_id}-${item.submitted_at}`} className="flex justify-between text-xs"><span>Submission {item.status}</span><span className="text-gray-500">{new Date(item.submitted_at).toLocaleDateString()}</span></div>)}</div>}</CardContent></Card>
+      <Card className="mt-6">
+        <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><CheckCircle size={14} /> Recent activity</CardTitle></CardHeader>
+        <CardContent>
+          {data.progress.length === 0 && data.submissions.length === 0 ? (
+            <p className="text-sm text-gray-500">Your learning activity will appear here as you complete lessons and submit work.</p>
+          ) : (
+            <div className="space-y-2">
+              {data.progress.filter((item) => item.is_completed).slice(0, 5).map((item) => (
+                <div key={`lesson-${item.lesson_id}`} className="flex justify-between text-xs">
+                  <span>Lesson completed</span>
+                  <span className="text-gray-500">{new Date(item.completed_at || item.updated_at).toLocaleDateString()}</span>
+                </div>
+              ))}
+              {data.submissions.slice(0, 5).map((item) => (
+                <div key={`submission-${item.lab_id || item.assessment_id}-${item.submitted_at}`} className="flex justify-between text-xs">
+                  <span>Submission {item.status}</span>
+                  <span className="text-gray-500">{new Date(item.submitted_at).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Card className="mt-6">
+        <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Calendar size={14} /> Upcoming Deadlines</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          {data.modules.length === 0 ? (
+            <p className="text-sm text-gray-500">No upcoming deadlines.</p>
+          ) : (
+            data.modules.slice(0, 5).map((module) => (
+              <div key={module.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-deep-600">{module.title}</p>
+                  <p className="text-xs text-gray-500">{module.week} · {module.stage}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={module.is_published ? 'secondary' : 'outline'}>{module.is_published ? 'Published' : 'Draft'}</Badge>
+                  <Button size="sm" variant="outline" onClick={() => navigate('/my-learning')}>View</Button>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
       <WelcomeGuide role="Student" />
     </div>
   )

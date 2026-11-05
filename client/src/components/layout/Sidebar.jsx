@@ -30,6 +30,7 @@ import {
   User,
   Settings,
   Clock,
+  Award,
 } from 'lucide-react'
 
 const sidebarGroups = {
@@ -393,7 +394,6 @@ export default function Sidebar({ open, onOpen, onClose }) {
                         </Badge>
                       )}
                     </NavLink>
-                  )
                 })
               )}
             </nav>

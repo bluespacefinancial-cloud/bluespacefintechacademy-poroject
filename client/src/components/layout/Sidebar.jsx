@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { supabase } from '../../lib/supabase'
 import {
   LayoutDashboard,
   BookOpen,
@@ -63,7 +64,7 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
+        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications', badge: unreadCount },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -124,7 +125,7 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
+        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications', badge: unreadCount },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -188,6 +189,31 @@ export default function Sidebar({ open, onOpen, onClose }) {
   const location = useLocation()
   const groups = sidebarGroups[user?.type] || sidebarGroups.Student
   const [openCategories, setOpenCategories] = useState({})
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifLoading, setNotifLoading] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const loadUnreadCount = async () => {
+      if (!user) return
+      setNotifLoading(true)
+      try {
+        const { count, error } = await supabase
+          .from('notifications')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false)
+        if (error) throw error
+        if (!cancelled) setUnreadCount(count || 0)
+      } catch {
+        // silently fail - notification count is non-critical
+      } finally {
+        if (!cancelled) setNotifLoading(false)
+      }
+    }
+    loadUnreadCount()
+    return () => { cancelled = true }
+  }, [user])
 
   const isCategoryOpen = (category) => openCategories[category] ?? true
   const toggleCategory = (category) => {
@@ -252,8 +278,8 @@ export default function Sidebar({ open, onOpen, onClose }) {
         </div>
       </aside>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)] overflow-x-auto scrollbar-hide whitespace-nowrap">
-        {groups.flatMap((g) => g.items).map((item) => {
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
+        {groups.flatMap((g) => g.items).slice(0, 5).map((item) => {
           const active = location.pathname === item.to
           return (
             <NavLink
@@ -269,14 +295,16 @@ export default function Sidebar({ open, onOpen, onClose }) {
             </NavLink>
           )
         })}
-        <button
-          onClick={onOpen}
-          className="flex-none flex flex-col items-center justify-center gap-1 py-2 px-3 text-[10px] font-medium text-gray-400"
-          aria-label="More options"
-        >
-          <MoreHorizontal size={20} />
-          <span className="visually-hidden">More</span>
-        </button>
+        {groups.flatMap((g) => g.items).length > 5 && (
+          <button
+            onClick={onOpen}
+            className="flex-none flex flex-col items-center justify-center gap-1 py-2 px-3 text-[10px] font-medium text-gray-400"
+            aria-label="More options"
+          >
+            <MoreHorizontal size={20} />
+            <span className="visually-hidden">More</span>
+          </button>
+        )}
       </nav>
 
       {open && (

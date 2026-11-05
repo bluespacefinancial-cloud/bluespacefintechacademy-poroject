@@ -44,13 +44,13 @@ export default function ForgotPassword() {
       headline="Recover your account"
       description="We will send a secure password reset link to the email address on your account."
     >
-      <div className="flex flex-1 items-center justify-center p-6">
+      <div className="flex flex-1 items-start justify-center px-4 pb-4 pt-20 lg:items-center lg:p-6">
         <Card className="w-full max-w-sm">
-          <CardHeader>
+          <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
             <CardTitle>Forgot password?</CardTitle>
             <CardDescription>Enter the email address you use to sign in.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
             {sent ? (
               <div className="space-y-4">
                 <p role="status" className="rounded-md bg-bluespace-700 p-3 text-sm text-white">

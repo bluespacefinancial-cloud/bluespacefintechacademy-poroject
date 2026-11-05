@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { BookOpen, Clock, CheckCircle, Plus, ArrowRight, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react'
+import { BookOpen, Clock, CheckCircle, Plus, ArrowRight, ShieldAlert, FileText, CheckCircle2, AlertCircle, Award } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -126,10 +126,10 @@ export default function PartnerDashboard({ user }) {
           to="/partner-courses"
         />
         <MetricCard
-          label="Drafts in progress"
-          value={count(['draft', 'changes_requested'])}
-          icon={Plus}
-          helper="Drafts or changes requested"
+          label="Changes requested"
+          value={count(['changes_requested'])}
+          icon={AlertCircle}
+          helper="Needs partner revision"
           to="/partner-courses"
         />
         <MetricCard
@@ -143,113 +143,143 @@ export default function PartnerDashboard({ user }) {
           label="Published courses"
           value={count(['published'])}
           icon={CheckCircle}
-          helper="Live for enrolled fellows"
-          to="/partner-catalog"
+          helper="Live in academy catalog"
+          to="/partner-courses"
         />
       </div>
 
-      {/* Main Grid: Courses + Guidelines */}
+      {/* Main Grid: Courses + Studio Operations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Course List Card */}
-        <Card data-tour="partner-courses" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Your courses</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Authored curricula and their review status</p>
-            </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
-              <Link to="/partner-courses">
-                Manage courses
-                <ArrowRight size={13} className="ml-1.5" />
-              </Link>
-            </Button>
-          </div>
-          <CardContent className="p-5">
-            {data.courses.length === 0 ? (
-              <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
-                  <BookOpen size={18} />
-                </div>
-                <p className="text-sm font-semibold text-gray-900">No courses authored yet</p>
-                <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
-                  Create your first course draft in the studio and submit it for academy curriculum review.
-                </p>
-                <Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700">
-                  <Link to="/partner-courses">Create your first course</Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {data.courses.slice(0, 6).map((course) => {
-                  const statusLabel = course.status ? course.status.replace('_', ' ') : 'draft'
-                  return (
-                    <div
-                      key={course.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
-                        <p className="mt-1 text-xs text-gray-500">
-                          Updated {new Date(course.updated_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <Badge
-                          variant={course.status === 'published' ? 'secondary' : 'outline'}
-                          className="text-[11px] font-medium capitalize"
-                        >
-                          {statusLabel}
-                        </Badge>
-                        <Button asChild size="sm" variant="outline" className="h-8 px-2.5 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
-                          <Link to="/partner-courses">Edit</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Studio Guidelines Card */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h3 className="text-base font-bold text-gray-900 leading-tight">Publishing checklist</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Academy curriculum standards</p>
-          </div>
-          <CardContent className="p-5 space-y-4 text-xs text-gray-600">
-            <div className="flex items-start gap-2.5">
-              <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />
+        <Card data-tour="partner-courses" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <div>
-                <p className="font-semibold text-gray-900">Practical fintech focus</p>
-                <p className="mt-0.5 text-gray-500">Ensure all modules include real-world banking, payments, or infrastructure applications.</p>
+                <h3 className="text-base font-bold text-gray-900 leading-tight">Course Studio & Curricula</h3>
+                <p className="mt-0.5 text-xs text-gray-500">Authored fintech programs and academy review statuses</p>
               </div>
-            </div>
-            <div className="flex items-start gap-2.5">
-              <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-gray-900">Hands-on lab tasks</p>
-                <p className="mt-0.5 text-gray-500">Attach code repositories or clear evaluation criteria for each practical assignment.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2.5">
-              <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-gray-900">Review SLA</p>
-                <p className="mt-0.5 text-gray-500">Academy staff review submitted courses within 5 business days.</p>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200">
+              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
                 <Link to="/partner-courses">
-                  <FileText size={13} className="mr-1.5" />
-                  Open Course Studio
+                  Open studio
+                  <ArrowRight size={13} className="ml-1.5" />
                 </Link>
               </Button>
             </div>
-          </CardContent>
+            <CardContent className="p-5">
+              {data.courses.length === 0 ? (
+                <div className="py-8 text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                    <BookOpen size={18} />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">No courses authored yet</p>
+                  <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
+                    Create your first course draft in the studio and submit it for academy curriculum review.
+                  </p>
+                  <Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700">
+                    <Link to="/partner-courses">Create your first course</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {data.courses.slice(0, 6).map((course) => {
+                    const isChangesRequested = course.status === 'changes_requested'
+                    const isPublished = course.status === 'published'
+                    const isSubmitted = course.status === 'submitted' || course.status === 'under_review'
+                    const statusLabel = course.status ? course.status.replace('_', ' ') : 'draft'
+
+                    return (
+                      <div
+                        key={course.id}
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border p-3.5 transition-colors bg-white ${
+                          isChangesRequested
+                            ? 'border-amber-200 bg-amber-50/20'
+                            : 'border-gray-100 hover:border-gray-200'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
+                            {isChangesRequested && (
+                              <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 shrink-0">
+                                Action Required
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Updated {new Date(course.updated_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <Badge
+                            variant={isPublished ? 'secondary' : 'outline'}
+                            className="text-[11px] font-medium capitalize"
+                          >
+                            {statusLabel}
+                          </Badge>
+                          <Button asChild size="sm" variant="outline" className="h-8 px-3 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
+                            <Link to="/partner-courses">
+                              {isChangesRequested ? 'Revise Draft' : 'Open in Studio'}
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </div>
+
+          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 flex items-center justify-between text-xs">
+            <span className="text-gray-500">
+              Need to add video lectures or resources to an existing course?
+            </span>
+            <Link to="/partner-courses" className="font-semibold text-deep-600 hover:text-deep-700">
+              Edit Lessons in Studio →
+            </Link>
+          </div>
+        </Card>
+
+        {/* Studio Operations & Guidelines Card */}
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="px-5 py-4 border-b border-gray-100">
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Curriculum Accreditation</h3>
+              <p className="mt-0.5 text-xs text-gray-500">Standards for publishing to academy fellows</p>
+            </div>
+            <CardContent className="p-5 space-y-4 text-xs text-gray-600">
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-gray-900">Industry-Grounded Syllabus</p>
+                  <p className="mt-0.5 text-gray-500">Structure modules around hands-on banking, mobile money, digital payments, or fintech security workflows.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Award size={16} className="text-deep-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-gray-900">Automated Certification</p>
+                  <p className="mt-0.5 text-gray-500">Fellows who complete 100% of your course lessons earn verified credentials co-branded with your agency.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Clock size={16} className="text-deep-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-gray-900">Review Turnaround</p>
+                  <p className="mt-0.5 text-gray-500">Submitted courses undergo technical review by academy staff within 3 to 5 business days.</p>
+                </div>
+              </div>
+            </CardContent>
+          </div>
+
+          <div className="p-4 bg-gray-50/60 border-t border-gray-100">
+            <Button asChild size="sm" className="w-full text-xs bg-deep-600 text-white hover:bg-deep-700 font-semibold">
+              <Link to="/partner-courses">
+                <Plus size={13} className="mr-1.5" />
+                Author New Course Draft
+              </Link>
+            </Button>
+          </div>
         </Card>
       </div>
 

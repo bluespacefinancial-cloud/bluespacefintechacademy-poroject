@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { BookOpen, Clock, CheckCircle, Plus, ArrowRight, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 import WelcomeGuide from '../components/WelcomeGuide'
@@ -47,7 +47,7 @@ export default function PartnerDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="py-16 text-center">
+      <div className="py-20 text-center">
         <p className="text-sm font-medium text-gray-500">Loading partner workspace...</p>
       </div>
     )
@@ -64,21 +64,21 @@ export default function PartnerDashboard({ user }) {
 
   if (!data.linked) {
     return (
-      <div className="space-y-6">
+      <div className="w-full space-y-6">
         <DashboardHeader
           title="Partner dashboard"
           subtitle={`Welcome, ${user?.name || 'Partner'}.`}
         />
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white max-w-2xl">
-          <CardHeader className="flex flex-row items-center gap-3 border-b border-gray-100 pb-4">
-            <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
-              <ShieldAlert size={20} />
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white w-full overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+              <ShieldAlert size={18} />
             </div>
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Agency connection required</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Agency connection required</h3>
               <p className="text-xs text-gray-500">Account pending organization assignment</p>
             </div>
-          </CardHeader>
+          </div>
           <CardContent className="p-5 space-y-3">
             <p className="text-sm text-gray-600 leading-relaxed">
               Your partner account is not linked to a registered partner agency yet. An academy administrator must connect your account before you can create and publish courses.
@@ -95,7 +95,7 @@ export default function PartnerDashboard({ user }) {
   const count = (statuses) => data.courses.filter((course) => statuses.includes(course.status)).length
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <DashboardHeader
         dataTour="partner-header"
         title="Partner dashboard"
@@ -151,10 +151,10 @@ export default function PartnerDashboard({ user }) {
       {/* Main Grid: Courses + Guidelines */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Course List Card */}
-        <Card data-tour="partner-courses" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="partner-courses" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Your courses</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Your courses</h3>
               <p className="mt-0.5 text-xs text-gray-500">Authored curricula and their review status</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -163,11 +163,13 @@ export default function PartnerDashboard({ user }) {
                 <ArrowRight size={13} className="ml-1.5" />
               </Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.courses.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-8 text-center">
-                <BookOpen size={24} className="mx-auto text-gray-400 mb-2" />
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <BookOpen size={18} />
+                </div>
                 <p className="text-sm font-semibold text-gray-900">No courses authored yet</p>
                 <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
                   Create your first course draft in the studio and submit it for academy curriculum review.
@@ -177,43 +179,45 @@ export default function PartnerDashboard({ user }) {
                 </Button>
               </div>
             ) : (
-              data.courses.slice(0, 6).map((course) => {
-                const statusLabel = course.status ? course.status.replace('_', ' ') : 'draft'
-                return (
-                  <div
-                    key={course.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
-                      <p className="mt-1 text-xs text-gray-500">
-                        Updated {new Date(course.updated_at).toLocaleDateString()}
-                      </p>
+              <div className="space-y-3">
+                {data.courses.slice(0, 6).map((course) => {
+                  const statusLabel = course.status ? course.status.replace('_', ' ') : 'draft'
+                  return (
+                    <div
+                      key={course.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          Updated {new Date(course.updated_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <Badge
+                          variant={course.status === 'published' ? 'secondary' : 'outline'}
+                          className="text-[11px] font-medium capitalize"
+                        >
+                          {statusLabel}
+                        </Badge>
+                        <Button asChild size="sm" variant="outline" className="h-8 px-2.5 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
+                          <Link to="/partner-courses">Edit</Link>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <Badge
-                        variant={course.status === 'published' ? 'secondary' : 'outline'}
-                        className="text-[11px] font-medium capitalize"
-                      >
-                        {statusLabel}
-                      </Badge>
-                      <Button asChild size="sm" variant="outline" className="h-8 px-2.5 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
-                        <Link to="/partner-courses">Edit</Link>
-                      </Button>
-                    </div>
-                  </div>
-                )
-              })
+                  )
+                })}
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Studio Guidelines Card */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="pb-3 border-b border-gray-100">
-            <CardTitle className="text-base font-bold text-gray-900">Publishing checklist</CardTitle>
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h3 className="text-base font-bold text-gray-900 leading-tight">Publishing checklist</h3>
             <p className="mt-0.5 text-xs text-gray-500">Academy curriculum standards</p>
-          </CardHeader>
+          </div>
           <CardContent className="p-5 space-y-4 text-xs text-gray-600">
             <div className="flex items-start gap-2.5">
               <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />

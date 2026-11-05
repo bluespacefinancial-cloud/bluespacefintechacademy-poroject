@@ -196,20 +196,20 @@ export default function Sidebar({ open, onOpen, onClose }) {
         Skip to main content
       </a>
 
-      <aside className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-black text-white flex-col">
-        <div className="flex items-center justify-between h-14 px-4 border-b border-white/20 shrink-0">
+      <aside className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-[#0B0F19] text-white flex-col border-r border-slate-800/80">
+        <div className="flex items-center justify-between h-14 px-5 border-b border-slate-800/80 shrink-0">
           <img src="/logo-white.png" alt="BlueSPACE" className="h-7 w-auto" />
         </div>
 
-        <nav aria-label="Main navigation" className="p-2 space-y-1 flex-1 overflow-y-auto">
+        <nav aria-label="Main navigation" className="p-3 space-y-2 flex-1 overflow-y-auto">
           {groups.map((group) => (
-            <div key={group.category} className="mb-1">
+            <div key={group.category} className="mb-2">
               <button
                 onClick={() => toggleCategory(group.category)}
-                className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-deep-300 uppercase tracking-wider transition-colors hover:text-white"
+                className="flex items-center justify-between w-full px-2.5 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider transition-colors hover:text-slate-200"
               >
                 <span>{group.category}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${isCategoryOpen(group.category) ? 'rotate-180' : ''}`} />
+                <ChevronDown size={13} className={`transition-transform duration-200 text-slate-500 ${isCategoryOpen(group.category) ? 'rotate-180' : ''}`} />
               </button>
               <nav className={`space-y-0.5 mt-1 ${isCategoryOpen(group.category) ? '' : 'hidden'}`}>
                 {group.items.map((item) => {
@@ -218,14 +218,14 @@ export default function Sidebar({ open, onOpen, onClose }) {
                     <NavLink
                       key={item.to}
                       to={item.to}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         active
-                          ? 'bg-white/10 text-white'
-                          : 'text-white/60 hover:text-white hover:bg-white/5'
+                          ? 'bg-slate-800 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                       }`}
                       aria-current={active ? 'page' : undefined}
                     >
-                      <item.icon size={16} aria-hidden="true" />
+                      <item.icon size={16} aria-hidden="true" className={active ? 'text-white' : 'text-slate-400'} />
                       <span>{item.label}</span>
                     </NavLink>
                   )
@@ -235,10 +235,10 @@ export default function Sidebar({ open, onOpen, onClose }) {
           ))}
         </nav>
 
-        <div className="p-2 border-t border-white/20 shrink-0">
+        <div className="p-3 border-t border-slate-800/80 shrink-0">
           <button
             onClick={logout}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <LogOut size={16} />
             <span>Sign Out</span>

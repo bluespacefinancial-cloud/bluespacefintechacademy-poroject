@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Activity, BookOpen, CheckCircle, Users, Calendar, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 import { getCurrentProfile } from '../lib/profile'
@@ -107,7 +107,7 @@ export default function StudentDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="py-16 text-center">
+      <div className="py-20 text-center">
         <p className="text-sm font-medium text-gray-500">Loading your learning dashboard...</p>
       </div>
     )
@@ -136,7 +136,7 @@ export default function StudentDashboard({ user }) {
   const currentCompleted = currentLessons.filter((lesson) => data.progress.find((item) => item.lesson_id === lesson.id)?.is_completed).length
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <DashboardHeader
         dataTour="student-header"
         title="My Learning Dashboard"
@@ -158,14 +158,14 @@ export default function StudentDashboard({ user }) {
           label="Course completion"
           value={`${completion}%`}
           icon={BookOpen}
-          helper={`${completedLessons} of ${data.lessons.length} lessons`}
+          helper={`${completedLessons} of ${data.lessons.length} lessons completed`}
           to="/my-learning"
         />
         <MetricCard
           label="Class attendance"
           value={attendance === null ? 'No data' : `${attendance}%`}
           icon={Users}
-          helper={data.attendance.length ? `${attended} of ${data.attendance.length} sessions` : 'No live sessions recorded'}
+          helper={data.attendance.length ? `${attended} of ${data.attendance.length} sessions attended` : 'No live sessions recorded'}
           to="/live-classes"
         />
         <MetricCard
@@ -179,17 +179,17 @@ export default function StudentDashboard({ user }) {
           label="Lessons finished"
           value={`${completedLessons}/${data.lessons.length}`}
           icon={Activity}
-          helper="Total completed modules"
+          helper="Total completed lessons"
           to="/my-learning"
         />
       </div>
 
       {/* Current Learning + My Squad */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card data-tour="student-current-learning" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="student-current-learning" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Current learning</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Current learning</h3>
               <p className="mt-0.5 text-xs text-gray-500">Pick up where you left off</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -198,13 +198,17 @@ export default function StudentDashboard({ user }) {
                 <ArrowRight size={13} className="ml-1.5" />
               </Link>
             </Button>
-          </CardHeader>
+          </div>
           <CardContent className="p-5">
             {!currentModule ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-8 text-center">
-                <BookOpen size={24} className="mx-auto text-gray-400 mb-2" />
-                <p className="text-sm font-semibold text-gray-900">No published modules</p>
-                <p className="mt-1 text-xs text-gray-500">No active modules are published for your cohort at this time.</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <BookOpen size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No published modules yet</p>
+                <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
+                  Active learning modules will appear here as your cohort starts.
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -229,7 +233,7 @@ export default function StudentDashboard({ user }) {
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <Button size="sm" onClick={() => navigate('/my-learning')} className="bg-deep-600 text-white hover:bg-deep-700">
                     Continue learning
                     <ArrowRight size={13} className="ml-1.5" />
@@ -241,17 +245,17 @@ export default function StudentDashboard({ user }) {
         </Card>
 
         {/* Squad Card */}
-        <Card data-tour="student-squad" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="student-squad" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">My squad</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">My squad</h3>
               <p className="mt-0.5 text-xs text-gray-500">Team collaboration unit</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
               <Link to="/my-squad">View squad</Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.squad ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -272,10 +276,14 @@ export default function StudentDashboard({ user }) {
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-                <Users size={22} className="mx-auto text-gray-400 mb-1.5" />
-                <p className="text-sm font-medium text-gray-900">No squad assigned</p>
-                <p className="mt-1 text-xs text-gray-500">You will be placed in a collaborative squad soon.</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <Users size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No squad assigned yet</p>
+                <p className="mt-1 text-xs text-gray-500 max-w-xs mx-auto">
+                  You will be grouped into a collaborative student squad shortly.
+                </p>
               </div>
             )}
           </CardContent>
@@ -284,63 +292,69 @@ export default function StudentDashboard({ user }) {
 
       {/* Deadlines & Recent Activity Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card data-tour="student-deadlines" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="student-deadlines" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Upcoming deadlines</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Upcoming deadlines</h3>
               <p className="mt-0.5 text-xs text-gray-500">Module milestones and schedules</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
               <Link to="/my-learning">All modules</Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.modules.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-                <Calendar size={22} className="mx-auto text-gray-400 mb-1.5" />
-                <p className="text-sm font-medium text-gray-900">No upcoming deadlines</p>
-                <p className="mt-1 text-xs text-gray-500">Check back as new cohorts and modules launch.</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <Calendar size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No upcoming deadlines</p>
+                <p className="mt-1 text-xs text-gray-500">Module milestones will show here once curriculum starts.</p>
               </div>
             ) : (
-              data.modules.slice(0, 5).map((module) => (
-                <div key={module.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{module.title}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      Weeks {module.week_start}-{module.week_end} • {module.stage ? module.stage.replace('_', ' ') : 'Foundations'}
-                    </p>
+              <div className="space-y-3">
+                {data.modules.slice(0, 5).map((module) => (
+                  <div key={module.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{module.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        Weeks {module.week_start}-{module.week_end} • {module.stage ? module.stage.replace('_', ' ') : 'Foundations'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium">
+                        {module.is_published ? 'Published' : 'Draft'}
+                      </Badge>
+                      <Button size="sm" variant="outline" onClick={() => navigate('/my-learning')} className="h-8 px-2.5 text-xs border-gray-200">
+                        View
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium">
-                      {module.is_published ? 'Published' : 'Draft'}
-                    </Badge>
-                    <Button size="sm" variant="outline" onClick={() => navigate('/my-learning')} className="h-8 px-2.5 text-xs border-gray-200">
-                      View
-                    </Button>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Recent Activity */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Recent activity</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Recent activity</h3>
               <p className="mt-0.5 text-xs text-gray-500">Completed lessons and lab submissions</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
               <Link to="/progress">View history</Link>
             </Button>
-          </CardHeader>
+          </div>
           <CardContent className="p-5">
             {data.progress.length === 0 && data.submissions.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-                <CheckCircle size={22} className="mx-auto text-gray-400 mb-1.5" />
-                <p className="text-sm font-medium text-gray-900">No activity yet</p>
-                <p className="mt-1 text-xs text-gray-500">Completed lessons and graded submissions will show here.</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <CheckCircle size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No activity yet</p>
+                <p className="mt-1 text-xs text-gray-500">Completed lessons and graded submissions will record here.</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">

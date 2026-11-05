@@ -384,21 +384,22 @@ export default function Sidebar({ open, onOpen, onClose }) {
                       key={item.to}
                       to={item.to}
                       onClick={onClose}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                      location.pathname === item.to ? 'bg-deep-50 text-deep-700 font-bold' : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <item.icon size={18} />
-                      {item.label}
-                    </div>
-                    {badgeCount && badgeCount > 0 && (
-                      <Badge variant="outline" className="text-[10px] font-bold text-red-600 bg-red-50 border-red-200">
-                        {badgeCount}
-                      </Badge>
-                    )}
-                  </NavLink>
-                ))
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                        location.pathname === item.to ? 'bg-deep-50 text-deep-700 font-bold' : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon size={18} />
+                        {item.label}
+                      </div>
+                      {badgeCount && badgeCount > 0 && (
+                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 bg-red-50 border-red-200">
+                          {badgeCount}
+                        </Badge>
+                      )}
+                    </NavLink>
+                  )
+                })
               )}
             </nav>
 

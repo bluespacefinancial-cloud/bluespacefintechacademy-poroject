@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { BookOpen, ClipboardList, GraduationCap, ArrowRight, Users, Plus, CheckCircle2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { getCurrentProfile } from '../lib/profile'
 import { supabase } from '../lib/supabase'
@@ -87,7 +87,7 @@ export default function InstructorDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="py-16 text-center">
+      <div className="py-20 text-center">
         <p className="text-sm font-medium text-gray-500">Loading your teaching dashboard...</p>
       </div>
     )
@@ -105,7 +105,7 @@ export default function InstructorDashboard({ user }) {
   const publishedModules = data.modules.filter((item) => item.is_published).length
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <DashboardHeader
         dataTour="instructor-header"
         title="Teaching dashboard"
@@ -162,10 +162,10 @@ export default function InstructorDashboard({ user }) {
 
       {/* Main Content Grid: Modules & Squads */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card data-tour="instructor-modules" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="instructor-modules" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Your teaching modules</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Your teaching modules</h3>
               <p className="mt-0.5 text-xs text-gray-500">Modules from your assigned cohorts and modules you created</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -174,95 +174,101 @@ export default function InstructorDashboard({ user }) {
                 <ArrowRight size={13} className="ml-1.5" />
               </Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.modules.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-8 text-center">
-                <BookOpen size={24} className="mx-auto text-gray-400 mb-2" />
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <BookOpen size={18} />
+                </div>
                 <p className="text-sm font-semibold text-gray-900">No modules assigned yet</p>
                 <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
-                  Your academy administrator can assign cohort modules, or you can create one from scratch.
+                  Your administrator can assign cohort modules, or you can author a new module.
                 </p>
                 <Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700">
                   <Link to="/my-modules">Create a module</Link>
                 </Button>
               </div>
             ) : (
-              data.modules.slice(0, 6).map((module) => (
-                <div
-                  key={module.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{module.title}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                      <span className="capitalize">{module.stage ? module.stage.replaceAll('_', ' ') : 'Foundations'}</span>
-                      <span>•</span>
-                      <span>{module.domain || module.track || 'Fintech Core'}</span>
-                      <span>•</span>
-                      <span className="truncate">{cohortNamesFor(module, data.cohorts)}</span>
+              <div className="space-y-3">
+                {data.modules.slice(0, 6).map((module) => (
+                  <div
+                    key={module.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{module.title}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                        <span className="capitalize">{module.stage ? module.stage.replaceAll('_', ' ') : 'Foundations'}</span>
+                        <span>•</span>
+                        <span>{module.domain || module.track || 'Fintech Core'}</span>
+                        <span>•</span>
+                        <span className="truncate">{cohortNamesFor(module, data.cohorts)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium">
+                        {module.is_published ? 'Published' : 'Draft'}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium">
-                      {module.is_published ? 'Published' : 'Draft'}
-                    </Badge>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Assigned Squads */}
-        <Card data-tour="instructor-squads" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="instructor-squads" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Assigned squads</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Assigned squads</h3>
               <p className="mt-0.5 text-xs text-gray-500">Student squads in your cohorts</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
               <Link to="/squads">View all</Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.squads.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-                <Users size={22} className="mx-auto text-gray-400 mb-1.5" />
-                <p className="text-sm font-medium text-gray-900">No squads assigned</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <Users size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No squads assigned</p>
                 <p className="mt-1 text-xs text-gray-500">
                   Your administrator will assign squads to your mentoring queue.
                 </p>
               </div>
             ) : (
-              data.squads.map((squad) => (
-                <div key={squad.id} className="rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{squad.name}</p>
-                    <span className="text-[11px] font-medium text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                      Squad
-                    </span>
+              <div className="space-y-3">
+                {data.squads.map((squad) => (
+                  <div key={squad.id} className="rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{squad.name}</p>
+                      <span className="text-[11px] font-medium text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                        Squad
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {cohortNamesFor({ cohort_id: squad.cohort_id }, data.cohorts)}
+                    </p>
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {cohortNamesFor({ cohort_id: squad.cohort_id }, data.cohorts)}
-                  </p>
-                </div>
-              ))
-            )}
-            {data.squads.length > 0 && (
-              <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 mt-2">
-                <Link to="/squads">Manage all squads</Link>
-              </Button>
+                ))}
+                <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 mt-2">
+                  <Link to="/squads">Manage all squads</Link>
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Submissions Waiting for Review */}
-      <Card data-tour="instructor-reviews" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+      <Card data-tour="instructor-reviews" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div>
-            <CardTitle className="text-base font-bold text-gray-900">Submissions waiting for review</CardTitle>
+            <h3 className="text-base font-bold text-gray-900 leading-tight">Submissions waiting for review</h3>
             <p className="mt-0.5 text-xs text-gray-500">Student lab exercises submitted and awaiting grading</p>
           </div>
           <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -271,11 +277,13 @@ export default function InstructorDashboard({ user }) {
               <ArrowRight size={13} className="ml-1.5" />
             </Link>
           </Button>
-        </CardHeader>
+        </div>
         <CardContent className="p-5">
           {data.submissions.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-200 p-8 text-center">
-              <CheckCircle2 size={24} className="mx-auto text-emerald-600 mb-2" />
+            <div className="py-8 text-center">
+              <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto mb-2.5">
+                <CheckCircle2 size={18} />
+              </div>
               <p className="text-sm font-semibold text-gray-900">All submissions up to date</p>
               <p className="mt-1 text-xs text-gray-500">No lab submissions are currently waiting for your review.</p>
             </div>

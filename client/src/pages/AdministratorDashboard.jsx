@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Users, GraduationCap, ClipboardList, Briefcase, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../lib/supabase'
 import WelcomeGuide from '../components/WelcomeGuide'
@@ -54,7 +54,7 @@ export default function AdministratorDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="py-16 text-center">
+      <div className="py-20 text-center">
         <p className="text-sm font-medium text-gray-500">Loading academy operations...</p>
       </div>
     )
@@ -70,7 +70,7 @@ export default function AdministratorDashboard({ user }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <DashboardHeader
         dataTour="admin-header"
         title="Academy operations"
@@ -125,10 +125,10 @@ export default function AdministratorDashboard({ user }) {
 
       {/* Grid: Applications + Partner Reviews */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card data-tour="admin-applications" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="admin-applications" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Pending applications</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Pending applications</h3>
               <p className="mt-0.5 text-xs text-gray-500">Candidate applications awaiting admissions decision</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -137,35 +137,40 @@ export default function AdministratorDashboard({ user }) {
                 <ArrowRight size={13} className="ml-1.5" />
               </Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.applications.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-                <p className="text-sm font-medium text-gray-900">No applications waiting</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <ClipboardList size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No applications waiting</p>
                 <p className="mt-1 text-xs text-gray-500">All student and partner applications have been reviewed.</p>
               </div>
             ) : (
-              data.applications.map((item) => (
-                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p>
-                    <p className="mt-0.5 text-xs text-gray-500 truncate">
-                      {item.email}{item.track ? ` • ${item.track}` : ''}
-                    </p>
+              <div className="space-y-3">
+                {data.applications.map((item) => (
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p>
+                      <p className="mt-0.5 text-xs text-gray-500 truncate">
+                        {item.email}{item.track ? ` • ${item.track}` : ''}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize">
+                      {item.requested_role}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize">
-                    {item.requested_role}
-                  </Badge>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
-        <Card data-tour="admin-partner-reviews" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+        <Card data-tour="admin-partner-reviews" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-              <CardTitle className="text-base font-bold text-gray-900">Partner course reviews</CardTitle>
+              <h3 className="text-base font-bold text-gray-900 leading-tight">Partner course reviews</h3>
               <p className="mt-0.5 text-xs text-gray-500">Partner courses submitted for curriculum audit</p>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -174,37 +179,42 @@ export default function AdministratorDashboard({ user }) {
                 <ArrowRight size={13} className="ml-1.5" />
               </Link>
             </Button>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
+          </div>
+          <CardContent className="p-5">
             {data.courses.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-                <p className="text-sm font-medium text-gray-900">No partner courses to review</p>
+              <div className="py-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                  <Briefcase size={18} />
+                </div>
+                <p className="text-sm font-semibold text-gray-900">No partner courses to review</p>
                 <p className="mt-1 text-xs text-gray-500">No pending partner submissions at this time.</p>
               </div>
             ) : (
-              data.courses.map((item) => (
-                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      {item.submitted_at ? `Submitted ${new Date(item.submitted_at).toLocaleDateString()}` : 'Date unavailable'}
-                    </p>
+              <div className="space-y-3">
+                {data.courses.map((item) => (
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {item.submitted_at ? `Submitted ${new Date(item.submitted_at).toLocaleDateString()}` : 'Date unavailable'}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize">
+                      {item.status ? item.status.replace('_', ' ') : 'under review'}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize">
-                    {item.status ? item.status.replace('_', ' ') : 'under review'}
-                  </Badge>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Cohorts Card */}
-      <Card data-tour="admin-cohorts" className="border border-gray-200/90 shadow-sm rounded-xl bg-white">
-        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100">
+      <Card data-tour="admin-cohorts" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div>
-            <CardTitle className="text-base font-bold text-gray-900">Upcoming and active cohorts</CardTitle>
+            <h3 className="text-base font-bold text-gray-900 leading-tight">Upcoming and active cohorts</h3>
             <p className="mt-0.5 text-xs text-gray-500">Cohort scheduling, enrollment statuses, and capacities</p>
           </div>
           <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
@@ -213,11 +223,14 @@ export default function AdministratorDashboard({ user }) {
               <ArrowRight size={13} className="ml-1.5" />
             </Link>
           </Button>
-        </CardHeader>
+        </div>
         <CardContent className="p-5">
           {data.cohorts.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center">
-              <p className="text-sm font-medium text-gray-900">No active or planned cohorts</p>
+            <div className="py-8 text-center">
+              <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                <GraduationCap size={18} />
+              </div>
+              <p className="text-sm font-semibold text-gray-900">No active or planned cohorts</p>
               <p className="mt-1 text-xs text-gray-500">Create a cohort to begin enrolling students.</p>
             </div>
           ) : (

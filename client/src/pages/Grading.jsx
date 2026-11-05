@@ -23,7 +23,7 @@ export default function Grading() {
   const loadSubmissions = useCallback(async () => {
     const { data, error: loadError } = await supabase
       .from('submissions')
-      .select('id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at, labs(title, max_score), assessments(title, max_score), users(name, email)')
+      .select('id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at, labs(title, max_score), assessments(title, max_score), users!submissions_user_id_fkey(name, email)')
       .in('status', ['submitted', 'graded', 'remediation'])
       .order('submitted_at', { ascending: false })
     if (loadError) throw loadError
@@ -68,7 +68,7 @@ export default function Grading() {
         status,
         graded_by: user.id,
         graded_at: new Date().toISOString(),
-      }).eq('id', selected.id).select('id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at, labs(title, max_score), assessments(title, max_score), users(name, email)').single()
+      }).eq('id', selected.id).select('id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at, labs(title, max_score), assessments(title, max_score), users!submissions_user_id_fkey(name, email)').single()
       if (updateError) throw updateError
       setSubmissions((previous) => previous.map((row) => row.id === data.id ? data : row))
       setSelected(data)

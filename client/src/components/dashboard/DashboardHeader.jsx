@@ -11,11 +11,11 @@ export default function DashboardHeader({
   role,
 }) {
   return (
-    <header
+    <div
       data-tour={dataTour}
-      className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-1"
+      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-1"
     >
-      <div className="min-w-0 flex-1">
+      <div data-tour="tour-dashboard-title" className="min-w-0 flex-1">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 leading-tight">
           {title}
         </h1>
@@ -41,7 +41,7 @@ export default function DashboardHeader({
         )}
         {actions}
       </div>
-    </header>
+    </div>
   )
 }
 

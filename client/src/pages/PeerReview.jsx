@@ -19,7 +19,7 @@ export default function PeerReview() {
   useEffect(() => {
     const load = async () => {
       const profile = await getCurrentProfile()
-      const { data, error: loadError } = await supabase.from('peer_reviews').select('*, submissions(content_url, users(name), labs(title), assessments(title))').eq('reviewer_id', profile.id).order('created_at', { ascending: false })
+      const { data, error: loadError } = await supabase.from('peer_reviews').select('*, submissions(content_url, users!submissions_user_id_fkey(name), labs(title), assessments(title))').eq('reviewer_id', profile.id).order('created_at', { ascending: false })
       if (loadError) throw loadError
       setReviews(data || [])
     }

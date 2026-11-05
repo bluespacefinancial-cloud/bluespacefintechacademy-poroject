@@ -200,14 +200,14 @@ export default function Sidebar({ open, onOpen, onClose }) {
         Skip to main content
       </a>
 
-      <aside className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-[#0B0F19] text-white flex-col border-r border-slate-800/80">
+      <aside data-tour="tour-sidebar" className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-[#0B0F19] text-white flex-col border-r border-slate-800/80">
         <div className="flex items-center justify-between h-14 px-5 border-b border-slate-800/80 shrink-0">
           <img src="/logo-white.png" alt="BlueSPACE" className="h-7 w-auto" />
         </div>
 
         <nav aria-label="Main navigation" className="p-3 space-y-2 flex-1 overflow-y-auto">
           {groups.map((group) => (
-            <div key={group.category} className="mb-2">
+            <div key={group.category} data-tour={`tour-sidebar-${group.category.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} className="mb-2">
               <button
                 onClick={() => toggleCategory(group.category)}
                 className="flex items-center justify-between w-full px-2.5 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider transition-colors hover:text-slate-200"
@@ -218,10 +218,12 @@ export default function Sidebar({ open, onOpen, onClose }) {
               <nav className={`space-y-0.5 mt-1 ${isCategoryOpen(group.category) ? '' : 'hidden'}`}>
                 {group.items.map((item) => {
                   const active = location.pathname === item.to
+                  const itemTourTag = `tour-nav-${item.to.replace(/^\//, '').replace(/[^a-z0-9]/g, '-') || 'dashboard'}`
                   return (
                     <NavLink
                       key={item.to}
                       to={item.to}
+                      data-tour={itemTourTag}
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         active
                           ? 'bg-slate-800 text-white shadow-sm'

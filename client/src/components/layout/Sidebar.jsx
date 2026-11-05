@@ -394,6 +394,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                         </Badge>
                       )}
                     </NavLink>
+                  )
                 })
               )}
             </nav>

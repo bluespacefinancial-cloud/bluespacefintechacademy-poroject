@@ -10,7 +10,10 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character
 
 const appOrigin = () => (typeof window === 'undefined' ? '' : window.location.origin)
 const logoUrl = () => `${appOrigin()}/logo-dark.png`
-const signInUrl = () => `${appOrigin()}/student-login`
+const signInUrl = (role) => {
+  const paths = { Student: '/student-login', Instructor: '/instructor-login', Partner: '/partner-login' }
+  return `${appOrigin()}${paths[role] || '/student-login'}`
+}
 
 function emailLayout({ heading, greeting, content, actionLabel, actionUrl, preheader = heading }) {
   const safeActionUrl = actionUrl ? escapeHtml(actionUrl) : ''
@@ -68,7 +71,7 @@ export const emailService = {
     return this.sendEmail(
       email,
       'Welcome to BlueSPACE Fintech Academy',
-      makeEmail({ heading: 'Welcome to BlueSPACE', name, message, preheader: `${safeRole} account information` }),
+      makeEmail({ heading: 'Welcome to BlueSPACE', name, message, actionUrl: signInUrl(role), preheader: `${safeRole} account information` }),
       `Welcome ${name || 'to BlueSPACE'}. ${message}`,
     )
   },
@@ -109,7 +112,7 @@ export const emailService = {
     return this.sendEmail(
       email,
       `BlueSPACE application update: ${approved ? 'approved' : 'not approved'}`,
-      makeEmail({ heading, name, message, actionLabel: approved ? 'Sign in to BlueSPACE' : 'Visit BlueSPACE', preheader: heading }),
+      makeEmail({ heading, name, message, actionLabel: approved ? 'Sign in to BlueSPACE' : 'Visit BlueSPACE', actionUrl: signInUrl(role), preheader: heading }),
       `Hello ${name || 'applicant'}. ${message}`,
     )
   },

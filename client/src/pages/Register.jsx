@@ -105,7 +105,10 @@ export default function Register() {
           partnershipDetails: form.role === 'Partner' ? form.partnershipDetails.trim() : null,
         },
       })
-      if (error) throw error
+      if (error) {
+        const response = await error.context?.clone?.().json?.().catch(() => null)
+        throw new Error(response?.error || error.message || 'Unable to submit application')
+      }
       toast.success(data?.emailConfirmationRequired
         ? 'Application received. Check your email to verify your address.'
         : 'Application submitted. The academy team will review it shortly.')

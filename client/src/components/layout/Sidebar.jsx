@@ -62,14 +62,12 @@ const sidebarGroups = {
       ],
     },
     {
-      category: 'Credentials & Account',
+      category: 'Credentials & Portfolio',
       icon: Shield,
       items: [
-        { to: '/certificates', icon: Award, label: 'Certificates', ariaLabel: 'Certificates' },
+        { to: '/profile-settings', icon: FileText, label: 'Profile & Showcase', ariaLabel: 'Profile and Showcase' },
         { to: '/capstone', icon: FileText, label: 'Capstone Project', ariaLabel: 'Capstone Project' },
-        { to: '/skills-profile', icon: CheckCircle, label: 'Skills Profile', ariaLabel: 'Skills Profile' },
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
-        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
+        { to: '/certificates', icon: Award, label: 'Certificates', ariaLabel: 'Certificates' },
       ],
     },
   ],
@@ -110,7 +108,6 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -128,7 +125,6 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -180,7 +176,6 @@ const sidebarGroups = {
       category: 'Account',
       icon: Shield,
       items: [
-        { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
@@ -523,7 +518,7 @@ function getMobilePrimaryItems(role) {
       { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
       { to: '/partner-courses', icon: SchoolIcon, label: 'Studio' },
       { to: '/live-classes', icon: Video, label: 'Classes' },
-      { to: '/notifications', icon: Bell, label: 'Alerts' },
+      { to: '/partner-catalog', icon: BookOpen, label: 'Catalog' },
       { to: '/profile-settings', icon: FileText, label: 'Settings' },
     ]
   }

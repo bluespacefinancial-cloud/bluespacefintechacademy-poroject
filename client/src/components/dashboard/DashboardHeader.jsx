@@ -36,7 +36,7 @@ export default function DashboardHeader({
             title="Start interactive tour"
           >
             <HelpCircle size={14} className="mr-1.5" />
-            Tour guide
+            Orientation Guide
           </Button>
         )}
         {actions}

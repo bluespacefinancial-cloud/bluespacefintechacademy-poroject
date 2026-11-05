@@ -1,7 +1,8 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useState } from 'react'
-import { Search, Bell } from 'lucide-react'
+import { Search } from 'lucide-react'
 import Sidebar from './Sidebar'
+import NotificationDropdown from '../notifications/NotificationDropdown'
 import { useAuth } from '../../context/AuthContext'
 
 export default function AppLayout() {
@@ -28,8 +29,6 @@ export default function AppLayout() {
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input
-                  type="search"
-                  placeholder="Search labs, assessments, cohorts..."
                   className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-600 focus:border-brand-500 outline-none transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -50,17 +49,9 @@ export default function AppLayout() {
                   </p>
                 </div>
               </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <button className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors relative">
-                  <Bell size={16} className="shrink-0" />
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 border border-white" />
-                </button>
+              <div className="flex items-center gap-2">
+                <NotificationDropdown />
               </div>
-              <button className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 017 7z" />
-                </svg>
-              </button>
             </div>
           </div>
         </header>

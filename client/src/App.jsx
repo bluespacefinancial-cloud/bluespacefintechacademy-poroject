@@ -22,7 +22,6 @@ import Placement from './pages/Placement'
 import Reports from './pages/Reports'
 import CapstoneSubmission from './pages/CapstoneSubmission'
 import PanelReview from './pages/PanelReview'
-import SkillsProfile from './pages/SkillsProfile'
 import LessonPlayer from './pages/LessonPlayer'
 import LiveClasses from './pages/LiveClasses'
 import StudentMonitoring from './pages/StudentMonitoring'
@@ -114,7 +113,7 @@ export default function App() {
         <Route path="live-classes" element={<ProtectedRoute><LiveClasses /></ProtectedRoute>} />
         <Route path="student-monitoring" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><StudentMonitoring /></ProtectedRoute>} />
         <Route path="panel-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><PanelReview /></ProtectedRoute>} />
-        <Route path="skills-profile" element={<ProtectedRoute roles={['Student']}><SkillsProfile /></ProtectedRoute>} />
+        <Route path="skills-profile" element={<ProtectedRoute roles={['Student']}><Navigate to="/profile-settings?tab=skills" replace /></ProtectedRoute>} />
         <Route path="cohorts" element={<ProtectedRoute roles={['Administrator']}><Cohorts /></ProtectedRoute>} />
         <Route path="instructor-assignments" element={<ProtectedRoute roles={['Administrator']}><InstructorAssignments /></ProtectedRoute>} />
         <Route path="enrolments" element={<ProtectedRoute roles={['Administrator']}><Enrolments /></ProtectedRoute>} />

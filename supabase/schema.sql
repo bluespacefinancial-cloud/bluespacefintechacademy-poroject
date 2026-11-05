@@ -21,6 +21,7 @@ CREATE TABLE public.users (
   force_password_change smallint NOT NULL DEFAULT 0,
   last_login_at timestamptz DEFAULT NULL,
   partner_id bigint DEFAULT NULL,
+  student_id varchar(50) DEFAULT NULL,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );

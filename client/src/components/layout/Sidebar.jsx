@@ -9,7 +9,6 @@ import {
   GraduationCap,
   Users,
   Activity,
-  Award,
   Target,
   LogOut,
   X,
@@ -27,6 +26,10 @@ import {
   Shield,
   GraduationCap as SchoolIcon,
   Monitor,
+  Cog,
+  User,
+  Settings,
+  Clock,
 } from 'lucide-react'
 
 const sidebarGroups = {
@@ -38,13 +41,11 @@ const sidebarGroups = {
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
         { to: '/my-learning', icon: BookOpen, label: 'My Learning', ariaLabel: 'My Learning' },
         { to: '/lab-workspace', icon: ClipboardList, label: 'Lab Workspace', ariaLabel: 'Lab Workspace' },
-        { to: '/skills-profile', icon: CheckCircle, label: 'Skills Profile', ariaLabel: 'Skills Profile' },
-        { to: '/certificates', icon: Award, label: 'Certificates', ariaLabel: 'Certificates' },
-        { to: '/capstone', icon: FileText, label: 'Capstone', ariaLabel: 'Capstone' },
+        { to: '/progress', icon: Activity, label: 'Progress & Milestones', ariaLabel: 'Progress and Milestones' },
       ],
     },
     {
-      category: 'Classes',
+      category: 'Classes & Clinics',
       icon: Monitor,
       items: [
         { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
@@ -52,20 +53,21 @@ const sidebarGroups = {
       ],
     },
     {
-      category: 'Community',
+      category: 'Collaboration',
       icon: Users,
       items: [
-        { to: '/my-squad', icon: Users, label: 'My Squad', ariaLabel: 'My Squad' },
-        { to: '/progress', icon: Activity, label: 'Progress', ariaLabel: 'Progress' },
+        { to: '/my-squad', icon: Users, label: 'Squad Workspace', ariaLabel: 'Squad Workspace' },
         { to: '/peer-reviews', icon: ClipboardList, label: 'Peer Reviews', ariaLabel: 'Peer Reviews' },
-        { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace', ariaLabel: 'Project Workspace' },
         { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Courses', ariaLabel: 'Partner Catalog' },
       ],
     },
     {
-      category: 'Account',
+      category: 'Credentials & Account',
       icon: Shield,
       items: [
+        { to: '/certificates', icon: Award, label: 'Certificates', ariaLabel: 'Certificates' },
+        { to: '/capstone', icon: FileText, label: 'Capstone Project', ariaLabel: 'Capstone Project' },
+        { to: '/skills-profile', icon: CheckCircle, label: 'Skills Profile', ariaLabel: 'Skills Profile' },
         { to: '/notifications', icon: Bell, label: 'Notifications', ariaLabel: 'Notifications' },
         { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
@@ -191,6 +193,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
   const groups = sidebarGroups[user?.type] || sidebarGroups.Student
   const [openCategories, setOpenCategories] = useState({})
   const [unreadCount, setUnreadCount] = useState(0)
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -217,6 +220,16 @@ export default function Sidebar({ open, onOpen, onClose }) {
     setOpenCategories((prev) => ({ ...prev, [category]: !prev[category] }))
   }
 
+  const openProfileDrawer = () => {
+    setProfileDrawerOpen(true)
+    if (onOpen) onOpen()
+  }
+
+  const closeProfileDrawer = () => {
+    setProfileDrawerOpen(false)
+    if (onClose) onClose()
+  }
+
   return (
     <>
       <a href="#main-content" className="absolute -top-48 left-0 bg-brand-600 text-white px-4 py-2 z-50 transform -translate-y-full transition-all duration-200 focus:translate-y-0 focus:outline-none">
@@ -224,8 +237,29 @@ export default function Sidebar({ open, onOpen, onClose }) {
       </a>
 
       <aside data-tour="tour-sidebar" className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-[#0B0F19] text-white flex-col border-r border-slate-800/80">
-        <div className="flex items-center justify-between h-14 px-5 border-b border-slate-800/80 shrink-0">
-          <img src="/logo-white.png" alt="BlueSPACE" className="h-7 w-auto" />
+        {/* Profile Header */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800/80 shrink-0">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={openProfileDrawer}>
+            <div className="relative">
+              <img
+                src={user?.avatar || '/logo-white.png'}
+                alt={user?.name || 'User'}
+                className="h-10 w-10 rounded-full bg-deep-100 border border-deep-200 object-cover shrink-0"
+              />
+              <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0B0F19]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
+              <p className="text-[10px] text-slate-400 truncate">{user?.email || ''}</p>
+            </div>
+          </div>
+          <button
+            onClick={openProfileDrawer}
+            className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-deep-100 hover:bg-slate-700 transition-colors"
+            aria-label="Profile menu"
+          >
+            <Settings size={16} />
+          </button>
         </div>
 
         <nav aria-label="Main navigation" className="p-3 space-y-2 flex-1 overflow-y-auto">
@@ -272,8 +306,8 @@ export default function Sidebar({ open, onOpen, onClose }) {
 
         <div className="p-3 border-t border-slate-800/80 shrink-0">
           <button
-            onClick={logout}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            onClick={openProfileDrawer}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-white hover:bg-slate-700 transition-colors"
           >
             <LogOut size={16} />
             <span>Sign Out</span>
@@ -281,7 +315,8 @@ export default function Sidebar({ open, onOpen, onClose }) {
         </div>
       </aside>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
         {groups.flatMap((g) => g.items).slice(0, 5).map((item) => {
           const active = location.pathname === item.to
           const badgeCount = item.to === '/notifications' ? unreadCount : null
@@ -289,39 +324,49 @@ export default function Sidebar({ open, onOpen, onClose }) {
             <NavLink
               key={item.to}
               to={item.to}
-              className={`flex-none flex flex-col items-center justify-center gap-1 py-2 px-3 text-[10px] font-medium transition-colors ${
-                active ? 'text-deep-600' : 'text-gray-400'
+              className={`flex-none flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium transition-colors ${
+                active ? 'text-deep-600 font-bold' : 'text-gray-500 hover:text-gray-800'
               }`}
               aria-current={active ? 'page' : undefined}
             >
-              <item.icon size={20} aria-hidden="true" />
-              {badgeCount && badgeCount > 0 && (
-                <Badge variant="outline" className="text-[9px] font-bold text-red-600 bg-red-50 border-red-200 shrink-0 absolute top-1 right-1">
-                  {badgeCount}
-                </Badge>
-              )}
-              <span className="visually-hidden">{item.label}</span>
+              <div className="relative">
+                <item.icon size={19} className="shrink-0" />
+                {badgeCount && badgeCount > 0 && (
+                  <span className="absolute -top-1 -right-2.5 bg-red-600 text-white text-[9px] font-bold px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
+                    {badgeCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] truncate max-w-full mt-0.5 leading-tight">{item.shortLabel || item.label}</span>
             </NavLink>
           )
         })}
         {groups.flatMap((g) => g.items).length > 5 && (
           <button
             onClick={onOpen}
-            className="flex-none flex flex-col items-center justify-center gap-1 py-2 px-3 text-[10px] font-medium text-gray-400"
+            className="flex-none flex flex-col items-center justify-center py-2 px-1 text-center text-gray-500 hover:text-gray-800 transition-colors min-w-0"
             aria-label="More options"
           >
-            <MoreHorizontal size={20} />
-            <span className="visually-hidden">More</span>
+            <div className="relative">
+              <MoreHorizontal size={19} className="shrink-0" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-2.5 bg-red-600 text-white text-[9px] font-bold px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-medium truncate max-w-full mt-0.5 leading-tight">More</span>
           </button>
         )}
       </nav>
 
+      {/* Mobile "More" Slide-up Drawer */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-xs" onClick={onClose} />
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-sheet-up">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-              <span className="text-sm font-bold text-deep-600">More</span>
+              <span className="text-sm font-bold text-deep-600">Academy Menu</span>
               <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-deep-600 rounded-md">
                 <X size={20} />
                 <span className="visually-hidden">Close menu</span>
@@ -332,17 +377,26 @@ export default function Sidebar({ open, onOpen, onClose }) {
               {groups.flatMap((g) => g.items).length === 0 ? (
                 <p className="px-4 py-3 text-xs text-gray-400">No additional items</p>
               ) : (
-                groups.flatMap((g) => g.items).map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={onClose}
+                groups.flatMap((g) => g.items).map((item) => {
+                  const badgeCount = item.to === '/notifications' ? unreadCount : null
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={onClose}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                      location.pathname === item.to ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'
+                      location.pathname === item.to ? 'bg-deep-50 text-deep-700 font-bold' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
-                    <item.icon size={18} />
-                    {item.label}
+                    <div className="flex items-center gap-3">
+                      <item.icon size={18} />
+                      {item.label}
+                    </div>
+                    {badgeCount && badgeCount > 0 && (
+                      <Badge variant="outline" className="text-[10px] font-bold text-red-600 bg-red-50 border-red-200">
+                        {badgeCount}
+                      </Badge>
+                    )}
                   </NavLink>
                 ))
               )}
@@ -351,15 +405,133 @@ export default function Sidebar({ open, onOpen, onClose }) {
             <div className="p-3 border-t border-gray-100 shrink-0">
               <button
                 onClick={() => { onClose(); logout() }}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-3 w-full px-3.5 py-3 rounded-xl text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
-                <LogOut size={18} />
+                <LogOut size={16} />
                 <span>Sign Out</span>
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Profile Slide-up Drawer */}
+      {profileDrawerOpen && (
+        <div className="lg:hidden fixed inset-0 z-[60]">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeProfileDrawer} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-sheet-up">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+              <div className="flex items-center gap-3">
+                  <span className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
+                    <User size={14} />
+                  </span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-bold text-deep-600">{user?.name || 'User'}</span>
+                  <p className="text-[10px] text-gray-500">{user?.email || ''}</p>
+                </div>
+              </div>
+              <button
+                onClick={closeProfileDrawer}
+                className="p-1.5 text-gray-400 hover:text-deep-600 rounded-md"
+              >
+                <X size={20} />
+                <span className="visually-hidden">Close profile</span>
+              </button>
+            </div>
+
+            <nav className="p-4 space-y-3 overflow-y-auto" aria-label="Profile settings">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                  <User size={14} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-deep-600">Edit Profile</p>
+                  <p className="text-[10px] text-gray-500">Update your personal information</p>
+                </div>
+                <ArrowRight size={14} className="text-gray-400 shrink-0" />
+              </div>
+
+              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-white cursor-pointer hover:bg-gray-100 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                  <Clock size={14} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-deep-600">Student ID</p>
+                  <p className="text-[10px] text-gray-500 font-mono">{profile ? (profile.student_id || 'Pending') : 'Loading...'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-white cursor-pointer hover:bg-gray-100 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+                  <Mail size={14} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-deep-600">Contact Preferences</p>
+                  <p className="text-[10px] text-gray-500">Manage email and SMS notifications</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-white cursor-pointer hover:bg-gray-100 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
+                  <Cog size={14} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-deep-600">Account Settings</p>
+                  <p className="text-[10px] text-gray-500">Security, privacy, and preferences</p>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <button
+                  onClick={() => { closeProfileDrawer(); logout() }}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut size={16} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
     </>
   )
+}
+
+function getMobilePrimaryItems(role) {
+  if (role === 'Instructor') {
+    return [
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+      { to: '/grading', icon: ClipboardList, label: 'Grading' },
+      { to: '/live-classes', icon: Video, label: 'Classes' },
+      { to: '/squads', icon: Users, label: 'Squads' },
+      { to: '/my-modules', icon: BookOpen, label: 'Modules' },
+    ]
+  }
+  if (role === 'Administrator') {
+    return [
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+      { to: '/applications', icon: ClipboardList, label: 'Admissions' },
+      { to: '/cohorts', icon: SchoolIcon, label: 'Cohorts' },
+      { to: '/curriculum', icon: BookOpen, label: 'Curriculum' },
+      { to: '/reports', icon: BarChart3, label: 'Reports' },
+    ]
+  }
+  if (role === 'Partner') {
+    return [
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+      { to: '/partner-courses', icon: SchoolIcon, label: 'Studio' },
+      { to: '/live-classes', icon: Video, label: 'Classes' },
+      { to: '/notifications', icon: Bell, label: 'Alerts' },
+      { to: '/profile-settings', icon: FileText, label: 'Settings' },
+    ]
+  }
+  // Default: Student
+  return [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+    { to: '/my-learning', icon: BookOpen, label: 'Learn' },
+    { to: '/lab-workspace', icon: ClipboardList, label: 'Labs' },
+    { to: '/live-classes', icon: Video, label: 'Live' },
+    { to: '/my-squad', icon: Users, label: 'Squad' },
+  ]
 }

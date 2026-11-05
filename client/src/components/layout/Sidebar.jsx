@@ -48,6 +48,7 @@ const sidebarGroups = {
       icon: Monitor,
       items: [
         { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
+        { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics', ariaLabel: 'Mentor Clinics' },
       ],
     },
     {
@@ -77,8 +78,7 @@ const sidebarGroups = {
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
         { to: '/my-modules', icon: BookOpen, label: 'My Modules', ariaLabel: 'My Modules' },
-        { to: '/labs-to-review', icon: ClipboardList, label: 'Labs to Review', ariaLabel: 'Labs to Review' },
-        { to: '/grading', icon: BarChart3, label: 'Grading', ariaLabel: 'Grading' },
+        { to: '/grading', icon: ClipboardList, label: 'Evaluation & Grading', ariaLabel: 'Evaluation & Grading' },
         { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
         { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring', ariaLabel: 'Quiz Authoring' },
       ],

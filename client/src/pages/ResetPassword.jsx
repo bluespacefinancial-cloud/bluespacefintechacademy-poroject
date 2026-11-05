@@ -74,13 +74,13 @@ export default function ResetPassword() {
       headline="Choose a new password"
       description="Set a new password to get back to your BlueSPACE account."
     >
-      <div className="flex flex-1 items-center justify-center p-6">
+      <div className="flex flex-1 items-start justify-center px-4 pb-4 pt-20 lg:items-center lg:p-6">
         <Card className="w-full max-w-sm">
-          <CardHeader>
+          <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
             <CardTitle>{updated ? 'Password updated' : 'Reset your password'}</CardTitle>
             <CardDescription>{updated ? 'Your new password is ready to use.' : 'Choose a new password for your account.'}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
             {updated ? (
               <Button className="w-full bg-deep-600 text-white hover:bg-deep-700" onClick={() => navigate(returnTo, { replace: true })}>Back to sign in</Button>
             ) : checking ? (

@@ -183,7 +183,7 @@ export default function Login() {
       headline={artwork.headline}
       description={artwork.description}
     >
-        <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex flex-1 items-start justify-center px-4 pb-4 pt-20 lg:items-center lg:p-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -200,11 +200,11 @@ export default function Login() {
                 transition={{ duration: 0.25, ease }}
               >
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
                     <CardTitle>Set New Password</CardTitle>
                     <CardDescription>Your password was reset by admin. Please create a new one.</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
                     <form onSubmit={handleForceChange} className="space-y-4">
                       <div className="space-y-2">
                         <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
@@ -270,11 +270,11 @@ export default function Login() {
                 transition={{ duration: 0.25, ease }}
               >
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
                     <CardTitle>{portal.title}</CardTitle>
                     <CardDescription>{portal.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
                     {emailVerified && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">Your email is verified. The academy team must approve your application before you can sign in.</p>}
                     {pendingVerification && <div className="mb-4 rounded-md bg-bluespace-700 p-3 text-sm text-white"><p>Check your inbox for the verification link. You can resend it after entering your email below.</p><Button type="button" variant="link" className="mt-1 h-auto p-0 text-white" onClick={resendVerification} disabled={resending}>{resending ? 'Sending...' : 'Resend verification email'}</Button></div>}
                     <form onSubmit={handleSubmit} className="space-y-4">

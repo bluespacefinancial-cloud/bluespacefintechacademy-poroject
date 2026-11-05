@@ -83,8 +83,8 @@ export default function Sidebar({ open, onOpen, onClose }) {
         Skip to main content
       </a>
 
-      <aside className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-60 bg-deep-600 text-white flex-col">
-        <div className="flex items-center justify-between h-14 px-4 border-b border-white/10 shrink-0">
+      <aside className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-60 bg-black text-white flex-col">
+        <div className="flex items-center justify-between h-14 px-4 border-b border-white/20 shrink-0">
           <img src="/logo-white.png" alt="BlueSPACE" className="h-7 w-auto" />
         </div>
 
@@ -96,7 +96,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                 key={item.to}
                 to={item.to}
                 className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  active ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
+                  active ? 'bg-white/10 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
                 }`}
                 aria-current={active ? 'page' : undefined}
               >
@@ -107,10 +107,10 @@ export default function Sidebar({ open, onOpen, onClose }) {
           })}
         </nav>
 
-        <div className="p-3 border-t border-white/10 shrink-0">
+        <div className="p-3 border-t border-white/20 shrink-0">
           <button
             onClick={logout}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
           >
             <LogOut size={16} />
             <span>Sign Out</span>

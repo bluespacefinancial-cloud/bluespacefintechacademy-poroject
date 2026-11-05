@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   Code2,
   Clock,
-  GraduationCap,
   Compass,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -529,7 +528,7 @@ export default function StudentDashboard({ user }) {
                 <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto mb-1">
                   <CheckCircle2 size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900">You're all caught up!</p>
+                <p className="text-sm font-semibold text-gray-900">You&apos;re all caught up!</p>
                 <p className="text-xs text-gray-500 max-w-sm mx-auto">
                   No pending lab assignments or required remediations. Keep progressing through the modules.
                 </p>

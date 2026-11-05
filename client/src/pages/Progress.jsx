@@ -199,8 +199,7 @@ export default function Progress() {
         },
       ])
       setLoading(false)
-    } catch (err) {
-      console.error('Error loading progress:', err)
+    } catch {
       setLoading(false)
     }
   }

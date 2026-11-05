@@ -33,7 +33,6 @@ export default function AppLayout() {
                   className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-600 focus:border-brand-500 outline-none transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search labs, assessments, cohorts..."
                 />
               </div>
             </div>

@@ -108,15 +108,30 @@ npm run dev
 The `email-service` Edge Function sends application status notifications through
 Resend without exposing the provider key in the browser. Configure
 `RESEND_API_KEY`, `EMAIL_FROM`, and `APP_ORIGIN` as Supabase function secrets.
-Supabase Auth confirmation emails use the project's SMTP settings separately:
-configure a production SMTP provider in **Authentication → SMTP Settings**, keep
-email confirmation enabled, set the production frontend as the Auth Site URL, and
-allow its `/student-login` and `/reset-password` redirect URLs. The registration screen reports that the
-applicant must verify their email before academy staff review the application.
-Password recovery uses Supabase Auth's `resetPasswordForEmail` and `updateUser`
-flows; the recovery email template must preserve the generated `{{ .ConfirmationURL }}` link.
-The function permits users to email their own verified address; only active
-administrators can send to other recipients.
+`EMAIL_FROM` must use an address on a domain verified in Resend, and `APP_ORIGIN`
+must be the production frontend origin.
+
+Supabase Auth confirmation and password recovery use a separate SMTP connection;
+the Edge Function secret alone does not enable Auth email delivery. In
+**Authentication → SMTP Settings**, configure Resend SMTP with host
+`smtp.resend.com`, port `465`, username `resend`, the Resend API key as the SMTP
+password, and a sender address on the verified domain. Keep email confirmation
+enabled. Set the production frontend as the Auth Site URL and allow its
+`/student-login` and `/reset-password` redirect URLs.
+
+Branded Auth templates are in `supabase/templates`. `supabase/config.toml` points
+the local Supabase stack to those files; for the hosted project, copy each file's
+HTML into its matching template under **Authentication → Email Templates**. The
+logo uses `{{ .SiteURL }}/logo-dark.png`, so the Auth Site URL must serve the
+frontend's public logo. Keep the generated `{{ .ConfirmationURL }}` link intact in
+the confirmation, recovery, magic-link and invitation templates.
+
+After setup, test registration with an inbox outside the Supabase organization,
+then test password recovery. Check **Logs → Auth** for Auth delivery errors,
+**Functions → email-service → Invocations/Logs** for application status email
+failures, and the Resend Emails page for accepted, delivered, bounced or rejected
+messages. The email function permits users to send to their own verified address;
+only active administrators can send to other recipients.
 
 After migration 009, administrators can manage instructor boundaries from
 `/instructor-assignments`. Create cohort and squad assignments before relying on

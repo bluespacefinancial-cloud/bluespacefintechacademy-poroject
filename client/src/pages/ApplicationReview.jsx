@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { emailService } from '../lib/emailService'
 
 export default function ApplicationReview() {
   const [applications, setApplications] = useState([])
@@ -39,18 +40,29 @@ export default function ApplicationReview() {
       toast.error('Choose a cohort before approving a student')
       return
     }
+    const reviewReason = decision === 'rejected' ? 'Application was not approved by the academy team.' : null
     const { error } = await supabase.rpc('review_academy_application', {
       p_application_id: application.id,
       p_decision: decision,
       p_cohort_id: decision === 'approved' && application.requested_role === 'Student' ? Number(cohortId) : null,
       p_track: decision === 'approved' && application.requested_role === 'Student' ? application.track : null,
-      p_reason: decision === 'rejected' ? 'Application was not approved by the academy team.' : null,
+      p_reason: reviewReason,
     })
     if (error) {
       toast.error(error.message)
       return
     }
-    toast.success(`Application ${decision}`)
+    const notification = await emailService.sendApplicationStatusEmail(
+      application.email,
+      application.name,
+      decision,
+      reviewReason,
+    )
+    if (notification.success) {
+      toast.success(`Application ${decision}; email sent`)
+    } else {
+      toast.error(`Application ${decision}, but the email could not be sent: ${notification.error}`)
+    }
     load().catch((loadError) => toast.error(loadError.message))
   }
 

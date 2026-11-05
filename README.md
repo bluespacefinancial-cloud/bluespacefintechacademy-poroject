@@ -105,9 +105,14 @@ npm run dev
    ```
 17. Copy your Supabase URL and anon key to `.env`
 
-The `email-service` Edge Function sends mail through Resend without exposing the
-provider key in the browser. Configure `RESEND_API_KEY`, `EMAIL_FROM`, and
-`APP_ORIGIN` as Supabase function secrets before using email notifications.
+The `email-service` Edge Function sends application status notifications through
+Resend without exposing the provider key in the browser. Configure
+`RESEND_API_KEY`, `EMAIL_FROM`, and `APP_ORIGIN` as Supabase function secrets.
+Supabase Auth confirmation emails use the project's SMTP settings separately:
+configure a production SMTP provider in **Authentication → SMTP Settings**, keep
+email confirmation enabled, set the production frontend as the Auth Site URL, and
+allow its `/student-login` redirect URL. The registration screen reports that the
+applicant must verify their email before academy staff review the application.
 The function permits users to email their own verified address; only active
 administrators can send to other recipients.
 
@@ -157,11 +162,18 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 3. Add environment variables in Vercel dashboard:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-4. Deploy Edge Functions to Supabase:
+4. Link the Supabase project, apply all migrations, and deploy the required Edge
+   Functions (the public registration handler and notification sender are not
+   deployed automatically by a frontend push):
    ```bash
-   npx supabase functions deploy
+   npx supabase link --project-ref <project-ref>
+   npx supabase db push
+   npx supabase functions deploy auth-handler
+   npx supabase functions deploy email-service
    ```
-5. Configure CORS in Supabase to allow your Vercel domain
+5. Set `APP_ORIGIN` to the production frontend origin and configure Resend secrets
+   as described above. The Auth Site URL and allowed redirect URL must use the same
+   production origin.
 
 ## Available Scripts
 

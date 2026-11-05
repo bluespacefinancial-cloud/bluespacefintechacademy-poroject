@@ -56,7 +56,10 @@ const PORTAL_LABEL_BY_ROLE = {
 export default function Login() {
   const { login, logout, setUser } = useAuth()
   const navigate = useNavigate()
-  const { pathname: rawPathname } = useLocation()
+  const { pathname: rawPathname, search, state } = useLocation()
+  const query = new URLSearchParams(search)
+  const pendingVerification = query.get('pendingVerification') === '1'
+  const emailVerified = query.get('emailVerified') === '1'
   // Normalize so "/admin-login/" or "/Admin-Login" cannot fall back to the
   // student portal by missing the lookup.
   const pathname = rawPathname.replace(/\/+$/, '').toLowerCase() || '/'
@@ -66,13 +69,36 @@ export default function Login() {
   const displayRole = portal.displayRole || role
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(state?.registeredEmail || '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [forceChange, setForceChange] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [changing, setChanging] = useState(false)
+  const [resending, setResending] = useState(false)
+
+  const resendVerification = async () => {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) {
+      toast.error('Enter your email address first')
+      return
+    }
+    setResending(true)
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: normalizedEmail,
+        options: { emailRedirectTo: `${window.location.origin}/student-login?emailVerified=1` },
+      })
+      if (error) throw error
+      toast.success('Verification email sent. Check your inbox and spam folder.')
+    } catch (err) {
+      toast.error(err.message || 'Unable to resend verification email')
+    } finally {
+      setResending(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -249,6 +275,8 @@ export default function Login() {
                     <CardDescription>{portal.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
+                    {emailVerified && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">Your email is verified. The academy team must approve your application before you can sign in.</p>}
+                    {pendingVerification && <div className="mb-4 rounded-md bg-bluespace-700 p-3 text-sm text-white"><p>Check your inbox for the verification link. You can resend it after entering your email below.</p><Button type="button" variant="link" className="mt-1 h-auto p-0 text-white" onClick={resendVerification} disabled={resending}>{resending ? 'Sending...' : 'Resend verification email'}</Button></div>}
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
                         <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">

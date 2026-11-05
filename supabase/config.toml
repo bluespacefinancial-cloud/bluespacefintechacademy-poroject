@@ -1,0 +1,7 @@
+[functions.auth-handler]
+# Public registration/login endpoints are validated in the function itself.
+verify_jwt = false
+
+[functions.email-service]
+# The function validates the caller's Supabase access token and academy role.
+verify_jwt = false

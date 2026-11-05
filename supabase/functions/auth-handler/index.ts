@@ -44,19 +44,36 @@ serve(async (req) => {
       if (!email || !password || !name || !["Student", "Instructor", "Partner"].includes(role)) {
         return json({ error: "name, email, password and a valid role are required" }, 400)
       }
+      if (typeof email !== "string" || typeof name !== "string" || typeof password !== "string" || password.length < 8) {
+        return json({ error: "Enter a valid email and name, and use a password with at least 8 characters" }, 400)
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 191 || name.trim().length > 191) {
+        return json({ error: "Enter a valid email address and a name under 192 characters" }, 400)
+      }
+      if ((phone && String(phone).length > 191) || (organisation && String(organisation).length > 200) || (motivation && String(motivation).length > 2000)) {
+        return json({ error: "One or more application fields are too long" }, 400)
+      }
       if (role === "Student" && !["Finsoft", "Finops"].includes(track)) {
         return json({ error: "Students must choose a valid track" }, 400)
       }
+      const normalizedEmail = email.trim().toLowerCase()
+      const appOrigin = Deno.env.get("APP_ORIGIN") || req.headers.get("origin")
+      const emailRedirectTo = appOrigin
+        ? new URL("/student-login?emailVerified=1", appOrigin).toString()
+        : undefined
       const { data, error } = await admin.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
-        options: { data: { type: role, name } },
+        options: {
+          data: { type: role, name: name.trim() },
+          ...(emailRedirectTo ? { emailRedirectTo } : {}),
+        },
       })
       if (error) return json({ error: error.message }, 400)
       if (!data.user) return json({ error: "Unable to create account" }, 500)
 
       const { data: profile, error: profileError } = await admin.from("users").upsert(
-        { auth_user_id: data.user.id, name, email, type: role, phone: phone || null, is_active: 0 },
+        { auth_user_id: data.user.id, name: name.trim(), email: normalizedEmail, type: role, phone: phone || null, is_active: 0 },
         { onConflict: "email" }
       ).select("id").single()
       if (profileError) return json({ error: profileError.message }, 500)
@@ -65,7 +82,7 @@ serve(async (req) => {
         auth_user_id: data.user.id,
         user_id: profile.id,
         name,
-        email,
+        email: normalizedEmail,
         phone: phone || null,
         requested_role: role,
         track: role === "Student" ? track : null,
@@ -73,7 +90,7 @@ serve(async (req) => {
         motivation: motivation || null,
       })
       if (applicationError) return json({ error: applicationError.message }, 500)
-      return json({ submitted: true }, 201)
+      return json({ submitted: true, emailConfirmationRequired: !data.user.email_confirmed_at }, 201)
     }
 
     // Everything below requires a valid session.

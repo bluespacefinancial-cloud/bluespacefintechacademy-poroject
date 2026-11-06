@@ -64,7 +64,6 @@ const sidebarGroups = {
       category: 'Credentials & Portfolio',
       icon: Shield,
       items: [
-        { to: '/profile-settings', icon: FileText, label: 'Profile & Showcase', ariaLabel: 'Profile and Showcase' },
         { to: '/capstone', icon: FileText, label: 'Capstone Project', ariaLabel: 'Capstone Project' },
         { to: '/certificates', icon: Award, label: 'Certificates', ariaLabel: 'Certificates' },
       ],
@@ -103,13 +102,6 @@ const sidebarGroups = {
         { to: '/project-review', icon: ClipboardList, label: 'Project Review', ariaLabel: 'Project Review' },
       ],
     },
-    {
-      category: 'Account',
-      icon: Shield,
-      items: [
-        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
-      ],
-    },
   ],
   Partner: [
     {
@@ -118,13 +110,6 @@ const sidebarGroups = {
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
         { to: '/partner-courses', icon: BookOpen, label: 'Course Studio', ariaLabel: 'Course Studio' },
-      ],
-    },
-    {
-      category: 'Account',
-      icon: Shield,
-      items: [
-        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
   ],
@@ -169,13 +154,6 @@ const sidebarGroups = {
       items: [
         { to: '/capstone', icon: FileText, label: 'Capstone', ariaLabel: 'Capstone' },
         { to: '/panel-review', icon: ClipboardList, label: 'Panel Review', ariaLabel: 'Panel Review' },
-      ],
-    },
-    {
-      category: 'Account',
-      icon: Shield,
-      items: [
-        { to: '/profile-settings', icon: FileText, label: 'Profile Settings', ariaLabel: 'Profile Settings' },
       ],
     },
   ],
@@ -409,7 +387,6 @@ export default function Sidebar({ open, onOpen, onClose }) {
               <div className="w-9 h-9 rounded-full bg-brand-600/30 border border-brand-500/40 text-brand-300 font-bold text-xs flex items-center justify-center">
                 {userInitials}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#0B0F19]" />
             </div>
 
             <div className="min-w-0 flex-1">

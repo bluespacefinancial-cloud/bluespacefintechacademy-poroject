@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -23,13 +23,11 @@ import {
   Briefcase,
   ListPlus,
   ChevronDown,
+  ChevronUp,
   Shield,
   GraduationCap as SchoolIcon,
   Monitor,
-  Cog,
   User,
-  Settings,
-  Clock,
   Award,
 } from 'lucide-react'
 
@@ -189,7 +187,18 @@ export default function Sidebar({ open, onOpen, onClose }) {
   const groups = sidebarGroups[user?.type] || sidebarGroups.Student
   const [openCategories, setOpenCategories] = useState({})
   const [unreadCount, setUnreadCount] = useState(0)
-  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef(null)
+
+  const userInitials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : (user?.email?.[0]?.toUpperCase() || 'U')
 
   useEffect(() => {
     let cancelled = false
@@ -211,19 +220,30 @@ export default function Sidebar({ open, onOpen, onClose }) {
     return () => { cancelled = true }
   }, [user])
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setProfileMenuOpen(false)
+      }
+    }
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setProfileMenuOpen(false)
+      }
+    }
+    if (profileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [profileMenuOpen])
+
   const isCategoryOpen = (category) => openCategories[category] ?? true
   const toggleCategory = (category) => {
     setOpenCategories((prev) => ({ ...prev, [category]: !prev[category] }))
-  }
-
-  const openProfileDrawer = () => {
-    setProfileDrawerOpen(true)
-    if (onOpen) onOpen()
-  }
-
-  const closeProfileDrawer = () => {
-    setProfileDrawerOpen(false)
-    if (onClose) onClose()
   }
 
   return (
@@ -233,29 +253,15 @@ export default function Sidebar({ open, onOpen, onClose }) {
       </a>
 
       <aside data-tour="tour-sidebar" className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-[#0B0F19] text-white flex-col border-r border-slate-800/80">
-        {/* Profile Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800/80 shrink-0">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={openProfileDrawer}>
-            <div className="relative">
-              <img
-                src={user?.avatar || '/logo-white.png'}
-                alt={user?.name || 'User'}
-                className="h-10 w-10 rounded-full bg-deep-100 border border-deep-200 object-cover shrink-0"
-              />
-              <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0B0F19]" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
-              <p className="text-[10px] text-slate-400 truncate">{user?.email || ''}</p>
-            </div>
-          </div>
-          <button
-            onClick={openProfileDrawer}
-            className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-deep-100 hover:bg-slate-700 transition-colors"
-            aria-label="Profile menu"
-          >
-            <Settings size={16} />
-          </button>
+        {/* Brand Logo Header */}
+        <div className="flex items-center h-16 px-5 border-b border-slate-800/80 shrink-0">
+          <NavLink to="/dashboard" className="flex items-center gap-2.5 group">
+            <img
+              src="/logo-white.png"
+              alt="BlueSPACE Fintech Academy"
+              className="h-7 w-auto transition-opacity group-hover:opacity-90"
+            />
+          </NavLink>
         </div>
 
         <nav aria-label="Main navigation" className="p-3 space-y-2 flex-1 overflow-y-auto">
@@ -300,13 +306,123 @@ export default function Sidebar({ open, onOpen, onClose }) {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-slate-800/80 shrink-0">
+        {/* User Profile & Slide-Up Menu Trigger */}
+        <div ref={profileMenuRef} className="relative p-3 border-t border-slate-800/80 shrink-0">
+          {/* Slide-Up Popover Menu */}
+          {profileMenuOpen && (
+            <div
+              role="menu"
+              aria-label="User profile and settings"
+              className="absolute bottom-full left-3 right-3 mb-2 bg-[#131926] border border-slate-700/80 rounded-xl shadow-2xl p-2 z-50 animate-sheet-up divide-y divide-slate-800/80"
+            >
+              {/* User Identity Card */}
+              <div className="px-3 py-2.5">
+                <p className="text-xs font-bold text-white truncate">{user?.name || 'Fellow'}</p>
+                <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || ''}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                    {user?.type || 'Student'}
+                  </span>
+                  {user?.student_id && (
+                    <span className="font-mono text-[10px] text-slate-400">
+                      ID: {user.student_id}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Menu Actions */}
+              <div className="py-1.5 space-y-0.5">
+                <NavLink
+                  to="/profile-settings"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'bg-slate-800 text-white font-semibold'
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`
+                  }
+                >
+                  <User size={15} className="text-slate-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block leading-tight">Profile & Showcase</span>
+                    <span className="block text-[10px] text-slate-500 truncate mt-0.5">Bio, photo & public portfolio</span>
+                  </div>
+                </NavLink>
+
+                <NavLink
+                  to="/profile-settings?tab=skills"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+                >
+                  <Target size={15} className="text-slate-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block leading-tight">Skills & Domains</span>
+                    <span className="block text-[10px] text-slate-500 truncate mt-0.5">Fintech tracks & competencies</span>
+                  </div>
+                </NavLink>
+
+                <NavLink
+                  to="/profile-settings?tab=security"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+                >
+                  <Shield size={15} className="text-slate-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block leading-tight">Account & Security</span>
+                    <span className="block text-[10px] text-slate-500 truncate mt-0.5">Password, contact & privacy</span>
+                  </div>
+                </NavLink>
+              </div>
+
+              {/* Sign Out */}
+              <div className="pt-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    logout()
+                  }}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                >
+                  <LogOut size={15} className="shrink-0" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Trigger Button */}
           <button
-            onClick={openProfileDrawer}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-white hover:bg-slate-700 transition-colors"
+            type="button"
+            onClick={() => setProfileMenuOpen((prev) => !prev)}
+            className={`flex items-center gap-3 w-full p-2 rounded-xl text-left transition-colors border ${
+              profileMenuOpen
+                ? 'bg-slate-800/90 border-slate-700 text-white shadow-inner'
+                : 'border-transparent hover:bg-slate-800/60 text-slate-300 hover:text-white'
+            }`}
+            aria-expanded={profileMenuOpen}
+            aria-haspopup="menu"
           >
-            <LogOut size={16} />
-            <span>Sign Out</span>
+            <div className="relative shrink-0">
+              <div className="w-9 h-9 rounded-full bg-brand-600/30 border border-brand-500/40 text-brand-300 font-bold text-xs flex items-center justify-center">
+                {userInitials}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#0B0F19]" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-white truncate leading-tight">{user?.name || 'User'}</p>
+              <p className="text-[10px] text-slate-400 truncate mt-0.5">{user?.type || 'Student'} • Account</p>
+            </div>
+
+            <ChevronUp
+              size={15}
+              className={`text-slate-400 transition-transform duration-200 shrink-0 ${
+                profileMenuOpen ? 'rotate-180 text-white' : ''
+              }`}
+            />
           </button>
         </div>
       </aside>
@@ -399,95 +515,23 @@ export default function Sidebar({ open, onOpen, onClose }) {
               )}
             </nav>
 
-            <div className="p-3 border-t border-gray-100 shrink-0">
+            <div className="p-3 border-t border-gray-100 shrink-0 space-y-1">
+              <NavLink
+                to="/profile-settings"
+                onClick={onClose}
+                className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <User size={16} className="text-gray-500" />
+                <span>Profile & Settings</span>
+              </NavLink>
               <button
                 onClick={() => { onClose(); logout() }}
-                className="flex items-center gap-3 w-full px-3.5 py-3 rounded-xl text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut size={16} />
                 <span>Sign Out</span>
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Profile Slide-up Drawer */}
-      {profileDrawerOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeProfileDrawer} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-sheet-up">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-              <div className="flex items-center gap-3">
-                  <span className="h-8 w-8 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600 shrink-0">
-                    <User size={14} />
-                  </span>
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-bold text-deep-600">{user?.name || 'User'}</span>
-                  <p className="text-[10px] text-gray-500">{user?.email || ''}</p>
-                </div>
-              </div>
-              <button
-                onClick={closeProfileDrawer}
-                className="p-1.5 text-gray-400 hover:text-deep-600 rounded-md"
-              >
-                <X size={20} />
-                <span className="visually-hidden">Close profile</span>
-              </button>
-            </div>
-
-            <nav className="p-4 space-y-3 overflow-y-auto" aria-label="Profile settings">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                  <User size={14} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-deep-600">Edit Profile</p>
-                  <p className="text-[10px] text-gray-500">Update your personal information</p>
-                </div>
-                <ArrowRight size={14} className="text-gray-400 shrink-0" />
-              </div>
-
-              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-white cursor-pointer hover:bg-gray-100 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-                  <Clock size={14} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-deep-600">Student ID</p>
-                  <p className="text-[10px] text-gray-500 font-mono">{profile ? (profile.student_id || 'Pending') : 'Loading...'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-white cursor-pointer hover:bg-gray-100 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-                  <Mail size={14} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-deep-600">Contact Preferences</p>
-                  <p className="text-[10px] text-gray-500">Manage email and SMS notifications</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 bg-white cursor-pointer hover:bg-gray-100 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
-                  <Cog size={14} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-deep-600">Account Settings</p>
-                  <p className="text-[10px] text-gray-500">Security, privacy, and preferences</p>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-100 pt-4 mt-4">
-                <button
-                  onClick={() => { closeProfileDrawer(); logout() }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  <LogOut size={16} />
-                  <span>Sign Out</span>
-                </button>
-              </div>
-            </nav>
           </div>
         </div>
       )}

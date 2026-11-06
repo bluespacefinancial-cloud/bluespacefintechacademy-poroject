@@ -250,11 +250,11 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
       <div className="relative w-full max-w-xl bg-white border border-gray-200/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-50 animate-sheet-up">
         {/* Top Header Bar */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/60">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-deep-700 bg-deep-50 px-2.5 py-0.5 rounded border border-deep-100">
-              {current.badge} • Step {step + 1} of {screens.length}
-            </span>
-          </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
+                  {current.badge} • Step {step + 1} of {screens.length}
+                </span>
+              </div>
           <button
             type="button"
             onClick={handleClose}

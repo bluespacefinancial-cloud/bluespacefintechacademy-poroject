@@ -110,6 +110,39 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  // Session timeout: auto-logout after 30 minutes of inactivity
+  useEffect(() => {
+    if (!user) return
+
+    const INACTIVITY_TIMEOUT = 30 * 60 * 1000 // 30 minutes
+    let timer
+
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        supabase.auth.signOut()
+        setUser(null)
+      }, INACTIVITY_TIMEOUT)
+    }
+
+    const activityHandler = () => resetTimer()
+
+    window.addEventListener('mousemove', activityHandler)
+    window.addEventListener('keydown', activityHandler)
+    window.addEventListener('click', activityHandler)
+    window.addEventListener('scroll', activityHandler)
+
+    resetTimer()
+
+    return () => {
+      if (timer) clearTimeout(timer)
+      window.removeEventListener('mousemove', activityHandler)
+      window.removeEventListener('keydown', activityHandler)
+      window.removeEventListener('click', activityHandler)
+      window.removeEventListener('scroll', activityHandler)
+    }
+  }, [user])
+
   const login = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

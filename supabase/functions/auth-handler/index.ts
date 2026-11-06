@@ -14,22 +14,51 @@ function json(body: unknown, status = 200) {
   })
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders })
+// ============================================================
+// RATE LIMITING - In-memory store (reset on function cold start)
+// Max 5 requests per minute per IP address
+// ============================================================
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
+const RATE_LIMIT_MAX = 5 // max requests per window
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now()
+  const record = rateLimitMap.get(ip)
+
+  if (!record || now > record.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW })
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1, resetIn: RATE_LIMIT_WINDOW }
   }
 
-  try {
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    )
+  if (record.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0, resetIn: record.resetAt - now }
+  }
+
+  record.count++
+  return { allowed: true, remaining: RATE_LIMIT_MAX - record.count, resetIn: record.resetAt - now }
+}
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for")
+  if (forwarded) return forwarded.split(",")[0].trim()
+  return req.headers.get("x-real-ip") || "unknown"
+}
 
     const url = new URL(req.url)
     const path = url.pathname.replace("/functions/v1/auth-handler", "")
 
     // Login and applications do not require an existing session.
     if (req.method === "POST" && path === "/login") {
+      const clientIp = getClientIp(req)
+      const rateLimit = checkRateLimit(clientIp)
+      if (!rateLimit.allowed) {
+        return json({
+          error: `Too many login attempts. Try again in ${rateLimit.resetIn} seconds.`,
+          retryAfter: rateLimit.resetIn,
+        }, 429)
+      }
+
       const { email, password } = await req.json()
       if (!email || !password) return json({ error: "Missing credentials" }, 400)
       const { data, error } = await admin.auth.signInWithPassword({ email, password })
@@ -38,6 +67,14 @@ serve(async (req) => {
     }
 
     if (req.method === "POST" && (path === "/apply" || path === "")) {
+      const clientIp = getClientIp(req)
+      const rateLimit = checkRateLimit(clientIp)
+      if (!rateLimit.allowed) {
+        return json({
+          error: `Too many application attempts. Try again in ${rateLimit.resetIn} seconds.`,
+          retryAfter: rateLimit.resetIn,
+        }, 429)
+      }
       const body = await req.json()
       if (path === "" && body.action !== "apply") return json({ error: "Not found" }, 404)
       const {

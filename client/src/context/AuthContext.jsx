@@ -1,20 +1,35 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { PROFILE_COLUMNS } from '../lib/profile'
 
 const AuthContext = createContext(null)
+
+class ProfileLoadError extends Error {
+  constructor(cause) {
+    super('We could not load your academy profile right now. Please try again shortly.')
+    this.name = 'ProfileLoadError'
+    this.cause = cause
+  }
+}
 
 // Role lives in public.users.type, not in the Supabase auth session. Without
 // this lookup, a page refresh restores a user with no `type`, which breaks
 // every role-gated route and sidebar until the next login.
 async function loadProfile(authUser) {
   if (!authUser?.email) return { ...authUser, hasProfile: false }
-    const { data: profile } = await supabase
-      .from('users')
-      // Explicit columns: public.users.password is deliberately not selectable
-      // (see supabase/migrations/010_security_hardening.sql).
-      .select('id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at, student_id')
-      .eq('email', authUser.email)
-      .maybeSingle()
+  const { data: profile, error } = await supabase
+    .from('users')
+    // Explicit columns: public.users.password is deliberately not selectable
+    // (see supabase/migrations/015_fix_users_rls_recursion.sql).
+    .select(PROFILE_COLUMNS)
+    .eq('email', authUser.email)
+    .maybeSingle()
+  // A failed query is not the same as "no profile": surface it instead of
+  // telling an active student their account is deactivated.
+  if (error) {
+    console.error('Profile lookup failed:', error)
+    throw new ProfileLoadError(error)
+  }
   return {
     ...authUser,
     ...(profile || {}),
@@ -103,7 +118,13 @@ export function AuthProvider({ children }) {
 
     if (error) throw error
 
-    const fullUser = await loadProfile(data.user)
+    let fullUser
+    try {
+      fullUser = await loadProfile(data.user)
+    } catch (profileError) {
+      await supabase.auth.signOut()
+      throw profileError
+    }
     if (isBlocked(fullUser)) {
       await supabase.auth.signOut()
       throw new Error('This account is not active in the academy. Contact an administrator for help.')

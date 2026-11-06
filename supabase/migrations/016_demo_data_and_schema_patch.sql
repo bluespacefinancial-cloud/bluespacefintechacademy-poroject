@@ -18,6 +18,28 @@ ALTER TABLE public.live_classes ADD COLUMN IF NOT EXISTS venue varchar(200) DEFA
 
 ALTER TABLE public.clinics ADD COLUMN IF NOT EXISTS attendee_count int NOT NULL DEFAULT 0;
 
+-- Ensure clinics.created_by & live_classes.created_by do not reject inserts when missing or null
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'clinics' AND column_name = 'created_by'
+  ) THEN
+    ALTER TABLE public.clinics ALTER COLUMN created_by DROP NOT NULL;
+  ELSE
+    ALTER TABLE public.clinics ADD COLUMN created_by bigint DEFAULT NULL;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'live_classes' AND column_name = 'created_by'
+  ) THEN
+    ALTER TABLE public.live_classes ALTER COLUMN created_by DROP NOT NULL;
+  ELSE
+    ALTER TABLE public.live_classes ADD COLUMN created_by bigint DEFAULT NULL;
+  END IF;
+END $$;
+
 -- Ensure column-level grant includes student_id & partner_id for authenticated users
 REVOKE SELECT ON public.users FROM anon, authenticated;
 GRANT SELECT (
@@ -67,7 +89,10 @@ INSERT INTO public.squads (cohort_id, name, squad_lead_id)
 SELECT
   c.id,
   'Squad Alpha (Payment Rails)',
-  (SELECT id FROM public.users WHERE email = 'ada.okonkwo@bluespacefintechacademy.com')
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'ada.okonkwo@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  )
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (
@@ -445,7 +470,10 @@ SELECT
   'Masterclass: Core Banking Ledgers & Idempotent Transactions',
   'Deep dive into ACID transaction semantics, double-entry ledger database schemas, and avoiding race conditions on payment rails.',
   c.id,
-  (SELECT id FROM public.users WHERE email = 'fin.core@bluespacefintechacademy.com'),
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'fin.core@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  ),
   now() + interval '2 days 4 hours',
   now() + interval '2 days 6 hours',
   'cohort',
@@ -453,7 +481,11 @@ SELECT
   'https://meet.google.com/xyz-blue-fin',
   false,
   'Virtual Stream',
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com')
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users WHERE lower(email) = 'fin.core@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  )
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (
@@ -468,7 +500,10 @@ SELECT
   'Workshop: TrustNet & Samsub API Security Lab',
   'Hands-on implementation of webhook signatures, HMAC validation, and KYC callback ingestion.',
   c.id,
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com'),
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  ),
   now() + interval '5 days 2 hours',
   now() + interval '5 days 4 hours',
   'cohort',
@@ -476,7 +511,10 @@ SELECT
   'https://meet.google.com/abc-trust-sam',
   false,
   'Virtual Stream',
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com')
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  )
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (
@@ -493,14 +531,21 @@ INSERT INTO public.clinics (
 SELECT
   'FinCore Ledger Architecture & Code Review Clinic',
   c.id,
-  (SELECT id FROM public.users WHERE email = 'fin.core@bluespacefintechacademy.com'),
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'fin.core@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  ),
   now() + interval '1 day 3 hours',
   now() + interval '1 day 4 hours',
   'https://meet.google.com/clinic-fincore',
   15,
   'scheduled',
   4,
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com')
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users WHERE lower(email) = 'fin.core@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  )
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (
@@ -514,14 +559,20 @@ INSERT INTO public.clinics (
 SELECT
   'Fintech Career Mentoring & Squad Sprint Office Hours',
   c.id,
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com'),
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  ),
   now() + interval '3 days 5 hours',
   now() + interval '3 days 6 hours',
   'https://meet.google.com/clinic-career',
   10,
   'scheduled',
   2,
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com')
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  )
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (
@@ -533,7 +584,10 @@ WHERE c.name = 'Cohort 1 - December 2026'
 -- =====================================================================
 INSERT INTO public.announcements (author_id, title, content, type, audience, pinned)
 SELECT
-  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com'),
+  COALESCE(
+    (SELECT id FROM public.users WHERE lower(email) = 'academy.lead@bluespacefintechacademy.com' LIMIT 1),
+    (SELECT id FROM public.users LIMIT 1)
+  ),
   'Welcome to Cohort 1 - BlueSPACE Fintech Academy',
   'Welcome to the academy! Orientation schedules, squad workspace allocations, syllabus access, and partner electives from TrustNet and Samsub have unlocked.',
   'announcement',

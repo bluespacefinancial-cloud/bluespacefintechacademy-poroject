@@ -38,6 +38,7 @@ BEGIN;
 -- ---------------------------------------------------------------------
 -- 1. Columns the client reads
 -- ---------------------------------------------------------------------
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS auth_user_id uuid UNIQUE;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS student_id varchar(50) DEFAULT NULL;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS partner_id bigint DEFAULT NULL;
 
@@ -50,50 +51,80 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 -- ---------------------------------------------------------------------
 -- 2. Identity helpers (RLS-bypassing)
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.current_profile_id()
-RETURNS bigint
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT id FROM public.users
-  WHERE is_active = 1
-    AND (
-      auth_user_id = auth.uid()
-      OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
-    )
-  LIMIT 1;
-$$;
+-- The live helpers may have been created with a different return type than
+-- the migrations (e.g. varchar instead of text). CREATE OR REPLACE cannot
+-- change a return type (42P13), and DROP would cascade through nearly every
+-- policy in the app. So each helper is redefined with whatever return type it
+-- already has, falling back to the migration default when it does not exist.
+DO $do$
+DECLARE
+  ret text;
+  elem text;
+BEGIN
+  -- current_profile_id()
+  SELECT pg_get_function_result(p.oid) INTO ret
+  FROM pg_proc p
+  WHERE p.pronamespace = 'public'::regnamespace
+    AND p.proname = 'current_profile_id' AND p.pronargs = 0;
+  ret := coalesce(ret, 'bigint');
+  EXECUTE format($f$
+    CREATE OR REPLACE FUNCTION public.current_profile_id()
+    RETURNS %1$s
+    LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+    AS $body$
+      SELECT id::%1$s FROM public.users
+      WHERE is_active = 1
+        AND (
+          auth_user_id = auth.uid()
+          OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
+        )
+      LIMIT 1;
+    $body$;
+  $f$, ret);
 
-CREATE OR REPLACE FUNCTION public.current_profile_role()
-RETURNS text
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT type FROM public.users
-  WHERE is_active = 1
-    AND (
-      auth_user_id = auth.uid()
-      OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
-    )
-  LIMIT 1;
-$$;
+  -- current_profile_role()
+  ret := NULL;
+  SELECT pg_get_function_result(p.oid) INTO ret
+  FROM pg_proc p
+  WHERE p.pronamespace = 'public'::regnamespace
+    AND p.proname = 'current_profile_role' AND p.pronargs = 0;
+  ret := coalesce(ret, 'text');
+  EXECUTE format($f$
+    CREATE OR REPLACE FUNCTION public.current_profile_role()
+    RETURNS %1$s
+    LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+    AS $body$
+      SELECT type::%1$s FROM public.users
+      WHERE is_active = 1
+        AND (
+          auth_user_id = auth.uid()
+          OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
+        )
+      LIMIT 1;
+    $body$;
+  $f$, ret);
 
-CREATE OR REPLACE FUNCTION public.current_squad_ids()
-RETURNS SETOF bigint
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT squad_id
-  FROM public.enrolments
-  WHERE user_id = public.current_profile_id()
-    AND squad_id IS NOT NULL;
-$$;
+  -- current_squad_ids()
+  ret := NULL;
+  SELECT pg_get_function_result(p.oid) INTO ret
+  FROM pg_proc p
+  WHERE p.pronamespace = 'public'::regnamespace
+    AND p.proname = 'current_squad_ids' AND p.pronargs = 0;
+  ret := coalesce(ret, 'SETOF bigint');
+  elem := regexp_replace(ret, '^SETOF\s+', '', 'i');
+  EXECUTE format($f$
+    CREATE OR REPLACE FUNCTION public.current_squad_ids()
+    RETURNS %1$s
+    LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+    AS $body$
+      SELECT squad_id::%2$s
+      FROM public.enrolments
+      WHERE user_id = public.current_profile_id()
+        AND squad_id IS NOT NULL;
+    $body$;
+  $f$, ret, elem);
+END
+$do$;
 
 -- User ids that share a squad with the caller. Reading enrolments here as the
 -- definer keeps the users policy independent of enrolments policies, so a

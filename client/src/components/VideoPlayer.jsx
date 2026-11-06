@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { Play, Pause, Volume2, VolumeOff, Minimize, Expand, RefreshCw } from 'lucide-react'
 
+function getYouTubeEmbedUrl(url) {
+  if (!url || typeof url !== 'string') return null
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return match && match[2].length === 11
+    ? `https://www.youtube.com/embed/${match[2]}?rel=0`
+    : null
+}
+
 export function VideoPlayer({
   src,
   title,
@@ -11,6 +20,22 @@ export function VideoPlayer({
   width = 640,
   height = 360,
 }) {
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(src)
+
+  if (youtubeEmbedUrl) {
+    return (
+      <div className={`relative aspect-video w-full bg-black rounded-lg overflow-hidden ${className || ''}`}>
+        <iframe
+          src={youtubeEmbedUrl}
+          title={title || 'Class Recording'}
+          className="w-full h-full min-h-[360px] border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    )
+  }
+
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)

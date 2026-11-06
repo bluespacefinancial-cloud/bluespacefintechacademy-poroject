@@ -8,6 +8,15 @@ const SAVE_INTERVAL_MS = 10000 // save progress every 10 seconds
 
 const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
+function getYouTubeEmbedUrl(url) {
+  if (!url || typeof url !== 'string') return null
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return match && match[2].length === 11
+    ? `https://www.youtube.com/embed/${match[2]}?rel=0`
+    : null
+}
+
 export default function MediaPlayer({
   lesson,
   user,
@@ -34,6 +43,7 @@ export default function MediaPlayer({
   const isVideo = lesson.type === 'video'
   const mediaUrl = lesson.type === 'video' ? lesson.video_url : lesson.audio_url
   const mediaType = lesson.type === 'video' ? 'video/mp4' : 'audio/mpeg'
+  const youtubeEmbedUrl = isVideo && mediaUrl ? getYouTubeEmbedUrl(mediaUrl) : null
 
   const loadProgress = async () => {
     if (!user || !lesson.id) return
@@ -213,6 +223,39 @@ export default function MediaPlayer({
       }
     }
   }, [])
+
+  if (youtubeEmbedUrl) {
+    return (
+      <div className="bg-gray-900 text-white rounded-xl overflow-hidden flex flex-col shadow-2xl relative border border-gray-800">
+        <div className="relative aspect-video w-full bg-black">
+          <iframe
+            src={youtubeEmbedUrl}
+            title={lesson.title || 'Lesson Video'}
+            className="w-full h-full min-h-[380px] border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
+        <div className="p-4 bg-gray-950 border-t border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400 font-medium">Video Stream • YouTube Embedded</span>
+            {isCompleted && (
+              <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-semibold">
+                Completed
+              </Badge>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => saveProgress(duration || 300, true)}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
+          >
+            {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const mediaElement = isVideo ? (
     <video

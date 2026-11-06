@@ -5,6 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { supabase } from '../lib/supabase'
 
+function getYouTubeEmbedUrl(url) {
+  if (!url || typeof url !== 'string') return null
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return match && match[2].length === 11
+    ? `https://www.youtube.com/embed/${match[2]}?rel=0`
+    : null
+}
+
 export default function PartnerCourseLearning() {
   const { courseId } = useParams()
   const [course, setCourse] = useState(null)
@@ -35,5 +44,21 @@ export default function PartnerCourseLearning() {
       if (certificateError) setError(certificateError.message)
     }
   }
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6 flex items-center gap-3">{course?.partners?.logo_url && <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />}<div><h1 className="text-2xl font-bold text-deep-600">{course?.title || 'Partner course'}</h1><p className="text-sm text-gray-500">{course?.partners?.name}</p></div></div>{error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="space-y-3">{(course?.partner_course_lessons || []).sort((a, b) => a.order_index - b.order_index).map((lesson) => { const done = progress.some((item) => item.lesson_id === lesson.id && item.is_completed); return <Card key={lesson.id}><CardHeader><CardTitle className="text-sm">{lesson.title}</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-gray-600">{lesson.description}</p>{lesson.video_url && <a className="flex items-center gap-2 text-sm text-brand-700 hover:underline" href={lesson.video_url} target="_blank" rel="noreferrer"><PlayCircle size={16} />Open lesson video</a>}{lesson.content_url && <a className="text-sm text-brand-700 hover:underline" href={lesson.content_url} target="_blank" rel="noreferrer">Open lesson resource</a>}<Button variant={done ? 'secondary' : 'outline'} onClick={() => complete(lesson.id)} disabled={done}>{done ? <><CheckCircle size={14} className="mr-2" />Completed</> : 'Mark lesson complete'}</Button></CardContent></Card> })}</div></div>
+  return <div className="min-h-screen bg-gray-50"><div className="mb-6 flex items-center gap-3">{course?.partners?.logo_url && <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />}<div><h1 className="text-2xl font-bold text-deep-600">{course?.title || 'Partner course'}</h1><p className="text-sm text-gray-500">{course?.partners?.name}</p></div></div>{error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="space-y-3">{(course?.partner_course_lessons || []).sort((a, b) => a.order_index - b.order_index).map((lesson) => { const done = progress.some((item) => item.lesson_id === lesson.id && item.is_completed); return <Card key={lesson.id}><CardHeader><CardTitle className="text-sm">{lesson.title}</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-gray-600">{lesson.description}</p>{lesson.video_url && (
+  getYouTubeEmbedUrl(lesson.video_url) ? (
+    <div className="relative aspect-video w-full max-w-2xl bg-black rounded-lg overflow-hidden my-2 shadow">
+      <iframe
+        src={getYouTubeEmbedUrl(lesson.video_url)}
+        title={lesson.title}
+        className="w-full h-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
+  ) : (
+    <a className="flex items-center gap-2 text-sm text-brand-700 hover:underline" href={lesson.video_url} target="_blank" rel="noreferrer">
+      <PlayCircle size={16} />Open lesson video
+    </a>
+  )
+)}{lesson.content_url && <a className="text-sm text-brand-700 hover:underline" href={lesson.content_url} target="_blank" rel="noreferrer">Open lesson resource</a>}<Button variant={done ? 'secondary' : 'outline'} onClick={() => complete(lesson.id)} disabled={done}>{done ? <><CheckCircle size={14} className="mr-2" />Completed</> : 'Mark lesson complete'}</Button></CardContent></Card> })}</div></div>
 }

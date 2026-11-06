@@ -187,7 +187,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
           .from('notifications')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id)
-          .eq('is_read', false)
+          .eq('is_read', 0)
         if (error) throw error
         if (!cancelled) setUnreadCount(count || 0)
       } catch {

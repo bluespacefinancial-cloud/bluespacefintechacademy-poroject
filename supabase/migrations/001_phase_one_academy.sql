@@ -16,7 +16,7 @@ AS $$
 $$;
 
 CREATE OR REPLACE FUNCTION public.current_profile_role()
-RETURNS text
+RETURNS varchar(20)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER

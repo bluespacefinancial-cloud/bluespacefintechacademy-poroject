@@ -488,7 +488,7 @@ WHERE c.name = 'Cohort 1 - December 2026'
 -- =====================================================================
 INSERT INTO public.clinics (
   title, cohort_id, mentor_id, starts_at, ends_at,
-  meet_url, capacity, status, attendee_count
+  meet_url, capacity, status, attendee_count, created_by
 )
 SELECT
   'FinCore Ledger Architecture & Code Review Clinic',
@@ -499,7 +499,8 @@ SELECT
   'https://meet.google.com/clinic-fincore',
   15,
   'scheduled',
-  4
+  4,
+  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com')
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (
@@ -508,7 +509,7 @@ WHERE c.name = 'Cohort 1 - December 2026'
 
 INSERT INTO public.clinics (
   title, cohort_id, mentor_id, starts_at, ends_at,
-  meet_url, capacity, status, attendee_count
+  meet_url, capacity, status, attendee_count, created_by
 )
 SELECT
   'Fintech Career Mentoring & Squad Sprint Office Hours',
@@ -519,7 +520,8 @@ SELECT
   'https://meet.google.com/clinic-career',
   10,
   'scheduled',
-  2
+  2,
+  (SELECT id FROM public.users WHERE email = 'academy.lead@bluespacefintechacademy.com')
 FROM public.cohorts c
 WHERE c.name = 'Cohort 1 - December 2026'
   AND NOT EXISTS (

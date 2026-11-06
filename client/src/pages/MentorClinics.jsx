@@ -93,6 +93,7 @@ export default function MentorClinics() {
         title: form.title.trim(),
         cohort_id: Number(form.cohort_id),
         mentor_id: user.id,
+        created_by: user.id,
         starts_at: new Date(form.starts_at).toISOString(),
         ends_at: new Date(form.ends_at).toISOString(),
         meet_url: form.meet_url.trim() || null,

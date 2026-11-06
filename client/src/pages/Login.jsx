@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Lock } from 'lucide-react'
@@ -53,6 +53,9 @@ const PORTAL_LABEL_BY_ROLE = {
   Partner: 'partner',
 }
 
+// Password complexity: at least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/
+
 export default function Login() {
   const { login, logout, setUser } = useAuth()
   const navigate = useNavigate()
@@ -60,8 +63,6 @@ export default function Login() {
   const query = new URLSearchParams(search)
   const pendingVerification = query.get('pendingVerification') === '1'
   const emailVerified = query.get('emailVerified') === '1'
-  // Normalize so "/admin-login/" or "/Admin-Login" cannot fall back to the
-  // student portal by missing the lookup.
   const pathname = rawPathname.replace(/\/+$/, '').toLowerCase() || '/'
   const portal = PORTALS[pathname] || DEFAULT_PORTAL
   const { role } = portal
@@ -77,6 +78,35 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [changing, setChanging] = useState(false)
   const [resending, setResending] = useState(false)
+
+  // Rate limiting state
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [lockoutUntil, setLockoutUntil] = useState(0)
+  const MAX_ATTEMPTS = 5
+  const LOCKOUT_MS = 5 * 60 * 1000 // 5 minutes
+
+  const isLockedOut = lockoutUntil > Date.now()
+  const remainingLockout = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000))
+
+  const canAttempt = () => {
+    if (!isLockedOut) return true
+    return false
+  }
+
+  const recordFailedAttempt = () => {
+    setAttemptCount((prev) => {
+      const next = prev + 1
+      if (next >= MAX_ATTEMPTS) {
+        setLockoutUntil(Date.now() + LOCKOUT_MS)
+      }
+      return next
+    })
+  }
+
+  const resetAttempts = () => {
+    setAttemptCount(0)
+    setLockoutUntil(0)
+  }
 
   const resendVerification = async () => {
     const normalizedEmail = email.trim().toLowerCase()
@@ -106,6 +136,12 @@ export default function Login() {
       toast.error('Please enter email and password')
       return
     }
+
+    if (!canAttempt()) {
+      toast.error(`Too many failed attempts. Try again in ${remainingLockout} seconds.`)
+      return
+    }
+
     setLoading(true)
     try {
       const user = await login(email, password)
@@ -134,6 +170,8 @@ export default function Login() {
         return
       }
 
+      resetAttempts()
+
       if (user.forcePasswordChange) {
         setForceChange(true)
         toast('Your password was reset by admin. Please set a new password.', { icon: '🔐' })
@@ -142,7 +180,11 @@ export default function Login() {
         navigate('/dashboard', { replace: true })
       }
     } catch (err) {
-      toast.error(err.message || 'Invalid credentials')
+      recordFailedAttempt()
+      // Generic error message to prevent email enumeration
+      toast.error(isLockedOut()
+        ? `Too many failed attempts. Try again in ${remainingLockout} seconds.`
+        : 'Invalid email or password')
     } finally {
       setLoading(false)
     }
@@ -150,8 +192,12 @@ export default function Login() {
 
   const handleForceChange = async (e) => {
     e.preventDefault()
-    if (!newPassword || newPassword.length < 4) {
-      toast.error('Password must be at least 4 characters')
+    if (!newPassword || newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      toast.error('Password must include uppercase, lowercase, number, and special character')
       return
     }
     if (newPassword !== confirmPassword) {
@@ -218,7 +264,7 @@ export default function Login() {
                             autoComplete="new-password"
                             placeholder="Create a new password"
                             required
-                            minLength={4}
+                            minLength={8}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           />
                           <button
@@ -229,6 +275,9 @@ export default function Login() {
                             {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                         </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Must include uppercase, lowercase, number, and special character
+                        </p>
                       </div>
                       <div className="space-y-2">
                         <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
@@ -313,6 +362,9 @@ export default function Login() {
                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                         </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Must include uppercase, lowercase, number, and special character
+                        </p>
                       </div>
 
                       <div className="-mt-2 flex justify-end">
@@ -320,8 +372,13 @@ export default function Login() {
                       </div>
 
                       <div className="pt-2">
-                        <Button type="submit" className="w-full bg-deep-600 text-white hover:bg-deep-700" disabled={loading}>
-                          {loading ? (
+                        <Button type="submit" className="w-full bg-deep-600 text-white hover:bg-deep-700" disabled={loading || isLockedOut}>
+                          {isLockedOut ? (
+                            <span className="flex items-center gap-2">
+                              <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Locked ({remainingLockout}s)
+                            </span>
+                          ) : loading ? (
                             <span className="flex items-center gap-2">
                               <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                               Signing in...

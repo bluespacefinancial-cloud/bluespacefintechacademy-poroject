@@ -130,23 +130,19 @@ export function AuthProvider({ children }) {
       throw new Error('This account is not active in the academy. Contact an administrator for help.')
     }
 
-    localStorage.setItem('token', data.session.access_token)
-    localStorage.setItem('user', JSON.stringify(fullUser))
+    // Store minimal session info only (no password hash, no sensitive data)
     setUser(fullUser)
     return fullUser
   }
 
   const logout = async () => {
     await supabase.auth.signOut()
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
     setUser(null)
   }
 
   const setUserFromProfile = (updates) => {
     setUser((prev) => {
       const next = { ...prev, ...updates }
-      localStorage.setItem('user', JSON.stringify(next))
       return next
     })
   }

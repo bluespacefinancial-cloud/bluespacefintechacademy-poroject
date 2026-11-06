@@ -25,6 +25,9 @@ const slide = {
   exit: (direction) => ({ opacity: 0, x: direction > 0 ? -24 : 24 }),
 }
 
+// Password complexity: at least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/
+
 export default function Register() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
@@ -46,6 +49,28 @@ export default function Register() {
     partnershipFocus: '',
     partnershipDetails: '',
   })
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [lockoutUntil, setLockoutUntil] = useState(0)
+  const MAX_ATTEMPTS = 5
+  const LOCKOUT_MS = 5 * 60 * 1000 // 5 minutes
+
+  const isLockedOut = lockoutUntil > Date.now()
+  const remainingLockout = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000))
+
+  const canAttempt = () => {
+    if (!isLockedOut) return true
+    return false
+  }
+
+  const recordFailedAttempt = () => {
+    setAttemptCount((prev) => {
+      const next = prev + 1
+      if (next >= MAX_ATTEMPTS) {
+        setLockoutUntil(Date.now() + LOCKOUT_MS)
+      }
+      return next
+    })
+  }
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const selectedRole = ROLES.find((role) => role.value === form.role)
@@ -67,9 +92,19 @@ export default function Register() {
         return
       }
     }
-    if (step === 3 && (form.password.length < 8 || form.password !== form.confirmPassword)) {
-      toast.error('Use an 8 character password and make sure both passwords match')
-      return
+    if (step === 3) {
+      if (!form.password || form.password.length < 8) {
+        toast.error('Password must be at least 8 characters')
+        return
+      }
+      if (!PASSWORD_REGEX.test(form.password)) {
+        toast.error('Password must include uppercase, lowercase, number, and special character')
+        return
+      }
+      if (form.password !== form.confirmPassword) {
+        toast.error('Passwords do not match')
+        return
+      }
     }
     setDirection(1)
     setStep((current) => current + 1)
@@ -83,6 +118,10 @@ export default function Register() {
   const submit = async () => {
     if (!supabase) {
       toast.error('Registration is unavailable until Supabase is configured')
+      return
+    }
+    if (!canAttempt()) {
+      toast.error(`Too many attempts. Try again in ${remainingLockout} seconds.`)
       return
     }
     setLoading(true)
@@ -117,6 +156,7 @@ export default function Register() {
         state: { registeredEmail: form.email.trim().toLowerCase() },
       })
     } catch (error) {
+      recordFailedAttempt()
       toast.error(error.message || 'Unable to submit application')
     } finally {
       setLoading(false)

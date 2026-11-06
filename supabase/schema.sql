@@ -363,32 +363,69 @@ ALTER TABLE public.audit_logs
 
 -- ===================== ROW LEVEL SECURITY =====================
 
-ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.cohorts DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.enrolments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.squads DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.modules DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.lessons DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.labs DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.assessments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.submissions DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.use_cases DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.sprints DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.certifications DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.placements DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifications DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.audit_logs DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.clinics DISABLE ROW LEVEL SECURITY;
-
--- Clinics: enable RLS with role-based policies (not covered by a separate migration)
+-- Enable RLS on all tables
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cohorts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.enrolments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.squads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.modules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.labs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.use_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sprints ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.certifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.placements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.clinics ENABLE ROW LEVEL SECURITY;
 
+-- ===================== COLUMN-LEVEL GRANTS =====================
+-- Revoke table-level SELECT from anon/authenticated; re-grant only safe columns
+REVOKE ALL ON public.users FROM anon, authenticated;
+GRANT SELECT (
+  id, name, email, type, avatar, phone, is_active,
+  force_password_change, last_login_at, created_at, updated_at,
+  partner_id, student_id
+) ON public.users TO authenticated;
+
+-- Clinics: enable RLS with role-based policies
 CREATE POLICY "staff manage clinics" ON public.clinics FOR ALL
   USING (public.current_profile_role() IN ('Instructor', 'Administrator'))
   WITH CHECK (public.current_profile_role() IN ('Instructor', 'Administrator'));
 
 CREATE POLICY "students view clinics" ON public.clinics FOR SELECT
   USING (public.current_profile_role() = 'Student');
+
+-- ===================== HELPER FUNCTIONS =====================
+
+-- current_profile_id(): returns the id of the currently authenticated user
+-- based on email matching, requiring is_active = 1
+DROP FUNCTION IF EXISTS public.current_profile_id() CASCADE;
+CREATE OR REPLACE FUNCTION public.current_profile_id()
+RETURNS bigint
+LANGUAGE sql STABLE
+SET search_path = public
+AS $$
+  SELECT id FROM public.users
+  WHERE lower(email) = lower(auth.email())
+    AND is_active = 1
+$$;
+GRANT EXECUTE ON FUNCTION public.current_profile_id() TO anon, authenticated;
+
+-- current_profile_role(): returns the type of the currently authenticated user
+DROP FUNCTION IF EXISTS public.current_profile_role() CASCADE;
+CREATE OR REPLACE FUNCTION public.current_profile_role()
+RETURNS varchar(20)
+LANGUAGE sql STABLE
+SET search_path = public
+AS $$
+  SELECT type FROM public.users
+  WHERE lower(email) = lower(auth.email())
+    AND is_active = 1
+$$;
+GRANT EXECUTE ON FUNCTION public.current_profile_role() TO anon, authenticated;
 
 -- ===================== TRIGGERS =====================
 

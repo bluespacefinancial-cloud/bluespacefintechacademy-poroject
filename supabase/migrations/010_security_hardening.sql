@@ -23,37 +23,57 @@ BEGIN;
 -- policies that call these helpers fail closed for deactivated accounts.
 -- Preserves the auth_user_id bridge added in 002_academy_operations.sql, with
 -- the email fallback for rows that have not been migrated yet.
-CREATE OR REPLACE FUNCTION public.current_profile_id()
-RETURNS bigint
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT id FROM public.users
-  WHERE is_active = 1
-    AND (
-      auth_user_id = auth.uid()
-      OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
-    )
-  LIMIT 1;
-$$;
+-- The helpers may already exist with a different return type (schema.sql
+-- creates current_profile_role() as varchar(20)). CREATE OR REPLACE cannot
+-- change a return type (42P13), and DROP would cascade through every policy
+-- that calls the helper. So redefine each function with the return type it
+-- already has, falling back to the migration default when it does not exist.
+DO $do$
+DECLARE
+  ret text;
+BEGIN
+  SELECT pg_get_function_result(p.oid) INTO ret
+  FROM pg_proc p
+  WHERE p.pronamespace = 'public'::regnamespace
+    AND p.proname = 'current_profile_id' AND p.pronargs = 0;
+  ret := coalesce(ret, 'bigint');
+  EXECUTE format($f$
+    CREATE OR REPLACE FUNCTION public.current_profile_id()
+    RETURNS %1$s
+    LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+    AS $body$
+      SELECT id::%1$s FROM public.users
+      WHERE is_active = 1
+        AND (
+          auth_user_id = auth.uid()
+          OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
+        )
+      LIMIT 1;
+    $body$;
+  $f$, ret);
 
-CREATE OR REPLACE FUNCTION public.current_profile_role()
-RETURNS text
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT type FROM public.users
-  WHERE is_active = 1
-    AND (
-      auth_user_id = auth.uid()
-      OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
-    )
-  LIMIT 1;
-$$;
+  ret := NULL;
+  SELECT pg_get_function_result(p.oid) INTO ret
+  FROM pg_proc p
+  WHERE p.pronamespace = 'public'::regnamespace
+    AND p.proname = 'current_profile_role' AND p.pronargs = 0;
+  ret := coalesce(ret, 'text');
+  EXECUTE format($f$
+    CREATE OR REPLACE FUNCTION public.current_profile_role()
+    RETURNS %1$s
+    LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+    AS $body$
+      SELECT type::%1$s FROM public.users
+      WHERE is_active = 1
+        AND (
+          auth_user_id = auth.uid()
+          OR (auth_user_id IS NULL AND lower(email) = lower(auth.email()))
+        )
+      LIMIT 1;
+    $body$;
+  $f$, ret);
+END
+$do$;
 
 -- =====================================================================
 -- users: stop self-service privilege escalation

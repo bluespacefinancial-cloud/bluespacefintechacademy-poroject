@@ -427,6 +427,49 @@ AS $$
 $$;
 GRANT EXECUTE ON FUNCTION public.current_profile_role() TO anon, authenticated;
 
+-- current_squad_ids(): returns squad IDs for the current user's squad
+DROP FUNCTION IF EXISTS public.current_squad_ids() CASCADE;
+CREATE OR REPLACE FUNCTION public.current_squad_ids()
+RETURNS SETOF bigint
+LANGUAGE sql STABLE
+SET search_path = public
+AS $$
+  SELECT squad_id FROM public.enrolments
+  WHERE user_id = public.current_profile_id()
+    AND squad_id IS NOT NULL
+$$;
+GRANT EXECUTE ON FUNCTION public.current_squad_ids() TO anon, authenticated;
+
+-- current_squad_member_ids(): returns squad members IDs for current user's squads
+DROP FUNCTION IF EXISTS public.current_squad_member_ids() CASCADE;
+CREATE OR REPLACE FUNCTION public.current_squad_member_ids()
+RETURNS SETOF bigint
+LANGUAGE sql STABLE
+SET search_path = public
+AS $$
+  SELECT DISTINCT e.user_id
+  FROM public.enrolments e
+  WHERE e.squad_id IN (SELECT public.current_squad_ids());
+$$;
+GRANT EXECUTE ON FUNCTION public.current_squad_member_ids() TO anon, authenticated;
+
+-- ===================== USERS TABLE POLICIES =====================
+-- Users can read their own profile
+CREATE POLICY "users view own profile"
+  ON public.users FOR SELECT
+  USING (id = public.current_profile_id());
+
+-- Staff and admins can view all profiles
+CREATE POLICY "staff view all profiles"
+  ON public.users FOR SELECT
+  USING (public.current_profile_role() IN ('Instructor', 'Administrator'));
+
+-- Users can update their own profile
+CREATE POLICY "users update own profile"
+  ON public.users FOR UPDATE
+  USING (id = public.current_profile_id())
+  WITH CHECK (id = public.current_profile_id());
+
 -- ===================== TRIGGERS =====================
 
 CREATE OR REPLACE FUNCTION public.handle_updated_at()

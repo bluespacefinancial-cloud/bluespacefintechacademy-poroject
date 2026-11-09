@@ -16,6 +16,7 @@ import {
   AlertCircle,
   ExternalLink,
   GraduationCap,
+  CreditCard,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
@@ -23,8 +24,9 @@ import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
+import { IDCardLanyard } from '../components/ui/id-card-lanyard'
 
 const ROLES = [
   { id: 'Project Manager', label: 'Project Manager', desc: 'Team execution, sprint roadmaps, and stakeholder alignment' },
@@ -80,6 +82,7 @@ export default function ProfileSettings() {
 
   // Status & UI State
   const [loading, setLoading] = useState(true)
+  const [showIdCard, setShowIdCard] = useState(true)
   const [savingAccount, setSavingAccount] = useState(false)
   const [savingSkills, setSavingSkills] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
@@ -116,23 +119,23 @@ export default function ProfileSettings() {
           { data: certRows },
           { data: capstoneRows },
         ] = await Promise.all([
-          supabase
+          api
             .from('enrolments')
             .select('cohort_id, track, cohorts(name)')
             .eq('user_id', p.id)
             .in('status', ['enrolled', 'active'])
             .maybeSingle(),
-          supabase
+          api
             .from('skills_profiles')
             .select('*')
             .eq('user_id', p.id)
             .maybeSingle(),
-          supabase
+          api
             .from('certifications')
             .select('*, cohorts(name)')
             .eq('user_id', p.id)
             .order('created_at', { ascending: false }),
-          supabase
+          api
             .from('submissions')
             .select('*, assessments!inner(type, title)')
             .eq('user_id', p.id)
@@ -182,9 +185,8 @@ export default function ProfileSettings() {
       const updates = {
         name: accountForm.name.trim(),
         phone: accountForm.phone.trim() || null,
-        updated_at: new Date().toISOString(),
       }
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('users')
         .update(updates)
         .eq('id', profile.id)
@@ -223,7 +225,7 @@ export default function ProfileSettings() {
         updated_at: new Date().toISOString(),
       }
 
-      const { error: saveError } = await supabase
+      const { error: saveError } = await api
         .from('skills_profiles')
         .upsert(payload, { onConflict: 'user_id' })
 
@@ -252,7 +254,7 @@ export default function ProfileSettings() {
     setMessage('')
 
     try {
-      const { error: pwError } = await supabase.auth.updateUser({
+      const { error: pwError } = await api.auth.updateUser({
         password: passwordForm.new_password,
       })
       if (pwError) throw pwError
@@ -306,16 +308,47 @@ export default function ProfileSettings() {
 
   return (
     <div className="w-full space-y-6">
+      {/* 3D Interactive Lanyard ID Badge on the profile area */}
+      {showIdCard && (
+        <IDCardLanyard
+          name={profile.name || 'Fellow'}
+          role={`${cohortName || 'Cohort 1'} • ${selectedRole || profile.track || 'Fellow'}`}
+          brand="BLUESPACE"
+          brandTagline="Fintech Academy"
+          pillars={["Code", "Ledgers", "Ship"]}
+          location="Accra · Lagos"
+          idNumber={profile.student_id || profile.id || 'BS-2026-0042'}
+          validThru="12/2027"
+          site="bluespacefintechacademy.com"
+          anchorX="calc(100% - 130px)"
+          anchorY={6}
+          zIndex={60}
+          showHint={true}
+          onClose={() => setShowIdCard(false)}
+        />
+      )}
+
       {/* Top Header */}
       <DashboardHeader
         title="Fellow Profile & Showcase"
         subtitle={`${profile.name || 'Fellow'} • ${profile.type || 'Student'} • ${cohortName}`}
         actions={
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs bg-white border-gray-200 font-medium">
-              ID: {profile.student_id || profile.id}
-            </Badge>
-            <Badge variant="outline" className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700 font-medium">
+            <span className="text-xs text-gray-500 hidden sm:inline">
+              ID: <span className="font-mono font-medium text-gray-700">{profile.student_id || profile.id}</span>
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowIdCard(!showIdCard)}
+              className="text-xs border-blue-200 text-brand-700 bg-blue-50/50 hover:bg-blue-100/50 font-medium h-8"
+              title="Toggle Student Lanyard ID Badge"
+            >
+              <CreditCard size={13} className="mr-1.5 text-[#0000ff]" />
+              {showIdCard ? 'Hide Lanyard' : 'Physical ID Badge'}
+            </Button>
+            <Badge variant="outline" className="text-xs border-emerald-200 text-emerald-700 font-medium">
               Active Enrolment
             </Badge>
           </div>
@@ -362,7 +395,7 @@ export default function ProfileSettings() {
         >
           <Compass size={15} />
           Skills & Domains
-          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-deep-50 text-deep-700 border border-deep-100">
+          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-deep-700 border border-deep-200">
             {skillsCompletion}%
           </span>
         </button>
@@ -379,7 +412,7 @@ export default function ProfileSettings() {
           <Award size={15} />
           Credentials & Capstone
           {certifications.length > 0 && (
-            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-emerald-700 border border-emerald-200">
               {certifications.length}
             </span>
           )}
@@ -414,7 +447,7 @@ export default function ProfileSettings() {
                     <h3 className="text-lg font-bold text-gray-900">{profile.name}</h3>
                     <p className="text-xs text-gray-500 font-mono mt-0.5">{profile.email}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline" className="text-[10px] font-semibold text-deep-700 bg-deep-50 border-deep-100">
+                      <Badge variant="outline" className="text-[10px] font-semibold text-deep-700 border-deep-200">
                         {selectedRole || 'Fintech Engineer Fellow'}
                       </Badge>
                       <span className="text-[11px] text-gray-400">•</span>
@@ -446,7 +479,7 @@ export default function ProfileSettings() {
                       {selectedDomains.map((d) => (
                         <span
                           key={d}
-                          className="text-xs font-semibold px-3 py-1 rounded-lg bg-deep-50 text-deep-700 border border-deep-100"
+                          className="text-xs font-semibold px-3 py-1 rounded-lg text-deep-700 border border-deep-200"
                         >
                           {d}
                         </span>
@@ -467,7 +500,7 @@ export default function ProfileSettings() {
                       {selectedSkills.map((skill) => (
                         <span
                           key={skill}
-                          className="text-xs font-medium px-2.5 py-1 rounded-md bg-gray-50 text-gray-700 border border-gray-200"
+                          className="text-xs font-medium px-2.5 py-1 rounded-md text-gray-700 border border-gray-200"
                         >
                           {skill}
                         </span>
@@ -510,13 +543,24 @@ export default function ProfileSettings() {
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-gray-100">
                   <span className="text-gray-500">Academic Status</span>
-                  <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">
+                  <Badge variant="outline" className="text-[10px] text-emerald-700 border-emerald-200">
                     Enrolled
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <span className="text-gray-500">Certificates Earned</span>
                   <span className="font-semibold text-gray-900">{certifications.length}</span>
+                </div>
+                <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-gray-500">Interactive Lanyard</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowIdCard(!showIdCard)}
+                    className="text-xs font-semibold text-[#0000ff] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <CreditCard size={12} />
+                    {showIdCard ? 'Hide Badge' : 'View Hanging Badge'}
+                  </button>
                 </div>
               </CardContent>
             </Card>
@@ -755,7 +799,7 @@ export default function ProfileSettings() {
                         </div>
                         <Badge
                           variant="outline"
-                          className="text-[10px] capitalize bg-emerald-50 text-emerald-700 border-emerald-200"
+                          className="text-[10px] capitalize text-emerald-700 border-emerald-200"
                         >
                           {cert.status}
                         </Badge>
@@ -810,7 +854,7 @@ export default function ProfileSettings() {
                     <span className="text-xs font-bold text-gray-900">
                       {capstoneSubmission.assessments?.title || 'Production Capstone'}
                     </span>
-                    <Badge variant="outline" className="text-[10px] capitalize bg-brand-50 text-brand-700 border-brand-200">
+                    <Badge variant="outline" className="text-[10px] capitalize text-brand-700 border-brand-200">
                       {capstoneSubmission.status || 'Under Review'}
                     </Badge>
                   </div>

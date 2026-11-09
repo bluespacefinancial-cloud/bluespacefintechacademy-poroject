@@ -13,7 +13,6 @@ import {
   Clock,
   Compass,
   Trophy,
-  CreditCard,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
@@ -24,7 +23,6 @@ import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import { getDeadlineInfo } from '../lib/deadlines'
 import { AchievementBadge } from '../components/ui/achievement-badge'
-import { IDCardLanyard } from '../components/ui/id-card-lanyard'
 
 const initialData = {
   profile: null,
@@ -46,7 +44,6 @@ export default function StudentDashboard({ user }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [tourOpen, setTourOpen] = useState(false)
-  const [showIdCard, setShowIdCard] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -353,26 +350,6 @@ export default function StudentDashboard({ user }) {
 
   return (
     <div className="w-full space-y-6">
-      {/* 3D Interactive Lanyard ID Badge */}
-      {showIdCard && (
-        <IDCardLanyard
-          name={data.profile?.name || user?.name || user?.email?.split('@')[0] || 'Fellow'}
-          role={`${data.cohort?.name || 'Cohort 1'} Fellow`}
-          brand="BLUESPACE"
-          brandTagline="Fintech Academy"
-          pillars={["Code", "Ledgers", "Ship"]}
-          location="Accra · Lagos"
-          idNumber={user?.student_id || data.profile?.student_id || 'BS-2026-0042'}
-          validThru="12/2027"
-          site="bluespacefintechacademy.com"
-          anchorX="calc(100% - 130px)"
-          anchorY={6}
-          zIndex={60}
-          showHint={true}
-          onClose={() => setShowIdCard(false)}
-        />
-      )}
-
       {/* Dashboard Top Header & Progress Ribbon */}
       <DashboardHeader
         dataTour="student-header"
@@ -390,17 +367,6 @@ export default function StudentDashboard({ user }) {
                 <div className="h-full bg-deep-600 rounded-full" style={{ width: `${overallPercent}%` }} />
               </div>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowIdCard(!showIdCard)}
-              className="text-xs border-blue-200 text-brand-700 bg-blue-50/50 hover:bg-blue-100/50 font-medium h-8 sm:h-9"
-              title="Toggle Student Lanyard ID Badge"
-            >
-              <CreditCard size={13} className="mr-1.5 text-[#0000ff]" />
-              {showIdCard ? 'Hide ID Badge' : 'Student ID Badge'}
-            </Button>
             <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold h-8 sm:h-9">
               <Link to="/my-learning">
                 <BookOpen size={13} className="mr-1.5" />

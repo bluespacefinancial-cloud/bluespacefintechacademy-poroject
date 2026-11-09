@@ -1,6 +1,38 @@
-# BlueSPACE Fintech Academy LMS — Developer Guide
+# BlueSPACE Fintech Academy LMS — Documentation
 
-Complete technical documentation for developers, operators, and contributors.
+The single technical reference for developers, operators, and contributors.
+It covers the architecture, database, security model, API, client integration,
+design system, test logins, and deployment.
+
+---
+
+## Test Logins
+
+Demo data is seeded by `database/01_schema.sql`; password hashes come from
+`database/03_demo_passwords.sql`. Every demo account uses the same password:
+
+```
+BlueSpace2026!
+```
+
+Start the client at <http://localhost:3000> and open the portal for the role.
+
+| Role | Email | Portal |
+|------|-------|--------|
+| Student | `student@bluespacefintechacademy.com` | `/student-login` |
+| Student (Ada Okonkwo) | `ada.okonkwo@bluespacefintechacademy.com` | `/student-login` |
+| Student (Kwame Asante) | `kwame.asante@bluespacefintechacademy.com` | `/student-login` |
+| Student (Zainab Yusuf) | `zainab.yusuf@bluespacefintechacademy.com` | `/student-login` |
+| Student (Emeka Ndiaye) | `emeka.ndiaye@bluespacefintechacademy.com` | `/student-login` |
+| Student (Fatima Diallo) | `fatima.diallo@bluespacefintechacademy.com` | `/student-login` |
+| Instructor (FinCore) | `fin.core@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor (FaaS) | `faas.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor (FinOps) | `finops.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Administrator | `academy.lead@bluespacefintechacademy.com` | `/admin-login` |
+| Partner | `partner@bluespacefintechacademy.com` | `/partner-login` |
+
+These are local demo credentials. Change or remove them before any shared
+deployment.
 
 ---
 
@@ -380,12 +412,12 @@ client/
 lms/
 ├── backend/        # Laravel API, auth, PostgREST proxy, certificate script
 ├── database/       # Reproducible PostgreSQL bootstrap (sequential files)
-├── docs/           # Design system, plans, examples, archive
+├── docs/           # Design system source of truth
 ├── assets/brand/   # Brand source assets
+├── README.md       # Product overview and quick start
+├── DOCUMENTATION.md
 └── docker-compose.yml
 ```
-
-See [`docs/README.md`](docs/README.md) for the documentation index.
 
 ### Unused page files
 
@@ -401,24 +433,11 @@ These exist but are not imported by `App.jsx`:
 
 ---
 
-## 9. Demo Accounts and Provisioning
+## 9. Provisioning Accounts
 
-Demo data is in `database/01_schema.sql`; hashes are in
-`database/03_demo_passwords.sql`. Every demo account uses `BlueSpace2026!`.
-
-| Role | Email | Portal |
-|------|-------|--------|
-| Student | `student@bluespacefintechacademy.com` | `/student-login` |
-| Student (Ada Okonkwo) | `ada.okonkwo@bluespacefintechacademy.com` | `/student-login` |
-| Student (Kwame Asante) | `kwame.asante@bluespacefintechacademy.com` | `/student-login` |
-| Student (Zainab Yusuf) | `zainab.yusuf@bluespacefintechacademy.com` | `/student-login` |
-| Student (Emeka Ndiaye) | `emeka.ndiaye@bluespacefintechacademy.com` | `/student-login` |
-| Student (Fatima Diallo) | `fatima.diallo@bluespacefintechacademy.com` | `/student-login` |
-| Instructor (FinCore) | `fin.core@bluespacefintechacademy.com` | `/instructor-login` |
-| Instructor (FaaS) | `faas.domain@bluespacefintechacademy.com` | `/instructor-login` |
-| Instructor (FinOps) | `finops.domain@bluespacefintechacademy.com` | `/instructor-login` |
-| Administrator | `academy.lead@bluespacefintechacademy.com` | `/admin-login` |
-| Partner | `partner@bluespacefintechacademy.com` | `/partner-login` |
+The demo data lives in `database/01_schema.sql` and the password hashes in
+`database/03_demo_passwords.sql`. The shared password and the complete login
+list are in [Test Logins](#test-logins).
 
 ### Adding an account
 
@@ -513,7 +532,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `client/src/components/ui/badge.jsx` | Flat, background-free badge variants |
 | `client/src/components/certificate/ProfessionalCertificate.jsx` | Print certificate and verification view |
 | `docs/DESIGN_SYSTEM.md` | Visual language and component rules |
-| `docs/README.md` | Documentation index |
+| `README.md` | Product overview and quick start |
 | `assets/brand/` | Brand source assets (logos) |
 | `backend/scripts/certificate_generator.py` | Certificate PDF generator |
 

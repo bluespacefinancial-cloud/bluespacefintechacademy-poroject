@@ -38,21 +38,19 @@ lms/
 │   ├── 01_schema.sql           # Tables, data, grants, RLS policies
 │   ├── 02_auth_tokens.sql      # API tokens + password reset tokens
 │   └── 03_demo_passwords.sql   # Demo account password hashes
-├── docs/                       # Design system, plans, examples, archive
-│   ├── DESIGN_SYSTEM.md        # Visual language and component rules
-│   ├── plans/                  # Strategic and phased delivery plans
-│   ├── examples/               # Reference output (e.g. certificate PDF)
-│   └── archive/                # Supabase-era material, reference only
+├── docs/                       # Design system source of truth
+│   └── DESIGN_SYSTEM.md        # Visual language and component rules
 ├── assets/brand/               # Brand source assets (BFALogo.png, BFALogo2.png)
 ├── docker-compose.yml          # PostgreSQL + PostgREST
 ├── .env.example                # Compose settings (PGRST_JWT_SECRET)
 ├── vercel.json                 # Vercel frontend config
-├── DEVELOPER_GUIDE.md          # Technical guide
+├── DOCUMENTATION.md            # Technical reference and test logins
 └── README.md
 ```
 
-The documentation index is at [`docs/README.md`](docs/README.md). The design
-source of truth is [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
+The technical reference, including test logins, is
+[`DOCUMENTATION.md`](DOCUMENTATION.md). The design source of truth is
+[`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
 
 ## Architecture
 

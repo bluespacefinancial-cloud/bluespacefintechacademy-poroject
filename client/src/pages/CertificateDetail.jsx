@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Award, CheckCircle2, FileCheck2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
 
 export default function CertificateDetail() {
@@ -24,7 +24,7 @@ export default function CertificateDetail() {
       setError('')
 
       try {
-        const { data, error: queryError } = await supabase
+        const { data, error: queryError } = await api
           .from('certifications')
           .select(`
             id, cohort_id, track, status, final_grade, certificate_url, created_at,
@@ -62,21 +62,20 @@ export default function CertificateDetail() {
   }, [id])
 
   return (
-    <div className="min-h-screen bg-gray-50/60 pb-16 print:bg-white print:p-0">
-      {/* Top Bar (Hidden on print) */}
-      <div className="print:hidden max-w-5xl mx-auto mb-6 flex items-center justify-between">
-        <Button
-          variant="outline"
-          size="sm"
+    <div className="min-h-screen bg-slate-100/70 py-6 sm:py-8 px-4 sm:px-6 print:bg-white print:p-0">
+      {/* Subtle Top Utility Bar (Hidden on print) */}
+      <div className="print:hidden max-w-5xl mx-auto mb-5 flex items-center justify-between">
+        <button
+          type="button"
           onClick={() => navigate('/certificates')}
-          className="text-xs font-medium border-gray-200 hover:bg-gray-100 flex items-center gap-1.5"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors py-1.5 px-2.5 rounded-lg hover:bg-slate-200/60 cursor-pointer"
         >
-          <ArrowLeft size={14} />
-          Back to Certificates
-        </Button>
+          <ArrowLeft size={13} className="text-slate-400" />
+          <span>Back to Certificates</span>
+        </button>
 
-        <span className="text-xs font-mono font-medium text-gray-500">
-          Certificate #{cert?.certificate_number || id}
+        <span className="text-[11px] font-mono text-slate-400">
+          Ref: #{cert?.certificate_number || id}
         </span>
       </div>
 

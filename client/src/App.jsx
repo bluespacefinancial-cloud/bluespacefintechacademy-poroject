@@ -82,6 +82,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-certificate/:token" element={<CertificateVerify />} />
+      <Route path="/certificate/:id" element={<ProtectedRoute><CertificateDetail /></ProtectedRoute>} />
       <Route path="/" element={<RootRoute user={user} />}>
         <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -90,7 +91,6 @@ export default function App() {
         <Route path="progress" element={<ProtectedRoute roles={['Student']}><Progress /></ProtectedRoute>} />
         <Route path="my-squad" element={<ProtectedRoute roles={['Student']}><MySquad /></ProtectedRoute>} />
         <Route path="certificates" element={<ProtectedRoute roles={['Student']}><Certificates /></ProtectedRoute>} />
-        <Route path="certificate/:id" element={<ProtectedRoute roles={['Student']}><CertificateDetail /></ProtectedRoute>} />
         <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="quiz/:assessmentId" element={<ProtectedRoute roles={['Student']}><Quiz /></ProtectedRoute>} />
         <Route path="project-workspace" element={<Navigate to="/my-squad" replace />} />

@@ -1,19 +1,13 @@
-import React, { useState } from 'react'
-import {
-  Award,
-  CheckCircle2,
-  Printer,
-  Copy,
-  Check,
-  Share2,
-  Download,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
+import { CheckCircle2, Printer, Copy, Check, ShieldCheck, Award } from 'lucide-react'
 import { Button } from '../ui/button'
 
 /**
- * Beautiful Curly Guilloche Security Background & Lines in System Blue (#0000ff)
+ * Rich Ornamental Guilloche Security Background & Corner Medallions
+ * Styled in BlueSPACE System Blue (#0000ff) and Deep Midnight Navy (#0b192c)
  */
-function CertificateCurlyBackground() {
+function CertificateSecurityBackground() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden select-none" aria-hidden="true">
       <svg
@@ -22,136 +16,163 @@ function CertificateCurlyBackground() {
         preserveAspectRatio="none"
       >
         <defs>
-          {/* Subtle Fine Security Grid Pattern */}
-          <pattern id="certFineGrid" width="16" height="16" patternUnits="userSpaceOnUse">
-            <path d="M 0 16 L 16 0 M 0 0 L 16 16" fill="none" stroke="#0000ff" strokeWidth="0.3" strokeOpacity="0.04" />
+          {/* Subtle Security Micro-Mesh (Currency / Bond Paper Guilloche) */}
+          <pattern id="certBondPattern" width="24" height="24" patternUnits="userSpaceOnUse">
+            <path
+              d="M 0,12 Q 6,6 12,12 T 24,12 M 12,0 Q 6,6 12,12 T 12,24"
+              fill="none"
+              stroke="#0000ff"
+              strokeWidth="0.4"
+              strokeOpacity="0.06"
+            />
+            <circle cx="12" cy="12" r="1.5" fill="#0000ff" fillOpacity="0.04" />
           </pattern>
 
-          {/* Radial Gradient for Center Soft Glow */}
-          <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-            <stop offset="65%" stopColor="#f7f9ff" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#eef2ff" stopOpacity="0.85" />
+          {/* Luxury Parchment Radial Gradient */}
+          <radialGradient id="paperGrad" cx="50%" cy="50%" r="58%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+            <stop offset="55%" stopColor="#fbfdff" stopOpacity="0.85" />
+            <stop offset="85%" stopColor="#f3f6fe" stopOpacity="0.92" />
+            <stop offset="100%" stopColor="#eaf0fc" stopOpacity="0.98" />
           </radialGradient>
+
+          {/* Border Linear Gradients */}
+          <linearGradient id="blueNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#0000ff" />
+            <stop offset="50%" stopColor="#0b192c" />
+            <stop offset="100%" stopColor="#0000ff" />
+          </linearGradient>
+
+          <linearGradient id="goldAccentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#0000ff" stopOpacity="0.2" />
+            <stop offset="50%" stopColor="#0000ff" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#0000ff" stopOpacity="0.2" />
+          </linearGradient>
         </defs>
 
-        {/* Background Base Fill */}
-        <rect width="1000" height="707" fill="url(#centerGlow)" />
-        <rect width="1000" height="707" fill="url(#certFineGrid)" />
+        {/* Paper Fill with Security Micro-Pattern */}
+        <rect width="1000" height="707" fill="url(#paperGrad)" />
+        <rect width="1000" height="707" fill="url(#certBondPattern)" />
 
-        {/* Outer Guilloche Border Waves */}
+        {/* Outer Solid Midnight Navy Framework */}
+        <rect
+          x="18"
+          y="18"
+          width="964"
+          height="671"
+          fill="none"
+          stroke="#0b192c"
+          strokeWidth="3.5"
+          rx="4"
+        />
+
+        {/* Precision Hairline Inset */}
+        <rect
+          x="26"
+          y="26"
+          width="948"
+          height="655"
+          fill="none"
+          stroke="#0000ff"
+          strokeWidth="1.2"
+          strokeOpacity="0.75"
+        />
+
+        {/* Inner Guilloche Border Wave Bands */}
         <g stroke="#0000ff" fill="none" strokeLinecap="round">
-          {/* Top Wavy Ribbons */}
+          {/* Top Edge Interwoven Guilloche Wave */}
           <path
-            d="M 50,30 Q 150,15 250,30 T 450,30 T 650,30 T 850,30 T 950,30"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
+            d="M 50,34 Q 100,24 150,34 T 250,34 T 350,34 T 450,34 T 550,34 T 650,34 T 750,34 T 850,34 T 950,34"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
           <path
-            d="M 50,34 Q 150,48 250,34 T 450,34 T 650,34 T 850,34 T 950,34"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
-          />
-          <path
-            d="M 50,32 Q 150,22 250,32 T 450,32 T 650,32 T 850,32 T 950,32"
-            strokeWidth="0.5"
-            strokeOpacity="0.12"
+            d="M 50,38 Q 100,48 150,38 T 250,38 T 350,38 T 450,38 T 550,38 T 650,38 T 750,38 T 850,38 T 950,38"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
 
-          {/* Bottom Wavy Ribbons */}
+          {/* Bottom Edge Interwoven Guilloche Wave */}
           <path
-            d="M 50,677 Q 150,662 250,677 T 450,677 T 650,677 T 850,677 T 950,677"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
+            d="M 50,669 Q 100,659 150,669 T 250,669 T 350,669 T 450,669 T 550,669 T 650,669 T 750,669 T 850,669 T 950,669"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
           <path
-            d="M 50,673 Q 150,688 250,673 T 450,673 T 650,673 T 850,673 T 950,673"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
-          />
-          <path
-            d="M 50,675 Q 150,668 250,675 T 450,675 T 650,675 T 850,675 T 950,675"
-            strokeWidth="0.5"
-            strokeOpacity="0.12"
+            d="M 50,673 Q 100,683 150,673 T 250,673 T 350,673 T 450,673 T 550,673 T 650,673 T 750,673 T 850,673 T 950,673"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
 
-          {/* Left Wavy Ribbons */}
+          {/* Left Edge Wave */}
           <path
-            d="M 30,50 Q 15,150 30,250 T 30,450 T 30,650"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
+            d="M 34,50 Q 24,100 34,150 T 34,250 T 34,350 T 34,450 T 34,550 T 34,650"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
           <path
-            d="M 34,50 Q 48,150 34,250 T 34,450 T 34,650"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
+            d="M 38,50 Q 48,100 38,150 T 38,250 T 38,350 T 38,450 T 38,550 T 38,650"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
 
-          {/* Right Wavy Ribbons */}
+          {/* Right Edge Wave */}
           <path
-            d="M 970,50 Q 985,150 970,250 T 970,450 T 970,650"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
+            d="M 966,50 Q 956,100 966,150 T 966,250 T 966,350 T 966,450 T 966,550 T 966,650"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
           <path
-            d="M 966,50 Q 952,150 966,250 T 966,450 T 966,650"
-            strokeWidth="0.8"
-            strokeOpacity="0.18"
+            d="M 962,50 Q 972,100 962,150 T 962,250 T 962,350 T 962,450 T 962,550 T 962,650"
+            strokeWidth="1"
+            strokeOpacity="0.35"
           />
         </g>
 
-        {/* Ornate Curly Filigree Flourishes in All 4 Corners */}
-        <g stroke="#0000ff" fill="none" strokeWidth="1" strokeOpacity="0.22" strokeLinecap="round">
-          {/* Top-Left Corner Curly Flourish */}
-          <g transform="translate(35, 35)">
-            <path d="M 5,60 C 5,25 25,5 60,5 C 90,5 110,25 90,45 C 75,60 50,45 60,30 C 68,20 85,25 80,40 C 75,55 50,65 35,45 C 25,32 30,15 50,15" />
-            <path d="M 0,80 C 0,35 35,0 80,0" strokeWidth="1.5" strokeOpacity="0.28" />
-            <circle cx="60" cy="5" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-            <circle cx="5" cy="60" r="2.5" fill="#0000ff" fillOpacity="0.2" />
+        {/* Ornate Corner Spirograph Medallions */}
+        {[
+          { cx: 38, cy: 38, transform: '' },
+          { cx: 962, cy: 38, transform: 'scale(-1, 1) translate(-1000, 0)' },
+          { cx: 38, cy: 669, transform: 'scale(1, -1) translate(0, -707)' },
+          { cx: 962, cy: 669, transform: 'scale(-1, -1) translate(-1000, -707)' },
+        ].map((c, i) => (
+          <g key={i} transform={c.transform} stroke="#0000ff" fill="none">
+            {/* Concentric Decorative Rings */}
+            <circle cx="38" cy="38" r="16" strokeWidth="1.5" stroke="#0b192c" />
+            <circle cx="38" cy="38" r="12" strokeWidth="0.8" stroke="#0000ff" strokeDasharray="2,2" />
+            <circle cx="38" cy="38" r="7" strokeWidth="1" stroke="#0000ff" />
+            <circle cx="38" cy="38" r="3" fill="#0000ff" />
+
+            {/* Corner Floral Leaf Tendrils */}
+            <path
+              d="M 38,54 C 50,54 62,66 62,78 C 62,60 74,48 92,48"
+              strokeWidth="1.2"
+              strokeOpacity="0.45"
+            />
+            <path
+              d="M 54,38 C 54,50 66,62 78,62 C 60,62 48,74 48,92"
+              strokeWidth="1.2"
+              strokeOpacity="0.45"
+            />
           </g>
+        ))}
 
-          {/* Top-Right Corner Curly Flourish */}
-          <g transform="translate(965, 35) scale(-1, 1)">
-            <path d="M 5,60 C 5,25 25,5 60,5 C 90,5 110,25 90,45 C 75,60 50,45 60,30 C 68,20 85,25 80,40 C 75,55 50,65 35,45 C 25,32 30,15 50,15" />
-            <path d="M 0,80 C 0,35 35,0 80,0" strokeWidth="1.5" strokeOpacity="0.28" />
-            <circle cx="60" cy="5" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-            <circle cx="5" cy="60" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-          </g>
+        {/* Center Decorative Guilloche Rosette behind Logo */}
+        <g transform="translate(500, 353)" stroke="#0000ff" fill="none">
+          <circle cx="0" cy="0" r="230" strokeWidth="0.8" strokeOpacity="0.12" strokeDasharray="6,4" />
+          <circle cx="0" cy="0" r="195" strokeWidth="1.2" strokeOpacity="0.18" />
+          <circle cx="0" cy="0" r="160" strokeWidth="0.6" strokeOpacity="0.1" strokeDasharray="3,3" />
 
-          {/* Bottom-Left Corner Curly Flourish */}
-          <g transform="translate(35, 672) scale(1, -1)">
-            <path d="M 5,60 C 5,25 25,5 60,5 C 90,5 110,25 90,45 C 75,60 50,45 60,30 C 68,20 85,25 80,40 C 75,55 50,65 35,45 C 25,32 30,15 50,15" />
-            <path d="M 0,80 C 0,35 35,0 80,0" strokeWidth="1.5" strokeOpacity="0.28" />
-            <circle cx="60" cy="5" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-            <circle cx="5" cy="60" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-          </g>
-
-          {/* Bottom-Right Corner Curly Flourish */}
-          <g transform="translate(965, 672) scale(-1, -1)">
-            <path d="M 5,60 C 5,25 25,5 60,5 C 90,5 110,25 90,45 C 75,60 50,45 60,30 C 68,20 85,25 80,40 C 75,55 50,65 35,45 C 25,32 30,15 50,15" />
-            <path d="M 0,80 C 0,35 35,0 80,0" strokeWidth="1.5" strokeOpacity="0.28" />
-            <circle cx="60" cy="5" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-            <circle cx="5" cy="60" r="2.5" fill="#0000ff" fillOpacity="0.2" />
-          </g>
-        </g>
-
-        {/* Center Decorative Guilloche Rosette Rings behind the Logo */}
-        <g transform="translate(500, 353)" stroke="#0000ff" fill="none" strokeLinecap="round">
-          <circle cx="0" cy="0" r="220" strokeWidth="0.6" strokeOpacity="0.08" strokeDasharray="6,4" />
-          <circle cx="0" cy="0" r="185" strokeWidth="0.8" strokeOpacity="0.1" />
-          <circle cx="0" cy="0" r="150" strokeWidth="0.5" strokeOpacity="0.07" strokeDasharray="3,3" />
-
-          {/* Curvilinear Rosette Wave Petals */}
-          <path
-            d="M 0,-185 C 45,-175 75,-140 95,-105 C 135,-120 170,-85 180,-40 C 200,-5 190,45 165,85 C 160,130 120,165 75,175 C 35,190 -15,190 -55,175 C -100,165 -140,130 -145,85 C -170,45 -180,-5 -160,-40 C -150,-85 -115,-120 -75,-105 C -55,-140 -25,-175 0,-185 Z"
-            strokeWidth="0.7"
-            strokeOpacity="0.1"
-          />
-          <path
-            d="M 0,-185 C -45,-175 -75,-140 -95,-105 C -135,-120 -170,-85 -180,-40 C -200,-5 -190,45 -165,85 C -160,130 -120,165 -75,175 C -35,190 15,190 55,175 C 100,165 140,130 145,85 C 170,45 180,-5 160,-40 C 150,-85 115,-120 75,-105 C 55,-140 25,-175 0,-185 Z"
-            strokeWidth="0.7"
-            strokeOpacity="0.1"
-          />
+          {/* 16-lobe rosette petal waves */}
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+            <path
+              key={angle}
+              d="M 0,-195 C 35,-165 45,-125 0,-110 C -45,-125 -35,-165 0,-195 Z"
+              transform={`rotate(${angle})`}
+              strokeWidth="0.9"
+              strokeOpacity="0.12"
+            />
+          ))}
         </g>
       </svg>
     </div>
@@ -159,9 +180,9 @@ function CertificateCurlyBackground() {
 }
 
 /**
- * Clean Vector QR Code Generator
+ * High-Resolution Vector QR Code Generator in System Blue
  */
-function CertificateQRCode({ value, size = 52 }) {
+function CertificateQRCode({ value, size = 56 }) {
   const matrixSize = 21
   const modules = Array(matrixSize).fill(null).map(() => Array(matrixSize).fill(false))
 
@@ -188,7 +209,7 @@ function CertificateQRCode({ value, size = 52 }) {
   }
 
   let hash = 0
-  const str = String(value || 'BLUESPACE')
+  const str = String(value || 'BLUESPACE-FINTECH')
   for (let i = 0; i < str.length; i++) {
     hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0
   }
@@ -210,7 +231,7 @@ function CertificateQRCode({ value, size = 52 }) {
       viewBox={`0 0 ${matrixSize} ${matrixSize}`}
       width={size}
       height={size}
-      className="bg-white p-1 rounded border border-blue-200 shadow-sm"
+      className="bg-white p-1 rounded-md border border-blue-200/90 shadow-xs shrink-0"
       aria-label={`Verification code for ${value}`}
     >
       {modules.map((row, r) =>
@@ -223,82 +244,179 @@ function CertificateQRCode({ value, size = 52 }) {
 }
 
 /**
- * Cursive Signature in System Blue
+ * Embossed Official Academy Seal of Excellence in System Blue (#0000ff)
  */
-function SignatureScript({ variant = 1 }) {
+function OfficialAcademySeal() {
+  const points = 36
+  const outerR = 38
+  const innerR = 34
+  const pathD = Array.from({ length: points * 2 }).map((_, i) => {
+    const angle = (i * Math.PI) / points
+    const r = i % 2 === 0 ? outerR : innerR
+    const x = 50 + r * Math.sin(angle)
+    const y = 50 - r * Math.cos(angle)
+    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)},${y.toFixed(2)}`
+  }).join(' ') + ' Z'
+
+  return (
+    <div className="relative inline-flex flex-col items-center">
+      {/* 36-Point Fluted Seal Badge */}
+      <svg viewBox="0 0 100 100" className="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-md">
+        {/* Fluted Edge */}
+        <path d={pathD} fill="#0000ff" stroke="#0b192c" strokeWidth="1" />
+
+        {/* Concentric Rings */}
+        <circle cx="50" cy="50" r="30" fill="#0b192c" stroke="#ffffff" strokeWidth="1" />
+        <circle cx="50" cy="50" r="28" fill="none" stroke="#0000ff" strokeWidth="1.2" strokeDasharray="3,1.5" />
+        <circle cx="50" cy="50" r="22" fill="#0000ff" />
+
+        {/* Center Star & Crest */}
+        <path
+          d="M 50,33 L 53,42 L 62,42 L 55,47 L 58,56 L 50,51 L 42,56 L 45,47 L 38,42 L 47,42 Z"
+          fill="#ffffff"
+        />
+
+        {/* Text around seal */}
+        <text
+          x="50"
+          y="63"
+          textAnchor="middle"
+          fill="#ffffff"
+          fontSize="5"
+          fontWeight="bold"
+          letterSpacing="0.08em"
+          fontFamily="'Cinzel', serif"
+        >
+          SEAL OF EXCELLENCE
+        </text>
+        <text
+          x="50"
+          y="68"
+          textAnchor="middle"
+          fill="#ffffff"
+          opacity="0.85"
+          fontSize="4"
+          fontWeight="bold"
+          letterSpacing="0.12em"
+          fontFamily="monospace"
+        >
+          2026
+        </text>
+      </svg>
+
+      {/* Hanging Royal Blue Satin Ribbon Tails */}
+      <div className="flex justify-center -mt-2 gap-1 pointer-events-none">
+        <svg viewBox="0 0 24 38" className="w-4 h-6 text-[#0000ff] drop-shadow-sm -rotate-6">
+          <path d="M 0,0 L 24,0 L 24,38 L 12,28 L 0,38 Z" fill="currentColor" stroke="#0b192c" strokeWidth="0.8" />
+        </svg>
+        <svg viewBox="0 0 24 38" className="w-4 h-6 text-[#0000cc] drop-shadow-sm rotate-6">
+          <path d="M 0,0 L 24,0 L 24,38 L 12,28 L 0,38 Z" fill="currentColor" stroke="#0b192c" strokeWidth="0.8" />
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Authentic Cursive Executive Signatures
+ */
+function ExecutiveSignature({ variant = 1 }) {
   if (variant === 1) {
     return (
-      <svg viewBox="0 0 180 40" className="h-8 w-32 mx-auto stroke-[#0000ff] fill-none">
+      <svg viewBox="0 0 180 44" className="h-9 w-32 sm:w-36 mx-auto stroke-[#0000ff] fill-none">
         <path
-          d="M 10,28 Q 20,8 30,22 T 50,15 Q 65,5 75,25 T 100,18 Q 120,8 135,22 T 160,20"
-          strokeWidth="2"
+          d="M 12,30 C 18,10 24,6 30,22 C 34,32 40,16 48,12 C 58,8 68,26 78,20 C 92,12 108,8 120,24 C 130,34 142,16 162,18"
+          strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
-          d="M 25,25 Q 65,30 145,22"
-          strokeWidth="1.4"
+          d="M 22,28 Q 70,36 154,20"
+          strokeWidth="1.6"
           strokeLinecap="round"
+          strokeOpacity="0.85"
         />
       </svg>
     )
   }
   return (
-    <svg viewBox="0 0 180 40" className="h-8 w-32 mx-auto stroke-[#0000ff] fill-none">
+    <svg viewBox="0 0 180 44" className="h-9 w-32 sm:w-36 mx-auto stroke-[#0000ff] fill-none">
       <path
-        d="M 15,15 Q 25,35 40,20 T 65,14 Q 80,32 95,18 T 125,24 Q 140,6 155,22"
-        strokeWidth="2"
+        d="M 16,18 C 22,34 30,38 42,22 C 50,12 60,10 70,26 C 78,38 90,14 102,18 C 114,22 130,10 146,28 C 154,34 162,20 168,24"
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M 20,30 Q 75,24 150,28"
-        strokeWidth="1.4"
+        d="M 18,32 Q 85,22 158,30"
+        strokeWidth="1.6"
         strokeLinecap="round"
+        strokeOpacity="0.85"
       />
     </svg>
   )
 }
 
 /**
- * Landscape Certificate with Curly Lines & Platform Logo Background
+ * Professional Landscape Certificate with Rich Guilloche Border & Platform Watermark
  */
 export default function ProfessionalCertificate({
-  fellowName = 'Test Student',
+  fellowName = 'Emmanuel Johnson',
   studentId = 'BS-2026-0042',
-  track = 'Finsoft',
-  cohortName = 'Cohort 1 - December 2026',
-  certificateNumber = 'BSA-2026-000001',
-  verificationToken = 'a0000000-0000-0000-0000-000000000001',
-  issuedAt = '2026-11-06T00:00:00Z',
-  finalGrade,
+  track = 'FinCore',
   certificateTitle,
+  cohortName = 'Cohort 1 - December 2026',
+  certificateNumber = 'BSA-2026-000042',
+  verificationToken = 'a0000000-0000-0000-0000-000000000001',
+  issuedAt,
   partnerName,
   partnerLogoUrl,
-  bluespaceLogoUrl = '/logo-dark.png',
+  bluespaceLogoUrl,
+  finalGrade,
   showActions = true,
 }) {
   const [copied, setCopied] = useState(false)
 
-  const verificationUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/verify-certificate/${verificationToken}`
-    : `/verify-certificate/${verificationToken}`
+  // Dynamically load classic security certificate fonts
+  useEffect(() => {
+    const id = 'cert-google-fonts'
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id = id
+    link.rel = 'stylesheet'
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,500;1,700&family=Work+Sans:wght@400;500;600;700&display=swap'
+    document.head.appendChild(link)
+  }, [])
+
+  const displayTitle =
+    certificateTitle ||
+    (track === 'FaaS'
+      ? 'Fintech-as-a-Service & Open Banking'
+      : track === 'FinCore'
+      ? 'Core Banking & Ledger Architecture'
+      : track === 'FinOps'
+      ? 'Fintech Operations & Reconciliation'
+      : track === 'FinInfra'
+      ? 'Fintech Infrastructure & Payment Rails'
+      : 'Fintech Engineering Fellowship')
 
   const formattedDate = issuedAt
     ? new Date(issuedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
         month: 'long',
         day: 'numeric',
-        year: 'numeric',
       })
-    : 'November 2026'
+    : new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
 
-  const displayTitle = certificateTitle || (
-    track === 'Finsoft'
-      ? 'Financial Software Engineering'
-      : track === 'Finops'
-      ? 'Financial Operations & Compliance'
-      : `${track} Engineering`
-  )
+  const verificationUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/verify-certificate/${verificationToken}`
+      : `https://academy.bluespacefinancial.com/verify-certificate/${verificationToken}`
 
   const handlePrint = () => {
     window.print()
@@ -316,11 +434,11 @@ export default function ProfessionalCertificate({
     <div className="w-full space-y-4">
       {/* Clean Minimal Action Bar (Hidden during print) */}
       {showActions && (
-        <div className="print:hidden flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+        <div className="print:hidden flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-gray-200/90 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-brand-700 border border-blue-200">
-              <CheckCircle2 size={13} className="text-[#0000ff]" />
-              Verified Certificate
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-brand-700 border border-blue-200">
+              <ShieldCheck size={14} className="text-[#0000ff]" />
+              Verified Academic Credential
             </span>
             <span className="text-xs font-mono font-medium text-gray-500 hidden sm:inline">
               Ref: {certificateNumber}
@@ -332,7 +450,7 @@ export default function ProfessionalCertificate({
               variant="outline"
               size="sm"
               onClick={handleCopyLink}
-              className="text-xs font-medium border-gray-200 hover:bg-gray-50"
+              className="text-xs font-medium border-gray-200 hover:bg-gray-50 cursor-pointer"
             >
               {copied ? (
                 <>
@@ -342,7 +460,7 @@ export default function ProfessionalCertificate({
               ) : (
                 <>
                   <Copy size={13} className="mr-1.5" />
-                  Copy Link
+                  Copy Verification Link
                 </>
               )}
             </Button>
@@ -350,151 +468,182 @@ export default function ProfessionalCertificate({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="text-xs font-semibold bg-[#0000ff] hover:bg-[#0000cc] text-white shadow-sm"
+              className="text-xs font-semibold bg-[#0000ff] hover:bg-[#0000cc] text-white shadow-sm cursor-pointer"
             >
               <Printer size={13} className="mr-1.5" />
-              Download / Print
+              Download / Print PDF
             </Button>
           </div>
         </div>
       )}
 
-      {/* Landscape Certificate Container */}
+      {/* Landscape Certificate Container (True A4 Landscape Ratio 1.414 : 1) */}
       <div
         id="certificate-print-area"
-        className="relative w-full max-w-5xl mx-auto aspect-[1.414/1] bg-white rounded-xl border-2 border-brand-600 shadow-xl overflow-hidden p-6 sm:p-10 flex flex-col justify-between print:p-8 print:border-2 print:border-brand-600 print:shadow-none print:w-full print:max-w-none print:rounded-none"
+        className="relative w-full max-w-5xl mx-auto aspect-[1.414/1] bg-white rounded-xl shadow-2xl overflow-hidden p-7 sm:p-11 flex flex-col justify-between print:p-8 print:shadow-none print:w-full print:max-w-none print:rounded-none"
         style={{
           boxSizing: 'border-box',
+          fontFamily: "'Work Sans', system-ui, sans-serif",
         }}
       >
-        {/* Curvilinear Guilloche Lines & Background Security Waves in System Blue */}
-        <CertificateCurlyBackground />
+        {/* Layered Security Guilloche Background Waves */}
+        <CertificateSecurityBackground />
 
-        {/* Platform Logo Watermark Centered in Background */}
+        {/* Platform Watermark (Centered with Optimal Contrast) */}
         <div
-          className="absolute inset-0 pointer-events-none flex items-center justify-center select-none opacity-[0.06]"
+          className="absolute inset-0 pointer-events-none flex items-center justify-center select-none opacity-[0.09]"
           aria-hidden="true"
         >
           <img
             src="/logo-dark.png"
             alt=""
-            className="w-[450px] max-w-[70%] object-contain"
+            className="w-[480px] max-w-[70%] object-contain"
           />
         </div>
 
-        {/* Framing Border Lines */}
-        <div className="absolute inset-3 sm:inset-4 border border-brand-300/80 rounded-lg pointer-events-none"></div>
-        <div className="absolute inset-4 sm:inset-5 border border-dashed border-brand-200/60 rounded-md pointer-events-none"></div>
-
-        {/* 1. Header: Platform Identity */}
-        <div className="relative z-10 text-center space-y-2">
+        {/* 1. Header: Academy Identity & Title */}
+        <div className="relative z-10 text-center space-y-2.5">
           <div className="flex items-center justify-center gap-3">
             <img
               src={bluespaceLogoUrl || '/logo-dark.png'}
               alt="BlueSPACE Academy"
-              className="h-8 sm:h-10 w-auto object-contain drop-shadow-sm"
+              className="h-9 sm:h-11 w-auto object-contain drop-shadow-sm"
               onError={(e) => {
                 e.currentTarget.src = '/logo-dark.png'
               }}
             />
             {partnerName && (
               <>
-                <span className="text-gray-300 font-light text-base">|</span>
+                <span className="text-gray-300 font-light text-xl">|</span>
                 {partnerLogoUrl ? (
-                  <img src={partnerLogoUrl} alt={partnerName} className="h-7 sm:h-9 w-auto object-contain rounded" />
+                  <img src={partnerLogoUrl} alt={partnerName} className="h-8 sm:h-10 w-auto object-contain rounded" />
                 ) : (
-                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">{partnerName}</span>
+                  <span className="text-xs font-bold text-gray-800 uppercase tracking-wider font-['Cinzel',serif]">
+                    {partnerName}
+                  </span>
                 )}
               </>
             )}
           </div>
 
           <div>
-            <h1 className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.24em] text-gray-900">
+            <h1
+              className="text-xs sm:text-sm font-bold uppercase tracking-[0.28em] text-[#0b192c]"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
               BlueSPACE Fintech Academy
             </h1>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#0000ff] mt-0.5">
+            <p
+              className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.24em] text-[#0000ff] mt-0.5"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
               Certificate of Completion
             </p>
           </div>
         </div>
 
-        {/* 2. Recipient Section (Clean, Prestigious & Minimal) */}
-        <div className="relative z-10 text-center space-y-1.5 my-auto py-2 sm:py-4">
-          <p className="text-xs sm:text-sm text-gray-500 font-medium tracking-wide">
-            This is presented to
+        {/* 2. Recipient Section (Breathtaking Typography with Elegant Flourish) */}
+        <div className="relative z-10 text-center space-y-2 my-auto py-2 sm:py-3">
+          <p
+            className="text-xs sm:text-sm text-gray-500 font-medium italic tracking-wider"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            This is proudly conferred upon
           </p>
 
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+          {/* Fellow Full Name */}
+          <h2
+            className="text-3xl sm:text-5xl md:text-6xl font-black text-[#0b192c] tracking-tight leading-tight capitalize"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
             {fellowName}
           </h2>
 
-          <div className="w-40 sm:w-64 h-[2px] bg-[#0000ff] mx-auto my-1.5"></div>
+          {/* Ornamental Divider with Diamond Center */}
+          <div className="flex items-center justify-center gap-2 max-w-xs sm:max-w-md mx-auto my-1">
+            <div className="h-[1.5px] flex-1 bg-gradient-to-r from-transparent via-[#0000ff] to-transparent" />
+            <div className="w-2.5 h-2.5 rotate-45 border-2 border-[#0000ff] bg-white shadow-xs" />
+            <div className="h-[1.5px] flex-1 bg-gradient-to-r from-transparent via-[#0000ff] to-transparent" />
+          </div>
 
-          {studentId && (
-            <p className="text-[11px] sm:text-xs font-mono font-medium text-gray-500">
-              Student ID: <span className="font-bold text-gray-900">{studentId}</span>
-            </p>
-          )}
-
-          <p className="text-xs sm:text-sm text-gray-600 max-w-lg mx-auto pt-2">
-            for successfully completing the coursework and requirements for
+          {/* Student ID & Cohort Info */}
+          <p className="text-[11px] sm:text-xs font-medium text-gray-500">
+            Fellow ID: <span className="font-mono font-bold text-gray-900">{studentId}</span>
+            <span className="mx-2 text-gray-300">•</span>
+            {cohortName}
           </p>
 
-          {/* Program Title */}
-          <div className="pt-1">
-            <div className="inline-block px-5 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
-              <h3 className="text-sm sm:text-base md:text-lg font-bold text-[#0000ff] uppercase tracking-wide">
+          <p className="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto pt-1 leading-relaxed">
+            for successfully fulfilling all academic requirements, hands-on architectural labs, and defense of the live fintech capstone in
+          </p>
+
+          {/* Specialization Track Ribbon */}
+          <div className="pt-1.5">
+            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-blue-50 via-white to-blue-50 border-2 border-[#0000ff] shadow-xs">
+              <Award size={16} className="text-[#0000ff] shrink-0" />
+              <h3
+                className="text-sm sm:text-lg md:text-xl font-extrabold text-[#0000ff] uppercase tracking-[0.12em]"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
                 {displayTitle}
               </h3>
             </div>
-            <p className="text-xs font-medium text-gray-500 mt-1">
-              {cohortName}
-              {finalGrade ? ` · Grade: ${finalGrade}%` : ''}
-            </p>
+            {finalGrade && (
+              <p className="text-[11px] font-semibold text-gray-600 mt-1">
+                Academic Distinction Score: <span className="text-[#0000ff] font-bold">{finalGrade}%</span>
+              </p>
+            )}
           </div>
         </div>
 
-        {/* 3. Signatures & Footer Section */}
-        <div className="relative z-10 space-y-4">
-          {/* Signatures */}
-          <div className="grid grid-cols-2 max-w-xl mx-auto pt-2 gap-8 text-center">
-            <div className="space-y-1">
-              <SignatureScript variant={1} />
-              <div className="w-32 h-[1px] bg-gray-300 mx-auto"></div>
-              <p className="text-[11px] font-bold text-gray-900 leading-tight">Emmanuel Johnson</p>
-              <p className="text-[10px] text-gray-500 leading-tight">Academic Director</p>
+        {/* 3. Signatures, Embossed Seal & Registry Footer */}
+        <div className="relative z-10 space-y-3">
+          <div className="grid grid-cols-3 items-end max-w-3xl mx-auto gap-4 pt-1">
+            {/* Left: Academic Director Signature */}
+            <div className="text-center space-y-1">
+              <ExecutiveSignature variant={1} />
+              <div className="w-36 h-[1.5px] bg-[#0000ff]/50 mx-auto" />
+              <p className="text-xs font-bold text-[#0b192c] leading-tight">Emmanuel Johnson</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Academic Director</p>
             </div>
 
-            <div className="space-y-1">
-              <SignatureScript variant={2} />
-              <div className="w-32 h-[1px] bg-gray-300 mx-auto"></div>
-              <p className="text-[11px] font-bold text-gray-900 leading-tight">Dr. Kwabena Mensah</p>
-              <p className="text-[10px] text-gray-500 leading-tight">Technical Review Board</p>
+            {/* Center: Official Embossed Seal */}
+            <div className="flex justify-center -mb-1">
+              <OfficialAcademySeal />
+            </div>
+
+            {/* Right: Technical Review Board Signature */}
+            <div className="text-center space-y-1">
+              <ExecutiveSignature variant={2} />
+              <div className="w-36 h-[1.5px] bg-[#0000ff]/50 mx-auto" />
+              <p className="text-xs font-bold text-[#0b192c] leading-tight">Dr. Kwabena Mensah</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Technical Review Board</p>
             </div>
           </div>
 
-          {/* Clean Bottom Footer Bar */}
-          <div className="pt-3 border-t border-gray-200 flex items-center justify-between text-xs">
-            {/* Left: QR Code & Certificate Number */}
+          {/* Bottom Security Strip */}
+          <div className="pt-3 border-t border-gray-200/90 flex items-center justify-between text-xs">
+            {/* Left: QR Code & Serial Number */}
             <div className="flex items-center gap-3">
-              <CertificateQRCode value={verificationUrl} size={44} />
+              <CertificateQRCode value={verificationUrl} size={48} />
               <div className="text-left">
-                <span className="text-[10px] font-mono text-gray-500 uppercase block">Certificate Number</span>
+                <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block">
+                  Serial Number
+                </span>
                 <span className="font-mono font-bold text-[#0000ff] text-xs sm:text-sm">
                   {certificateNumber}
                 </span>
               </div>
             </div>
 
-            {/* Right: Issue Date & Verification Note */}
-            <div className="text-right space-y-0.5">
+            {/* Right: Date Issued & Verification Badge */}
+            <div className="text-right space-y-1">
               <p className="text-[10px] text-gray-500">
-                Date: <strong className="text-gray-900">{formattedDate}</strong>
+                Date Issued: <strong className="text-gray-900">{formattedDate}</strong>
               </p>
-              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-brand-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                <CheckCircle2 size={11} className="text-[#0000ff]" />
-                Verified in Academy Registry
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-brand-700 bg-blue-50/80 px-2.5 py-0.5 rounded-full border border-blue-200">
+                <CheckCircle2 size={12} className="text-[#0000ff]" />
+                Registered on BlueSPACE Ledger
               </span>
             </div>
           </div>
@@ -503,4 +652,20 @@ export default function ProfessionalCertificate({
       </div>
     </div>
   )
+}
+
+ProfessionalCertificate.propTypes = {
+  fellowName: PropTypes.string,
+  studentId: PropTypes.string,
+  track: PropTypes.string,
+  certificateTitle: PropTypes.string,
+  cohortName: PropTypes.string,
+  certificateNumber: PropTypes.string,
+  verificationToken: PropTypes.string,
+  issuedAt: PropTypes.string,
+  partnerName: PropTypes.string,
+  partnerLogoUrl: PropTypes.string,
+  bluespaceLogoUrl: PropTypes.string,
+  finalGrade: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  showActions: PropTypes.bool,
 }

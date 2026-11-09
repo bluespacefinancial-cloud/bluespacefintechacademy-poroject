@@ -147,7 +147,7 @@ export default function CertificateVerify() {
                     </Badge>
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    This certificate is authentic, issued by BlueSPACE Fintech Academy, and recorded on the immutable academic ledger.
+                    This certificate is authentic, issued by BlueSPACE Fintech Academy, and recorded in the official academy registry.
                   </p>
                 </div>
               </div>
@@ -169,42 +169,42 @@ export default function CertificateVerify() {
               showActions={true}
             />
 
-            {/* Technical Verification Record (Hidden during print) */}
-            <div className="print:hidden bg-white rounded-xl border border-gray-200/90 shadow-sm p-5 sm:p-6 space-y-4">
+            {/* Verification Record (Hidden during print) */}
+            <div className="print:hidden bg-white rounded-xl border border-gray-200 shadow-sm p-5 sm:p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <FileCheck2 size={16} className="text-[#0000FF]" />
+                  <FileCheck2 size={16} className="text-brand-600" />
                   <h3 className="text-sm font-bold text-gray-900">
-                    Registry Audit Record
+                    Registry Record
                   </h3>
                 </div>
                 <span className="text-[11px] text-gray-500 font-mono">
-                  ISO-27001 Compliant Audit Log
+                  Official Verification Record
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-3 bg-gray-50/80 rounded-lg border border-gray-100 space-y-1">
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-1">
                   <span className="text-gray-500 text-[10px] uppercase font-semibold">Recipient</span>
                   <p className="font-bold text-gray-900">{certificate.fellow_name}</p>
                 </div>
 
-                <div className="p-3 bg-gray-50/80 rounded-lg border border-gray-100 space-y-1">
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-1">
                   <span className="text-gray-500 text-[10px] uppercase font-semibold">Specialization Track</span>
                   <p className="font-bold text-gray-900">{certificate.track} Engineering</p>
                 </div>
 
-                <div className="p-3 bg-gray-50/80 rounded-lg border border-gray-100 space-y-1">
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-1">
                   <span className="text-gray-500 text-[10px] uppercase font-semibold">Cohort</span>
                   <p className="font-bold text-gray-900">{certificate.cohort_name}</p>
                 </div>
 
-                <div className="p-3 bg-gray-50/80 rounded-lg border border-gray-100 space-y-1">
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-1">
                   <span className="text-gray-500 text-[10px] uppercase font-semibold">Certificate Number</span>
-                  <p className="font-bold font-mono text-[#0000FF]">{certificate.certificate_number}</p>
+                  <p className="font-bold font-mono text-brand-600">{certificate.certificate_number}</p>
                 </div>
 
-                <div className="p-3 bg-gray-50/80 rounded-lg border border-gray-100 space-y-1">
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-1">
                   <span className="text-gray-500 text-[10px] uppercase font-semibold">Date of Issuance</span>
                   <p className="font-bold text-gray-900">
                     {certificate.issued_at ? new Date(certificate.issued_at).toLocaleDateString('en-US', {
@@ -215,8 +215,8 @@ export default function CertificateVerify() {
                   </p>
                 </div>
 
-                <div className="p-3 bg-gray-50/80 rounded-lg border border-gray-100 space-y-1">
-                  <span className="text-gray-500 text-[10px] uppercase font-semibold">Ledger Verification Token</span>
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-1">
+                  <span className="text-gray-500 text-[10px] uppercase font-semibold">Verification Token</span>
                   <p className="font-mono text-[10px] text-gray-700 truncate">{token}</p>
                 </div>
               </div>

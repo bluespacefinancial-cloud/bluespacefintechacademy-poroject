@@ -1,27 +1,16 @@
 import { useEffect, useState } from 'react'
 import {
   Award,
-  Download,
   ExternalLink,
   Eye,
   CheckCircle2,
-  Calendar,
-  Hash,
-  Sparkles,
-  ShieldCheck,
 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../components/ui/dialog'
 import { supabase } from '../lib/supabase'
-import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
 
 const statusStyle = {
   certified: 'text-emerald-700 border-emerald-200 bg-emerald-50',
@@ -32,11 +21,10 @@ const statusStyle = {
 
 export default function Certificates() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [certificates, setCertificates] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selectedCert, setSelectedCert] = useState(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -77,30 +65,25 @@ export default function Certificates() {
     }
   }, [user?.id])
 
-  const handleOpenCertificateModal = (cert) => {
-    setSelectedCert(cert)
-    setDialogOpen(true)
-  }
-
   return (
     <div className="min-h-screen bg-gray-50/60 pb-12">
       {/* Page Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-deep-600 flex items-center gap-2.5">
-            <Award className="text-[#0000FF]" size={26} />
-            Academic Certificates & Credentials
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2.5">
+            <Award className="text-[#0000ff]" size={26} />
+            Academic Certificates
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Official graduation diplomas, specialization certificates, and cryptographic verification links.
+            Official graduation diplomas, specialization certificates, and verification links.
           </p>
         </div>
 
         {certificates.filter((c) => c.status === 'certified').length > 0 && (
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700">
-            <CheckCircle2 size={14} className="text-emerald-600" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-xs font-semibold text-brand-700">
+            <CheckCircle2 size={14} className="text-[#0000ff]" />
             <span>
-              {certificates.filter((c) => c.status === 'certified').length} Active Verifiable Credential
+              {certificates.filter((c) => c.status === 'certified').length} Active Certificate
               {certificates.filter((c) => c.status === 'certified').length === 1 ? '' : 's'}
             </span>
           </div>
@@ -121,12 +104,12 @@ export default function Certificates() {
       ) : certificates.length === 0 ? (
         <Card className="border border-gray-200 shadow-sm bg-white">
           <CardContent className="py-16 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-blue-50 text-[#0000FF] flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mx-auto">
               <Award size={26} />
             </div>
             <h3 className="text-base font-bold text-gray-900">No Certification Records Yet</h3>
             <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
-              Academic certificates and diplomas are awarded upon achieving required coursework completion, passing all distributed ledger labs, and successfully defending your capstone project before the technical panel.
+              Academic certificates are awarded upon achieving required coursework completion, passing all distributed ledger labs, and successfully defending your capstone project before the technical panel.
             </p>
           </CardContent>
         </Card>
@@ -140,11 +123,11 @@ export default function Certificates() {
             return (
               <Card
                 key={certificate.id}
-                className="border border-gray-200/90 shadow-sm bg-white hover:border-gray-300 transition-all flex flex-col justify-between"
+                className="border border-gray-200 shadow-sm bg-white hover:border-gray-300 transition-all flex flex-col justify-between"
               >
                 <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
                   <div className="flex items-start gap-3">
-                    <div className="rounded-xl bg-blue-50 p-2.5 text-[#0000FF] shrink-0 border border-blue-100">
+                    <div className="rounded-xl bg-blue-50 p-2.5 text-[#0000ff] shrink-0 border border-blue-100">
                       <Award size={22} />
                     </div>
                     <div>
@@ -166,16 +149,16 @@ export default function Certificates() {
 
                 <CardContent className="space-y-4 pt-1 text-xs">
                   {/* Metadata Chips */}
-                  <div className="space-y-2 p-3 bg-gray-50/70 rounded-lg border border-gray-100 text-gray-600">
+                  <div className="space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-gray-600">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Credential Ref</span>
+                      <span className="text-gray-500">Certificate No</span>
                       <span className="font-mono font-bold text-gray-900">{certNumber}</span>
                     </div>
 
                     {certificate.final_grade !== null && certificate.final_grade !== undefined && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500">Final Grade</span>
-                        <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        <span className="font-bold text-brand-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
                           {certificate.final_grade}%
                         </span>
                       </div>
@@ -198,12 +181,13 @@ export default function Certificates() {
                   <div className="space-y-2 pt-1">
                     {isCertified ? (
                       <>
+                        {/* View Certificate Button: strictly adopting the system blue color */}
                         <Button
-                          onClick={() => handleOpenCertificateModal(certificate)}
-                          className="w-full text-xs font-semibold bg-[#0B192C] hover:bg-[#1E3E62] text-white shadow-sm"
+                          onClick={() => navigate(`/certificate/${certificate.id}`)}
+                          className="w-full text-xs font-semibold bg-[#0000ff] hover:bg-[#0000cc] text-white shadow-sm"
                         >
                           <Eye size={14} className="mr-2" />
-                          View Full Certificate
+                          View Certificate
                         </Button>
 
                         {certificate.certificate_url && (
@@ -231,46 +215,6 @@ export default function Certificates() {
           })}
         </div>
       )}
-
-      {/* Full Certificate Modal Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl p-2 sm:p-5 max-h-[95vh] overflow-y-auto bg-white border-gray-200">
-          <DialogHeader className="px-2 pt-1 pb-2">
-            <DialogTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <ShieldCheck className="text-emerald-600" size={18} />
-              Official Academic Credential
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedCert && (
-            <div className="mt-2">
-              <ProfessionalCertificate
-                fellowName={user?.name || 'BlueSPACE Fellow'}
-                studentId={user?.student_id || 'BS-2026-0042'}
-                track={selectedCert.track}
-                cohortName={selectedCert.cohorts?.name || 'Cohort 1 - December 2026'}
-                certificateNumber={
-                  selectedCert.certificate_number ||
-                  `BSA-2026-${String(selectedCert.id).padStart(6, '0')}`
-                }
-                verificationToken={
-                  selectedCert.verification_token ||
-                  selectedCert.certificate_url?.split('/').pop() ||
-                  'a0000000-0000-0000-0000-000000000001'
-                }
-                issuedAt={selectedCert.issued_at || selectedCert.created_at}
-                finalGrade={selectedCert.final_grade}
-                certificateTitle={selectedCert.certificate_title}
-                partnerName={selectedCert.partner_name}
-                partnerLogoUrl={selectedCert.partner_logo_url}
-                bluespaceLogoUrl={selectedCert.bluespace_logo_url || '/logo.png'}
-                showActions={true}
-                onClose={() => setDialogOpen(false)}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

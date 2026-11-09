@@ -9,6 +9,7 @@ import LabWorkspace from './pages/LabWorkspace'
 import Progress from './pages/Progress'
 import MySquad from './pages/MySquad'
 import Certificates from './pages/Certificates'
+import CertificateDetail from './pages/CertificateDetail'
 import MyModules from './pages/MyModules'
 import Grading from './pages/Grading'
 import MentorClinics from './pages/MentorClinics'
@@ -87,11 +88,12 @@ export default function App() {
         <Route path="my-learning" element={<ProtectedRoute roles={['Student']}><MyLearning /></ProtectedRoute>} />
         <Route path="lab-workspace" element={<ProtectedRoute roles={['Student']}><LabWorkspace /></ProtectedRoute>} />
         <Route path="progress" element={<ProtectedRoute roles={['Student']}><Progress /></ProtectedRoute>} />
-        <Route path="my-squad" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MySquad /></ProtectedRoute>} />
+        <Route path="my-squad" element={<ProtectedRoute roles={['Student']}><MySquad /></ProtectedRoute>} />
         <Route path="certificates" element={<ProtectedRoute roles={['Student']}><Certificates /></ProtectedRoute>} />
+        <Route path="certificate/:id" element={<ProtectedRoute roles={['Student']}><CertificateDetail /></ProtectedRoute>} />
         <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="quiz/:assessmentId" element={<ProtectedRoute roles={['Student']}><Quiz /></ProtectedRoute>} />
-        <Route path="project-workspace" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MySquad /></ProtectedRoute>} />
+        <Route path="project-workspace" element={<Navigate to="/my-squad" replace />} />
         <Route path="partner-courses" element={<ProtectedRoute roles={['Partner']}><PartnerCourses /></ProtectedRoute>} />
         <Route path="partner-catalog" element={<ProtectedRoute roles={['Student']}><PartnerCatalog /></ProtectedRoute>} />
         <Route path="partner-course/:courseId" element={<ProtectedRoute roles={['Student']}><PartnerCourseLearning /></ProtectedRoute>} />

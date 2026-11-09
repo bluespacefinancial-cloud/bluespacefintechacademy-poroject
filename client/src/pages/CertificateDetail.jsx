@@ -122,35 +122,6 @@ export default function CertificateDetail() {
               bluespaceLogoUrl={cert.bluespace_logo_url || '/logo-dark.png'}
               showActions={true}
             />
-
-            {/* Verification Metadata Box */}
-            <div className="print:hidden bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5">
-              <div className="flex items-center gap-2 border-b border-gray-100 pb-2.5 mb-3">
-                <FileCheck2 size={16} className="text-[#0000ff]" />
-                <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wide">
-                  Official Verification Details
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <span className="text-gray-400 text-[10px] uppercase font-semibold block">Track</span>
-                  <span className="font-semibold text-gray-900">{cert.track} Engineering</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 text-[10px] uppercase font-semibold block">Cohort</span>
-                  <span className="font-semibold text-gray-900">{cert.cohorts?.name || 'Cohort 1'}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 text-[10px] uppercase font-semibold block">Certificate Ref</span>
-                  <span className="font-mono font-bold text-brand-600">{cert.certificate_number}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 text-[10px] uppercase font-semibold block">Status</span>
-                  <span className="font-semibold text-emerald-700 capitalize">{cert.status}</span>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>

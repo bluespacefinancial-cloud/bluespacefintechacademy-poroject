@@ -4,13 +4,18 @@ import {
   ExternalLink,
   Eye,
   CheckCircle2,
+  X,
 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+} from '../components/ui/dialog'
 import { supabase } from '../lib/supabase'
+import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
 
 const statusStyle = {
   certified: 'text-emerald-700 border-emerald-200 bg-emerald-50',
@@ -21,10 +26,11 @@ const statusStyle = {
 
 export default function Certificates() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [certificates, setCertificates] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedCert, setSelectedCert] = useState(null)
+  const [popupOpen, setPopupOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -64,6 +70,11 @@ export default function Certificates() {
       mounted = false
     }
   }, [user?.id])
+
+  const handleOpenCertificatePopup = (cert) => {
+    setSelectedCert(cert)
+    setPopupOpen(true)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/60 pb-12">
@@ -148,7 +159,7 @@ export default function Certificates() {
                 </CardHeader>
 
                 <CardContent className="space-y-4 pt-1 text-xs">
-                  {/* Metadata Chips */}
+                  {/* Metadata Box */}
                   <div className="space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-gray-600">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Certificate No</span>
@@ -183,7 +194,7 @@ export default function Certificates() {
                       <>
                         {/* View Certificate Button: strictly adopting the system blue color */}
                         <Button
-                          onClick={() => navigate(`/certificate/${certificate.id}`)}
+                          onClick={() => handleOpenCertificatePopup(certificate)}
                           className="w-full text-xs font-semibold bg-[#0000ff] hover:bg-[#0000cc] text-white shadow-sm"
                         >
                           <Eye size={14} className="mr-2" />
@@ -215,6 +226,38 @@ export default function Certificates() {
           })}
         </div>
       )}
+
+      {/* Clean Popup Modal for Viewing Certificate */}
+      <Dialog open={popupOpen} onOpenChange={setPopupOpen}>
+        <DialogContent className="max-w-5xl p-4 sm:p-6 bg-white border-none shadow-2xl overflow-y-auto max-h-[92vh]">
+          {selectedCert && (
+            <div className="space-y-4">
+              <ProfessionalCertificate
+                fellowName={user?.name || 'BlueSPACE Fellow'}
+                studentId={user?.student_id || 'BS-2026-0042'}
+                track={selectedCert.track}
+                cohortName={selectedCert.cohorts?.name || 'Cohort 1 - December 2026'}
+                certificateNumber={
+                  selectedCert.certificate_number ||
+                  `BSA-2026-${String(selectedCert.id).padStart(6, '0')}`
+                }
+                verificationToken={
+                  selectedCert.verification_token ||
+                  selectedCert.certificate_url?.split('/').pop() ||
+                  'a0000000-0000-0000-0000-000000000001'
+                }
+                issuedAt={selectedCert.issued_at || selectedCert.created_at}
+                finalGrade={selectedCert.final_grade}
+                certificateTitle={selectedCert.certificate_title}
+                partnerName={selectedCert.partner_name}
+                partnerLogoUrl={selectedCert.partner_logo_url}
+                bluespaceLogoUrl={selectedCert.bluespace_logo_url || '/logo-dark.png'}
+                showActions={true}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

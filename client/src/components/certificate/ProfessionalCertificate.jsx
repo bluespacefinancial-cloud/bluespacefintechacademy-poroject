@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { CheckCircle2, Printer, Copy, Check, ShieldCheck } from 'lucide-react'
+import { Printer, Copy, Check, ShieldCheck } from 'lucide-react'
 import { Button } from '../ui/button'
 
 /**
@@ -645,14 +645,13 @@ export default function ProfessionalCertificate({
               </div>
             </div>
 
-            {/* Right: Date Issued & Verification Badge */}
-            <div className="text-right space-y-1">
-              <p className="text-[10px] text-gray-500">
-                Date Conferred: <strong className="text-gray-900">{formattedDate}</strong>
-              </p>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-brand-700 bg-blue-50/80 px-2.5 py-0.5 rounded-full border border-blue-200">
-                <CheckCircle2 size={12} className="text-[#0000ff]" />
-                Officially Registered in Academy Ledger
+            {/* Right: Date Conferred */}
+            <div className="text-right">
+              <span className="text-[9.5px] font-mono text-gray-400 uppercase tracking-wider block">
+                Date Conferred
+              </span>
+              <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm">
+                {formattedDate}
               </span>
             </div>
           </div>

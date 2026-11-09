@@ -11,7 +11,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Textarea } from '../components/ui/textarea'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 
@@ -67,7 +67,7 @@ export default function SkillsProfile() {
       try {
         const current = await getCurrentProfile()
         if (!current) throw new Error('You must be signed in to access your skills profile.')
-        const { data, error: loadError } = await supabase
+        const { data, error: loadError } = await api
           .from('skills_profiles')
           .select('*')
           .eq('user_id', current.id)
@@ -111,7 +111,7 @@ export default function SkillsProfile() {
     setMessage('')
 
     try {
-      const { error: saveError } = await supabase.from('skills_profiles').upsert(
+      const { error: saveError } = await api.from('skills_profiles').upsert(
         {
           user_id: profile.id,
           role_preference: role,

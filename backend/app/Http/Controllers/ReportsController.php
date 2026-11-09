@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cohort;
-use App\Models\Enrolment;
-use App\Models\Lab;
 use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
@@ -40,13 +37,14 @@ class ReportsController extends Controller
 
         $data = $cohorts->map(function ($cohort) {
             $enrolments = $cohort->enrolments;
+
             return [
                 'id' => $cohort->id,
                 'name' => $cohort->name,
                 'total_enrolments' => $cohort->enrolments->count(),
                 'active_enrolments' => $cohort->enrolments->where('status', 'active')->count(),
                 'completed_enrolments' => $cohort->enrolments->where('status', 'completed')->count(),
-                'completion_rate' => $cohort->enrolments->count() > 0 
+                'completion_rate' => $cohort->enrolments->count() > 0
                     ? round(($cohort->enrolments->where('status', 'completed')->count() / $cohort->enrolments->count()) * 100, 2)
                     : 0,
             ];
@@ -72,12 +70,12 @@ class ReportsController extends Controller
         $data = $submissions->map(function ($submission) {
             return [
                 'id' => $submission->id,
-                'title' => $submission->lab?->title,
+                'title' => $submission->labs?->title ?? 'Unknown',
                 'student' => $submission->user->name,
                 'status' => $submission->status,
                 'score' => $submission->score,
                 'submitted_at' => $submission->submitted_at,
-            ]);
+            ];
         });
 
         return response()->json($data);
@@ -85,7 +83,7 @@ class ReportsController extends Controller
 
     protected function placementsReport(Request $request)
     {
-        $query = \App\Models\Placement::with('user');
+        $query = Placement::with('user');
 
         if ($request->user()->type !== 'Administrator') {
             $query->where('user_id', $request->user()->id);
@@ -98,7 +96,7 @@ class ReportsController extends Controller
 
     protected function certificationsReport(Request $request)
     {
-        $query = \App\Models\Certification::with('user');
+        $query = Certification::with('user');
 
         if ($request->user()->type !== 'Administrator') {
             $query->where('user_id', $request->user()->id);

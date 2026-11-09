@@ -1,7 +1,18 @@
 import { motion } from 'framer-motion'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { ArrowDown, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, CheckCircle2, Code2, Layers3, Users, Workflow } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  BriefcaseBusiness,
+  CheckCircle2,
+  Code2,
+  Layers3,
+  Users,
+  Workflow,
+} from 'lucide-react'
 import { Button } from '../components/ui/button'
 
 const photo = (id, width = 1200) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`
@@ -17,10 +28,10 @@ const tracks = [
   { title: 'Finops', label: 'Run reliable operations', text: 'Practice reconciliation, reporting and the workflows that keep financial services dependable.', image: images.operations, alt: 'Team discussing operational work around a table', icon: Workflow },
 ]
 const domains = [
-  { name: 'FaaS', detail: 'Fintech APIs and partner services', color: 'bg-brand-50 text-brand-700' },
-  { name: 'FinCore', detail: 'Ledgers and transaction systems', color: 'bg-brand-50 text-brand-700' },
-  { name: 'FinOps', detail: 'Reconciliation and reporting', color: 'bg-amber-50 text-amber-700' },
-  { name: 'FinInfra', detail: 'Cloud, delivery and observability', color: 'bg-slate-100 text-slate-700' },
+  { name: 'FaaS', detail: 'Fintech APIs and partner services', color: 'text-brand-700 border border-brand-200' },
+  { name: 'FinCore', detail: 'Ledgers and transaction systems', color: 'text-brand-700 border border-brand-200' },
+  { name: 'FinOps', detail: 'Reconciliation and reporting', color: 'text-amber-700 border border-amber-200' },
+  { name: 'FinInfra', detail: 'Cloud, delivery and observability', color: 'text-slate-700 border border-slate-200' },
 ]
 const steps = [
   { number: '01', title: 'Learn the foundations', text: 'Build shared knowledge of fintech, financial systems and the language teams use.' },

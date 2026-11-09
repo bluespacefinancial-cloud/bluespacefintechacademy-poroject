@@ -1,20 +1,11 @@
 import { useEffect, useState } from 'react'
-import {
-  Award,
-  ExternalLink,
-  Eye,
-  CheckCircle2,
-  X,
-} from 'lucide-react'
+import { Award, ExternalLink, Eye, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-} from '../components/ui/dialog'
-import { supabase } from '../lib/supabase'
+import { Dialog, DialogContent } from '../components/ui/dialog'
+import { api } from '../lib/backend'
 import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
 
 const statusStyle = {
@@ -40,7 +31,7 @@ export default function Certificates() {
         setLoading(false)
         return
       }
-      const { data, error: loadError } = await supabase
+      const { data, error: loadError } = await api
         .from('certifications')
         .select(`
           id, cohort_id, track, status, final_grade, certificate_url, created_at,

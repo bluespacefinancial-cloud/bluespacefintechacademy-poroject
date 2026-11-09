@@ -3,8 +3,14 @@ import { useEffect, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 export default function InstructorAssignments() {
   const [instructors, setInstructors] = useState([])
@@ -21,11 +27,11 @@ export default function InstructorAssignments() {
 
   const load = async () => {
     const [{ data: instructorRows, error: instructorError }, { data: cohortRows, error: cohortError }, { data: squadRows, error: squadError }, { data: cohortLinks, error: cohortLinkError }, { data: squadLinks, error: squadLinkError }] = await Promise.all([
-      supabase.from('users').select('id, name, email').eq('type', 'Instructor').order('name'),
-      supabase.from('cohorts').select('id, name').order('start_date', { ascending: false }),
-      supabase.from('squads').select('id, name, cohort_id').order('name'),
-      supabase.from('instructor_cohort_assignments').select('id, instructor_id, cohort_id'),
-      supabase.from('instructor_squad_assignments').select('id, instructor_id, squad_id'),
+      api.from('users').select('id, name, email').eq('type', 'Instructor').order('name'),
+      api.from('cohorts').select('id, name').order('start_date', { ascending: false }),
+      api.from('squads').select('id, name, cohort_id').order('name'),
+      api.from('instructor_cohort_assignments').select('id, instructor_id, cohort_id'),
+      api.from('instructor_squad_assignments').select('id, instructor_id, squad_id'),
     ])
     if (instructorError || cohortError || squadError || cohortLinkError || squadLinkError) {
       throw instructorError || cohortError || squadError || cohortLinkError || squadLinkError
@@ -42,7 +48,7 @@ export default function InstructorAssignments() {
   const addAssignment = async (table, values, reset) => {
     if (Object.values(values).some((value) => !value)) return
     setError('')
-    const { error: insertError } = await supabase.from(table).insert(values)
+    const { error: insertError } = await api.from(table).insert(values)
     if (insertError) { setError(insertError.code === '23505' ? 'That assignment already exists.' : insertError.message); return }
     reset()
     await load()
@@ -50,7 +56,7 @@ export default function InstructorAssignments() {
 
   const removeAssignment = async (table, id) => {
     setError('')
-    const { error: deleteError } = await supabase.from(table).delete().eq('id', id)
+    const { error: deleteError } = await api.from(table).delete().eq('id', id)
     if (deleteError) { setError(deleteError.message); return }
     await load()
   }

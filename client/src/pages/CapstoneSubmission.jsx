@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function CapstoneSubmission() {
@@ -21,15 +21,15 @@ export default function CapstoneSubmission() {
     const load = async () => {
       try {
         const profile = await getCurrentProfile()
-        const { data: enrolment, error: enrolmentError } = await supabase.from('enrolments').select('cohort_id').eq('user_id', profile.id).in('status', ['enrolled', 'active']).maybeSingle()
+        const { data: enrolment, error: enrolmentError } = await api.from('enrolments').select('cohort_id').eq('user_id', profile.id).in('status', ['enrolled', 'active']).maybeSingle()
         if (enrolmentError) throw enrolmentError
         if (!enrolment) return
-        const { data: assessments, error: assessmentError } = await supabase.from('assessments').select('*, modules!inner(cohort_id)').eq('type', 'capstone').eq('modules.cohort_id', enrolment.cohort_id).order('created_at', { ascending: false }).limit(1)
+        const { data: assessments, error: assessmentError } = await api.from('assessments').select('*, modules!inner(cohort_id)').eq('type', 'capstone').eq('modules.cohort_id', enrolment.cohort_id).order('created_at', { ascending: false }).limit(1)
         if (assessmentError) throw assessmentError
         const current = assessments?.[0]
         setAssessment(current || null)
         if (current) {
-          const { data, error: submissionError } = await supabase.from('submissions').select('*').eq('user_id', profile.id).eq('assessment_id', current.id).order('created_at', { ascending: false })
+          const { data, error: submissionError } = await api.from('submissions').select('*').eq('user_id', profile.id).eq('assessment_id', current.id).order('created_at', { ascending: false })
           if (submissionError) throw submissionError
           setSubmissions(data || [])
         }
@@ -44,7 +44,7 @@ export default function CapstoneSubmission() {
     setSaving(true); setError(''); setMessage('')
     const profile = await getCurrentProfile()
     const contentUrl = `${repoUrl}\n${notes}`
-    const { data, error: submitError } = await supabase.from('submissions').insert({ user_id: profile.id, assessment_id: assessment.id, content_url: contentUrl, status: 'submitted', submitted_at: new Date().toISOString() }).select().single()
+    const { data, error: submitError } = await api.from('submissions').insert({ user_id: profile.id, assessment_id: assessment.id, content_url: contentUrl, status: 'submitted', submitted_at: new Date().toISOString() }).select().single()
     if (submitError) setError(submitError.message)
     else { setSubmissions((current) => [data, ...current]); setMessage('Capstone submitted for review.'); setRepoUrl(''); setNotes('') }
     setSaving(false)

@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { BookOpen, Clock, CheckCircle, Plus, ArrowRight, ShieldAlert, FileText, CheckCircle2, AlertCircle, Award } from 'lucide-react'
+import {
+  BookOpen,
+  Clock,
+  CheckCircle,
+  Plus,
+  ArrowRight,
+  ShieldAlert,
+  CheckCircle2,
+  AlertCircle,
+  Award,
+} from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import MetricCard from '../components/dashboard/MetricCard'
@@ -22,15 +32,15 @@ export default function PartnerDashboard({ user }) {
     let cancelled = false
     const load = async () => {
       try {
-        const { data: partnerId, error: partnerIdError } = await supabase.rpc('current_partner_id')
+        const { data: partnerId, error: partnerIdError } = await api.rpc('current_partner_id')
         if (partnerIdError) throw partnerIdError
         if (!partnerId) {
           if (!cancelled) setData({ ...emptyData, linked: false })
           return
         }
         const [{ data: partner, error: partnerError }, { data: courses, error: coursesError }] = await Promise.all([
-          supabase.from('partners').select('id, name, status').eq('id', partnerId).maybeSingle(),
-          supabase.from('partner_courses').select('id, title, status, submitted_at, updated_at').eq('partner_id', partnerId).order('updated_at', { ascending: false }),
+          api.from('partners').select('id, name, status').eq('id', partnerId).maybeSingle(),
+          api.from('partner_courses').select('id, title, status, submitted_at, updated_at').eq('partner_id', partnerId).order('updated_at', { ascending: false }),
         ])
         if (partnerError) throw partnerError
         if (coursesError) throw coursesError
@@ -184,7 +194,6 @@ export default function PartnerDashboard({ user }) {
                   {data.courses.slice(0, 6).map((course) => {
                     const isChangesRequested = course.status === 'changes_requested'
                     const isPublished = course.status === 'published'
-                    const isSubmitted = course.status === 'submitted' || course.status === 'under_review'
                     const statusLabel = course.status ? course.status.replace('_', ' ') : 'draft'
 
                     return (
@@ -200,7 +209,7 @@ export default function PartnerDashboard({ user }) {
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
                             {isChangesRequested && (
-                              <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 shrink-0">
+                              <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-200 shrink-0">
                                 Action Required
                               </Badge>
                             )}

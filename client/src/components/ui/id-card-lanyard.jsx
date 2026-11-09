@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react"
 
 const CSS = `
 .idcl-root{
@@ -315,7 +315,7 @@ export function IDCardLanyard({
     let downPos = { x: anchor.x, y: anchor.y };
     let pointer = { x: anchor.x, y: anchor.y + REST_LENGTH };
     let lastPointer = { ...pointer };
-    let velocity = { x: 0, y: 0 };
+    const velocity = { x: 0, y: 0 };
 
     let flipTarget = 0;
     let flipCurrent = 0;

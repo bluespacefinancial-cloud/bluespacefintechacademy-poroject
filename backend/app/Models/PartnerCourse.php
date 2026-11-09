@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable([
+    'partner_id',
+    'title',
+    'description',
+    'domain',
+    'status',
+    'is_published',
+])]
+
 class PartnerCourse extends Model
 {
     use HasFactory;
-
-    #[Fillable([
-        'partner_id',
-        'title',
-        'description',
-        'domain',
-        'status',
-        'is_published',
-    ])]
 
     public function partner(): BelongsTo
     {

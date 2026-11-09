@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function ProjectWorkspace() {
@@ -19,10 +19,10 @@ export default function ProjectWorkspace() {
 
   const load = async () => {
     const profile = await getCurrentProfile()
-    const { data: enrolment, error: enrolmentError } = await supabase.from('enrolments').select('squad_id').eq('user_id', profile.id).in('status', ['enrolled', 'active']).maybeSingle()
+    const { data: enrolment, error: enrolmentError } = await api.from('enrolments').select('squad_id').eq('user_id', profile.id).in('status', ['enrolled', 'active']).maybeSingle()
     if (enrolmentError) throw enrolmentError
     if (!enrolment?.squad_id) return
-    const { data, error: sprintError } = await supabase.from('sprints').select('*, use_cases(title, domain), sprint_deliverables(*)').eq('squad_id', enrolment.squad_id).order('sprint_number')
+    const { data, error: sprintError } = await api.from('sprints').select('*, use_cases(title, domain), sprint_deliverables(*)').eq('squad_id', enrolment.squad_id).order('sprint_number')
     if (sprintError) throw sprintError
     setSprints(data || [])
     if (data?.[0]) { setSelected(data[0]); setDeliverables(data[0].sprint_deliverables || []) }
@@ -33,7 +33,7 @@ export default function ProjectWorkspace() {
   const submit = async (event) => {
     event.preventDefault(); setError(''); setMessage('')
     const profile = await getCurrentProfile()
-    const { data, error: submitError } = await supabase.from('sprint_deliverables').insert({ sprint_id: selected.id, user_id: profile.id, ...form, status: 'submitted', submitted_at: new Date().toISOString() }).select().single()
+    const { data, error: submitError } = await api.from('sprint_deliverables').insert({ sprint_id: selected.id, user_id: profile.id, ...form, status: 'submitted', submitted_at: new Date().toISOString() }).select().single()
     if (submitError) setError(submitError.message)
     else { setDeliverables((current) => [data, ...current]); setForm({ title: '', description: '', evidence_url: '' }); setMessage('Deliverable submitted for mentor review.') }
   }

@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 
 export default function ProjectReview() {
   const [items, setItems] = useState([])
@@ -16,7 +16,7 @@ export default function ProjectReview() {
   const [error, setError] = useState('')
 
   const load = async () => {
-    const { data, error: loadError } = await supabase.from('sprint_deliverables').select('*, users(name, email), sprints(sprint_number, use_cases(title))').order('created_at', { ascending: false })
+    const { data, error: loadError } = await api.from('sprint_deliverables').select('*, users!sprint_deliverables_user_id_fkey(name, email), sprints(sprint_number, use_cases(title))').order('created_at', { ascending: false })
     if (loadError) throw loadError
     setItems(data || [])
   }
@@ -25,7 +25,7 @@ export default function ProjectReview() {
   const choose = (item) => { setSelected(item); setScore(item.score ?? ''); setFeedback(item.feedback || '') }
   const review = async (status) => {
     if (!selected || score === '') { setError('Enter a score before reviewing'); return }
-    const { data, error: reviewError } = await supabase.rpc('review_sprint_deliverable', { p_deliverable_id: selected.id, p_score: Number(score), p_feedback: feedback.trim(), p_status: status })
+    const { data, error: reviewError } = await api.rpc('review_sprint_deliverable', { p_deliverable_id: selected.id, p_score: Number(score), p_feedback: feedback.trim(), p_status: status })
     if (reviewError) { setError(reviewError.message); return }
     setItems((current) => current.map((item) => item.id === selected.id ? { ...item, ...data } : item)); setSelected({ ...selected, ...data })
   }

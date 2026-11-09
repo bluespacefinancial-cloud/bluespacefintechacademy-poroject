@@ -2,11 +2,24 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const SUBMISSION_STATUS = {
   submitted: { label: 'Submitted', variant: 'default', color: 'text-brand-600' },
@@ -16,10 +29,10 @@ const SUBMISSION_STATUS = {
 }
 
 const DOMAIN_COLORS = {
-  FaaS: 'bg-brand-100 text-brand-700 border-brand-200',
-  FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
-  FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
+  FaaS: 'text-brand-700 border-brand-200',
+  FinCore: 'text-emerald-700 border-emerald-200',
+  FinOps: 'text-amber-700 border-amber-200',
+  FinInfra: 'text-slate-700 border-slate-200',
 }
 
 export default function LabsToReview() {
@@ -35,10 +48,10 @@ export default function LabsToReview() {
 
   const loadLabs = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await api.auth.getUser()
       if (!user) return
 
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('submissions')
         .select(`
           *,
@@ -53,7 +66,7 @@ export default function LabsToReview() {
       const userIds = [...new Set((data || []).map((s) => s.user_id))]
       const trackMap = {}
       if (userIds.length > 0) {
-        const { data: enrolments } = await supabase
+        const { data: enrolments } = await api
           .from('enrolments')
           .select('user_id, track')
           .in('user_id', userIds)

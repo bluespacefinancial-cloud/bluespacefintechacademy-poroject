@@ -3,15 +3,21 @@ import { Plus, Edit3, Eye, X, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import { api } from '../lib/backend'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
 import { Input } from '../components/ui/input'
 
 const STATUS_COLORS = {
-  planned: 'bg-gray-50 text-gray-600',
-  active: 'bg-brand-50 text-brand-700 border-brand-100',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  archived: 'bg-slate-50 text-slate-600 border-slate-100',
+  planned: 'text-gray-600 border-gray-200',
+  active: 'text-brand-700 border-brand-200',
+  completed: 'text-emerald-700 border-emerald-200',
+  archived: 'text-slate-600 border-slate-200',
 }
 
 const STATUS_LABELS = {
@@ -36,7 +42,7 @@ export default function Cohorts() {
 
   const loadCohorts = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('cohorts')
         .select('*')
         .order('start_date', { ascending: true })
@@ -80,7 +86,7 @@ export default function Cohorts() {
     setSaving(editingId)
     setError('')
     try {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('cohorts')
         .update({
           name: editForm.name,
@@ -106,7 +112,7 @@ export default function Cohorts() {
   const deleteCohort = async (id) => {
     if (!window.confirm('Delete this cohort? This cannot be undone.')) return
     try {
-      const { error: delError } = await supabase.from('cohorts').delete().eq('id', id)
+      const { error: delError } = await api.from('cohorts').delete().eq('id', id)
       if (delError) throw delError
       setMessage('Cohort deleted')
       await loadCohorts()
@@ -119,7 +125,7 @@ export default function Cohorts() {
     e.preventDefault()
     setError('')
     try {
-      const { error: createError } = await supabase.from('cohorts').insert({
+      const { error: createError } = await api.from('cohorts').insert({
         name: editForm.name || 'New Cohort',
         start_date: editForm.start_date,
         end_date: editForm.end_date,
@@ -385,15 +391,15 @@ export default function Cohorts() {
                       <td className="py-4">
                         <div className="flex gap-2">
                           {cohort.track_finsoft && (
-                            <Badge className="bg-brand-50 text-brand-700 border-brand-100 text-[10px]">Finsoft</Badge>
+                            <Badge className="text-brand-700 border-brand-200 text-[10px]">Finsoft</Badge>
                           )}
                           {cohort.track_finops && (
-                            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px]">Finops</Badge>
+                            <Badge className="text-emerald-700 border-emerald-200 text-[10px]">Finops</Badge>
                           )}
                         </div>
                       </td>
                       <td className="py-4">
-                        <Badge className={STATUS_COLORS[cohort.status] || 'bg-gray-50 text-gray-600'}>
+                        <Badge className={STATUS_COLORS[cohort.status] || 'text-gray-600'}>
                           {STATUS_LABELS[cohort.status]}
                         </Badge>
                       </td>

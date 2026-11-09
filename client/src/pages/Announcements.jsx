@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import { Bell, Users, Eye, CheckCircle } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 const TYPE_CONFIG = {
-  announcement: { label: 'Announcement', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
-  reminder: { label: 'Reminder', variant: 'default', color: 'bg-amber-50 text-amber-700 border-amber-100' },
-  update: { label: 'Update', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
+  announcement: { label: 'Announcement', variant: 'default', color: 'text-brand-700 border-brand-200' },
+  reminder: { label: 'Reminder', variant: 'default', color: 'text-amber-700 border-amber-200' },
+  update: { label: 'Update', variant: 'default', color: 'text-brand-700 border-brand-200' },
 }
 
 export default function Announcements() {
@@ -23,7 +23,7 @@ export default function Announcements() {
 
   const loadAnnouncements = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('announcements')
         .select('*')
         .order('created_at', { ascending: false })
@@ -42,7 +42,7 @@ export default function Announcements() {
     if (!profile) return
 
     try {
-      const { data } = await supabase
+      const { data } = await api
         .from('announcement_reads')
         .select('announcement_id')
         .eq('user_id', profile.id)
@@ -61,7 +61,7 @@ export default function Announcements() {
     if (!profile) return
     profile.then((p) => {
       if (!p) return
-      supabase
+      api
         .from('announcement_reads')
         .insert({ announcement_id: announcementId, user_id: p.id })
         .then(() => {

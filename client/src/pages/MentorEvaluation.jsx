@@ -1,10 +1,9 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
 import { CheckCircle, Save } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function MentorEvaluation() {
@@ -20,15 +19,15 @@ export default function MentorEvaluation() {
     const load = async () => {
       const profile = await getCurrentProfile()
       const [{ data: assignments, error: assignmentError }, { data: sprintRows, error: sprintError }] = await Promise.all([
-        supabase.from('instructor_squad_assignments').select('squad_id').eq('instructor_id', profile.id),
-        supabase.from('sprints').select('id, sprint_number, squad_id, use_cases(title)').order('sprint_number'),
+        api.from('instructor_squad_assignments').select('squad_id').eq('instructor_id', profile.id),
+        api.from('sprints').select('id, sprint_number, squad_id, use_cases(title)').order('sprint_number'),
       ])
       if (assignmentError) throw assignmentError
       if (sprintError) throw sprintError
       const squadIds = (assignments || []).map((item) => item.squad_id)
       const visibleSprints = (sprintRows || []).filter((sprint) => !squadIds.length || squadIds.includes(sprint.squad_id))
       setSprints(visibleSprints)
-      const { data: enrolments, error: enrolmentError } = await supabase.from('enrolments').select('user_id, squad_id, users(name, email)').in('squad_id', visibleSprints.map((item) => item.squad_id))
+      const { data: enrolments, error: enrolmentError } = await api.from('enrolments').select('user_id, squad_id, users(name, email)').in('squad_id', visibleSprints.map((item) => item.squad_id))
       if (enrolmentError) throw enrolmentError
       setStudents(enrolments || [])
     }
@@ -39,7 +38,7 @@ export default function MentorEvaluation() {
     event.preventDefault(); setSaving(true); setError(''); setMessage('')
     try {
       const mentor = await getCurrentProfile()
-      const { error: saveError } = await supabase.from('mentor_evaluations').upsert({ sprint_id: Number(form.sprint_id), user_id: Number(form.user_id), mentor_id: mentor.id, score: Number(form.score), feedback: form.feedback.trim() || null, updated_at: new Date().toISOString() }, { onConflict: 'sprint_id,user_id,mentor_id' })
+      const { error: saveError } = await api.from('mentor_evaluations').upsert({ sprint_id: Number(form.sprint_id), user_id: Number(form.user_id), mentor_id: mentor.id, score: Number(form.score), feedback: form.feedback.trim() || null, updated_at: new Date().toISOString() }, { onConflict: 'sprint_id,user_id,mentor_id' })
       if (saveError) throw saveError
       setMessage('Mentor evaluation saved.')
     } catch (saveError) { setError(saveError.message || 'Unable to save evaluation') } finally { setSaving(false) }

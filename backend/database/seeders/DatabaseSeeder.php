@@ -11,27 +11,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Partner accounts first (users table foreign key)
-        $this->call([
-            PartnerCourseSeeder::class,
-        ]);
-
-        // Users (depends on partner_id foreign key)
+        // 1. Users first (needed by almost everything)
         $this->call([
             UserSeeder::class,
         ]);
 
-        // Core tables
+        // 2. Cohorts (needed by enrolments, modules, clinics)
         $this->call([
             CohortSeeder::class,
         ]);
 
-        // Enrolments depend on cohorts + users
+        // 3. Enrolments (depends on cohorts + users)
         $this->call([
             EnrolmentSeeder::class,
         ]);
 
-        // Core learning content
+        // 4. Core learning content (depends on cohorts)
         $this->call([
             ModuleSeeder::class,
             LessonSeeder::class,
@@ -40,13 +35,12 @@ class DatabaseSeeder extends Seeder
             SubmissionSeeder::class,
         ]);
 
-        // Academic operations
+        // 5. Squads (depends on cohorts + users)
         $this->call([
-            SquadSeeder::class,
             SquadSeeder::class,
         ]);
 
-        // Partner ecosystem
+        // 6. Partner ecosystem
         $this->call([
             PartnerCourseSeeder::class,
             PartnerCourseLessonSeeder::class,
@@ -54,18 +48,16 @@ class DatabaseSeeder extends Seeder
             PartnerCourseProgressSeeder::class,
         ]);
 
-        // Operations
+        // 7. Operations
         $this->call([
             UseCaseSeeder::class,
             SprintSeeder::class,
             CertificationSeeder::class,
             PlacementSeeder::class,
-            ReportSeeder::class,
             ClinicSeeder::class,
-            ReportSeeder::class,
         ]);
 
-        // Notifications & Audit
+        // 8. Notifications & Audit
         $this->call([
             NotificationSeeder::class,
             AuditLogSeeder::class,

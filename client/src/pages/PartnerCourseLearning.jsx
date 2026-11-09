@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { CheckCircle, PlayCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 
 function getYouTubeEmbedUrl(url) {
   if (!url || typeof url !== 'string') return null
@@ -21,26 +21,26 @@ export default function PartnerCourseLearning() {
   const [error, setError] = useState('')
   useEffect(() => {
     const load = async () => {
-      const { data: courseData, error: courseError } = await supabase.from('partner_courses').select('*, partners(name, logo_url), partner_course_lessons(*)').eq('id', courseId).single()
+      const { data: courseData, error: courseError } = await api.from('partner_courses').select('*, partners(name, logo_url), partner_course_lessons(*)').eq('id', courseId).single()
       if (courseError) throw courseError
-      const { data: user } = await supabase.auth.getUser()
-      const { data: profile } = await supabase.from('users').select('id').eq('email', user.user.email).single()
-      const { data: progressData, error: progressError } = await supabase.from('partner_course_progress').select('*').eq('course_id', courseId).eq('user_id', profile.id)
+      const { data: user } = await api.auth.getUser()
+      const { data: profile } = await api.from('users').select('id').eq('email', user.user.email).single()
+      const { data: progressData, error: progressError } = await api.from('partner_course_progress').select('*').eq('course_id', courseId).eq('user_id', profile.id)
       if (progressError) throw progressError
       setCourse(courseData); setProgress(progressData || [])
     }
     load().catch((loadError) => setError(loadError.message || 'Unable to load course'))
   }, [courseId])
   const complete = async (lessonId) => {
-    const { data: user } = await supabase.auth.getUser()
-    const { data: profile } = await supabase.from('users').select('id').eq('email', user.user.email).single()
-    const { error: saveError } = await supabase.from('partner_course_progress').upsert({ course_id: Number(courseId), lesson_id: lessonId, user_id: profile.id, completion_percentage: 100, is_completed: true }, { onConflict: 'lesson_id,user_id' })
+    const { data: user } = await api.auth.getUser()
+    const { data: profile } = await api.from('users').select('id').eq('email', user.user.email).single()
+    const { error: saveError } = await api.from('partner_course_progress').upsert({ course_id: Number(courseId), lesson_id: lessonId, user_id: profile.id, completion_percentage: 100, is_completed: true }, { onConflict: 'lesson_id,user_id' })
     if (saveError) { setError(saveError.message); return }
     const nextProgress = [...progress.filter((item) => item.lesson_id !== lessonId), { lesson_id: lessonId, is_completed: true }]
     setProgress(nextProgress)
     const publishedLessons = (course?.partner_course_lessons || []).filter((item) => item.is_published)
     if (publishedLessons.length > 0 && publishedLessons.every((item) => nextProgress.some((itemProgress) => itemProgress.lesson_id === item.id && itemProgress.is_completed))) {
-      const { error: certificateError } = await supabase.rpc('issue_partner_certificate', { p_user_id: profile.id, p_course_id: Number(courseId), p_final_grade: 100 })
+      const { error: certificateError } = await api.rpc('issue_partner_certificate', { p_user_id: profile.id, p_course_id: Number(courseId), p_final_grade: 100 })
       if (certificateError) setError(certificateError.message)
     }
   }

@@ -4,7 +4,7 @@ import { BookOpen, PlayCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 
 export default function PartnerCatalog() {
   const [courses, setCourses] = useState([])
@@ -12,16 +12,16 @@ export default function PartnerCatalog() {
   const navigate = useNavigate()
   useEffect(() => {
     const load = async () => {
-      const { data, error: loadError } = await supabase.from('partner_courses').select('*, partners(name, logo_url), partner_course_lessons(id)').eq('status', 'published').order('published_at', { ascending: false })
+      const { data, error: loadError } = await api.from('partner_courses').select('*, partners(name, logo_url), partner_course_lessons(id)').eq('status', 'published').order('published_at', { ascending: false })
       if (loadError) throw loadError
       setCourses(data || [])
     }
     load().catch((loadError) => setError(loadError.message || 'Unable to load partner courses'))
   }, [])
   const enrol = async (courseId) => {
-    const { data: user } = await supabase.auth.getUser()
-    const { data: profile } = await supabase.from('users').select('id').eq('email', user.user.email).single()
-    const { error: enrolError } = await supabase.from('partner_course_enrolments').upsert({ course_id: courseId, user_id: profile.id, status: 'active' }, { onConflict: 'course_id,user_id' })
+    const { data: user } = await api.auth.getUser()
+    const { data: profile } = await api.from('users').select('id').eq('email', user.user.email).single()
+    const { error: enrolError } = await api.from('partner_course_enrolments').upsert({ course_id: courseId, user_id: profile.id, status: 'active' }, { onConflict: 'course_id,user_id' })
     if (enrolError) setError(enrolError.message)
     else navigate(`/partner-course/${courseId}`)
   }

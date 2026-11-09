@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Lock } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import toast from 'react-hot-toast'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -15,7 +15,7 @@ const ease = [0.23, 1, 0.32, 1]
 
 // Each portal has its own URL and only accepts accounts whose
 // public.users.type matches. The URL is a UX boundary; real authorization is
-// enforced by Supabase RLS (see supabase/migrations/001_phase_one_academy.sql).
+// enforced by PostgreSQL row-level security (see lms/database/01_schema.sql).
 const PORTALS = {
   '/student-login': {
     role: 'Student',
@@ -82,11 +82,18 @@ export default function Login() {
   // Rate limiting state
   const [attemptCount, setAttemptCount] = useState(0)
   const [lockoutUntil, setLockoutUntil] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
   const MAX_ATTEMPTS = 5
   const LOCKOUT_MS = 5 * 60 * 1000 // 5 minutes
 
-  const isLockedOut = lockoutUntil > Date.now()
-  const remainingLockout = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000))
+  const isLockedOut = lockoutUntil > now
+  const remainingLockout = Math.max(0, Math.ceil((lockoutUntil - now) / 1000))
+
+  useEffect(() => {
+    if (lockoutUntil <= 0) return undefined
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [lockoutUntil])
 
   const canAttempt = () => {
     if (!isLockedOut) return true
@@ -94,13 +101,12 @@ export default function Login() {
   }
 
   const recordFailedAttempt = () => {
-    setAttemptCount((prev) => {
-      const next = prev + 1
-      if (next >= MAX_ATTEMPTS) {
-        setLockoutUntil(Date.now() + LOCKOUT_MS)
-      }
-      return next
-    })
+    const next = attemptCount + 1
+    setAttemptCount(next)
+    if (next >= MAX_ATTEMPTS) {
+      setLockoutUntil(Date.now() + LOCKOUT_MS)
+      setNow(Date.now())
+    }
   }
 
   const resetAttempts = () => {
@@ -116,7 +122,7 @@ export default function Login() {
     }
     setResending(true)
     try {
-      const { error } = await supabase.auth.resend({
+      const { error } = await api.auth.resend({
         type: 'signup',
         email: normalizedEmail,
         options: { emailRedirectTo: `${window.location.origin}/student-login?emailVerified=1` },
@@ -179,11 +185,12 @@ export default function Login() {
         toast.success(`Welcome back, ${user.name || user.email}`)
         navigate('/dashboard', { replace: true })
       }
-    } catch (err) {
+    } catch {
+      const nextAttempts = attemptCount + 1
       recordFailedAttempt()
       // Generic error message to prevent email enumeration
-      toast.error(isLockedOut()
-        ? `Too many failed attempts. Try again in ${remainingLockout} seconds.`
+      toast.error(nextAttempts >= MAX_ATTEMPTS
+        ? `Too many failed attempts. Try again in ${Math.ceil(LOCKOUT_MS / 1000)} seconds.`
         : 'Invalid email or password')
     } finally {
       setLoading(false)
@@ -206,12 +213,12 @@ export default function Login() {
     }
     setChanging(true)
     try {
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await api.auth.updateUser({
         password: newPassword,
       })
       if (error) throw error
       // Clear the DB flag too, otherwise the next login forces a reset again.
-      await supabase.rpc('clear_my_force_password_change')
+      await api.rpc('clear_my_force_password_change')
       setUser({ forcePasswordChange: false })
       toast.success('Password updated successfully')
       navigate('/dashboard', { replace: true })

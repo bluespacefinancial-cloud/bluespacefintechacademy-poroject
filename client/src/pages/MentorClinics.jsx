@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Calendar, Clock, ExternalLink, Plus, Users, Video, User } from 'lucide-react'
+import { Calendar, Clock, Plus, Users, Video } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import { getCurrentProfile } from '../lib/profile'
 
@@ -32,7 +38,7 @@ export default function MentorClinics() {
       const profile = await getCurrentProfile()
       if (!profile) return
 
-      let clinicQuery = supabase
+      let clinicQuery = api
         .from('clinics')
         .select(`
           id, title, cohort_id, mentor_id, starts_at, ends_at, meet_url, capacity, status, attendee_count,
@@ -42,7 +48,7 @@ export default function MentorClinics() {
 
       if (isStudent) {
         // Find student's cohort
-        const { data: enrolment } = await supabase
+        const { data: enrolment } = await api
           .from('enrolments')
           .select('cohort_id')
           .eq('user_id', profile.id)
@@ -57,7 +63,7 @@ export default function MentorClinics() {
       const [clinicResult, cohortResult] = await Promise.all([
         clinicQuery,
         canManage
-          ? supabase.from('cohorts').select('id, name').order('start_date', { ascending: true })
+          ? api.from('cohorts').select('id, name').order('start_date', { ascending: true })
           : Promise.resolve({ data: [], error: null }),
       ])
 
@@ -74,6 +80,8 @@ export default function MentorClinics() {
   }, [isStudent, canManage])
 
   useEffect(() => {
+    // Loading flag is set synchronously before the request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
   }, [loadData])
 
@@ -89,7 +97,7 @@ export default function MentorClinics() {
         throw new Error('End time must be after the start time.')
       }
 
-      const { error: insertError } = await supabase.from('clinics').insert({
+      const { error: insertError } = await api.from('clinics').insert({
         title: form.title.trim(),
         cohort_id: Number(form.cohort_id),
         mentor_id: user.id,

@@ -3,17 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+#[Fillable([
+    'partner_course_enrolment_id',
+    'lesson_id',
+    'is_completed',
+])]
 
 class PartnerCourseProgress extends Model
 {
-    #[Fillable([
-        'partner_course_enrolment_id',
-        'lesson_id',
-        'is_completed',
-    ])]
+    use HasFactory;
 
     public function enrolment(): BelongsTo
     {

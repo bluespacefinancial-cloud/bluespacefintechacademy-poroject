@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, UserRound } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -51,11 +51,18 @@ export default function Register() {
   })
   const [attemptCount, setAttemptCount] = useState(0)
   const [lockoutUntil, setLockoutUntil] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
   const MAX_ATTEMPTS = 5
   const LOCKOUT_MS = 5 * 60 * 1000 // 5 minutes
 
-  const isLockedOut = lockoutUntil > Date.now()
-  const remainingLockout = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000))
+  const isLockedOut = lockoutUntil > now
+  const remainingLockout = Math.max(0, Math.ceil((lockoutUntil - now) / 1000))
+
+  useEffect(() => {
+    if (lockoutUntil <= 0) return undefined
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [lockoutUntil])
 
   const canAttempt = () => {
     if (!isLockedOut) return true
@@ -63,13 +70,12 @@ export default function Register() {
   }
 
   const recordFailedAttempt = () => {
-    setAttemptCount((prev) => {
-      const next = prev + 1
-      if (next >= MAX_ATTEMPTS) {
-        setLockoutUntil(Date.now() + LOCKOUT_MS)
-      }
-      return next
-    })
+    const next = attemptCount + 1
+    setAttemptCount(next)
+    if (next >= MAX_ATTEMPTS) {
+      setLockoutUntil(Date.now() + LOCKOUT_MS)
+      setNow(Date.now())
+    }
   }
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
@@ -116,17 +122,13 @@ export default function Register() {
   }
 
   const submit = async () => {
-    if (!supabase) {
-      toast.error('Registration is unavailable until Supabase is configured')
-      return
-    }
     if (!canAttempt()) {
       toast.error(`Too many attempts. Try again in ${remainingLockout} seconds.`)
       return
     }
     setLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('auth-handler', {
+      const { data, error } = await api.functions.invoke('auth-handler', {
         body: {
           action: 'apply',
           email: form.email.trim().toLowerCase(),

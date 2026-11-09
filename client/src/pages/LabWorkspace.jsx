@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import { getDeadlineInfo } from '../lib/deadlines'
 
@@ -25,7 +25,7 @@ export default function LabWorkspace() {
       try {
         const profile = await getCurrentProfile()
         if (!profile) throw new Error('Your academy profile could not be found.')
-        const { data: enrolment, error: enrolmentError } = await supabase
+        const { data: enrolment, error: enrolmentError } = await api
           .from('enrolments')
           .select('cohort_id, track')
           .eq('user_id', profile.id)
@@ -37,7 +37,7 @@ export default function LabWorkspace() {
           return
         }
 
-        const { data: moduleRows, error: moduleError } = await supabase
+        const { data: moduleRows, error: moduleError } = await api
           .from('modules')
           .select('id, title, domain, stage')
           .eq('cohort_id', enrolment.cohort_id)
@@ -49,7 +49,7 @@ export default function LabWorkspace() {
           return
         }
 
-        const { data: lessonRows, error: lessonError } = await supabase
+        const { data: lessonRows, error: lessonError } = await api
           .from('lessons')
           .select('id, module_id, title')
           .in('module_id', moduleIds)
@@ -60,13 +60,13 @@ export default function LabWorkspace() {
           return
         }
 
-        const { data: labRows, error: labError } = await supabase
+        const { data: labRows, error: labError } = await api
           .from('labs')
           .select('id, lesson_id, title, instructions, starter_code, max_score, due_date')
           .in('lesson_id', lessonIds)
         if (labError) throw labError
 
-        const { data: submissionRows, error: submissionError } = await supabase
+        const { data: submissionRows, error: submissionError } = await api
           .from('submissions')
           .select('id, lab_id, status, content_url, score, feedback, submitted_at')
           .eq('user_id', profile.id)
@@ -127,8 +127,8 @@ export default function LabWorkspace() {
       }
 
       const request = existing?.id
-        ? supabase.from('submissions').update(payload).eq('id', existing.id)
-        : supabase.from('submissions').insert(payload)
+        ? api.from('submissions').update(payload).eq('id', existing.id)
+        : api.from('submissions').insert(payload)
       const { data, error: submitError } = await request.select('id, lab_id, status, content_url, score, feedback, submitted_at').single()
       if (submitError) throw submitError
       setSubmissions((previous) => ({ ...previous, [lab.id]: data }))

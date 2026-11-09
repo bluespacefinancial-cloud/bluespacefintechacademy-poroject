@@ -11,10 +11,10 @@
     "lint:fix": "cd client && npm run lint:fix",
     "format": "cd client && npm run format",
     "format:check": "cd client && npm run format:check",
-    "supabase:start": "npx supabase start",
-    "supabase:stop": "npx supabase stop",
-    "supabase:db:push": "npx supabase db push",
-    "supabase:functions:deploy": "npx supabase functions deploy"
+    "stack:up": "docker compose up -d",
+    "stack:down": "docker compose down",
+    "stack:reset": "docker compose down -v && docker compose up -d",
+    "api": "cd backend && ./bin/artisan serve --host=127.0.0.1 --port=8001"
   },
   "engines": {
     "node": ">=18.0.0"

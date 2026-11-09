@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('email')->unique();
-            $table->string('password')->default(null); // Handled by Supabase Auth / Laravel Sanctum
+            $table->string('password')->default(null); // Bcrypt hash used by the academy API
             $table->string('type')->default('Student')->check("type IN ('Student', 'Instructor', 'Partner', 'Administrator')");
             $table->string('avatar')->default('avatar.png');
             $table->string('phone')->nullable();

@@ -3,26 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable([
+    'user_id',
+    'lab_id',
+    'assessment_id',
+    'squad_id',
+    'status',
+    'content_url',
+    'score',
+    'feedback',
+    'graded_by',
+    'submitted_at',
+    'graded_at',
+])]
 
 class Submission extends Model
 {
-    #[Fillable([
-        'user_id',
-        'lab_id',
-        'assessment_id',
-        'squad_id',
-        'status',
-        'content_url',
-        'score',
-        'feedback',
-        'graded_by',
-        'submitted_at',
-        'graded_at',
-    ])]
+    use HasFactory;
 
     public function user(): BelongsTo
     {

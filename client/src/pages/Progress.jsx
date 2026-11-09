@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart3, Clock, Award, FileText, CheckCircle2, BookOpen, AlertCircle, Trophy } from 'lucide-react'
+import {
+  BarChart3,
+  Clock,
+  Award,
+  FileText,
+  CheckCircle2,
+  BookOpen,
+  AlertCircle,
+  Trophy,
+} from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'

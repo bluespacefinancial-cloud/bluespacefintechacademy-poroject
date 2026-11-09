@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { api } from './backend'
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
   '&': '&amp;',
@@ -44,8 +44,8 @@ function makeEmail({ heading, name, message, actionLabel = 'Sign in to BlueSPACE
 export const emailService = {
   async sendEmail(to, subject, htmlContent, textContent) {
     try {
-      if (!supabase) throw new Error('Email delivery is not configured.')
-      const { data, error } = await supabase.functions.invoke('email-service', {
+      if (!api) throw new Error('Email delivery is not configured.')
+      const { data, error } = await api.functions.invoke('email-service', {
         body: { to, subject, html: htmlContent, text: textContent },
       })
       if (error) {

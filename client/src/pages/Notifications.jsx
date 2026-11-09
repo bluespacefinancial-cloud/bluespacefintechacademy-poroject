@@ -4,7 +4,7 @@ import { Bell, Check } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function Notifications() {
@@ -14,14 +14,14 @@ export default function Notifications() {
 
   const load = async () => {
     const profile = await getCurrentProfile()
-    const { data, error: loadError } = await supabase.from('notifications').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(50)
+    const { data, error: loadError } = await api.from('notifications').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(50)
     if (loadError) throw loadError
     setNotifications(data || [])
   }
   useEffect(() => { load().catch((loadError) => setError(loadError.message || 'Unable to load notifications')).finally(() => setLoading(false)) }, [])
 
   const markRead = async (notification) => {
-    const { error: updateError } = await supabase.from('notifications').update({ is_read: 1, updated_at: new Date().toISOString() }).eq('id', notification.id)
+    const { error: updateError } = await api.from('notifications').update({ is_read: 1, updated_at: new Date().toISOString() }).eq('id', notification.id)
     if (updateError) { setError(updateError.message); return }
     setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, is_read: 1 } : item))
   }

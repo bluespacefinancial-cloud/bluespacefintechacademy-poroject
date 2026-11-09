@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -17,7 +17,7 @@ export default function ResetPassword() {
   const requestedReturnTo = new URLSearchParams(location.search).get('from')
   const returnTo = LOGIN_PATHS.includes(requestedReturnTo) ? requestedReturnTo : '/student-login'
   const { logout } = useAuth()
-  const [checking, setChecking] = useState(Boolean(supabase))
+  const [checking, setChecking] = useState(true)
   const [hasSession, setHasSession] = useState(false)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -25,16 +25,14 @@ export default function ResetPassword() {
   const [updated, setUpdated] = useState(false)
 
   useEffect(() => {
-    if (!supabase) return undefined
-
     let active = true
-    supabase.auth.getSession().then(({ data }) => {
+    api.auth.getSession().then(({ data }) => {
       if (active) {
         setHasSession(Boolean(data.session))
         setChecking(false)
       }
     })
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener } = api.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY' && session) setHasSession(true)
       if (event === 'SIGNED_OUT') setHasSession(false)
     })
@@ -56,7 +54,7 @@ export default function ResetPassword() {
     }
     setLoading(true)
     try {
-      const { error } = await supabase.auth.updateUser({ password })
+      const { error } = await api.auth.updateUser({ password })
       if (error) throw error
       await logout()
       setUpdated(true)

@@ -19,7 +19,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { getCurrentProfile } from '../lib/profile'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import MetricCard from '../components/dashboard/MetricCard'
@@ -39,9 +39,9 @@ export default function InstructorDashboard({ user }) {
         const profile = await getCurrentProfile()
         if (!profile) throw new Error('Your instructor profile could not be found')
         const [cohortResult, squadResult, moduleResult] = await Promise.all([
-          supabase.from('instructor_cohort_assignments').select('cohort_id').eq('instructor_id', profile.id),
-          supabase.from('instructor_squad_assignments').select('squad_id').eq('instructor_id', profile.id),
-          supabase.from('modules').select('id, title, stage, domain, track, cohort_id, is_published, week_start, week_end, created_by').order('updated_at', { ascending: false }),
+          api.from('instructor_cohort_assignments').select('cohort_id').eq('instructor_id', profile.id),
+          api.from('instructor_squad_assignments').select('squad_id').eq('instructor_id', profile.id),
+          api.from('modules').select('id, title, stage, domain, track, cohort_id, is_published, week_start, week_end, created_by').order('updated_at', { ascending: false }),
         ])
         if (cohortResult.error) throw cohortResult.error
         if (squadResult.error) throw squadResult.error
@@ -52,10 +52,10 @@ export default function InstructorDashboard({ user }) {
         const modules = moduleResult.data.filter((item) => cohortIds.includes(item.cohort_id) || item.created_by === profile.id)
         const moduleIds = modules.map((item) => item.id)
         const [cohortRows, squadRows, lessonResult, liveClassResult] = await Promise.all([
-          cohortIds.length ? supabase.from('cohorts').select('id, name, status').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
-          squadIds.length ? supabase.from('squads').select('id, name, cohort_id').in('id', squadIds) : Promise.resolve({ data: [], error: null }),
-          moduleIds.length ? supabase.from('lessons').select('id, module_id').in('module_id', moduleIds) : Promise.resolve({ data: [], error: null }),
-          cohortIds.length ? supabase.from('live_classes').select('id, title, starts_at, ends_at, is_offline, venue, meet_url, cohort_id').in('cohort_id', cohortIds).eq('status', 'scheduled').order('starts_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
+          cohortIds.length ? api.from('cohorts').select('id, name, status').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
+          squadIds.length ? api.from('squads').select('id, name, cohort_id').in('id', squadIds) : Promise.resolve({ data: [], error: null }),
+          moduleIds.length ? api.from('lessons').select('id, module_id').in('module_id', moduleIds) : Promise.resolve({ data: [], error: null }),
+          cohortIds.length ? api.from('live_classes').select('id, title, starts_at, ends_at, is_offline, venue, meet_url, cohort_id').in('cohort_id', cohortIds).eq('status', 'scheduled').order('starts_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
         ])
         if (cohortRows.error) throw cohortRows.error
         if (squadRows.error) throw squadRows.error
@@ -64,18 +64,18 @@ export default function InstructorDashboard({ user }) {
 
         const lessonIds = lessonResult.data.map((item) => item.id)
         const labResult = lessonIds.length
-          ? await supabase.from('labs').select('id, lesson_id, title').in('lesson_id', lessonIds)
+          ? await api.from('labs').select('id, lesson_id, title').in('lesson_id', lessonIds)
           : { data: [], error: null }
         if (labResult.error) throw labResult.error
         const labIds = labResult.data.map((item) => item.id)
         const submissionResult = labIds.length
-          ? await supabase.from('submissions').select('id, lab_id, user_id, status, submitted_at').eq('status', 'submitted').in('lab_id', labIds).order('submitted_at', { ascending: false }).limit(6)
+          ? await api.from('submissions').select('id, lab_id, user_id, status, submitted_at').eq('status', 'submitted').in('lab_id', labIds).order('submitted_at', { ascending: false }).limit(6)
           : { data: [], error: null }
         if (submissionResult.error) throw submissionResult.error
 
         const studentIds = [...new Set(submissionResult.data.map((item) => item.user_id))]
         const [studentRows,] = studentIds.length
-          ? await Promise.all([supabase.from('users').select('id, name').in('id', studentIds)])
+          ? await Promise.all([api.from('users').select('id, name').in('id', studentIds)])
           : [{ data: [], error: null }]
         if (studentRows.error) throw studentRows.error
 
@@ -264,7 +264,7 @@ export default function InstructorDashboard({ user }) {
               {nextLiveClass ? (
                 <>
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
                       Next Scheduled Class
                     </span>
                     <h4 className="text-base font-bold text-gray-900 leading-snug pt-1">

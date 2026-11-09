@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, XCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent } from '../components/ui/card'
-import { supabase } from '../lib/supabase'
+import { Card } from '../components/ui/card'
+import { api } from '../lib/backend'
 import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
 
 export default function CertificateVerify() {
   const { token } = useParams()
   const [certificate, setCertificate] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(Boolean(token))
+  const [error, setError] = useState(token ? '' : 'No certificate token provided.')
 
   useEffect(() => {
     let isMounted = true
@@ -20,7 +20,7 @@ export default function CertificateVerify() {
       setError('')
 
       try {
-        const { data, error: rpcError } = await supabase
+        const { data, error: rpcError } = await api
           .rpc('verify_certificate', { p_token: token })
           .maybeSingle()
 
@@ -48,9 +48,6 @@ export default function CertificateVerify() {
 
     if (token) {
       verify()
-    } else {
-      setError('No certificate token provided.')
-      setLoading(false)
     }
 
     return () => {

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 const SUBMISSION_STATUS_CONFIG = {
@@ -31,11 +31,11 @@ export default function SubmissionFeedback() {
   const loadSubmission = async () => {
     if (!submissionId) return
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('submissions')
         .select(`
           *,
-          labs (title, domain),
+          labs (title, lessons (module_id, modules (domain))),
           assessments (title, module_id),
           users!submissions_user_id_fkey (name, email)
         `)
@@ -60,7 +60,7 @@ export default function SubmissionFeedback() {
       const profile = await getCurrentProfile()
       if (!profile) throw new Error('Profile not found')
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('submissions')
         .update({
           status: 'submitted',
@@ -94,7 +94,7 @@ export default function SubmissionFeedback() {
   const statusConfig = SUBMISSION_STATUS_CONFIG[submission.status] || { label: submission.status, variant: 'secondary', color: 'text-gray-600' }
   const isLab = !!submission.labs
   const itemTitle = submission.labs?.title || submission.assessments?.title || 'Unknown Assignment'
-  const itemDomain = submission.labs?.domain || ''
+  const itemDomain = submission.labs?.lessons?.modules?.domain || ''
 
   return (
     <div className="min-h-screen bg-gray-50">

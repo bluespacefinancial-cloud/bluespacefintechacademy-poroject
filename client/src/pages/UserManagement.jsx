@@ -1,17 +1,30 @@
 import { useEffect, useState } from 'react'
 import { Users, X, Edit3 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const ROLE_COLORS = {
-  Student: 'bg-brand-50 text-brand-700 border-brand-100',
-  Instructor: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  Partner: 'bg-amber-50 text-amber-700 border-amber-100',
-  Administrator: 'bg-slate-50 text-slate-700 border-slate-100',
+  Student: 'text-brand-700 border-brand-200',
+  Instructor: 'text-emerald-700 border-emerald-200',
+  Partner: 'text-amber-700 border-amber-200',
+  Administrator: 'text-slate-700 border-slate-200',
 }
 
 export default function UserManagement() {
@@ -31,7 +44,7 @@ export default function UserManagement() {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('users')
         .select('id, name, email, type, is_active, avatar, created_at, last_login_at')
         .order('created_at', { ascending: false })
@@ -75,7 +88,7 @@ export default function UserManagement() {
     setSaving(editingId)
     setError('')
     try {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('users')
         .update({
           name: editForm.name,
@@ -98,7 +111,7 @@ export default function UserManagement() {
   const deleteUser = async (id) => {
     if (!window.confirm('Delete this user? This cannot be undone.')) return
     try {
-      const { error: delError } = await supabase.from('users').delete().eq('id', id)
+      const { error: delError } = await api.from('users').delete().eq('id', id)
       if (delError) throw delError
       setMessage('User deleted')
       await loadUsers()
@@ -265,7 +278,7 @@ export default function UserManagement() {
                         <CardDescription className="text-[10px]">{user.email}</CardDescription>
                       </div>
                     </div>
-                    <Badge className={ROLE_COLORS[user.type] || 'bg-gray-50 text-gray-600'}>
+                    <Badge className={ROLE_COLORS[user.type] || 'text-gray-600'}>
                       {user.type}
                     </Badge>
                   </CardHeader>

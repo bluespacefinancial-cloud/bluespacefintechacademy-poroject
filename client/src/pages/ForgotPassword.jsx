@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -19,13 +19,9 @@ export default function ForgotPassword() {
 
   const submit = async (event) => {
     event.preventDefault()
-    if (!supabase) {
-      toast.error('Password recovery is unavailable until Supabase is configured')
-      return
-    }
     setLoading(true)
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      const { error } = await api.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
         redirectTo: `${window.location.origin}/reset-password?from=${encodeURIComponent(returnTo)}`,
       })
       if (error) throw error

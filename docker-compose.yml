@@ -1,0 +1,48 @@
+# BlueSPACE Fintech Academy local stack.
+#
+# The database is a standalone PostgreSQL instance that keeps the original
+# schema, data, grants and row-level security. PostgREST is an internal data
+# API: only Laravel talks to it, signing a short-lived JWT for each request.
+# The React client never reaches this service directly.
+#
+#   cp .env.example .env        # then set PGRST_JWT_SECRET
+#   docker compose up -d
+#
+# The SQL files in ./database run once, in name order, when the volume is
+# first created. To rebuild from scratch: docker compose down -v
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bluespace_local_pg_2026
+      POSTGRES_DB: postgres
+    ports:
+      - "127.0.0.1:${LMS_DB_PORT:-5433}:5432"
+    volumes:
+      - lms_pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  rest:
+    image: postgrest/postgrest:v16.4
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:bluespace_postgrest_2026@db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_JWT_SECRET: ${PGRST_JWT_SECRET:?PGRST_JWT_SECRET must be set in lms/.env}
+      PGRST_SERVER_PORT: "3000"
+    ports:
+      - "127.0.0.1:${LMS_REST_PORT:-54330}:3000"
+
+volumes:
+  lms_pgdata:

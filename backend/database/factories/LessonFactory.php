@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Lesson;
+use App\Models\Module;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LessonFactory extends Factory
@@ -12,15 +13,14 @@ class LessonFactory extends Factory
     public function definition(): array
     {
         return [
-            'module_id' => \App\Models\Module::factory(),
+            'module_id' => Module::factory(),
             'title' => $this->faker->sentence(4),
             'type' => $this->faker->randomElement([
                 'foundations', 'domain_immersion', 'live_projects', 'certification',
             ]),
-            'domain' => $this->faker->randomElement(['FaaS', 'FinCore', 'FinOps', 'FinInfra']),
             'duration_minutes' => $this->faker->numberBetween(30, 120),
             'content_url' => null,
-            'video_url' => 'https://www.youtube.com/watch?v=' . $this->faker->regexify('[a-zA-Z0-9_-]{11}'),
+            'video_url' => 'https://www.youtube.com/watch?v='.$this->faker->regexify('[a-zA-Z0-9_-]{11}'),
             'audio_url' => null,
             'thumbnail_url' => null,
             'caption_url' => null,

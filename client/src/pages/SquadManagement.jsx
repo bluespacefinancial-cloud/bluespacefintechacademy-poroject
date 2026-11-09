@@ -5,10 +5,19 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
+import { useAuth } from '../context/AuthContext'
 
 export default function SquadManagement() {
+  const { user } = useAuth()
+  const canManage = user?.type === 'Administrator'
   const [squads, setSquads] = useState([])
   const [cohorts, setCohorts] = useState([])
   const [search, setSearch] = useState('')
@@ -21,10 +30,10 @@ export default function SquadManagement() {
 
   const load = async () => {
     const [{ data, error: squadError }, { data: cohortRows, error: cohortError }, { data: enrolments, error: enrolmentError }, { data: users, error: usersError }] = await Promise.all([
-      supabase.from('squads').select('*').order('created_at', { ascending: false }),
-      supabase.from('cohorts').select('id, name'),
-      supabase.from('enrolments').select('squad_id, track, user_id'),
-      supabase.from('users').select('id, name'),
+      api.from('squads').select('*').order('created_at', { ascending: false }),
+      api.from('cohorts').select('id, name'),
+      api.from('enrolments').select('squad_id, cohort_id, track, user_id'),
+      api.from('users').select('id, name'),
     ])
     if (squadError) throw squadError
     if (cohortError) throw cohortError
@@ -44,28 +53,45 @@ export default function SquadManagement() {
 
   const createSquad = async (event) => {
     event.preventDefault()
-    const { error: createError } = await supabase.from('squads').insert({ name: form.name.trim(), cohort_id: Number(form.cohort_id) })
+    if (!canManage) { setError('Only administrators can create squads.'); return }
+    setError('')
+    const { data: created, error: createError } = await api
+      .from('squads')
+      .insert({ name: form.name.trim(), cohort_id: Number(form.cohort_id) })
+      .select('id')
+      .maybeSingle()
     if (createError) { setError(createError.message); return }
+    if (!created) { setError('Squad was not created. Your account may not have permission to manage squads.'); return }
     setForm({ name: '', cohort_id: '' }); setShowCreate(false); await load()
   }
 
   const assignMember = async (squadId, userId) => {
     if (!userId) return
-    const { error: assignError } = await supabase.from('enrolments').update({ squad_id: Number(squadId), updated_at: new Date().toISOString() }).eq('user_id', Number(userId)).in('status', ['enrolled', 'active'])
+    if (!canManage) { setError('Only administrators can assign squad members.'); return }
+    setError('')
+    const { data: updated, error: assignError } = await api
+      .from('enrolments')
+      .update({ squad_id: Number(squadId), updated_at: new Date().toISOString() })
+      .eq('user_id', Number(userId))
+      .in('status', ['enrolled', 'active'])
+      .select('user_id')
+      .maybeSingle()
     if (assignError) { setError(assignError.message); return }
+    if (!updated) { setError('No enrolment was updated. Your account may not have permission to change squad assignments.'); return }
     await load()
   }
 
   const filtered = useMemo(() => squads.filter((squad) => (!search || `${squad.name} ${squad.cohortName}`.toLowerCase().includes(search.toLowerCase())) && (status === 'all' || (squad.members.length ? 'active' : 'forming') === status)), [squads, search, status])
   const totalMembers = squads.reduce((sum, squad) => sum + squad.members.length, 0)
 
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6 flex items-center justify-between"><div><h1 className="text-2xl font-bold text-deep-600">Squad Management</h1><p className="text-sm text-gray-500">Manage live project squads and their enrolments.</p></div><Button onClick={() => setShowCreate(!showCreate)}><Plus size={16} className="mr-2" />Create Squad</Button></div>
+  return <div className="min-h-screen bg-gray-50"><div className="mb-6 flex items-center justify-between"><div><h1 className="text-2xl font-bold text-deep-600">Squad Management</h1><p className="text-sm text-gray-500">Manage live project squads and their enrolments.</p></div>{canManage && <Button onClick={() => setShowCreate(!showCreate)}><Plus size={16} className="mr-2" />Create Squad</Button>}</div>
+    {!canManage && <p className="mb-4 rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-600">Read-only view. Squad creation and member assignment are restricted to administrators.</p>}
     {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-    {showCreate && <Card className="mb-6"><CardHeader><CardTitle className="text-sm">Create squad</CardTitle></CardHeader><CardContent><form onSubmit={createSquad} className="grid gap-3 md:grid-cols-3"><Input placeholder="Squad name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /><Select value={form.cohort_id} onValueChange={(value) => setForm({ ...form, cohort_id: value })}><SelectTrigger><SelectValue placeholder="Select cohort" /></SelectTrigger><SelectContent>{cohorts.map((cohort) => <SelectItem key={cohort.id} value={String(cohort.id)}>{cohort.name}</SelectItem>)}</SelectContent></Select><Button type="submit">Create</Button></form></CardContent></Card>}
+    {showCreate && canManage && <Card className="mb-6"><CardHeader><CardTitle className="text-sm">Create squad</CardTitle></CardHeader><CardContent><form onSubmit={createSquad} className="grid gap-3 md:grid-cols-3"><Input placeholder="Squad name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /><Select value={form.cohort_id} onValueChange={(value) => setForm({ ...form, cohort_id: value })}><SelectTrigger><SelectValue placeholder="Select cohort" /></SelectTrigger><SelectContent>{cohorts.map((cohort) => <SelectItem key={cohort.id} value={String(cohort.id)}>{cohort.name}</SelectItem>)}</SelectContent></Select><Button type="submit">Create</Button></form></CardContent></Card>}
     <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3"><Card><CardContent className="p-4"><p className="text-2xl font-bold">{squads.length}</p><p className="text-xs uppercase text-gray-500">Squads</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-2xl font-bold">{squads.filter((squad) => squad.members.length).length}</p><p className="text-xs uppercase text-gray-500">Active squads</p></CardContent></Card><Card><CardContent className="p-4"><p className="text-2xl font-bold">{totalMembers}</p><p className="text-xs uppercase text-gray-500">Members</p></CardContent></Card></div>
     <div className="mb-5 flex gap-3"><Input placeholder="Search squads or cohorts" value={search} onChange={(event) => setSearch(event.target.value)} /><Select value={status} onValueChange={setStatus}><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="forming">Forming</SelectItem></SelectContent></Select></div>
     {loading && <p className="py-10 text-center text-sm text-gray-500">Loading squads...</p>}
     {!loading && filtered.length === 0 && <p className="py-10 text-center text-sm text-gray-500">No squads found.</p>}
-    <div className="space-y-3">{filtered.map((squad) => <Card key={squad.id}><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="text-sm">{squad.name}</CardTitle><p className="text-xs text-gray-500">{squad.cohortName} · Lead: {squad.leadName}</p></div><Badge variant="outline">{squad.members.length ? 'Active' : 'Forming'}</Badge></CardHeader><CardContent><div className="mb-3 flex items-center gap-2 text-xs"><Users size={14} /> {squad.members.length} members <Badge variant="outline">{squad.finsoft} Finsoft</Badge><Badge variant="outline">{squad.finops} Finops</Badge></div><select className="w-full rounded border p-2 text-xs" value="" onChange={(event) => assignMember(squad.id, event.target.value)}><option value="">Assign an unassigned enrolment...</option>{memberChoices.filter((member) => member.cohort_id === squad.cohort_id).map((member) => <option key={member.user_id} value={member.user_id}>{member.name} · {member.track}</option>)}</select></CardContent></Card>)}</div>
+    <div className="space-y-3">{filtered.map((squad) => <Card key={squad.id}><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="text-sm">{squad.name}</CardTitle><p className="text-xs text-gray-500">{squad.cohortName} · Lead: {squad.leadName}</p></div><Badge variant="outline">{squad.members.length ? 'Active' : 'Forming'}</Badge></CardHeader><CardContent><div className="mb-3 flex items-center gap-2 text-xs"><Users size={14} /> {squad.members.length} members <Badge variant="outline">{squad.finsoft} Finsoft</Badge><Badge variant="outline">{squad.finops} Finops</Badge></div>{canManage ? <select className="w-full rounded border p-2 text-xs" value="" onChange={(event) => assignMember(squad.id, event.target.value)}><option value="">Assign an unassigned enrolment...</option>{memberChoices.filter((member) => member.cohort_id === squad.cohort_id).map((member) => <option key={member.user_id} value={member.user_id}>{member.name} · {member.track}</option>)}</select> : <p className="text-xs text-gray-500">Member assignment is managed by administrators.</p>}</CardContent></Card>)}</div>
   </div>
 }

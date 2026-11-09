@@ -8,7 +8,6 @@ export default function DashboardHeader({
   actions,
   dataTour,
   onStartTour,
-  role,
 }) {
   return (
     <div

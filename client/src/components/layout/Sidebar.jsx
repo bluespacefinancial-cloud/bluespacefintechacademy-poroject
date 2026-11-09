@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { supabase } from '../../lib/supabase'
+import { api } from '../../lib/backend'
 import { Badge } from '../ui/badge'
 import {
   LayoutDashboard,
@@ -19,7 +19,6 @@ import {
   CheckCircle,
   FileText,
   Video,
-  Bell,
   Briefcase,
   ListPlus,
   ChevronDown,
@@ -98,7 +97,6 @@ const sidebarGroups = {
       items: [
         { to: '/squads', icon: Target, label: 'Squads', ariaLabel: 'Squads' },
         { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
-        { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace', ariaLabel: 'Project Workspace' },
         { to: '/project-review', icon: ClipboardList, label: 'Project Review', ariaLabel: 'Project Review' },
       ],
     },
@@ -145,7 +143,6 @@ const sidebarGroups = {
         { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
         { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
         { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring', ariaLabel: 'Quiz Authoring' },
-        { to: '/project-workspace', icon: Briefcase, label: 'Project Workspace', ariaLabel: 'Project Workspace' },
       ],
     },
     {
@@ -183,7 +180,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
     const loadUnreadCount = async () => {
       if (!user) return
       try {
-        const { count, error } = await supabase
+        const { count, error } = await api
           .from('notifications')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id)
@@ -272,7 +269,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                       <item.icon size={16} aria-hidden="true" className={active ? 'text-white' : 'text-slate-400'} />
                       <span>{item.label}</span>
                       {badgeCount && badgeCount > 0 && (
-                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 bg-red-50 border-red-200 shrink-0 ml-1">
+                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 border-red-200 shrink-0 ml-1">
                           {badgeCount}
                         </Badge>
                       )}
@@ -297,16 +294,10 @@ export default function Sidebar({ open, onOpen, onClose }) {
               <div className="px-3 py-2.5">
                 <p className="text-xs font-bold text-white truncate">{user?.name || 'Fellow'}</p>
                 <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || ''}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
-                    {user?.type || 'Student'}
-                  </span>
-                  {user?.student_id && (
-                    <span className="font-mono text-[10px] text-slate-400">
-                      ID: {user.student_id}
-                    </span>
-                  )}
-                </div>
+                <p className="text-[11px] text-slate-500 mt-1.5 truncate">
+                  {user?.type || 'Student'}
+                  {user?.student_id ? ` · ${user.student_id}` : ''}
+                </p>
               </div>
 
               {/* Menu Actions */}
@@ -482,7 +473,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                         {item.label}
                       </div>
                       {badgeCount && badgeCount > 0 && (
-                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 bg-red-50 border-red-200">
+                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 border-red-200">
                           {badgeCount}
                         </Badge>
                       )}
@@ -514,42 +505,4 @@ export default function Sidebar({ open, onOpen, onClose }) {
       )}
     </>
   )
-}
-
-function getMobilePrimaryItems(role) {
-  if (role === 'Instructor') {
-    return [
-      { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-      { to: '/grading', icon: ClipboardList, label: 'Grading' },
-      { to: '/live-classes', icon: Video, label: 'Classes' },
-      { to: '/squads', icon: Users, label: 'Squads' },
-      { to: '/my-modules', icon: BookOpen, label: 'Modules' },
-    ]
-  }
-  if (role === 'Administrator') {
-    return [
-      { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-      { to: '/applications', icon: ClipboardList, label: 'Admissions' },
-      { to: '/cohorts', icon: SchoolIcon, label: 'Cohorts' },
-      { to: '/curriculum', icon: BookOpen, label: 'Curriculum' },
-      { to: '/reports', icon: BarChart3, label: 'Reports' },
-    ]
-  }
-  if (role === 'Partner') {
-    return [
-      { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-      { to: '/partner-courses', icon: SchoolIcon, label: 'Studio' },
-      { to: '/live-classes', icon: Video, label: 'Classes' },
-      { to: '/partner-catalog', icon: BookOpen, label: 'Catalog' },
-      { to: '/profile-settings', icon: FileText, label: 'Settings' },
-    ]
-  }
-  // Default: Student
-  return [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-    { to: '/my-learning', icon: BookOpen, label: 'Learn' },
-    { to: '/lab-workspace', icon: ClipboardList, label: 'Labs' },
-    { to: '/live-classes', icon: Video, label: 'Live' },
-    { to: '/my-squad', icon: Users, label: 'Squad' },
-  ]
 }

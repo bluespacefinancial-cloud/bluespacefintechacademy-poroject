@@ -3,22 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable([
+    'cohort_id',
+    'user_id',
+    'track',
+    'status',
+    'squad_id',
+])]
 
 class Enrolment extends Model
 {
     use HasFactory;
 
-    #[Fillable([
-        'cohort_id',
-        'user_id',
-        'track',
-        'status',
-        'squad_id',
-    ])]
     public function cohort(): BelongsTo
     {
         return $this->belongsTo(Cohort::class);

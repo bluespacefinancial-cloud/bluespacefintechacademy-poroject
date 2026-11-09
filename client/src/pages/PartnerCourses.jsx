@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 
 export default function PartnerCourses() {
   const [partner, setPartner] = useState(null)
@@ -18,7 +18,7 @@ export default function PartnerCourses() {
   const [loading, setLoading] = useState(true)
 
   const load = async () => {
-    const { data: partnerId, error: partnerIdError } = await supabase.rpc('current_partner_id')
+    const { data: partnerId, error: partnerIdError } = await api.rpc('current_partner_id')
     if (partnerIdError) throw partnerIdError
     if (!partnerId) {
       setPartner(null)
@@ -26,8 +26,8 @@ export default function PartnerCourses() {
       return
     }
     const [{ data: partnerRow, error: partnerError }, { data: courseRows, error: courseError }] = await Promise.all([
-      supabase.from('partners').select('*').eq('id', partnerId).single(),
-      supabase.from('partner_courses').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false }),
+      api.from('partners').select('*').eq('id', partnerId).single(),
+      api.from('partner_courses').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false }),
     ])
     if (partnerError || courseError) throw partnerError || courseError
     setPartner(partnerRow); setCourses(courseRows || [])
@@ -36,19 +36,19 @@ export default function PartnerCourses() {
 
   const createCourse = async (event) => {
     event.preventDefault(); setError(''); setMessage('')
-    const { data: created, error: createError } = await supabase.from('partner_courses').insert({ ...form, partner_id: partner.id, created_by: null, status: 'draft' }).select().single()
+    const { data: created, error: createError } = await api.from('partner_courses').insert({ ...form, partner_id: partner.id, created_by: null, status: 'draft' }).select().single()
     if (createError) { setError(createError.message); return }
     setCourses((current) => [created, ...current]); setSelected(created); setForm({ title: '', description: '', thumbnail_url: '', certificate_title: 'Partner Course Certificate', partner_logo_url: '' }); setMessage('Course draft created')
   }
   const addLesson = async (event) => {
     event.preventDefault(); if (!selected) return
-    const { data: created, error: lessonError } = await supabase.from('partner_course_lessons').insert({ ...lesson, course_id: selected.id, is_published: true, order_index: 0 }).select().single()
+    const { data: created, error: lessonError } = await api.from('partner_course_lessons').insert({ ...lesson, course_id: selected.id, is_published: true, order_index: 0 }).select().single()
     if (lessonError) { setError(lessonError.message); return }
     setSelected({ ...selected, lessons: [...(selected.lessons || []), created] }); setLesson({ title: '', description: '', video_url: '', content_url: '' })
   }
   const submit = async () => {
     if (!selected) return
-    const { error: submitError } = await supabase.from('partner_courses').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', selected.id)
+    const { error: submitError } = await api.from('partner_courses').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', selected.id)
     if (submitError) { setError(submitError.message); return }
     setCourses((current) => current.map((course) => course.id === selected.id ? { ...course, status: 'submitted' } : course)); setSelected({ ...selected, status: 'submitted' }); setMessage('Course submitted for academy review')
   }

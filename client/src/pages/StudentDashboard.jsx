@@ -196,7 +196,7 @@ export default function StudentDashboard({ user }) {
     .filter((l) => l.status !== 'graded')
 
   // Achievement milestones
-  const gradedLabsCount = data.submissions.filter((s) => s.status === 'graded' || s.score != null).length
+  const gradedLabsCount = data.submissions.filter((s) => s.status === 'graded' || (s.score !== null && s.score !== undefined)).length
   const attendanceCount = data.attendance.filter((a) => a.status === 'present').length
 
   const studentAchievements = [

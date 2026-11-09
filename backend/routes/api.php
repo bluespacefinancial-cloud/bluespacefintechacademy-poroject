@@ -1,39 +1,58 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LabsController;
-use App\Http\Controllers\SubmissionsController;
-use App\Http\Controllers\PlacementsController;
-use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\CertificationsController;
+use App\Http\Controllers\DataProxyController;
+use App\Http\Controllers\FunctionsController;
+use App\Http\Controllers\RpcController;
+use Illuminate\Support\Facades\Route;
 
-Route::middleware('api')->group(function () {
-    // Authentication routes
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    Route::get('/auth/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
-    Route::post('/auth/password-change', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
-    Route::post('/auth/activate-account', [AuthController::class, 'deactivate'])->middleware('auth:sanctum');
+/*
+|--------------------------------------------------------------------------
+| API routes
+|--------------------------------------------------------------------------
+|
+| The React client talks only to this application. Authentication issues an
+| opaque bearer token; every data request is forwarded to PostgREST with a
+| short-lived signed JWT so PostgreSQL row-level security still decides what
+| the caller may read or write. The client never receives a PostgREST token.
+|
+*/
 
-    // Labs routes
-    Route::apiResource('labs', LabsController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+Route::prefix('auth')->group(function () {
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:20,1');
+    Route::post('apply', [AuthController::class, 'apply'])->middleware('throttle:20,1');
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:10,1');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:10,1');
+    Route::post('resend', [AuthController::class, 'resendVerification'])->middleware('throttle:10,1');
 
-    // Submissions routes
-    Route::apiResource('submissions', SubmissionsController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
-
-    // Placements routes
-    Route::apiResource('placements', PlacementsController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
-
-    // Reports routes
-    Route::get('/reports', [ReportsController::class, 'index']);
-
-    // Certifications routes
-    Route::apiResource('certifications', CertificationsController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
-
-    // Health check
-    Route::get('/health', function () {
-        return response()->json(['status' => 'ok', 'timestamp' => now()]);
+    Route::middleware('auth.token')->group(function () {
+        Route::get('session', [AuthController::class, 'session']);
+        Route::get('user', [AuthController::class, 'me']);
+        Route::get('profile', [AuthController::class, 'profileForRequest']);
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::post('update-user', [AuthController::class, 'updateUser']);
+        Route::post('change-password', [AuthController::class, 'changePassword']);
     });
 });
+
+// Compatibility shim for the former `auth-handler` edge function. `/apply` is
+// public (it creates a pending application); `signup` and `profile` look up
+// the bearer token themselves so the route itself stays public.
+Route::post('functions/auth-handler', [FunctionsController::class, 'authHandler'])
+    ->middleware('throttle:20,1');
+
+Route::middleware('auth.token')->group(function () {
+    Route::post('functions/email', [FunctionsController::class, 'email']);
+
+    Route::post('rpc/{function}', RpcController::class)
+        ->where('function', '[A-Za-z0-9_]+');
+
+    // Table access, mirroring the PostgREST surface (`/data/users?select=...`).
+    Route::match(['get', 'post', 'patch', 'put', 'delete'], 'data/{path?}', DataProxyController::class)
+        ->where('path', '.*');
+});
+
+Route::get('health', fn () => response()->json([
+    'status' => 'ok',
+    'timestamp' => now()->toIso8601String(),
+]));

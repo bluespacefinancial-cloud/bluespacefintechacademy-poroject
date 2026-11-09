@@ -18,7 +18,7 @@ import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function MySquad() {
@@ -39,7 +39,7 @@ export default function MySquad() {
     try {
       setError('')
       const profile = await getCurrentProfile()
-      const { data: enrolment, error: enrolmentError } = await supabase
+      const { data: enrolment, error: enrolmentError } = await api
         .from('enrolments')
         .select('squad_id, cohort_id')
         .eq('user_id', profile.id)
@@ -59,13 +59,13 @@ export default function MySquad() {
         { data: cohortRow, error: cohortError },
         { data: sprintRows, error: sprintError },
       ] = await Promise.all([
-        supabase.from('squads').select('*').eq('id', enrolment.squad_id).single(),
-        supabase
+        api.from('squads').select('*').eq('id', enrolment.squad_id).single(),
+        api
           .from('enrolments')
           .select('user_id, track, users!inner(id, name, email)')
           .eq('squad_id', enrolment.squad_id),
-        supabase.from('cohorts').select('name').eq('id', enrolment.cohort_id).maybeSingle(),
-        supabase
+        api.from('cohorts').select('name').eq('id', enrolment.cohort_id).maybeSingle(),
+        api
           .from('sprints')
           .select('*, use_cases(title, domain), sprint_deliverables(*)')
           .eq('squad_id', enrolment.squad_id)
@@ -124,7 +124,7 @@ export default function MySquad() {
         submitted_at: new Date().toISOString(),
       }
 
-      const { data, error: submitError } = await supabase
+      const { data, error: submitError } = await api
         .from('sprint_deliverables')
         .insert(payload)
         .select()
@@ -200,12 +200,12 @@ export default function MySquad() {
         subtitle={`${squad.name} • ${cohort || 'Cohort'} • Team collaboration and sprint delivery`}
         actions={
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs bg-white border-gray-200 font-medium">
+            <Badge variant="outline" className="text-xs border-gray-200 font-medium">
               <Users size={12} className="mr-1 text-deep-600" />
               {members.length} Fellows
             </Badge>
             {activeSprint && (
-              <Badge variant="outline" className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700 font-medium">
+              <Badge variant="outline" className="text-xs border-emerald-200 text-emerald-700 font-medium">
                 Active Sprint {activeSprint.sprint_number}
               </Badge>
             )}
@@ -240,7 +240,7 @@ export default function MySquad() {
         >
           <Target size={16} />
           Sprint Deliverables & Evidence
-          <span className="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-gray-100 text-gray-600">
+          <span className="text-[11px] font-bold text-gray-600">
             {sprints.length}
           </span>
         </button>
@@ -255,7 +255,7 @@ export default function MySquad() {
         >
           <Users size={16} />
           Team Roster & Roles
-          <span className="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-gray-100 text-gray-600">
+          <span className="text-[11px] font-bold text-gray-600">
             {members.length}
           </span>
         </button>
@@ -309,10 +309,10 @@ export default function MySquad() {
                             variant="outline"
                             className={`text-[10px] capitalize font-medium ${
                               sprint.status === 'active'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                ? 'text-emerald-700 border-emerald-200'
                                 : sprint.status === 'completed'
-                                ? 'bg-gray-100 text-gray-600 border-gray-200'
-                                : 'bg-slate-50 text-slate-600 border-slate-200'
+                                ? 'text-gray-600 border-gray-200'
+                                : 'text-slate-600 border-slate-200'
                             }`}
                           >
                             {sprint.status}
@@ -352,7 +352,7 @@ export default function MySquad() {
                                 : 'Submit code repository, deployed endpoint, or architectural evidence'}
                             </CardDescription>
                           </div>
-                          <Badge variant="outline" className="text-[10px] uppercase font-semibold text-deep-700 bg-deep-50 border-deep-100">
+                          <Badge variant="outline" className="text-[10px] uppercase font-semibold text-deep-700 border-deep-200">
                             Sprint {selectedSprint.sprint_number}
                           </Badge>
                         </div>
@@ -456,12 +456,12 @@ export default function MySquad() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {item.score !== null ? (
-                                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded text-emerald-700 border border-emerald-200 flex items-center gap-1">
                                       <CheckCircle size={12} />
                                       {item.score}/100
                                     </span>
                                   ) : (
-                                    <Badge variant="outline" className="text-[10px] capitalize text-amber-700 bg-amber-50 border-amber-200">
+                                    <Badge variant="outline" className="text-[10px] capitalize text-amber-700 border-amber-200">
                                       {item.status || 'Under Review'}
                                     </Badge>
                                   )}
@@ -549,7 +549,7 @@ export default function MySquad() {
                             {member.users?.name || 'Fellow'}
                           </p>
                           {isLead && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded text-amber-800 border border-amber-200">
                               Squad Lead
                             </span>
                           )}
@@ -561,7 +561,7 @@ export default function MySquad() {
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-center">
-                      <Badge variant="outline" className="text-xs font-medium capitalize bg-gray-50 border-gray-200 text-gray-700">
+                      <Badge variant="outline" className="text-xs font-medium capitalize border-gray-200 text-gray-700">
                         {member.track || 'Fintech Core'}
                       </Badge>
                       <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 h-8 px-2.5">
@@ -594,7 +594,7 @@ export default function MySquad() {
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-gray-100">
                   <span className="text-gray-500">Status</span>
-                  <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">
+                  <Badge variant="outline" className="text-[10px] text-emerald-700 border-emerald-200">
                     {members.length > 0 ? 'Active' : 'Forming'}
                   </Badge>
                 </div>

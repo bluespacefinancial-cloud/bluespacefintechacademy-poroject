@@ -1,23 +1,36 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const ROLE_COLORS = {
-  'Project Manager': 'bg-brand-100 text-brand-700 border-brand-200',
-  'Field Lead': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  UAT: 'bg-brand-100 text-brand-700 border-brand-200',
-  'Technical Specialist': 'bg-amber-100 text-amber-700 border-amber-200',
+  'Project Manager': 'text-brand-700 border-brand-200',
+  'Field Lead': 'text-emerald-700 border-emerald-200',
+  UAT: 'text-brand-700 border-brand-200',
+  'Technical Specialist': 'text-amber-700 border-amber-200',
 }
 
 const PLACEMENT_STATUS = {
-  matched: { label: 'Matched', variant: 'secondary', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  interviewing: { label: 'Interviewing', variant: 'default', color: 'bg-brand-50 text-brand-700 border-brand-100' },
-  placed: { label: 'Placed', variant: 'secondary', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  completed: { label: 'Completed', variant: 'outline', color: 'bg-gray-50 text-gray-600 border-gray-100' },
+  matched: { label: 'Matched', variant: 'secondary', color: 'text-emerald-700 border-emerald-200' },
+  interviewing: { label: 'Interviewing', variant: 'default', color: 'text-brand-700 border-brand-200' },
+  placed: { label: 'Placed', variant: 'secondary', color: 'text-emerald-700 border-emerald-200' },
+  completed: { label: 'Completed', variant: 'outline', color: 'text-gray-600 border-gray-200' },
 }
 
 export default function Placement() {
@@ -31,7 +44,7 @@ export default function Placement() {
 
   useEffect(() => {
     let mounted = true
-    supabase.from('placements').select('id, user_id, role, project_id, start_date, status, checkin_30_days, checkin_60_days, checkin_90_days, users(name, email), certifications(track, cohort_id, cohorts(name))').order('created_at', { ascending: false })
+    api.from('placements').select('id, user_id, role, project_id, start_date, status, checkin_30_days, checkin_60_days, checkin_90_days, users(name, email), certifications(track, cohort_id, cohorts(name))').order('created_at', { ascending: false })
       .then(({ data, error: loadError }) => {
         if (!mounted) return
         if (loadError) setError(loadError.message)
@@ -194,7 +207,7 @@ export default function Placement() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-deep-600">Role</span>
-                      <Badge className={ROLE_COLORS[placement.role] || 'bg-gray-50 text-gray-600'}>
+                      <Badge className={ROLE_COLORS[placement.role] || 'text-gray-600'}>
                         {placement.role}
                       </Badge>
                     </div>

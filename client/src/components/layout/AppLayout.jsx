@@ -1,31 +1,24 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { Search, Calendar, Clock, GraduationCap } from 'lucide-react'
+import { Search, GraduationCap } from 'lucide-react'
 import Sidebar from './Sidebar'
 import NotificationDropdown from '../notifications/NotificationDropdown'
 import { useAuth } from '../../context/AuthContext'
-import { supabase } from '../../lib/supabase'
+import { api } from '../../lib/backend'
 
 export default function AppLayout() {
   const { user } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [cohortName, setCohortName] = useState(null)
-  const [currentTime, setCurrentTime] = useState(new Date())
-
-  // Real-time clock update (every 30s)
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 30000)
-    return () => clearInterval(timer)
-  }, [])
 
   // Fetch current user cohort
   useEffect(() => {
     let cancelled = false
     const fetchCohort = async () => {
-      if (!user?.id || !supabase) return
+      if (!user?.id || !api) return
       try {
-        const { data } = await supabase
+        const { data } = await api
           .from('enrolments')
           .select('cohorts(name)')
           .eq('user_id', user.id)
@@ -45,16 +38,6 @@ export default function AppLayout() {
   }, [user?.id])
 
   if (!user) return <Navigate to="/login" />
-
-  const formattedDate = currentTime.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
-  const formattedTime = currentTime.toLocaleTimeString(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -81,43 +64,17 @@ export default function AppLayout() {
               </div>
             </div>
 
-            {/* Top Navigation Center / Right Status: Date & Time, ID, Cohort */}
+            {/* Top Navigation Right: Cohort + Notifications */}
             <div className="flex items-center gap-3 ml-auto">
-              {/* Date & Live Time */}
-              <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-500 font-medium bg-gray-50/80 px-2.5 py-1.5 rounded-lg border border-gray-100">
-                <Calendar size={13} className="text-gray-400 shrink-0" />
-                <span>{formattedDate}</span>
-                <span className="text-gray-300">•</span>
-                <Clock size={13} className="text-gray-400 shrink-0" />
-                <span>{formattedTime}</span>
-              </div>
-
-              {/* ID & Cohort Pill (no duplicate user name) */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200/90 text-xs">
-                {user.student_id ? (
-                  <span className="font-mono font-bold text-gray-900 tracking-tight">
-                    {user.student_id}
-                  </span>
-                ) : (
-                  <span className="font-mono text-gray-500 text-[11px]">
-                    {user.type === 'Student' ? 'ID Pending' : user.type}
-                  </span>
-                )}
-                {cohortName ? (
-                  <>
-                    <span className="text-gray-300">•</span>
-                    <span className="flex items-center gap-1 text-gray-600 font-medium truncate max-w-[180px]" title={cohortName}>
-                      <GraduationCap size={13} className="text-deep-600 shrink-0" />
-                      {cohortName}
-                    </span>
-                  </>
-                ) : user.type === 'Student' ? (
-                  <>
-                    <span className="text-gray-300">•</span>
-                    <span className="text-gray-400 text-[11px]">Placement in Progress</span>
-                  </>
-                ) : null}
-              </div>
+              {cohortName && (
+                <span
+                  className="hidden sm:flex items-center gap-1 text-xs text-gray-600 font-medium truncate max-w-[220px]"
+                  title={cohortName}
+                >
+                  <GraduationCap size={13} className="text-deep-600 shrink-0" />
+                  {cohortName}
+                </span>
+              )}
 
               {/* Notification Dropdown */}
               <div className="flex items-center shrink-0">

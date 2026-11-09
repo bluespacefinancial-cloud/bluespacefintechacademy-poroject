@@ -15,7 +15,7 @@ export function getDeadlineInfo(dueDateStr) {
       label: overdueDays === 0 ? 'Overdue today' : `Overdue by ${overdueDays}d`,
       isOverdue: true,
       badgeVariant: 'outline',
-      badgeClass: 'text-red-700 bg-red-50 border-red-200 font-medium',
+      badgeClass: 'text-red-700 border-red-200 font-medium',
       dueDateFormatted: due.toLocaleDateString(),
     }
   }
@@ -25,7 +25,7 @@ export function getDeadlineInfo(dueDateStr) {
       label: 'Due today',
       isDueSoon: true,
       badgeVariant: 'outline',
-      badgeClass: 'text-amber-700 bg-amber-50 border-amber-200 font-semibold',
+      badgeClass: 'text-amber-700 border-amber-200 font-semibold',
       dueDateFormatted: due.toLocaleDateString(),
     }
   }
@@ -35,7 +35,7 @@ export function getDeadlineInfo(dueDateStr) {
       label: `Due in ${diffDays} days`,
       isDueSoon: true,
       badgeVariant: 'outline',
-      badgeClass: 'text-amber-700 bg-amber-50/60 border-amber-200/80 font-medium',
+      badgeClass: 'text-amber-700 border-amber-200/80 font-medium',
       dueDateFormatted: due.toLocaleDateString(),
     }
   }
@@ -44,7 +44,7 @@ export function getDeadlineInfo(dueDateStr) {
     label: `Due ${due.toLocaleDateString()}`,
     isNormal: true,
     badgeVariant: 'outline',
-    badgeClass: 'text-gray-600 bg-gray-50 border-gray-100 font-normal',
+    badgeClass: 'text-gray-600 border-gray-200 font-normal',
     dueDateFormatted: due.toLocaleDateString(),
   }
 }

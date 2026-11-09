@@ -4,201 +4,315 @@ Learning Management System for the BlueSPACE Fintech Academy, training Finsoft a
 
 ## Tech Stack
 
-- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui
-- **Backend:** Supabase (PostgreSQL + Auth + Edge Functions + Storage)
-- **State/Auth:** React Context + Supabase JS client
+- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui + Framer Motion
+- **API / Auth:** Laravel 13 (`backend/`) with opaque bearer tokens
+- **Data API:** PostgREST, reachable only from Laravel
+- **Database:** PostgreSQL 17 with row-level security and column-level grants
+- **Local stack:** Docker Compose (`lms-postgres` + `lms-postgrest`)
 - **Icons:** Lucide React
-- **Animations:** Framer Motion
 - **Notifications:** React Hot Toast
 
 ## Project Structure
 
 ```
 lms/
-├── client/                 # React frontend (deployed to Vercel)
-│   ├── src/
-│   │   ├── components/ui/     # shadcn/ui components
-│   │   ├── components/MediaPlayer.jsx  # Video/audio player with progress tracking
-│   │   ├── components/layout/   # AppLayout, Sidebar, ProtectedRoute
-│   │   ├── context/           # AuthContext
-│   │   ├── lib/               # Supabase client, API layer
-│   │   ├── pages/             # Page components (Login, Dashboard, MyLearning, etc.)
-│   │   ├── App.jsx            # App router
-│   │   ├── main.jsx           # Entry point
-│   │   └── index.css          # Global styles + design tokens
-│   ├── supabase/              # Database schema
-│   │   ├── schema.sql
-│   │   └── storage.sql
-│   ├── index.html
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.js
-├── supabase/                  # Edge Functions (deployed to Supabase)
-│   ├── functions/
-│   │   ├── auth-handler/
-│   │   ├── lessons/
-│   │   ├── submissions/
-│   │   ├── placements/
-│   │   └── reports/
-│   ├── schema.sql
-│   └── storage.sql
-├── vercel.json                # Vercel deployment config
-├── package.json
+├── client/                     # React frontend
+│   ├── public/                 # Brand assets: logo-dark/light/white, favicon
+│   └── src/
+│       ├── components/ui/      # shadcn/ui components
+│       ├── components/layout/  # AppLayout, Sidebar, ProtectedRoute
+│       ├── context/            # AuthContext
+│       ├── lib/backend.js      # Laravel API client + query builder
+│       ├── pages/              # Route components
+│       ├── App.jsx             # App router
+│       └── main.jsx            # Entry point
+├── backend/                    # Laravel API (auth, data proxy, RPC, email)
+│   ├── app/Http/Controllers/   # Auth, DataProxy, Rpc, Functions
+│   ├── app/Support/            # AuthStore (tokens), Jwt (PostgREST signing)
+│   ├── bin/artisan             # Artisan wrapper with local pdo_pgsql
+│   └── routes/api.php          # The complete API surface
+├── database/                   # Reproducible PostgreSQL bootstrap (run in order)
+│   ├── 00_bootstrap.sql        # Roles, auth schema/functions, extensions
+│   ├── 01_schema.sql           # Tables, data, grants, RLS policies
+│   ├── 02_auth_tokens.sql      # API tokens + password reset tokens
+│   └── 03_demo_passwords.sql   # Demo account password hashes
+├── docker-compose.yml          # PostgreSQL + PostgREST
+├── .env.example                # Compose settings (PGRST_JWT_SECRET)
+├── vercel.json                 # Vercel frontend config
 └── README.md
 ```
 
 ## Architecture
 
 ```
-┌─────────────┐      HTTPS       ┌──────────────┐
-│  Vercel     │◄─────────────────▶│  Supabase    │
-│  (Frontend) │                  │  (Backend)   │
-│             │                  │              │
-│ React App   │                  │ PostgreSQL   │
-│ Tailwind    │◀─────────────────│ Auth         │
-│ shadcn/ui   │                  │ Edge Fn      │
-│             │                  │ Storage      │
-└─────────────┘                  └──────────────┘
+┌──────────────┐   /api/*    ┌──────────────┐   signed JWT   ┌──────────────┐
+│ React client │────────────▶│ Laravel 8001 │───────────────▶│ PostgREST    │
+│ (Vite 3000)  │◀────────────│ auth + proxy │◀───────────────│ 54330        │
+└──────────────┘             └──────────────┘                └──────┬───────┘
+                                                                     │ SQL
+                                                              ┌──────▼───────┐
+                                                              │ PostgreSQL   │
+                                                              │ 5433, RLS    │
+                                                              └──────────────┘
 ```
+
+**Auth model:** Laravel checks the email/password against `public.users.password`
+(bcrypt), creates an opaque token in `public.auth_tokens`, and returns it to the
+client. The client sends that token as `Authorization: Bearer …`. Laravel looks
+the token up, confirms the account is active, and signs a short-lived HS256 JWT
+for PostgREST carrying the caller's `auth_user_id` and email.
+
+**Authorization:** PostgreSQL row-level security remains the authority on every
+read and write. Laravel never sends a service-role request for client data; it
+only switches to `service_role` for its own token, application, and reset-table
+operations. Column-level grants hide `users.password`, `labs.solution_code`, and
+`assessment_questions.correct_answer` from client roles.
+
+**Why a proxy:** the browser never receives a PostgREST token, so it cannot
+forge a role claim. Laravel fixes the role to `authenticated` and forwards the
+request with a five-minute JWT.
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- Supabase account and project
-- Vercel account (for frontend hosting)
 
-### Installation
+- Docker + Docker Compose
+- Node.js 18+
+- PHP 8.3 with `pdo_pgsql` (or use `backend/bin/artisan` with the local
+  extracted extension — see `backend/scripts/install-php-pgsql-local.sh`)
+- Composer
+
+### 1. Start PostgreSQL and PostgREST
 
 ```bash
-# Install dependencies
-cd client && npm install
-
-# Set up environment variables
+cd lms
 cp .env.example .env
-# Edit .env with your Supabase URL and anon key
+# Set PGRST_JWT_SECRET to a random 32+ byte hex value:
+#   openssl rand -hex 32
+docker compose up -d
+```
 
-# Run development server
+The first start runs `database/*.sql` in filename order. To rebuild the database
+from scratch:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+Check the stack:
+
+```bash
+docker compose ps
+docker compose exec db psql -U postgres -d postgres -c '\dt public.*'
+```
+
+### 2. Start the Laravel API
+
+```bash
+cd backend
+cp .env.example .env
+composer install
+./bin/artisan key:generate
+
+# The JWT secret must be identical to lms/.env:
+#   PGRST_JWT_SECRET=<same value as lms/.env>
+./bin/artisan serve --host=127.0.0.1 --port=8001
+```
+
+Port `8001` is used because an unrelated local project already occupies `8000`.
+The Vite proxy in `client/vite.config.js` targets `127.0.0.1:8001`.
+
+### 3. Start the client
+
+```bash
+cd client
+cp .env.example .env      # VITE_API_URL=/api
+npm install
 npm run dev
 ```
 
-### Supabase Setup
+Open <http://localhost:3000>.
 
-1. Create a new Supabase project
-2. Run `supabase/schema.sql` in the SQL Editor
-3. Run `supabase/storage.sql` to create storage buckets
-4. Run `supabase/migrations/001_phase_one_academy.sql` to add live classes and RLS policies
-5. Run `supabase/migrations/002_academy_operations.sql` to add the direct Auth profile key and announcements
-6. Run `supabase/migrations/003_student_squad_visibility.sql` to allow students to see their squad roster
-7. Run `supabase/migrations/004_staff_learning_monitoring.sql` to allow staff read-only learning monitoring
-8. Run `supabase/migrations/005_production_operations.sql` to secure squad, placement and notification operations
-9. Run `supabase/migrations/006_academy_v2_operations.sql` to add clinics, skills profiles, project evidence, peer reviews, mentor evaluations and quiz attempts
-10. Run `supabase/migrations/007_completion_workflows.sql` to add certificate verification and completion workflow support
-11. Run `supabase/migrations/008_workflow_automation.sql` to add submission, grading, clinic and project-review notifications
-12. Run `supabase/migrations/009_staff_assignments.sql` to add instructor cohort and squad assignment records
-13. Run `supabase/migrations/010_security_hardening.sql` to enable RLS on cohorts, labs and assessments, hide lab solutions and quiz answer keys, block deactivated accounts and stop users from changing their own role
-14. Run `supabase/migrations/011_partner_courses.sql` to add partner onboarding, partner course approval, student enrollment and dual-logo certificate metadata
-15. Run `supabase/migrations/012_applications_and_registration.sql` to add the shared student, teacher and partner application workflow
-16. Deploy Edge Functions:
-   ```bash
-   npx supabase functions deploy
-   ```
-17. Copy your Supabase URL and anon key to `.env`
+### Local ports and credentials
 
-The `email-service` Edge Function sends application status notifications through
-Resend without exposing the provider key in the browser. Configure
-`RESEND_API_KEY`, `EMAIL_FROM`, and `APP_ORIGIN` as Supabase function secrets.
-`EMAIL_FROM` must use an address on a domain verified in Resend, and `APP_ORIGIN`
-must be the production frontend origin.
+| Service | Address | Credentials |
+|---------|---------|-------------|
+| PostgreSQL | `127.0.0.1:5433` | `lms_service` / `bluespace_laravel_2026` |
+| PostgREST | `127.0.0.1:54330` | internal only; `authenticator` / `bluespace_postgrest_2026` |
+| Laravel API | `127.0.0.1:8001` | bearer token from `/api/auth/login` |
+| Vite client | `http://localhost:3000` | — |
 
-Supabase Auth confirmation and password recovery use a separate SMTP connection;
-the Edge Function secret alone does not enable Auth email delivery. In
-**Authentication → SMTP Settings**, configure Resend SMTP with host
-`smtp.resend.com`, port `465`, username `resend`, the Resend API key as the SMTP
-password, and a sender address on the verified domain. Keep email confirmation
-enabled. Set the production frontend as the Auth Site URL and allow its
-`/student-login` and `/reset-password` redirect URLs.
+These are local development credentials. Replace every password and the JWT
+secret before deploying anywhere shared.
 
-Branded Auth templates are in `supabase/templates`. `supabase/config.toml` points
-the local Supabase stack to those files; for the hosted project, copy each file's
-HTML into its matching template under **Authentication → Email Templates**. The
-logo uses `{{ .SiteURL }}/logo-dark.png`, so the Auth Site URL must serve the
-frontend's public logo. Keep the generated `{{ .ConfirmationURL }}` link intact in
-the confirmation, recovery, magic-link and invitation templates.
+## Demo Accounts
 
-After setup, test registration with an inbox outside the Supabase organization,
-then test password recovery. Check **Logs → Auth** for Auth delivery errors,
-**Functions → email-service → Invocations/Logs** for application status email
-failures, and the Resend Emails page for accepted, delivered, bounced or rejected
-messages. The email function permits users to send to their own verified address;
-only active administrators can send to other recipients.
+The demo data is part of `database/01_schema.sql`; the shared password hash is
+applied by `database/03_demo_passwords.sql`. All accounts use:
 
-After migration 009, administrators can manage instructor boundaries from
-`/instructor-assignments`. Create cohort and squad assignments before relying on
-instructor-specific monitoring and mentor evaluation visibility.
-
-After migration 011, administrators can onboard partner agencies from
-`/partner-management`, connect provisioned `Partner` accounts and review submitted
-courses from `/partner-course-review`. Partners use `/partner-login` and
-`/partner-courses` to create drafts and add lessons. Approved courses appear in the
-student `/partner-catalog`. Students can complete lessons from the course page and
-receive a certificate record containing both the BlueSPACE logo and the partner logo.
-
-After migration 012, applicants use `/register` for the shared animated wizard.
-Students, teachers and partner agencies submit the same application flow with
-role-specific fields. Administrators review the queue at `/applications`.
-Approved students are activated and enrolled into the selected cohort and track.
-Approved teachers and partners are activated for their existing role portals.
-
-Panel reviewers can approve a capstone and issue its certificate from the same
-review screen. Issued certificates receive a verification number and public
-verification token through the `issue_certificate` database function.
-
-### Google Meet and Calendar
-
-Live classes are free academy sessions, not paid products. The Phase 1 UI accepts a Google
-Meet URL and stores Google Calendar/Meet identifiers for the server-side OAuth integration.
-Configure Google OAuth and Calendar/Meet API credentials in Supabase Edge Function secrets;
-never place client secrets or refresh tokens in Vite environment variables. The
-`google_integrations` table provides server-side token storage fields for that integration.
-Automatic event creation is not enabled until the OAuth Edge Function is deployed and
-the required Google credentials and redirect URI are configured.
-
-### Environment Variables
-
-Create `client/.env`:
 ```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+BlueSpace2026!
 ```
 
-### Deployment (Vercel + Supabase)
+| Role | Email | Portal |
+|------|-------|--------|
+| Student | `student@bluespacefintechacademy.com` | `/student-login` |
+| Student (Ada Okonkwo) | `ada.okonkwo@bluespacefintechacademy.com` | `/student-login` |
+| Student (Kwame Asante) | `kwame.asante@bluespacefintechacademy.com` | `/student-login` |
+| Student (Zainab Yusuf) | `zainab.yusuf@bluespacefintechacademy.com` | `/student-login` |
+| Student (Emeka Ndiaye) | `emeka.ndiaye@bluespacefintechacademy.com` | `/student-login` |
+| Student (Fatima Diallo) | `fatima.diallo@bluespacefintechacademy.com` | `/student-login` |
+| Instructor (FinCore) | `fin.core@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor (FaaS) | `faas.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor (FinOps) | `finops.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Administrator | `academy.lead@bluespacefintechacademy.com` | `/admin-login` |
+| Partner | `partner@bluespacefintechacademy.com` | `/partner-login` |
 
-1. Push code to GitHub
-2. Connect Vercel to your GitHub repo
-3. Add environment variables in Vercel dashboard:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-4. Link the Supabase project, apply all migrations, and deploy the required Edge
-   Functions (the public registration handler and notification sender are not
-   deployed automatically by a frontend push):
-   ```bash
-   npx supabase link --project-ref <project-ref>
-   npx supabase db push
-   npx supabase functions deploy auth-handler
-   npx supabase functions deploy email-service
-   ```
-5. Set `APP_ORIGIN` to the production frontend origin and configure Resend secrets
-   as described above. The Auth Site URL and allowed redirect URL must use the same
-   production origin.
+## Database Changes
+
+`lms/database/` is the source of truth for a fresh environment:
+
+- `00_bootstrap.sql` creates the PostgREST roles (`anon`, `authenticated`,
+  `service_role`, `authenticator`), the Laravel role (`lms_service`), the `auth`
+  schema/functions, and the required extensions.
+- `01_schema.sql` contains every table, index, trigger, grant and RLS policy plus
+  the demo data.
+- `02_auth_tokens.sql` adds the token tables used by Laravel.
+- `03_demo_passwords.sql` sets the demo bcrypt hashes.
+
+For a schema change, add a new sequential file such as
+`database/04_your_change.sql`. Do not edit a file that has already been applied
+to an existing environment. Apply it with:
+
+```bash
+docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
+  < database/04_your_change.sql
+```
+
+The Laravel files under `backend/database/migrations/` are legacy scaffolding and
+are not the academy schema. Do not run `php artisan migrate` against this
+database.
+
+## API Surface
+
+All endpoints are under `/api`:
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/auth/login` | Email/password login, returns opaque token |
+| `POST` | `/auth/apply` | Public application/registration |
+| `POST` | `/auth/forgot-password` | Create a password-reset link |
+| `POST` | `/auth/reset-password` | Exchange a reset token for a new password |
+| `GET` | `/auth/session` | Validate the bearer token |
+| `GET` | `/auth/user` | Current auth user |
+| `GET` | `/auth/profile` | Current user + academy profile |
+| `POST` | `/auth/update-user` | Password/email/profile update |
+| `POST` | `/auth/change-password` | Change own password |
+| `POST` | `/auth/logout` | Revoke the token |
+| `GET/POST/PATCH/DELETE` | `/data/{table}` | RLS-scoped table access via PostgREST |
+| `POST` | `/rpc/{function}` | RLS-scoped database function |
+| `POST` | `/functions/auth-handler` | Compatibility shim (apply/signup/profile) |
+| `POST` | `/functions/email` | Transactional email (admin or self) |
+| `GET` | `/health` | Liveness check |
+
+The React client uses `client/src/lib/backend.js`, which mirrors the small
+query surface the pages already use (`from`, `select`, `eq`,
+`in`, `not`, `is`, `gte`, `lte`, `order`, `limit`, `single`, `maybeSingle`,
+`insert`, `update`, `upsert`, `delete`, `rpc`, `auth.*`, `functions.invoke`).
+
+## Environment Variables
+
+### `lms/.env` (Docker Compose)
+
+```
+PGRST_JWT_SECRET=<openssl rand -hex 32>
+LMS_DB_PORT=5433
+LMS_REST_PORT=54330
+```
+
+### `backend/.env`
+
+```
+APP_URL=http://localhost:8001
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5433
+DB_DATABASE=postgres
+DB_USERNAME=lms_service
+DB_PASSWORD=bluespace_laravel_2026
+
+POSTGREST_URL=http://127.0.0.1:54330
+PGRST_JWT_SECRET=<same value as lms/.env>
+LMS_FRONTEND_URL=http://localhost:3000
+LMS_TOKEN_TTL_MINUTES=10080
+LMS_RECOVERY_TTL_MINUTES=60
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+```
+
+### `client/.env`
+
+```
+VITE_API_URL=/api
+```
+
+## Email
+
+Laravel sends password-reset and transactional email through its configured
+mailer. Set `MAIL_*` in `backend/.env`; production should use SMTP with a
+verified sender. `MAIL_MAILER=log` writes messages to
+`backend/storage/logs/laravel.log` for local development.
+
+The public registration flow does not require email confirmation; applications
+are reviewed by an Administrator at `/applications`.
+
+## Deployment
+
+1. Deploy the frontend through Vercel (`vercel.json` already sets the build).
+   Set `VITE_API_URL` to the public Laravel origin plus `/api`.
+2. Host `backend/` on PHP 8.3 with the `pdo_pgsql` extension. Run
+   `composer install --no-dev`, set the production `.env`, and point the web
+   server at `backend/public`.
+3. Run PostgreSQL 17 and PostgREST privately. Apply `database/*.sql` in order or
+   use your normal migration process, then set the same `PGRST_JWT_SECRET` in
+   Laravel and PostgREST.
+4. Set `LMS_FRONTEND_URL` and `CORS_ALLOWED_ORIGINS` to the production frontend
+   origin.
+5. Change every development password and rotate the JWT secret.
+
+## Known Limitations
+
+- **Administrator user mutations are intentionally blocked.** `UserManagement`
+  cannot change roles, deactivate/reactivate or delete users because security
+  hardening revokes those mutations. Manage those operations with SQL.
+- **Squad mutations are Administrator-only in the UI.** The `squads` policy still
+  permits Instructors, but `SquadManagement` treats Instructors as read-only.
+- **Student lab resubmission is guarded.** Students may update their own ungraded
+  submissions; a trigger rejects changes to grading fields, ownership, or
+  already-graded rows.
+- **No UI link to `/quiz/:assessmentId`.** The student route exists.
+- **Dead page files remain in the tree:** `LabsToReview.jsx`,
+  `ProjectWorkspace.jsx`, `SkillsProfile.jsx`, `SubmissionFeedback.jsx`. They are
+  not imported by `App.jsx`.
+- **`/project-workspace` redirects to `/my-squad`**, and `/my-squad` is
+  Student-only.
+- **The `payments` table is unused.** Live classes and the academy are free.
+- **Google Meet/Calendar automation is not enabled.** The `google_integrations`
+  table stores server-side OAuth fields; create credentials in the Laravel
+  environment, never in Vite variables.
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Auto-fix lint issues
-- `npm run format` - Format with Prettier
+From `lms/`:
+
+- `npm run dev` — start the Vite client
+- `npm run build` — build the client
+- `npm run lint` — run ESLint
+- `npm run format` — format with Prettier
+- `npm run stack:up` — start PostgreSQL and PostgREST
+- `npm run stack:down` — stop the stack
+- `npm run stack:reset` — rebuild the database from `database/*.sql`
+- `npm run api` — start Laravel on `127.0.0.1:8001`
 
 ## License
 

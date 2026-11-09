@@ -22,20 +22,6 @@ export function VideoPlayer({
 }) {
   const youtubeEmbedUrl = getYouTubeEmbedUrl(src)
 
-  if (youtubeEmbedUrl) {
-    return (
-      <div className={`relative aspect-video w-full bg-black rounded-lg overflow-hidden ${className || ''}`}>
-        <iframe
-          src={youtubeEmbedUrl}
-          title={title || 'Class Recording'}
-          className="w-full h-full min-h-[360px] border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      </div>
-    )
-  }
-
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
@@ -118,6 +104,20 @@ export function VideoPlayer({
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
+
+  if (youtubeEmbedUrl) {
+    return (
+      <div className={`relative aspect-video w-full bg-black rounded-lg overflow-hidden ${className || ''}`}>
+        <iframe
+          src={youtubeEmbedUrl}
+          title={title || 'Class Recording'}
+          className="w-full h-full min-h-[360px] border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    )
+  }
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)

@@ -2,8 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { BarChart3, Users, Clock, Award } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 export default function Reports() {
   const [rows, setRows] = useState([])
@@ -16,12 +22,12 @@ export default function Reports() {
     const load = async () => {
       try {
         const [{ data: users, error: usersError }, { data: enrolments, error: enrolmentsError }, { data: cohortRows, error: cohortsError }, { data: progress, error: progressError }, { data: submissions, error: submissionsError }, { data: attendance, error: attendanceError }] = await Promise.all([
-          supabase.from('users').select('id, name, type').eq('type', 'Student'),
-          supabase.from('enrolments').select('user_id, cohort_id, track'),
-          supabase.from('cohorts').select('id, name').order('start_date'),
-          supabase.from('lesson_progress').select('user_id, is_completed, completion_percentage, updated_at'),
-          supabase.from('submissions').select('user_id, score, status'),
-          supabase.from('live_class_attendance').select('user_id, status'),
+          api.from('users').select('id, name, type').eq('type', 'Student'),
+          api.from('enrolments').select('user_id, cohort_id, track'),
+          api.from('cohorts').select('id, name').order('start_date'),
+          api.from('lesson_progress').select('user_id, is_completed, completion_percentage, updated_at'),
+          api.from('submissions').select('user_id, score, status'),
+          api.from('live_class_attendance').select('user_id, status'),
         ])
         for (const queryError of [usersError, enrolmentsError, cohortsError, progressError, submissionsError, attendanceError]) if (queryError) throw queryError
         const cohortMap = new Map((cohortRows || []).map((cohort) => [cohort.id, cohort.name]))

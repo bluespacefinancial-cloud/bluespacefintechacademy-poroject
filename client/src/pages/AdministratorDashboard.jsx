@@ -5,7 +5,7 @@ import { Users, GraduationCap, ClipboardList, Briefcase, ArrowRight } from 'luci
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import MetricCard from '../components/dashboard/MetricCard'
@@ -23,13 +23,13 @@ export default function AdministratorDashboard({ user }) {
     const load = async () => {
       try {
         const [cohortCount, fellowCount, applicationCount, courseCount, cohorts, applications, courses] = await Promise.all([
-          supabase.from('cohorts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-          supabase.from('enrolments').select('id', { count: 'exact', head: true }).in('status', ['enrolled', 'active']),
-          supabase.from('academy_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-          supabase.from('partner_courses').select('id', { count: 'exact', head: true }).in('status', ['submitted', 'under_review']),
-          supabase.from('cohorts').select('id, name, status, start_date, capacity').in('status', ['active', 'planned']).order('start_date').limit(5),
-          supabase.from('academy_applications').select('id, name, email, requested_role, track, created_at').eq('status', 'pending').order('created_at', { ascending: false }).limit(5),
-          supabase.from('partner_courses').select('id, title, status, submitted_at').in('status', ['submitted', 'under_review']).order('submitted_at', { ascending: true }).limit(5),
+          api.from('cohorts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+          api.from('enrolments').select('id', { count: 'exact', head: true }).in('status', ['enrolled', 'active']),
+          api.from('academy_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+          api.from('partner_courses').select('id', { count: 'exact', head: true }).in('status', ['submitted', 'under_review']),
+          api.from('cohorts').select('id, name, status, start_date, capacity').in('status', ['active', 'planned']).order('start_date').limit(5),
+          api.from('academy_applications').select('id, name, email, requested_role, track, created_at').eq('status', 'pending').order('created_at', { ascending: false }).limit(5),
+          api.from('partner_courses').select('id, title, status, submitted_at').in('status', ['submitted', 'under_review']).order('submitted_at', { ascending: true }).limit(5),
         ])
         const failure = [cohortCount, fellowCount, applicationCount, courseCount, cohorts, applications, courses].find((item) => item.error)
         if (failure?.error) throw failure.error

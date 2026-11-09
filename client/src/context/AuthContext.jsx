@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { PROFILE_COLUMNS } from '../lib/profile'
 
 const AuthContext = createContext(null)
@@ -12,15 +12,15 @@ class ProfileLoadError extends Error {
   }
 }
 
-// Role lives in public.users.type, not in the Supabase auth session. Without
+// Role lives in public.users.type, not in the academy API session. Without
 // this lookup, a page refresh restores a user with no `type`, which breaks
 // every role-gated route and sidebar until the next login.
 async function loadProfile(authUser) {
   if (!authUser?.email) return { ...authUser, hasProfile: false }
-  const { data: profile, error } = await supabase
+  const { data: profile, error } = await api
     .from('users')
     // Explicit columns: public.users.password is deliberately not selectable
-    // (see supabase/migrations/015_fix_users_rls_recursion.sql).
+    // (see lms/database/01_schema.sql).
     .select(PROFILE_COLUMNS)
     .eq('email', authUser.email)
     .maybeSingle()
@@ -48,52 +48,59 @@ function isBlocked(profile) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  // If Supabase is not configured, there is nothing to load.
-  const [loading, setLoading] = useState(Boolean(supabase))
+  const [loading, setLoading] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('bluespace-dark-mode')
+    return saved ? saved === 'true' : false
+  })
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => {
+      const next = !prev
+      localStorage.setItem('bluespace-dark-mode', String(next))
+      return next
+    })
+  }
 
   useEffect(() => {
-    // Without Supabase env vars the client is null. Calling into it here used
-    // to throw and render a blank page; fail visibly instead.
-    if (!supabase) return
-
     const initAuth = async () => {
       try {
-        const { data } = await supabase.auth.getSession()
+        const { data } = await api.auth.getSession()
         if (data.session?.user && window.location.pathname !== '/reset-password') {
           const profile = await loadProfile(data.session.user)
           if (isBlocked(profile)) {
-            await supabase.auth.signOut()
+            await api.auth.signOut()
             setUser(null)
           } else {
             setUser(profile)
           }
         }
       } catch {
-        // Supabase not configured
+        // A failed session check must not block the sign-in screen. Role gates
+        // still apply once a profile loads.
       }
       setLoading(false)
     }
 
     initAuth()
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
+    const { data: authListener } = api.auth.onAuthStateChange(
       (event, session) => {
         // Password recovery sessions belong to the reset form. Keep them alive
         // here even when an applicant is not active in the academy yet.
         if (window.location.pathname === '/reset-password') return
         if (event === 'SIGNED_IN' && session?.user) {
-          // Defer the profile lookup: awaiting Supabase inside this callback
-          // can deadlock. The raw session user has no role, so never set it
-          // directly.
+          // Defer the profile lookup so the auth listener returns immediately.
+          // The raw session user has no role, so never set it directly.
           setTimeout(() => {
             loadProfile(session.user)
-              .then(async (profile) => {
+              .then((profile) => {
                 if (isBlocked(profile)) {
-                  await supabase.auth.signOut()
+                  api.auth.signOut()
                   setUser(null)
-                  return
+                } else {
+                  setUser(profile)
                 }
-                setUser(profile)
               })
               .catch(() => setUser(null))
           }, 0)
@@ -120,7 +127,7 @@ export function AuthProvider({ children }) {
     const resetTimer = () => {
       if (timer) clearTimeout(timer)
       timer = setTimeout(() => {
-        supabase.auth.signOut()
+        api.auth.signOut()
         setUser(null)
       }, INACTIVITY_TIMEOUT)
     }
@@ -144,7 +151,7 @@ export function AuthProvider({ children }) {
   }, [user])
 
   const login = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await api.auth.signInWithPassword({
       email,
       password,
     })
@@ -155,11 +162,11 @@ export function AuthProvider({ children }) {
     try {
       fullUser = await loadProfile(data.user)
     } catch (profileError) {
-      await supabase.auth.signOut()
+      await api.auth.signOut()
       throw profileError
     }
     if (isBlocked(fullUser)) {
-      await supabase.auth.signOut()
+      await api.auth.signOut()
       throw new Error('This account is not active in the academy. Contact an administrator for help.')
     }
 
@@ -169,7 +176,7 @@ export function AuthProvider({ children }) {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
+    await api.auth.signOut()
     setUser(null)
   }
 
@@ -181,7 +188,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, setUser: setUserFromProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setUser: setUserFromProfile, isDarkMode, toggleDarkMode }}>
       {children}
     </AuthContext.Provider>
   )

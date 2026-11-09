@@ -9,24 +9,34 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        \App\Models\User::factory()->count(5)->create([
+        // Create students
+        User::factory()->count(20)->create([
             'type' => 'Student',
-            'is_active' => 1,
+            'is_active' => true,
         ]);
 
-        \App\Models\User::factory()->count(3)->create([
+        // Create instructors
+        User::factory()->count(5)->create([
             'type' => 'Instructor',
             'is_active' => 1,
         ]);
 
-        \App\Models\User::factory()->count(2)->create([
+        // Create partners
+        User::factory()->count(3)->create([
             'type' => 'Partner',
             'is_active' => 1,
         ]);
 
-        \App\Models\User::factory()->count(1)->create([
+        // Create administrators
+        User::factory()->count(2)->create([
             'type' => 'Administrator',
             'is_active' => 1,
+        ]);
+
+        // Create deactivated users for testing
+        User::factory()->count(2)->create([
+            'type' => 'Student',
+            'is_active' => 0,
         ]);
     }
 }

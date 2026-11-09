@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function Quiz() {
@@ -24,11 +24,11 @@ export default function Quiz() {
       try {
         const profile = await getCurrentProfile()
         const [{ data: assessmentRow, error: assessmentError }, { data: questionRows, error: questionsError }, { data: attempts, error: attemptsError }] = await Promise.all([
-          supabase.from('assessments').select('*').eq('id', assessmentId).single(),
+          api.from('assessments').select('*').eq('id', assessmentId).single(),
           // correct_answer is intentionally not selectable by students; see
-          // supabase/migrations/010_security_hardening.sql.
-          supabase.from('assessment_questions').select('id, assessment_id, prompt, question_type, options, points, order_index').eq('assessment_id', assessmentId).order('order_index'),
-          supabase.from('assessment_attempts').select('*').eq('assessment_id', assessmentId).eq('user_id', profile.id).order('started_at', { ascending: false }).limit(1),
+          // lms/database/01_schema.sql.
+          api.from('assessment_questions').select('id, assessment_id, prompt, question_type, options, points, order_index').eq('assessment_id', assessmentId).order('order_index'),
+          api.from('assessment_attempts').select('*').eq('assessment_id', assessmentId).eq('user_id', profile.id).order('started_at', { ascending: false }).limit(1),
         ])
         for (const queryError of [assessmentError, questionsError, attemptsError]) if (queryError) throw queryError
         const current = attempts?.[0]
@@ -42,8 +42,8 @@ export default function Quiz() {
     const profile = await getCurrentProfile()
     const payload = { assessment_id: Number(assessmentId), user_id: profile.id, answers, status, submitted_at: status === 'submitted' ? new Date().toISOString() : null }
     const query = attempt
-      ? supabase.from('assessment_attempts').update(payload).eq('id', attempt.id).select().single()
-      : supabase.from('assessment_attempts').insert(payload).select().single()
+      ? api.from('assessment_attempts').update(payload).eq('id', attempt.id).select().single()
+      : api.from('assessment_attempts').insert(payload).select().single()
     const { data, error: saveError } = await query
     if (saveError) throw saveError
     setAttempt(data); return data

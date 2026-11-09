@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import { Badge } from '../components/ui/badge'
 
@@ -50,7 +50,7 @@ export default function MediaPlayer({
     try {
       const profile = await getCurrentProfile()
       if (!profile) return
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('lesson_progress')
         .select('is_completed, completion_percentage')
         .eq('user_id', profile.id)
@@ -96,7 +96,7 @@ export default function MediaPlayer({
     const completed = isCompletedVal || percent >= COMPLETION_THRESHOLD
 
     try {
-      await supabase
+      await api
         .from('lesson_progress')
         .upsert({
           user_id: profile.id,
@@ -118,7 +118,7 @@ export default function MediaPlayer({
     if (completed && !isCompletedVal && onComplete) {
       onComplete(lesson.id)
     }
-  }, [user, lesson.id, duration, onComplete, supabase])
+  }, [user, lesson.id, duration, onComplete, api])
 
   const handleLoadedMetadata = () => {
     if (mediaRef.current) {
@@ -240,7 +240,7 @@ export default function MediaPlayer({
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400 font-medium">Video Stream • YouTube Embedded</span>
             {isCompleted && (
-              <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-semibold">
+              <Badge variant="outline" className="text-xs text-emerald-400 border-emerald-500/20 font-semibold">
                 Completed
               </Badge>
             )}

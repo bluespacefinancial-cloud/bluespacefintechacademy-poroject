@@ -1,23 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  CheckCircle,
-  ClipboardList,
-  Save,
-  Search,
-  ExternalLink,
-  Code2,
-  AlertCircle,
-  User,
-  ArrowRight,
-  Filter,
-} from 'lucide-react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { ClipboardList, Save, Search, ExternalLink, Code2, AlertCircle } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 
 const RUBRIC_PRESETS = [
@@ -41,7 +30,7 @@ const RUBRIC_PRESETS = [
 
 export default function Grading() {
   const { user } = useAuth()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [submissions, setSubmissions] = useState([])
   const [selected, setSelected] = useState(null)
   const [score, setScore] = useState('')
@@ -55,7 +44,7 @@ export default function Grading() {
 
   const loadSubmissions = useCallback(async () => {
     try {
-      const { data, error: loadError } = await supabase
+      const { data, error: loadError } = await api
         .from('submissions')
         .select(`
           id, user_id, lab_id, assessment_id, status, content_url, score, feedback, submitted_at,
@@ -91,6 +80,8 @@ export default function Grading() {
   }, [searchParams])
 
   useEffect(() => {
+    // Loading flag is set synchronously before the request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadSubmissions()
   }, [loadSubmissions])
 
@@ -125,7 +116,7 @@ export default function Grading() {
     setMessage('')
 
     try {
-      const { data, error: updateError } = await supabase
+      const { data, error: updateError } = await api
         .from('submissions')
         .update({
           score: numericScore,
@@ -274,7 +265,7 @@ export default function Grading() {
                         <Badge
                           variant={isGraded ? 'secondary' : isRemediation ? 'outline' : 'default'}
                           className={`text-[10px] capitalize shrink-0 ${
-                            isRemediation ? 'text-amber-700 bg-amber-50 border-amber-200' : ''
+                            isRemediation ? 'text-amber-700 border-amber-200' : ''
                           }`}
                         >
                           {sub.status}

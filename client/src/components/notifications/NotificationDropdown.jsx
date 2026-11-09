@@ -1,17 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  Bell,
-  Check,
-  CheckCircle2,
-  Calendar,
-  Video,
-  FileText,
-  AlertCircle,
-  ExternalLink,
-  X,
-} from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { Bell, Check, CheckCircle2, Calendar, Video, FileText, ExternalLink } from 'lucide-react'
+import { api } from '../../lib/backend'
 import { useAuth } from '../../context/AuthContext'
 
 export default function NotificationDropdown() {
@@ -27,7 +17,7 @@ export default function NotificationDropdown() {
     if (!user?.id) return
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
@@ -47,6 +37,8 @@ export default function NotificationDropdown() {
   }
 
   useEffect(() => {
+    // The first fetch flips the loading flag synchronously before awaiting.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadNotifications()
     // Periodic refresh every 60s
     const timer = setInterval(loadNotifications, 60000)
@@ -69,7 +61,7 @@ export default function NotificationDropdown() {
   const markAsRead = async (notification, event) => {
     if (event) event.stopPropagation()
     try {
-      await supabase
+      await api
         .from('notifications')
         .update({ is_read: 1, updated_at: new Date().toISOString() })
         .eq('id', notification.id)
@@ -88,7 +80,7 @@ export default function NotificationDropdown() {
       const unreadIds = notifications.filter((n) => n.is_read === 0 || !n.is_read).map((n) => n.id)
       if (!unreadIds.length) return
 
-      await supabase
+      await api
         .from('notifications')
         .update({ is_read: 1, updated_at: new Date().toISOString() })
         .in('id', unreadIds)
@@ -187,7 +179,7 @@ export default function NotificationDropdown() {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-gray-900">Notifications</span>
               {unreadCount > 0 && (
-                <span className="text-[10px] font-bold bg-deep-50 text-deep-700 border border-deep-100 px-2 py-0.2 rounded-full">
+                <span className="text-[10px] font-bold text-deep-700 border border-deep-200 px-2 py-0.2 rounded-full">
                   {unreadCount} new
                 </span>
               )}

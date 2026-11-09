@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronRight,
   ChevronLeft,
   X,
   BookOpen,
@@ -11,7 +10,6 @@ import {
   Users,
   Award,
   Shield,
-  Sparkles,
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react'
@@ -197,6 +195,8 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
 
   useEffect(() => {
     if (forceOpen) {
+      // Reopening the guide is an external signal, not state derivable from render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDismissed(false)
       setStep(0)
     }
@@ -303,7 +303,7 @@ export default function WelcomeGuide({ role, forceOpen = false, onClose }) {
               {current.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200"
+                  className="text-[11px] font-medium px-2 py-0.5 rounded text-gray-600 border border-gray-200"
                 >
                   #{tag}
                 </span>

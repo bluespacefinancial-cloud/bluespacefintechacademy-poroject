@@ -3,8 +3,14 @@ import { Activity, AlertTriangle, BookOpen, CheckCircle, Clock, Search, Users } 
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const INACTIVE_DAYS = 7
 
@@ -45,15 +51,15 @@ export default function StudentMonitoring() {
           { data: submissions, error: submissionsError },
           { data: attendance, error: attendanceError },
         ] = await Promise.all([
-          supabase.from('users').select('id, name, email, type, is_active, last_login_at').eq('type', 'Student').order('name'),
-          supabase.from('enrolments').select('id, user_id, cohort_id, track, squad_id, status'),
-          supabase.from('cohorts').select('id, name, status').order('start_date'),
-          supabase.from('squads').select('id, name'),
-          supabase.from('modules').select('id, cohort_id, is_published'),
-          supabase.from('lessons').select('id, module_id'),
-          supabase.from('lesson_progress').select('user_id, lesson_id, completion_percentage, is_completed, updated_at, completed_at'),
-          supabase.from('submissions').select('user_id, status, score, submitted_at, updated_at'),
-          supabase.from('live_class_attendance').select('user_id, status, joined_at, left_at'),
+          api.from('users').select('id, name, email, type, is_active, last_login_at').eq('type', 'Student').order('name'),
+          api.from('enrolments').select('id, user_id, cohort_id, track, squad_id, status'),
+          api.from('cohorts').select('id, name, status').order('start_date'),
+          api.from('squads').select('id, name'),
+          api.from('modules').select('id, cohort_id, is_published'),
+          api.from('lessons').select('id, module_id'),
+          api.from('lesson_progress').select('user_id, lesson_id, completion_percentage, is_completed, updated_at, completed_at'),
+          api.from('submissions').select('user_id, status, score, submitted_at, updated_at'),
+          api.from('live_class_attendance').select('user_id, status, joined_at, left_at'),
         ])
 
         for (const queryError of [usersError, enrolmentsError, cohortsError, squadsError, modulesError, lessonsError, progressError, submissionsError, attendanceError]) {
@@ -168,7 +174,7 @@ export default function StudentMonitoring() {
           </div>
           {loading && <p className="py-12 text-center text-sm text-gray-500">Loading student activity...</p>}
           {!loading && filteredStudents.length === 0 && <p className="py-12 text-center text-sm text-gray-500">No students match the current filters.</p>}
-          {!loading && filteredStudents.length > 0 && <div className="overflow-x-auto"><table className="w-full min-w-[980px] text-left text-xs"><thead><tr className="border-b border-gray-100 text-[10px] uppercase tracking-wider text-gray-500"><th className="px-3 py-3">Student</th><th className="px-3 py-3">Cohort / Track</th><th className="px-3 py-3">Squad</th><th className="px-3 py-3">Completion</th><th className="px-3 py-3">Attendance</th><th className="px-3 py-3">Grade</th><th className="px-3 py-3">Submissions</th><th className="px-3 py-3">Last activity</th><th className="px-3 py-3">Status</th></tr></thead><tbody>{filteredStudents.map((student) => <tr key={student.id} className="border-b border-gray-50 last:border-0"><td className="px-3 py-3"><p className="font-medium text-deep-600">{student.name || 'Unnamed student'}</p><p className="text-[10px] text-gray-400">{student.email}</p></td><td className="px-3 py-3"><p>{student.cohortName}</p><p className="text-[10px] text-gray-400">{student.track}</p></td><td className="px-3 py-3">{student.squadName}</td><td className="px-3 py-3"><div className="flex items-center gap-2"><div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100"><div className="h-full rounded-full bg-brand-600" style={{ width: `${student.completion}%` }} /></div><span>{student.completion}%</span></div></td><td className="px-3 py-3">{student.attendance === null ? 'N/A' : `${student.attendance}%`}</td><td className="px-3 py-3">{student.averageGrade === null ? 'N/A' : `${student.averageGrade}%`}</td><td className="px-3 py-3">{student.submissions}{student.pendingSubmissions > 0 && <span className="ml-1 text-amber-600">({student.pendingSubmissions} pending)</span>}</td><td className="px-3 py-3"><span className={student.inactive ? 'font-medium text-amber-700' : 'text-gray-600'}>{formatActivity(student.activityDate)}</span></td><td className="px-3 py-3"><Badge className={student.atRisk ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}>{student.atRisk ? 'Needs attention' : 'On track'}</Badge></td></tr>)}</tbody></table></div>}
+          {!loading && filteredStudents.length > 0 && <div className="overflow-x-auto"><table className="w-full min-w-[980px] text-left text-xs"><thead><tr className="border-b border-gray-100 text-[10px] uppercase tracking-wider text-gray-500"><th className="px-3 py-3">Student</th><th className="px-3 py-3">Cohort / Track</th><th className="px-3 py-3">Squad</th><th className="px-3 py-3">Completion</th><th className="px-3 py-3">Attendance</th><th className="px-3 py-3">Grade</th><th className="px-3 py-3">Submissions</th><th className="px-3 py-3">Last activity</th><th className="px-3 py-3">Status</th></tr></thead><tbody>{filteredStudents.map((student) => <tr key={student.id} className="border-b border-gray-50 last:border-0"><td className="px-3 py-3"><p className="font-medium text-deep-600">{student.name || 'Unnamed student'}</p><p className="text-[10px] text-gray-400">{student.email}</p></td><td className="px-3 py-3"><p>{student.cohortName}</p><p className="text-[10px] text-gray-400">{student.track}</p></td><td className="px-3 py-3">{student.squadName}</td><td className="px-3 py-3"><div className="flex items-center gap-2"><div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100"><div className="h-full rounded-full bg-brand-600" style={{ width: `${student.completion}%` }} /></div><span>{student.completion}%</span></div></td><td className="px-3 py-3">{student.attendance === null ? 'N/A' : `${student.attendance}%`}</td><td className="px-3 py-3">{student.averageGrade === null ? 'N/A' : `${student.averageGrade}%`}</td><td className="px-3 py-3">{student.submissions}{student.pendingSubmissions > 0 && <span className="ml-1 text-amber-600">({student.pendingSubmissions} pending)</span>}</td><td className="px-3 py-3"><span className={student.inactive ? 'font-medium text-amber-700' : 'text-gray-600'}>{formatActivity(student.activityDate)}</span></td><td className="px-3 py-3"><Badge className={student.atRisk ? 'text-amber-700 border-amber-200' : 'text-emerald-700 border-emerald-200'}>{student.atRisk ? 'Needs attention' : 'On track'}</Badge></td></tr>)}</tbody></table></div>}
         </CardContent>
       </Card>
       <p className="mt-4 flex items-center gap-2 text-[11px] text-gray-500"><Clock size={13} /> At-risk status includes no recorded activity for {INACTIVE_DAYS}+ days, suspended enrolments or remediation submissions.</p>

@@ -1,18 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Search, Edit3, X, Trash2, Plus } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const STATUS_COLORS = {
-  enrolled: 'bg-gray-50 text-gray-600',
-  active: 'bg-brand-50 text-brand-700 border-brand-100',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  withdrawn: 'bg-red-50 text-red-700 border-red-100',
-  suspended: 'bg-amber-50 text-amber-700 border-amber-100',
+  enrolled: 'text-gray-600 border-gray-200',
+  active: 'text-brand-700 border-brand-200',
+  completed: 'text-emerald-700 border-emerald-200',
+  withdrawn: 'text-red-700 border-red-200',
+  suspended: 'text-amber-700 border-amber-200',
 }
 
 const STATUS_LABELS = {
@@ -40,7 +53,7 @@ export default function Enrolments() {
 
   const loadEnrolments = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('enrolments')
         .select(`
           *,
@@ -102,7 +115,7 @@ export default function Enrolments() {
     setSaving(editingId)
     setError('')
     try {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('enrolments')
         .update({
           track: editForm.track,
@@ -123,7 +136,7 @@ export default function Enrolments() {
   const deleteEnrolment = async (id) => {
     if (!window.confirm('Delete this enrolment? This cannot be undone.')) return
     try {
-      const { error: delError } = await supabase.from('enrolments').delete().eq('id', id)
+      const { error: delError } = await api.from('enrolments').delete().eq('id', id)
       if (delError) throw delError
       setMessage('Enrolment deleted')
       await loadEnrolments()
@@ -136,7 +149,7 @@ export default function Enrolments() {
     e.preventDefault()
     setError('')
     try {
-      const { error: createError } = await supabase.from('enrolments').insert({
+      const { error: createError } = await api.from('enrolments').insert({
         user_id: Number(editForm.user_id),
         cohort_id: Number(editForm.cohort_id),
         track: editForm.track,
@@ -380,7 +393,7 @@ export default function Enrolments() {
                         <CardDescription className="text-[10px]">{enrolment.email}</CardDescription>
                       </div>
                     </div>
-                    <Badge className={STATUS_COLORS[enrolment.status] || 'bg-gray-50 text-gray-600'}>{STATUS_LABELS[enrolment.status]}</Badge>
+                    <Badge className={STATUS_COLORS[enrolment.status] || 'text-gray-600'}>{STATUS_LABELS[enrolment.status]}</Badge>
                   </CardHeader>
                   <CardContent className="pt-0 pb-3">
                     <div className="space-y-2">

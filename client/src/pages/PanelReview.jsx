@@ -5,8 +5,14 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const label = { submitted: 'Pending review', graded: 'Reviewed', passed: 'Approved', failed: 'Rejected', remediation: 'Remediation' }
 
@@ -24,9 +30,9 @@ export default function PanelReview() {
 
   const load = async () => {
     const [{ data, error: submissionError }, { data: users, error: usersError }, { data: assessments, error: assessmentError }] = await Promise.all([
-      supabase.from('submissions').select('*').not('assessment_id', 'is', null).order('submitted_at', { ascending: false }),
-      supabase.from('users').select('id, name, email'),
-      supabase.from('assessments').select('id, title').eq('type', 'capstone'),
+      api.from('submissions').select('*').not('assessment_id', 'is', null).order('submitted_at', { ascending: false }),
+      api.from('users').select('id, name, email'),
+      api.from('assessments').select('id, title').eq('type', 'capstone'),
     ])
     if (submissionError) throw submissionError
     if (usersError) throw usersError
@@ -40,7 +46,7 @@ export default function PanelReview() {
   const choose = (submission) => { setSelected(submission); setScore(submission.score ?? ''); setFeedback(submission.feedback || '') }
   const save = async (status) => {
     if (!selected || score === '') { setError('Enter a score before saving the review'); return }
-    const { data, error: updateError } = await supabase.from('submissions').update({ score: Number(score), feedback: feedback.trim() || null, status, graded_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', selected.id).select().single()
+    const { data, error: updateError } = await api.from('submissions').update({ score: Number(score), feedback: feedback.trim() || null, status, graded_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', selected.id).select().single()
     if (updateError) { setError(updateError.message); return }
     setSubmissions((current) => current.map((item) => item.id === selected.id ? { ...item, ...data } : item)); setSelected({ ...selected, ...data })
   }
@@ -48,15 +54,39 @@ export default function PanelReview() {
     if (!selected || selected.status !== 'passed') return
     setIssuing(true); setError('')
     try {
-      const { data: assessment, error: assessmentError } = await supabase.from('assessments').select('module_id, modules(cohort_id)').eq('id', selected.assessment_id).single()
+      const { data: assessment, error: assessmentError } = await api.from('assessments').select('module_id, modules(cohort_id)').eq('id', selected.assessment_id).single()
       if (assessmentError) throw assessmentError
-      const { data: enrolment, error: enrolmentError } = await supabase.from('enrolments').select('cohort_id, track').eq('user_id', selected.user_id).in('status', ['enrolled', 'active', 'completed']).order('created_at', { ascending: false }).limit(1).maybeSingle()
+      const { data: enrolment, error: enrolmentError } = await api.from('enrolments').select('cohort_id, track').eq('user_id', selected.user_id).in('status', ['enrolled', 'active', 'completed']).order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (enrolmentError) throw enrolmentError
       const cohortId = enrolment?.cohort_id || assessment.modules?.cohort_id
       if (!cohortId) throw new Error('The student does not have a cohort for certification')
-      const { data: certification, error: upsertError } = await supabase.from('certifications').upsert({ user_id: selected.user_id, cohort_id: cohortId, track: enrolment?.track || 'Finsoft', status: 'pending', final_grade: Number(score) }, { onConflict: 'user_id,cohort_id,track' }).select('id').single()
-      if (upsertError) throw upsertError
-      const { error: issueError } = await supabase.rpc('issue_certificate', { p_certification_id: certification.id })
+      const track = enrolment?.track || 'Finsoft'
+      const { data: existing, error: lookupError } = await api
+        .from('certifications')
+        .select('id')
+        .eq('user_id', selected.user_id)
+        .eq('cohort_id', cohortId)
+        .eq('track', track)
+        .is('partner_course_id', null)
+        .maybeSingle()
+      if (lookupError) throw lookupError
+      let certification = existing
+      if (certification) {
+        const { error: updateError } = await api
+          .from('certifications')
+          .update({ status: 'pending', final_grade: Number(score), updated_at: new Date().toISOString() })
+          .eq('id', certification.id)
+        if (updateError) throw updateError
+      } else {
+        const { data: inserted, error: insertError } = await api
+          .from('certifications')
+          .insert({ user_id: selected.user_id, cohort_id: cohortId, track, status: 'pending', final_grade: Number(score) })
+          .select('id')
+          .single()
+        if (insertError) throw insertError
+        certification = inserted
+      }
+      const { error: issueError } = await api.rpc('issue_certificate', { p_certification_id: certification.id })
       if (issueError) throw issueError
       setIssued(true)
     } catch (issueError) { setError(issueError.message || 'Unable to issue certificate') } finally { setIssuing(false) }

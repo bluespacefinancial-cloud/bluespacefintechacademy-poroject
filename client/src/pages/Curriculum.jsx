@@ -1,11 +1,24 @@
 import { useState, useEffect } from 'react'
 import { BookOpen, Plus, Edit3, Eye, X } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
 import { Input } from '../components/ui/input'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 
 const STAGE_COLORS = {
   foundations: 'text-brand-600',
@@ -22,10 +35,10 @@ const STAGE_LABELS = {
 }
 
 const DOMAIN_COLORS = {
-  FaaS: 'bg-brand-100 text-brand-700 border-brand-200',
-  FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
-  FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
+  FaaS: 'text-brand-700 border-brand-200',
+  FinCore: 'text-emerald-700 border-emerald-200',
+  FinOps: 'text-amber-700 border-amber-200',
+  FinInfra: 'text-slate-700 border-slate-200',
 }
 
 export default function Curriculum() {
@@ -44,7 +57,7 @@ export default function Curriculum() {
 
   const loadModules = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('modules')
         .select('*')
         .order('created_at', { ascending: true })
@@ -88,7 +101,7 @@ export default function Curriculum() {
     setSaving(editingId)
     setError('')
     try {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('modules')
         .update({
           title: editForm.title,
@@ -113,7 +126,7 @@ export default function Curriculum() {
   const deleteModule = async (id) => {
     if (!window.confirm('Delete this module? This cannot be undone.')) return
     try {
-      const { error: delError } = await supabase.from('modules').delete().eq('id', id)
+      const { error: delError } = await api.from('modules').delete().eq('id', id)
       if (delError) throw delError
       setMessage('Module deleted')
       await loadModules()
@@ -126,7 +139,7 @@ export default function Curriculum() {
     e.preventDefault()
     setError('')
     try {
-      const { error: createError } = await supabase.from('modules').insert({
+      const { error: createError } = await api.from('modules').insert({
         title: editForm.title || 'New Module',
         stage: editForm.stage || 'foundations',
         track: editForm.track || 'All',

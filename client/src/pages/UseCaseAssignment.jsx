@@ -1,25 +1,38 @@
 import { useEffect, useState } from 'react'
 import { Target, Plus, Edit3, X, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const DOMAIN_COLORS = {
-  FaaS: 'bg-brand-100 text-brand-700 border-brand-200',
-  FinCore: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  FinOps: 'bg-amber-100 text-amber-700 border-amber-200',
-  FinInfra: 'bg-slate-100 text-slate-700 border-slate-200',
+  FaaS: 'text-brand-700 border-brand-200',
+  FinCore: 'text-emerald-700 border-emerald-200',
+  FinOps: 'text-amber-700 border-amber-200',
+  FinInfra: 'text-slate-700 border-slate-200',
 }
 
 const STATUS_COLORS = {
-  proposed: 'bg-gray-50 text-gray-600',
-  qualified: 'bg-brand-50 text-brand-700 border-brand-100',
-  assigned: 'bg-amber-50 text-amber-700 border-amber-100',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  archived: 'bg-slate-50 text-slate-600 border-slate-100',
+  proposed: 'text-gray-600 border-gray-200',
+  qualified: 'text-brand-700 border-brand-200',
+  assigned: 'text-amber-700 border-amber-200',
+  completed: 'text-emerald-700 border-emerald-200',
+  archived: 'text-slate-600 border-slate-200',
 }
 
 export default function UseCaseAssignment() {
@@ -37,9 +50,9 @@ export default function UseCaseAssignment() {
   useEffect(() => {
     const loadUseCases = async () => {
       const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
-        supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
-        supabase.from('cohorts').select('id, name'),
-        supabase.from('squads').select('id, name'),
+        api.from('use_cases').select('*').order('created_at', { ascending: false }),
+        api.from('cohorts').select('id, name'),
+        api.from('squads').select('id, name'),
       ])
       if (loadError) throw loadError
       if (cohortsError) throw cohortsError
@@ -91,7 +104,7 @@ export default function UseCaseAssignment() {
     setSaving(editingId)
     setError('')
     try {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await api
         .from('use_cases')
         .update({
           title: editForm.title,
@@ -107,9 +120,9 @@ export default function UseCaseAssignment() {
       setEditingId(null)
       const loadUseCases = async () => {
         const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
-          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
-          supabase.from('cohorts').select('id, name'),
-          supabase.from('squads').select('id, name'),
+          api.from('use_cases').select('*').order('created_at', { ascending: false }),
+          api.from('cohorts').select('id, name'),
+          api.from('squads').select('id, name'),
         ])
         if (loadError) throw loadError
         if (cohortsError) throw cohortsError
@@ -135,14 +148,14 @@ export default function UseCaseAssignment() {
   const deleteUseCase = async (id) => {
     if (!window.confirm('Delete this use case? This cannot be undone.')) return
     try {
-      const { error: delError } = await supabase.from('use_cases').delete().eq('id', id)
+      const { error: delError } = await api.from('use_cases').delete().eq('id', id)
       if (delError) throw delError
       setMessage('Use case deleted')
       const loadUseCases = async () => {
         const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
-          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
-          supabase.from('cohorts').select('id, name'),
-          supabase.from('squads').select('id, name'),
+          api.from('use_cases').select('*').order('created_at', { ascending: false }),
+          api.from('cohorts').select('id, name'),
+          api.from('squads').select('id, name'),
         ])
         if (loadError) throw loadError
         if (cohortsError) throw cohortsError
@@ -167,7 +180,7 @@ export default function UseCaseAssignment() {
     e.preventDefault()
     setError('')
     try {
-      const { error: createError } = await supabase.from('use_cases').insert({
+      const { error: createError } = await api.from('use_cases').insert({
         title: editForm.title || 'New Use Case',
         stakeholder: editForm.stakeholder,
         domain: editForm.domain,
@@ -181,9 +194,9 @@ export default function UseCaseAssignment() {
       setEditingId(null)
       const loadUseCases = async () => {
         const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
-          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
-          supabase.from('cohorts').select('id, name'),
-          supabase.from('squads').select('id, name'),
+          api.from('use_cases').select('*').order('created_at', { ascending: false }),
+          api.from('cohorts').select('id, name'),
+          api.from('squads').select('id, name'),
         ])
         if (loadError) throw loadError
         if (cohortsError) throw cohortsError
@@ -208,7 +221,7 @@ export default function UseCaseAssignment() {
     if (!squadId) return
     setSaving(useCaseId)
     try {
-      const { error: assignError } = await supabase
+      const { error: assignError } = await api
         .from('use_cases')
         .update({ squad_id: Number(squadId) })
         .eq('id', useCaseId)
@@ -216,9 +229,9 @@ export default function UseCaseAssignment() {
       setMessage('Squad assigned')
       const loadUseCases = async () => {
         const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: squads, error: squadsError }] = await Promise.all([
-          supabase.from('use_cases').select('*').order('created_at', { ascending: false }),
-          supabase.from('cohorts').select('id, name'),
-          supabase.from('squads').select('id, name'),
+          api.from('use_cases').select('*').order('created_at', { ascending: false }),
+          api.from('cohorts').select('id, name'),
+          api.from('squads').select('id, name'),
         ])
         if (loadError) throw loadError
         if (cohortsError) throw cohortsError
@@ -547,7 +560,7 @@ export default function UseCaseAssignment() {
                     </div>
                   </CardContent>
                   <CardFooter className="flex items-center justify-between pt-3">
-                    <Badge className={STATUS_COLORS[useCase.status] || 'bg-gray-50 text-gray-600'}>
+                    <Badge className={STATUS_COLORS[useCase.status] || 'text-gray-600'}>
                       {useCase.status.charAt(0).toUpperCase() + useCase.status.slice(1)}
                     </Badge>
                     <div className="flex gap-2">

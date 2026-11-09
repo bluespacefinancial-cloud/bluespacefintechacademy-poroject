@@ -4,7 +4,7 @@ import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-r
 import { Button } from '../components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { useAuth } from '../context/AuthContext'
 
 const STAGE_LABELS = {
@@ -15,12 +15,12 @@ const STAGE_LABELS = {
 }
 
 const LESSON_TYPE_COLORS = {
-  concept: 'bg-brand-100 text-brand-700 border-brand-200',
-  demonstration: 'bg-brand-50 text-brand-700 border-brand-200',
-  video: 'bg-brand-50 text-brand-700 border-brand-200',
-  audio: 'bg-purple-50 text-purple-700 border-purple-200',
-  lab: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  assessment: 'bg-amber-50 text-amber-700 border-amber-200',
+  concept: 'text-brand-700 border-brand-200',
+  demonstration: 'text-brand-700 border-brand-200',
+  video: 'text-brand-700 border-brand-200',
+  audio: 'text-purple-700 border-purple-200',
+  lab: 'text-emerald-700 border-emerald-200',
+  assessment: 'text-amber-700 border-amber-200',
 }
 
 const formatTime = (minutes) => {
@@ -52,7 +52,7 @@ export default function MyLearning() {
   const loadData = async () => {
     try {
       if (!user?.id) { setLoading(false); return }
-      const { data: enrolments } = await supabase
+      const { data: enrolments } = await api
         .from('enrolments')
         .select('cohort_id, track, squad_id')
         .eq('user_id', user.id)
@@ -62,7 +62,7 @@ export default function MyLearning() {
         return
       }
       const enrolment = enrolments[0]
-      const { data: modulesData } = await supabase
+      const { data: modulesData } = await api
         .from('modules')
         .select('*')
         .eq('cohort_id', enrolment.cohort_id)
@@ -70,14 +70,14 @@ export default function MyLearning() {
       setModules(modulesData || [])
       const moduleIds = modulesData?.map(m => m.id) || []
       if (moduleIds.length > 0) {
-        const { data: lessonsData } = await supabase
+        const { data: lessonsData } = await api
           .from('lessons')
           .select('*')
           .in('module_id', moduleIds)
           .order('order_index', { ascending: true })
         setLessons(lessonsData || [])
         const lessonIds = lessonsData?.map(l => l.id) || []
-        const { data: progressData } = await supabase
+        const { data: progressData } = await api
           .from('lesson_progress')
           .select('*')
           .eq('user_id', user.id)

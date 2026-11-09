@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Calendar, ExternalLink, Plus, Video, Users, RefreshCw } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
@@ -21,10 +21,10 @@ const EMPTY_FORM = {
 }
 
 const STATUS_COLORS = {
-  scheduled: 'bg-gray-50 text-gray-600',
-  live: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  completed: 'bg-slate-50 text-slate-600 border-slate-100',
-  cancelled: 'bg-red-50 text-red-700 border-red-100',
+  scheduled: 'text-gray-600 border-gray-200',
+  live: 'text-emerald-700 border-emerald-200',
+  completed: 'text-slate-600 border-slate-200',
+  cancelled: 'text-red-700 border-red-200',
 }
 
 const STATUS_LABELS = {
@@ -49,7 +49,7 @@ export default function LiveClasses() {
   const canManage = ['Instructor', 'Administrator'].includes(user?.type)
 
   const loadClasses = async () => {
-    const { data, error: loadError } = await supabase
+    const { data, error: loadError } = await api
       .from('live_classes')
       .select('id, title, starts_at, ends_at, visibility, status, meet_url, is_offline, venue')
       .order('starts_at', { ascending: true })
@@ -59,10 +59,10 @@ export default function LiveClasses() {
   }
 
   const loadAttendance = async (classId) => {
-    const { data, error } = await supabase
+    const { data, error } = await api
       .from('live_class_attendance')
       .select('user_id, status, joined_at')
-      .eq('class_id', classId)
+      .eq('live_class_id', classId)
 
     if (!error) {
       const attendanceMap = {}
@@ -90,7 +90,7 @@ export default function LiveClasses() {
   }, [])
 
   useEffect(() => {
-    supabase.from('cohorts').select('id, name').order('start_date').then(({ data, error: cohortError }) => {
+    api.from('cohorts').select('id, name').order('start_date').then(({ data, error: cohortError }) => {
       if (cohortError) setError(cohortError.message)
       setCohorts(data || [])
     })
@@ -105,7 +105,7 @@ export default function LiveClasses() {
       const profile = await getCurrentProfile()
       if (!profile) throw new Error('You must be signed in to schedule a class')
 
-      const { error: createError } = await supabase.from('live_classes').insert({
+      const { error: createError } = await api.from('live_classes').insert({
         ...form,
         cohort_id: form.cohort_id ? Number(form.cohort_id) : null,
         instructor_id: profile.id,
@@ -125,12 +125,12 @@ export default function LiveClasses() {
 
   const markAttendance = async (classId, userId, status) => {
     try {
-      const { error } = await supabase.from('live_class_attendance').upsert({
-        class_id: classId,
+      const { error } = await api.from('live_class_attendance').upsert({
+        live_class_id: classId,
         user_id: userId,
         status: status,
         joined_at: new Date().toISOString(),
-      })
+      }, { onConflict: 'live_class_id,user_id' })
       if (error) throw error
       await loadAttendance(classId)
     } catch (err) {
@@ -150,7 +150,7 @@ export default function LiveClasses() {
   if (selectedClass) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full">
           <div className="flex items-center justify-between mb-6">
             <div>
               <button

@@ -2,10 +2,23 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Eye, Plus } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from '../components/ui/select'
-import { supabase } from '../lib/supabase'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from '../components/ui/select'
+import { api } from '../lib/backend'
 
 const STAGE_LABELS = {
   foundations: 'Foundations',
@@ -24,9 +37,9 @@ export default function MyModules() {
 
   const loadModules = async () => {
     const [{ data, error: loadError }, { data: cohorts, error: cohortsError }, { data: lessons, error: lessonsError }] = await Promise.all([
-      supabase.from('modules').select('*').order('created_at', { ascending: false }),
-      supabase.from('cohorts').select('id, name'),
-      supabase.from('lessons').select('id, module_id'),
+      api.from('modules').select('*').order('created_at', { ascending: false }),
+      api.from('cohorts').select('id, name'),
+      api.from('lessons').select('id, module_id'),
     ])
     if (loadError) throw loadError
     if (cohortsError) throw cohortsError
@@ -56,7 +69,7 @@ export default function MyModules() {
   }, [])
 
   const togglePublished = async (module) => {
-    const { error: updateError } = await supabase
+    const { error: updateError } = await api
       .from('modules')
       .update({ is_published: !module.is_published, updated_at: new Date().toISOString() })
       .eq('id', module.id)

@@ -1,21 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import {
-  ArrowLeft,
-  Clock,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  Code2,
-  BookOpen,
-} from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Code2, BookOpen } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import MediaPlayer from '../components/MediaPlayer'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
 export default function LessonPlayer() {
@@ -34,7 +25,7 @@ export default function LessonPlayer() {
     if (!lessonId) return
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('lessons')
         .select('*')
         .eq('id', parseInt(lessonId))
@@ -50,20 +41,20 @@ export default function LessonPlayer() {
 
       // Concurrently fetch sibling lessons, progress, and attached lab
       const [siblingResult, progressResult, labResult] = await Promise.all([
-        supabase
+        api
           .from('lessons')
           .select('id, title, order_index, duration_minutes, type')
           .eq('module_id', data.module_id)
           .order('order_index', { ascending: true }),
         profile
-          ? supabase
+          ? api
               .from('lesson_progress')
               .select('is_completed, completion_percentage')
               .eq('user_id', profile.id)
               .eq('lesson_id', parseInt(lessonId))
               .maybeSingle()
           : Promise.resolve({ data: null }),
-        supabase
+        api
           .from('labs')
           .select('id, title, max_score, due_date')
           .eq('lesson_id', data.id)
@@ -80,7 +71,7 @@ export default function LessonPlayer() {
       if (labResult.data) {
         setAttachedLab(labResult.data)
         if (profile) {
-          const { data: subData } = await supabase
+          const { data: subData } = await api
             .from('submissions')
             .select('id, status, score, feedback, submitted_at')
             .eq('lab_id', labResult.data.id)
@@ -100,6 +91,8 @@ export default function LessonPlayer() {
   }
 
   useEffect(() => {
+    // Loading flag is set synchronously before the request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadLesson()
   }, [lessonId])
 
@@ -112,7 +105,7 @@ export default function LessonPlayer() {
       setSavingProgress(true)
       const profile = await getCurrentProfile()
       if (profile && lesson) {
-        await supabase.from('lesson_progress').upsert(
+        await api.from('lesson_progress').upsert(
           {
             user_id: profile.id,
             lesson_id: lesson.id,
@@ -397,7 +390,7 @@ export default function LessonPlayer() {
               Need assistance?
             </h4>
             <p className="text-xs text-gray-600 leading-relaxed">
-              If you have questions about this lesson's API integration or encounter bug issues during the practical lab, reach out in your squad workspace or book a clinic slot with faculty.
+              If you have questions about this lesson&apos;s API integration or encounter bug issues during the practical lab, reach out in your squad workspace or book a clinic slot with faculty.
             </p>
             <Button
               asChild

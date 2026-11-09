@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Check, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -15,8 +15,8 @@ export default function ApplicationReview() {
 
   const load = async () => {
     const [{ data: applicationData, error: applicationError }, { data: cohortData, error: cohortError }] = await Promise.all([
-      supabase.from('academy_applications').select('*').order('created_at', { ascending: false }),
-      supabase.from('cohorts').select('id, name, status').in('status', ['planned', 'active']).order('start_date'),
+      api.from('academy_applications').select('*').order('created_at', { ascending: false }),
+      api.from('cohorts').select('id, name, status').in('status', ['planned', 'active']).order('start_date'),
     ])
     if (applicationError || cohortError) throw applicationError || cohortError
     setApplications(applicationData || [])
@@ -41,7 +41,7 @@ export default function ApplicationReview() {
       return
     }
     const reviewReason = decision === 'rejected' ? 'Application was not approved by the academy team.' : null
-    const { error } = await supabase.rpc('review_academy_application', {
+    const { error } = await api.rpc('review_academy_application', {
       p_application_id: application.id,
       p_decision: decision,
       p_cohort_id: decision === 'approved' && application.requested_role === 'Student' ? Number(cohortId) : null,

@@ -8,63 +8,114 @@ Complete technical documentation for developers, operators, and contributors.
 
 BlueSPACE Fintech Academy LMS is a learning management system training Finsoft and Finops Fellows on the AI Fintech Factory domains (FaaS, FinCore, FinOps, FinInfra). It provides role-based portals for Students, Instructors, Partners, and Administrators.
 
-**Tech Stack:**
+**Tech stack:**
 - **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui + Framer Motion
-- **Backend:** Supabase (PostgreSQL + Auth + Edge Functions + Storage)
-- **Auth:** Supabase Auth + custom `public.users` profile table
+- **API/Auth:** Laravel 13 (`backend/`)
+- **Data API:** PostgREST v16 (internal only)
+- **Database:** PostgreSQL 17 with row-level security
+- **Local stack:** Docker Compose (`db` + `rest`)
 - **Icons:** Lucide React
 - **Notifications:** React Hot Toast
-- **Deployment:** Vercel (frontend) + Supabase (backend)
+- **Deployment:** Vercel (frontend) + Laravel host + managed PostgreSQL/PostgREST
 
 ---
 
 ## 2. Architecture
 
 ```
-┌─────────────────┐      HTTPS       ┌──────────────────┐
-│   Vercel        │◄─────────────────▶│   Supabase       │
-│   (Frontend)    │                  │   (Backend)      │
-│                 │                  │                  │
-│ React App       │                  │ PostgreSQL 16    │
-│ Tailwind CSS    │◀─────────────────│ Supabase Auth    │
-│ shadcn/ui       │                  │ Edge Functions   │
-│                 │                  │ Storage          │
-└─────────────────┘                  └──────────────────┘
+┌─────────────────┐    HTTPS /api    ┌──────────────────┐    HS256 JWT    ┌──────────────────┐
+│   Vercel        │◄────────────────▶│   Laravel 8001   │◄───────────────▶│   PostgREST      │
+│   (Frontend)    │                  │   auth + proxy   │                 │   54330          │
+│                 │                  │                  │                 │                  │
+│ React App       │                  │ AuthStore        │                 │ RLS enforced     │
+│ Tailwind CSS    │                  │ Jwt              │                 │                  │
+│ shadcn/ui       │                  │ DataProxy        │                 │                  │
+└─────────────────┘                  └──────────────────┘                 └────────┬─────────┘
+                                                                                   │ SQL
+                                                                          ┌────────▼─────────┐
+                                                                          │  PostgreSQL 17   │
+                                                                          │  5433, RLS       │
+                                                                          └──────────────────┘
 ```
 
-**Auth model:** Supabase Auth handles credentials (email/password). A separate `public.users` table stores profile metadata (name, role, track, active status). The two are joined by email, not by auth UUID, because `public.users.id` is a bigint while Supabase auth IDs are UUIDs.
+### Auth model
 
-**Authorization:** Row Level Security (RLS) on PostgreSQL tables enforces data access. Column-level grants hide secret fields (`password`, `solution_code`, `correct_answer`). Edge functions validate sessions server-side using the service role, then query data through the client (anon) key so RLS applies.
+- `public.users.password` stores a bcrypt hash. The former hosted auth schema
+  dependency is gone.
+- `POST /api/auth/login` verifies the password, inserts a random 32-byte opaque
+  token (hashed with SHA-256) into `public.auth_tokens`, and returns the raw
+  token to the client. Tokens expire after `LMS_TOKEN_TTL_MINUTES` (default
+  seven days).
+- Every protected request sends `Authorization: Bearer <token>`. The
+  `auth.token` middleware resolves the token, rejects expired or inactive
+  accounts, and attaches the academy profile as `auth_user`.
+- Laravel signs a five-minute HS256 JWT for PostgREST with:
+  `role=authenticated`, `sub=<users.auth_user_id>`, `email=<users.email>`.
+- The React client never receives a PostgREST token, so it cannot alter the
+  role claim.
+
+### Authorization
+
+PostgreSQL row-level security is the authority for every table read and write.
+Laravel switches to `service_role` only for its own token lookup, application
+creation, and password-reset table operations. Client data requests always run
+as `authenticated` with the caller's `auth_user_id`, so RLS applies unchanged.
+
+Column-level grants hide `users.password`, `labs.solution_code`, and
+`assessment_questions.correct_answer` from `anon` and `authenticated`.
 
 ---
 
-## 3. Database Schema & Migrations
+## 3. Database Schema & Files
 
-All schema and migrations live in `supabase/`.
+The reproducible database lives in `lms/database/`. Files run once, in filename
+order, when Docker creates the volume:
 
-### Core Tables
+| File | Purpose |
+|------|---------|
+| `00_bootstrap.sql` | PostgREST roles, Laravel role, `auth` schema/functions, extensions |
+| `01_schema.sql` | Tables, indexes, triggers, grants, RLS policies, demo data |
+| `02_auth_tokens.sql` | `auth_tokens` and `password_resets` (service-role only) |
+| `03_demo_passwords.sql` | Demo account bcrypt hashes (`BlueSpace2026!`) |
+
+`00_bootstrap.sql` creates these API roles:
+
+- `anon` — unauthenticated PostgREST requests (RLS denies data).
+- `authenticated` — all signed-in users.
+- `service_role` — `BYPASSRLS`, used only by Laravel internals.
+- `authenticator` — PostgREST's login role; switches to the role above.
+- `lms_service` — Laravel's direct PostgreSQL login.
+
+The `auth` schema provides `auth.uid()`, `auth.email()`, `auth.role()`, and
+`auth.jwt()`, which read `request.jwt.claims`. Existing policies use these
+helpers, so the schema and policies carried over unchanged.
+
+### Core tables
 
 | Table | Description |
 |-------|-------------|
 | `users` | Academy profiles (name, email, type, is_active, partner_id) |
-| `cohorts` | Quarterly intakes (Dec 2026, Mar 2027, Jun 2027, Sep 2027) |
+| `cohorts` | Quarterly intakes |
 | `enrolments` | Links users to cohorts with track and status |
 | `squads` | Mixed-track groups within cohorts |
 | `modules` | Course modules within the 4-stage framework |
 | `lessons` | Individual lessons within modules |
-| `labs` | Guided lab assignments (solution_code hidden) |
-| `assessments` | Quizzes and domain assessments (correct_answer hidden) |
+| `labs` | Guided lab assignments (`solution_code` hidden) |
+| `assessments` | Quizzes and domain assessments (`correct_answer` hidden) |
 | `submissions` | Student lab/assessment submissions |
 | `lesson_progress` | Per-user lesson completion tracking |
-| `use_cases` | Live Factory problems for project stage |
-| `sprints` | 2-week sprints within live projects |
+| `use_cases` | Live Factory problems for the project stage |
+| `sprints` | Two-week sprints within live projects |
 | `certifications` | Fellow certification records |
 | `placements` | Post-certification project placements |
 | `notifications` | In-app notifications |
 | `audit_logs` | Admin audit trail |
 | `clinics` | Mentor office hours |
+| `academy_applications` | Public applications awaiting review |
+| `auth_tokens` | Opaque Laravel API tokens |
+| `password_resets` | One-use recovery tokens |
 
-### Partner Tables (Migration 011)
+### Partner tables
 
 | Table | Description |
 |-------|-------------|
@@ -74,218 +125,255 @@ All schema and migrations live in `supabase/`.
 | `partner_course_enrolments` | Student enrolments in partner courses |
 | `partner_course_progress` | Per-user lesson progress in partner courses |
 
-### Migration Order
+### Changing the schema
 
-Apply in this order:
-1. `supabase/schema.sql` — Foundation tables, indexes, foreign keys, triggers
-2. `001_phase_one_academy.sql` — Live classes, RLS policies
-3. `002_academy_operations.sql` — Auth bridge (`auth_user_id`), announcements
-4. `003_student_squad_visibility.sql` — Squad roster visibility (recursion fix in 010)
-5. `004_staff_learning_monitoring.sql` — Staff read-only monitoring
-6. `005_production_operations.sql` — Squad, placement, notification security
-7. `006_academy_v2_operations.sql` — Clinics, skills profiles, peer reviews, quiz attempts
-8. `007_completion_workflows.sql` — Certificate verification
-9. `008_workflow_automation.sql` — Notification triggers
-10. `009_staff_assignments.sql` — Instructor cohort/squad assignments
-11. `010_security_hardening.sql` — **CRITICAL:** RLS on cohorts/labs/assessments, secret column hiding, deactivated account blocking, anti self-promotion
-12. `011_partner_courses.sql` — Partner marketplace (optional, for partner feature)
+Add a new sequential file, for example `database/04_add_something.sql`. Never
+edit a file that has already been applied to a shared environment.
+
+```bash
+docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
+  < database/04_add_something.sql
+```
+
+For a repeatable local rebuild:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+The Laravel migrations in `backend/database/migrations/` are legacy scaffolding
+and do not describe this schema. Do not run `php artisan migrate` here.
 
 ---
 
 ## 4. Security Model
 
-### Migration 010 — Security Hardening (committed)
+### Row-level security and grants
 
-| Fix | Implementation |
-|-----|---------------|
-| RLS disabled on cohorts/labs/assessments | `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` + policies |
-| `labs.solution_code` readable by students | Column-level grant: revoke table SELECT, re-grant without `solution_code` |
-| `assessment_questions.correct_answer` readable | Column-level grant excludes `correct_answer` |
-| Deactivated accounts access data | `current_profile_id()`/`current_profile_role()` require `is_active = 1` |
-| Users self-promote to Administrator | `REVOKE UPDATE ON users`, re-grant only `(name, avatar, phone)` |
-| Self-referential enrolments policy (infinite recursion) | `current_squad_ids()` SECURITY DEFINER helper |
-| `users.password` leakage | Revoked from client roles; client reads explicit columns only |
-| `labs.solution_code` / `assessment_questions.correct_answer` | Hidden from `authenticated`/`anon`; service role only |
+| Protection | Implementation |
+|------------|----------------|
+| Table access | RLS enabled on every public table; policies keyed to `current_profile_id()` / `current_profile_role()` |
+| Deactivated accounts | Helpers return `NULL` when `is_active = 0`, so policies yield no rows |
+| `users` self-promotion | Table `UPDATE` is revoked; only `name`, `avatar`, `phone` are grantable |
+| `users.password` | Not granted to `anon`/`authenticated`; Laravel uses `lms_service` |
+| `labs.solution_code` | Column-level `SELECT` grant excludes it |
+| `assessment_questions.correct_answer` | Column-level `SELECT` grant excludes it |
+| Token tables | `REVOKE ALL` from client roles; only `service_role` may read/write |
 
-### Role-Based Access
+### Role-based access
 
-| Role | Can See | Can Edit | Portal URL |
-|------|---------|----------|------------|
+| Role | Can see | Can edit | Portal |
+|------|---------|----------|--------|
 | Student | Own enrolments, squad, learning, partner catalog | Own profile, submissions, progress | `/student-login` |
-| Instructor | All cohort data, submissions to grade | Grading, lessons, squads | `/instructor-login` |
-| Partner | Own organization's courses | Own courses, lessons | `/partner-login` |
+| Instructor | Cohort data, submissions to grade | Grading, lessons (squad mutations are Administrator-only in the UI) | `/instructor-login` |
+| Partner | Own organization's courses | Own courses and lessons | `/partner-login` |
 | Administrator | Everything | All academy operations | `/admin-login` |
 
-### Fail-Closed Behavior
+### Squad, enrolment, and user management
 
-- Deactivated accounts (`is_active = 0`) get `NULL` from `current_profile_id()` — all RLS policies return no rows
-- AuthContext `isBlocked()` clears the session on refresh if profile is missing or deactivated
-- Login blocks deactivated and unprovisioned accounts with explicit messages
+- `squads` RLS permits Instructor and Administrator writes; `SquadManagement`
+  intentionally limits the UI to Administrators and shows a read-only notice
+  for Instructors.
+- `enrolments` management is Administrator-only.
+- `UserManagement` role, activation, and delete mutations are intentionally
+  blocked by security hardening. Use SQL for those operations.
+- Zero-row updates surface an explicit permission error instead of failing
+  silently.
+
+### Fail-closed behavior
+
+- Deactivated accounts get `NULL` from the profile helpers; all RLS policies
+  return no rows.
+- `AuthContext` clears the session on refresh if the profile is missing,
+  inactive, or the wrong role.
+- Login blocks deactivated and unprovisioned accounts with explicit messages.
+- The client logs out after 30 minutes of inactivity.
 
 ---
 
-## 5. Edge Functions
+## 5. Laravel API
 
-Five deployable edge functions in `supabase/functions/`:
+The complete surface is in `backend/routes/api.php`.
 
-| Function | Purpose | Auth Required |
-|----------|---------|---------------|
-| `auth-handler` | Login, applications, admin signup, profile lookup | Yes (except login/apply) |
-| `lessons` | Lesson CRUD, progress tracking (RLS-scoped) | Yes |
-| `placements` | Placement management (admin-only writes) | Yes |
-| `reports` | Cohort, domain, placement reports (admin-only) | Yes (Administrator) |
-| `submissions` | Submission CRUD, grading (staff-only) | Yes |
+### Controllers
 
-**Auth pattern in edge functions:**
-1. Extract Bearer token from `Authorization` header
-2. Verify with `supabase.auth.getUser(token)` using service role
-3. Look up profile by email in `public.users`
-4. Check `is_active = 1`
-5. For data queries, switch to the client (anon) key with the user's token so RLS applies
+| Controller | Responsibility |
+|------------|----------------|
+| `AuthController` | Login, session, profile, update-user, change-password, apply, admin signup, forgot/reset password |
+| `DataProxyController` | Forwards table requests to PostgREST with a signed JWT |
+| `RpcController` | Forwards database function calls with the same JWT |
+| `FunctionsController` | `auth-handler` compatibility shim and transactional email |
 
-**Environment variables required in Supabase:**
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_ANON_KEY`
+### Support classes
 
+| Class | Responsibility |
+|-------|----------------|
+| `App\Support\AuthStore` | Service-role database access, opaque token creation, session lookup, user lookup |
+| `App\Support\Jwt` | HS256 signing for PostgREST |
+| `App\Http\Middleware\AuthenticateToken` | Reads the bearer token, validates expiry and active status, sets `auth_user` |
 
+### Data proxy details
 
-## 6. Email Configuration
+`DataProxyController` forwards the method, query string, `Content-Type`,
+`Prefer`, and `Range` headers. It only resumes the `Content-Type`,
+`Content-Range`, `Preference-Applied`, and `Location` response headers. The path
+is restricted to `[A-Za-z0-9_-]` segments, so it cannot be used to reach another
+host or service.
 
-Two email systems are used in parallel:
+### Rate limits
 
-### Supabase Auth Emails (confirmation, password reset, magic link, invite)
+`login` and `apply` are limited to 20 requests per minute per IP; the three
+password-reset endpoints are limited to 10 per minute.
 
-These are sent by Supabase Auth using SMTP. Configure in the Supabase dashboard under **Authentication → Email Templates** and **Authentication → SMTP Settings**:
+### Local PHP requirement
 
-**SMTP Settings (Resend recommended):**
-- Host: `smtp.resend.com`
-- Port: `465`
-- Username: `resend`
-- Password: Your Resend API key
-- From: A verified sender address (e.g., `noreply@yourdomain.com`)
+`backend/bin/artisan` loads the locally extracted `pdo_pgsql` extension from
+`backend/.php-ext`. On a normal host with `php8.3-pgsql` installed, plain
+`php artisan` works and the wrapper simply delegates to it. To extract the
+extension without sudo:
 
-**Auth Site URL:** Set to your production frontend origin (e.g., `https://app.bluespacefintechacademy.com`)
+```bash
+cd backend
+./scripts/install-php-pgsql-local.sh
+./bin/artisan serve --host=127.0.0.1 --port=8001
+```
 
-**Redirect URLs:** Allow `/student-login`, `/instructor-login`, `/admin-login`, `/partner-login`, and `/reset-password`
+---
 
-**Email Templates:** Copy the HTML from `supabase/templates/` into the matching template in **Authentication → Email Templates**:
-- `confirmation.html` → Confirmation email
-- `recovery.html` → Password recovery
-- `magic_link.html` → Magic link
-- `invite.html` → Invitation
-- `email_change.html` → Email change confirmation
-- `email_changed_notification.html` → Email changed notification
-- `password_changed_notification.html` → Password changed notification
-- `reauthentication.html` → Reauthentication code
+## 6. Client Integration
 
-All templates include the BlueSPACE logo (`{{ .SiteURL }}/logo-dark.png`), brand color buttons, and fallback plain-text links. The logo requires your Auth Site URL to serve the frontend's public `logo-dark.png`.
+`client/src/lib/backend.js` is the only transport layer. It exposes a small
+query-builder API so page code stays unchanged:
 
-### Application Status Emails (Resend Edge Function)
+```js
+import { api } from '../lib/backend'
 
-Application approval/rejection emails are sent via the `email-service` edge function using Resend directly.
+const { data, error } = await api
+  .from('submissions')
+  .select('id, score, users!submissions_user_id_fkey(name)')
+  .eq('user_id', profile.id)
+  .order('submitted_at', { ascending: false })
+```
 
-**Required Supabase Edge Function secrets:**
-- `RESEND_API_KEY`
-- `EMAIL_FROM` (verified sender domain)
-- `APP_ORIGIN` (production frontend origin)
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_ANON_KEY`
+Supported builder methods: `select`, `insert`, `update`, `upsert`, `delete`,
+`eq`, `in`, `is`, `not`, `gte`, `lte`, `order`, `limit`, `single`,
+`maybeSingle`.
 
-**Authorization:** Callers must have an active academy profile. Non-administrators can only email themselves; administrators can email any recipient.
+Supported auth calls: `signInWithPassword`, `signOut`, `getSession`, `getUser`,
+`updateUser`, `resetPasswordForEmail`, `resend`, `onAuthStateChange`.
+
+Supported function calls: `functions.invoke('auth-handler' | 'email-service')`
+and `rpc(name, params)`.
+
+### Password recovery
+
+The reset link is `/reset-password?from=…#access_token=…&type=recovery`.
+`lib/backend.js` stores the token in `sessionStorage`, removes it from the
+address bar, emits `PASSWORD_RECOVERY`, and exchanges it through
+`POST /api/auth/reset-password` when the form calls
+`api.auth.updateUser({ password })`. The recovery token cannot be used for data
+access.
+
+### Authentication flow
+
+1. User visits `/student-login`, `/instructor-login`, `/partner-login`, or
+   `/admin-login`.
+2. `Login.jsx` calls `api.auth.signInWithPassword`.
+3. `AuthContext.loadProfile()` reads `public.users` by email with an explicit
+   column list.
+4. Checks: `is_active === 1` and `type` matches the portal role.
+5. On success: profile is stored in context/localStorage and the user lands on
+   `/dashboard`.
+6. On refresh: `getSession()` restores the token, the profile is reloaded, and
+   blocked accounts are cleared.
+
+### Route protection
+
+`ProtectedRoute` checks that a user exists and that `user.type` is in the
+route's `roles` array; otherwise it redirects to `/unauthorized`.
 
 ---
 
 ## 7. Frontend Structure
 
 ```
-client/src/
-├── App.jsx              # React router with role-gated routes
-├── main.jsx             # Entry point
-├── index.css            # Global styles + design tokens
-├── context/
-│   └── AuthContext.jsx  # Auth provider, profile loading, fail-closed guard
-├── components/
-│   ├── ui/              # shadcn/ui primitives
-│   └── layout/
-│       ├── AppLayout.jsx
-│       ├── ProtectedRoute.jsx  # Role-based route guard
-│       └── Sidebar.jsx         # Role-based navigation
-├── lib/
-│   └── supabase.js      # Supabase client initialization
-└── pages/               # Route components
-    ├── Login.jsx                 # 4 portals: student/instructor/partner/admin
-    ├── Dashboard.jsx
-    ├── MyLearning.jsx
-    ├── LabWorkspace.jsx
-    ├── LabsToReview.jsx          # Instructor grading queue
-    ├── Certificates.jsx
-    ├── SquadManagement.jsx
-    ├── Grading.jsx
-    ├── StudentMonitoring.jsx
-    ├── PartnerCourses.jsx        # Partner course studio
-    ├── PartnerCatalog.jsx        # Student partner course browse
-    ├── PartnerCourseLearning.jsx # Partner course player
-    ├── PartnerCourseReview.jsx   # Admin partner course approval
-    ├── PartnerManagement.jsx     # Admin partner agency onboarding
-    ├── Reports.jsx               # Admin reports
-    └── ... (more pages)
+client/
+├── public/              # logo-dark.png, logo-light.png, logo-white.png, favicon.*
+└── src/
+    ├── App.jsx              # React router with role-gated routes
+    ├── main.jsx             # Entry point
+    ├── index.css            # Global styles + design tokens
+    ├── context/
+    │   └── AuthContext.jsx  # Auth provider, profile loading, inactivity logout
+    ├── components/
+    │   ├── ui/              # shadcn/ui primitives
+    │   └── layout/
+    │       ├── AppLayout.jsx
+    │       ├── ProtectedRoute.jsx
+    │       └── Sidebar.jsx
+    ├── lib/
+    │   ├── backend.js       # Laravel API client + query builder
+    │   ├── profile.js       # Profile column list and lookup
+    │   ├── deadlines.js     # Deadline formatting helpers
+    │   └── emailService.js  # Transactional email composer
+    └── pages/               # Route components
 ```
 
-### Authentication Flow
+### Unused page files
 
-1. User visits `/student-login`, `/instructor-login`, `/partner-login`, or `/admin-login`
-2. `Login.jsx` validates credentials via Supabase Auth
-3. `AuthContext.loadProfile()` looks up `public.users` by email
-4. Checks: `is_active === 1`, `type` matches portal role
-5. On success: stores profile in context + localStorage, navigates to `/dashboard`
-6. On page refresh: `AuthContext` restores session via `getSession()`, reloads profile, clears if blocked
+These exist but are not imported by `App.jsx`:
 
-### Route Protection
+- `LabsToReview.jsx`
+- `ProjectWorkspace.jsx`
+- `SkillsProfile.jsx`
+- `SubmissionFeedback.jsx`
 
-`ProtectedRoute` checks:
-- `user` is not null (redirects to `/login`)
-- `user.type` is in the `roles` array (redirects to `/unauthorized`)
+`/project-workspace` redirects to `/my-squad`, and `/my-squad` is Student-only.
+`/quiz/:assessmentId` is a live student route but no page links to it.
 
 ---
 
-## 8. Adding Test Accounts
+## 8. Demo Accounts and Provisioning
 
-Passwords are managed by **Supabase Auth**, not the `public.users` table. The `public.users.password` column is legacy and unused.
+Demo data is in `database/01_schema.sql`; hashes are in
+`database/03_demo_passwords.sql`. Every demo account uses `BlueSpace2026!`.
 
-### Method 1: Supabase Dashboard (recommended for testing)
+| Role | Email | Portal |
+|------|-------|--------|
+| Student | `student@bluespacefintechacademy.com` | `/student-login` |
+| Student (Ada Okonkwo) | `ada.okonkwo@bluespacefintechacademy.com` | `/student-login` |
+| Student (Kwame Asante) | `kwame.asante@bluespacefintechacademy.com` | `/student-login` |
+| Student (Zainab Yusuf) | `zainab.yusuf@bluespacefintechacademy.com` | `/student-login` |
+| Student (Emeka Ndiaye) | `emeka.ndiaye@bluespacefintechacademy.com` | `/student-login` |
+| Student (Fatima Diallo) | `fatima.diallo@bluespacefintechacademy.com` | `/student-login` |
+| Instructor (FinCore) | `fin.core@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor (FaaS) | `faas.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor (FinOps) | `finops.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Administrator | `academy.lead@bluespacefintechacademy.com` | `/admin-login` |
+| Partner | `partner@bluespacefintechacademy.com` | `/partner-login` |
 
-1. Go to your Supabase project dashboard → **Authentication → Users**
-2. Click **Add user**
-3. Enter email and password
-4. The user is created in `auth.users`
+### Adding an account
 
-### Method 2: Via the application
+1. Submit `/register`, or call `POST /api/auth/apply`.
+2. An Administrator reviews the application at `/applications`.
+3. Approval creates or activates the matching `public.users` row and enrols
+   students in the selected cohort/track.
 
-1. Open `/register` in your deployed app
-2. Submit an application (name, email, password, role, track)
-3. An Administrator reviews it at `/applications`
-4. Admin provisions via `/auth-handler/signup`
-
-### Method 3: Via auth-handler edge function (admin only)
-
-```
-POST /functions/v1/auth-handler/signup
-Headers: Authorization: Bearer <admin-token>
-Body: { "email": "new@user.com", "password": "...", "type": "Student", "name": "New User" }
-```
-
-### Critical Step — Activate the Profile
-
-After creating a Supabase Auth user, you **must** ensure a matching `public.users` row exists with `is_active = 1`:
+For a manual account, insert a profile with a bcrypt password and an
+`auth_user_id`:
 
 ```sql
--- Find or create the profile
-INSERT INTO public.users (name, email, type, is_active, avatar)
-VALUES ('New User', 'new@user.com', 'Student', 1, 'avatar.png')
-ON CONFLICT (email) DO UPDATE
-SET is_active = 1, type = 'Student';
+INSERT INTO public.users (auth_user_id, name, email, password, type, is_active, avatar)
+VALUES (
+  gen_random_uuid(),
+  'New User',
+  'new@user.com',
+  crypt('BlueSpace2026!', gen_salt('bf')),
+  'Student',
+  1,
+  '/avatars/student.png'
+);
 ```
 
 Without `is_active = 1`, login fails with "This account has been deactivated."
@@ -296,37 +384,42 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
-| "This account has been deactivated" | `is_active = 0` in `public.users` | Set `is_active = 1` via SQL or dashboard |
-| "This account is not provisioned" | `type` is NULL or doesn't match portal | Set `type` to Student/Instructor/Administrator/Partner |
-| "No academy profile" | No `public.users` row matching email | Insert profile row with matching email |
-| `select('*') on users` fails | `track`, `password` not in column grant | Use explicit column list (no `track` — it's on `enrolments`) |
-| 403 on logout | Browser hitting old auth endpoint | Normal; session already cleared client-side |
-| Build fails on embedded selects | `users(track)` — `track` not on `users` | Join `enrolments` for track instead |
+| Login 500 with `could not find driver` | PHP missing `pdo_pgsql` | Use `./bin/artisan`, or install `php8.3-pgsql` |
+| Login 500 with `password authentication failed` | `.env` password does not match `00_bootstrap.sql` | Use `lms_service` / `bluespace_laravel_2026` locally |
+| PostgREST returns 401 for every request | `PGRST_JWT_SECRET` differs between compose and Laravel | Set the same value in `lms/.env` and `backend/.env`, then restart both |
+| Data request returns `[]` unexpectedly | RLS policy or wrong role | Check the signed-in profile's `type` and `is_active` |
+| `select('*')` on `users` fails | `password` is not in the column grant | Use `PROFILE_COLUMNS` from `lib/profile.js` |
+| "This account has been deactivated" | `is_active = 0` | Set `is_active = 1` |
+| "This account is not provisioned" | `type` is NULL or wrong portal | Set `type` to Student/Instructor/Administrator/Partner |
+| Build fails on embedded selects | Column missing from the joined table | Join `enrolments` for `track`; it is not on `users` |
+| Password reset email missing | `MAIL_MAILER=log` | Read `backend/storage/logs/laravel.log`, or configure SMTP |
+| Portable PHP wrapper fails | `.php-ext` missing | Run `backend/scripts/install-php-pgsql-local.sh` |
 
 ---
 
 ## 10. Deployment Checklist
 
-- [ ] Create `.env` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
-- [ ] Apply migrations 001–011 to production Supabase project
-- [ ] Deploy edge functions: `auth-handler`, `lessons`, `placements`, `reports`, `submissions`
-- [ ] Configure Supabase Auth SMTP settings for password reset
-- [ ] Set Auth Site URL and redirect URLs to production origin
-- [ ] Create at least one Administrator account and activate it
-- [ ] Push code to GitHub and connect Vercel
-- [ ] Add environment variables in Vercel dashboard
-- [ ] Rotate any exposed GitHub PATs (never commit tokens to `.git/config`)
+- [ ] Provision PostgreSQL 17 and apply `database/*.sql` in order
+- [ ] Run PostgREST privately with the same `PGRST_JWT_SECRET` as Laravel
+- [ ] Deploy `backend/` with PHP 8.3, `pdo_pgsql`, and `composer install --no-dev`
+- [ ] Set `APP_URL`, database credentials, `POSTGREST_URL`, and mail settings
+- [ ] Change every development password and rotate the JWT secret
+- [ ] Set `LMS_FRONTEND_URL` and `CORS_ALLOWED_ORIGINS` to the production origin
+- [ ] Build the client with `VITE_API_URL=https://<api-host>/api`
+- [ ] Deploy the client to Vercel
+- [ ] Create at least one active Administrator account
+- [ ] Never commit `.env` files, JWTs, or database passwords
 
 ---
 
 ## 11. Contributing
 
-1. Create a branch from `main`
-2. Make changes
-3. Run `npm run build` and `npm run lint` in `client/`
-4. Test migrations locally against Docker PostgreSQL
-5. Commit with descriptive message
-6. Open pull request
+1. Create a branch from `main`.
+2. Make changes.
+3. Run `npm run build` and `npm run lint` in `client/`.
+4. For PHP changes, run `vendor/bin/pint --dirty --format agent` in `backend/`.
+5. Test database changes against a fresh `docker compose down -v && docker compose up -d`.
+6. Commit with a descriptive message and open a pull request.
 
 ---
 
@@ -334,26 +427,46 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 | File | Purpose |
 |------|---------|
-| `supabase/schema.sql` | Foundation tables, indexes, FKs, triggers, base RLS (disabled) |
-| `supabase/migrations/010_security_hardening.sql` | RLS enablement, secret column hiding, fail-closed auth |
-| `supabase/migrations/011_partner_courses.sql` | Partner marketplace tables, functions, RLS policies |
-| `supabase/functions/auth-handler/index.ts` | Login, applications, admin signup, profile |
-| `supabase/functions/lessons/index.ts` | Lessons + progress (RLS-scoped) |
-| `supabase/functions/submissions/index.ts` | Submissions + grading |
-| `supabase/functions/placements/index.ts` | Placement management |
-| `supabase/functions/reports/index.ts` | Admin reports |
+| `database/00_bootstrap.sql` | Roles, auth schema/functions, extensions |
+| `database/01_schema.sql` | Full academy schema, data, grants, RLS |
+| `database/02_auth_tokens.sql` | Laravel token and reset tables |
+| `database/03_demo_passwords.sql` | Demo bcrypt hashes |
+| `docker-compose.yml` | PostgreSQL and PostgREST services |
+| `backend/routes/api.php` | Complete API surface |
+| `backend/app/Http/Controllers/AuthController.php` | Auth, applications, password reset |
+| `backend/app/Http/Controllers/DataProxyController.php` | RLS-preserving PostgREST proxy |
+| `backend/app/Support/AuthStore.php` | Service-role data access and sessions |
+| `backend/app/Support/Jwt.php` | PostgREST JWT signing |
+| `client/src/lib/backend.js` | Client transport and query builder |
 | `client/src/context/AuthContext.jsx` | Auth provider, fail-closed guard |
-| `client/src/pages/Login.jsx` | 4 role-based login portals |
+| `client/src/pages/Login.jsx` | Four role-based login portals |
 | `client/src/App.jsx` | Route definitions with role guards |
 | `client/src/components/layout/ProtectedRoute.jsx` | Role-based route protection |
 | `client/src/components/layout/Sidebar.jsx` | Role-based navigation |
+| `client/src/components/ui/badge.jsx` | Flat, background-free badge variants |
+
+### Known gaps
+
+- Administrator role/activation/delete mutations in `UserManagement` are
+  intentionally blocked by security hardening.
+- Squad mutations are Administrator-only in the UI even though the `squads`
+  policy allows Instructors.
+- Dead page files: `LabsToReview.jsx`, `ProjectWorkspace.jsx`,
+  `SkillsProfile.jsx`, `SubmissionFeedback.jsx`.
+- `/quiz/:assessmentId` has no UI link.
+- The `payments` table is unused.
+- Google Meet/Calendar automation is not enabled.
 
 ---
 
 ## 13. Security Notes
 
-- **Never commit `.env` files or PAT tokens** to git
-- **Never insert passwords into `public.users.password`** — column is revoked from client reads
-- **Service role key must never be exposed in the browser** — only used in edge functions
-- **All client reads use explicit column lists** — `select('*')` on `users`, `labs`, or `assessment_questions` will fail
-- **Deactivated accounts are blocked at both DB and application layers** — RLS returns NULL, AuthContext clears session
+- **Never commit `.env` files, tokens, or passwords.**
+- **Never insert a password into a client-readable column.** `users.password` is
+  revoked from `anon` and `authenticated`.
+- **Never expose `service_role` or the PostgREST JWT secret to the browser.**
+- **Use explicit column lists** on `users`, `labs`, and `assessment_questions`;
+  `select('*')` is denied by the grants.
+- **Deactivated accounts are blocked at both layers** — RLS returns no rows and
+  `AuthContext` clears the session.
+- **Rotate the JWT secret** if it is ever shared outside Laravel/PostgREST.

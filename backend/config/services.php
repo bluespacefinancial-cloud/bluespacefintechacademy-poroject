@@ -35,4 +35,26 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Academy application
+    |--------------------------------------------------------------------------
+    |
+    | PostgREST is the data API behind this application. Laravel authenticates
+    | the client, signs a short-lived token for PostgREST, and proxies requests
+    | so PostgreSQL row-level security remains the authority on every query.
+    |
+    */
+
+    'postgrest' => [
+        'url' => env('POSTGREST_URL', 'http://127.0.0.1:54330'),
+        'jwt_secret' => env('PGRST_JWT_SECRET'),
+    ],
+
+    'lms' => [
+        'frontend_url' => env('LMS_FRONTEND_URL', 'http://localhost:3000'),
+        'token_ttl_minutes' => (int) env('LMS_TOKEN_TTL_MINUTES', 10080),
+        'recovery_ttl_minutes' => (int) env('LMS_RECOVERY_TTL_MINUTES', 60),
+    ],
+
 ];

@@ -4,14 +4,11 @@ import {
   User,
   Shield,
   Award,
-  BookOpen,
-  Briefcase,
   Check,
   Save,
   Lock,
   Layers,
   Compass,
-  FileText,
   CheckCircle2,
   AlertCircle,
   ExternalLink,
@@ -61,8 +58,11 @@ const ALL_SKILLS = [
 export default function ProfileSettings() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialTab = searchParams.get('tab') || 'showcase'
-  const [activeTab, setActiveTab] = useState(initialTab) // 'showcase' | 'skills' | 'credentials' | 'security'
+  const tabParam = searchParams.get('tab')
+  // The URL is the single source of truth for the active tab.
+  const activeTab = ['showcase', 'skills', 'credentials', 'security'].includes(tabParam)
+    ? tabParam
+    : 'showcase'
 
   // Profile and Account State
   const [profile, setProfile] = useState(null)
@@ -89,15 +89,7 @@ export default function ProfileSettings() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
-  useEffect(() => {
-    const tabParam = searchParams.get('tab')
-    if (tabParam && ['showcase', 'skills', 'credentials', 'security'].includes(tabParam)) {
-      setActiveTab(tabParam)
-    }
-  }, [searchParams])
-
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
     setSearchParams({ tab })
     setError('')
     setMessage('')

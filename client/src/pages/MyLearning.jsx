@@ -1,11 +1,27 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Clock, CheckCircle, ChevronRight, PlayCircle } from 'lucide-react'
-import { Button } from '../components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
+import {
+  Award,
+  BookOpen,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Compass,
+  Landmark,
+  Layers,
+  PlayCircle,
+  Rocket,
+  Server,
+  Sparkles,
+  Target,
+  TrendingUp,
+} from 'lucide-react'
 import { Badge } from '../components/ui/badge'
-import { api } from '../lib/backend'
+import { Book } from '../components/ui/book'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardTitle } from '../components/ui/card'
 import { useAuth } from '../context/AuthContext'
+import { api } from '../lib/backend'
 
 const STAGE_LABELS = {
   foundations: 'Foundations',
@@ -23,6 +39,46 @@ const LESSON_TYPE_COLORS = {
   assessment: 'text-amber-700 border-amber-200',
 }
 
+const MODULE_STATUS_LABELS = {
+  completed: 'Completed',
+  in_progress: 'In progress',
+  not_started: 'Not started',
+}
+
+const DOMAIN_COVERS = {
+  FaaS: { color: '#0000cc', icon: Rocket },
+  FinCore: { color: '#047857', icon: Landmark },
+  FinOps: { color: '#b45309', icon: TrendingUp },
+  FinInfra: { color: '#334155', icon: Server },
+}
+
+const STAGE_ICONS = {
+  foundations: BookOpen,
+  domain_immersion: Layers,
+  live_projects: Rocket,
+  certification: Award,
+}
+
+const FALLBACK_COVERS = [
+  { color: '#0000cc', icon: BookOpen },
+  { color: '#1e3a8a', icon: Layers },
+  { color: '#0f766e', icon: Target },
+  { color: '#7c2d12', icon: Compass },
+  { color: '#4c1d95', icon: Sparkles },
+]
+
+const MODULE_BOOK_WIDTH = { sm: 132, md: 148, lg: 164 }
+
+const getModuleCover = (module, index) => {
+  if (module.domain && DOMAIN_COVERS[module.domain]) {
+    return DOMAIN_COVERS[module.domain]
+  }
+
+  const stageIcon = STAGE_ICONS[module.stage]
+  const fallback = FALLBACK_COVERS[index % FALLBACK_COVERS.length]
+  return stageIcon ? { ...fallback, icon: stageIcon } : fallback
+}
+
 const formatTime = (minutes) => {
   if (!minutes) return '0 min'
   const h = Math.floor(minutes / 60)
@@ -36,6 +92,9 @@ export default function MyLearning() {
   const [modules, setModules] = useState([])
   const [lessons, setLessons] = useState([])
   const [activeModuleId, setActiveModuleId] = useState(null)
+  const [openingModuleId, setOpeningModuleId] = useState(null)
+  const moduleDetailRef = useRef(null)
+  const openTimerRef = useRef(null)
   const [loading, setLoading] = useState(true)
   const [progress, setProgress] = useState({})
   const [overallStats, setOverallStats] = useState({
@@ -48,6 +107,8 @@ export default function MyLearning() {
   useEffect(() => {
     loadData()
   }, [user?.id])
+
+  useEffect(() => () => window.clearTimeout(openTimerRef.current), [])
 
   const loadData = async () => {
     try {
@@ -107,8 +168,26 @@ export default function MyLearning() {
 
   const currentModule = modules.find(m => m.id === activeModuleId) || modules[0] || null
 
+  const handleOpenModule = (module) => {
+    window.clearTimeout(openTimerRef.current)
+    setOpeningModuleId(module.id)
+    openTimerRef.current = window.setTimeout(() => {
+      setActiveModuleId(module.id)
+      setOpeningModuleId(null)
+      window.requestAnimationFrame(() => {
+        moduleDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }, 260)
+  }
+
+  const handleStartModule = () => {
+    if (!currentModule) return
+    const firstLesson = lessons.find((lesson) => lesson.module_id === currentModule.id)
+    if (firstLesson) navigate(`/lesson/${firstLesson.id}`)
+  }
+
   const handleLessonClick = (lesson) => {
-    if (lesson.completed || lesson.status === 'locked') return
+    if (lesson.status === 'locked') return
     navigate(`/lesson/${lesson.id}`)
   }
 
@@ -189,7 +268,9 @@ export default function MyLearning() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-deep-600">{currentModule?.week || 'Week 1'}</p>
+                <p className="text-2xl font-bold text-deep-600">
+                  {currentModule?.week_start ? `Week ${currentModule.week_start}` : 'Week 1'}
+                </p>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Current Week</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
@@ -200,78 +281,130 @@ export default function MyLearning() {
         </Card>
       </div>
 
-      <div className="lg:col-span-2">
-        <h2 className="text-sm font-semibold text-deep-600 mb-4 flex items-center gap-2">
-          <BookOpen size={14} className="mr-1.5" />
-          Course Modules
-        </h2>
-        <div className="space-y-3">
-          {modules.map((module) => {
-            const moduleLessonsCount = lessons.filter(l => l.module_id === module.id).length
-            const moduleCompleted = moduleLessonsCount > 0
-              ? lessons.filter(l => l.module_id === module.id).filter(l => progress[l.id]?.is_completed).length
-              : 0
-            const moduleStatus = moduleLessonsCount > 0 && moduleCompleted === moduleLessonsCount ? 'completed' : moduleLessonsCount > 0 && moduleCompleted > 0 ? 'in_progress' : 'locked'
-
-            return (
-              <Card
-                key={module.id}
-                className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
-                  moduleStatus === 'locked' ? 'opacity-75 pointer-events-none' : ''
-                }`}
-                onClick={() => setActiveModuleId(module.id)}
+      <div>
+        <section aria-labelledby="course-modules-heading" className="mb-8">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2
+                id="course-modules-heading"
+                className="flex items-center gap-2 text-sm font-semibold text-deep-600"
               >
-                <CardHeader className="flex flex-row items-center justify-between py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
-                      {moduleStatus === 'completed' ? (
-                        <CheckCircle className="text-white" />
-                      ) : moduleStatus === 'in_progress' ? (
-                        <Clock className="text-brand-600" />
-                      ) : (
-                        <ChevronRight className="text-gray-400" />
-                      )}
+                <BookOpen size={14} />
+                Course Modules
+              </h2>
+              <p className="mt-1 text-xs text-gray-500">
+                Choose a book to open its module and lesson list.
+              </p>
+            </div>
+            <span className="text-[11px] uppercase tracking-wide text-gray-400">
+              {modules.length} {modules.length === 1 ? 'module' : 'modules'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-start gap-x-8 gap-y-10">
+            {modules.map((module, index) => {
+              const moduleLessonsList = lessons.filter((lesson) => lesson.module_id === module.id)
+              const moduleLessonsCount = moduleLessonsList.length
+              const moduleCompleted = moduleLessonsList.filter(
+                (lesson) => progress[lesson.id]?.is_completed
+              ).length
+              const moduleStatus =
+                moduleLessonsCount > 0 && moduleCompleted === moduleLessonsCount
+                  ? 'completed'
+                  : moduleCompleted > 0
+                    ? 'in_progress'
+                    : 'not_started'
+              const cover = getModuleCover(module, index)
+              const CoverIcon = cover.icon
+              const isActive = module.id === activeModuleId
+              const isOpening = module.id === openingModuleId
+              const progressPercent =
+                moduleLessonsCount > 0
+                  ? Math.round((moduleCompleted / moduleLessonsCount) * 100)
+                  : 0
+
+              return (
+                <div
+                  key={module.id}
+                  className="w-[132px] sm:w-[148px] lg:w-[164px]"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleOpenModule(module)}
+                    aria-label={`Open module: ${module.title}`}
+                    aria-pressed={isActive}
+                    className={`book-button group block w-full rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-4 focus-visible:ring-offset-gray-50 ${
+                      isActive
+                        ? 'rounded-lg ring-2 ring-deep-600 ring-offset-4 ring-offset-gray-50'
+                        : ''
+                    }`}
+                  >
+                    <Book
+                      title={module.title}
+                      width={MODULE_BOOK_WIDTH}
+                      color={cover.color}
+                      textColor="#111827"
+                      variant="stripe"
+                      isOpen={isOpening}
+                      illustration={
+                        <div className="flex h-full w-full items-end justify-end p-4 text-white/80">
+                          <CoverIcon size={26} strokeWidth={1.5} aria-hidden="true" />
+                        </div>
+                      }
+                    />
+                  </button>
+
+                  <div className="mt-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        {STAGE_LABELS[module.stage] || module.stage}
+                      </span>
+                      <span className="shrink-0 text-[10px] text-gray-400">
+                        {moduleCompleted}/{moduleLessonsCount}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-sm">{module.title}</CardTitle>
-                      <CardDescription className="text-[10px]">
-                        {module.week} · {module.track}
-                      </CardDescription>
+                    <div className="h-1 overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className="h-full rounded-full bg-deep-600"
+                        style={{ width: `${progressPercent}%` }}
+                      />
                     </div>
+                    <p className="truncate text-[10px] text-gray-400">
+                      {MODULE_STATUS_LABELS[moduleStatus]} ·{' '}
+                      {module.domain || module.track || 'Academy'}
+                      {module.week_start ? ` · Week ${module.week_start}` : ''}
+                    </p>
                   </div>
-                  <Badge variant={moduleStatus === 'completed' ? 'secondary' : moduleStatus === 'in_progress' ? 'default' : 'outline'}>
-                    {STAGE_LABELS[module.stage]}
-                    {module.domain && ` · ${module.domain}`}
-                  </Badge>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
-                      {moduleStatus}
-                    </span>
-                    <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
-                      Open Module
-                    </Button>
-                  </div>
-                  <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-brand-600" style={{ width: moduleLessonsCount > 0 ? `${Math.round((moduleCompleted / moduleLessonsCount) * 100)}%` : '0%' }} />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          )}
-        </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
 
         {currentModule && (
-          <div className="lg:col-span-2 mt-8">
+          <div
+            ref={moduleDetailRef}
+            id="module-detail"
+            className="scroll-mt-24 border-t border-gray-200/80 pt-8"
+          >
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-bold text-deep-600">{currentModule.title}</h2>
                 <p className="text-sm text-gray-500">
-                  {STAGE_LABELS[currentModule.stage]}{currentModule.domain ? ` · ${currentModule.domain}` : ''}
+                  {STAGE_LABELS[currentModule.stage]}
+                  {currentModule.domain ? ` · ${currentModule.domain}` : ''}
+                  {currentModule.week_start ? ` · Week ${currentModule.week_start}` : ''}
                 </p>
               </div>
-              <Button className="shrink-0">Start Module</Button>
+              <Button
+                className="shrink-0"
+                onClick={handleStartModule}
+                disabled={moduleLessons.length === 0}
+              >
+                {moduleLessons.some((lesson) => progress[lesson.id]?.is_completed)
+                  ? 'Continue Module'
+                  : 'Start Module'}
+              </Button>
             </div>
             <div className="space-y-3">
               {moduleLessons.map((lesson) => {

@@ -530,6 +530,8 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `client/src/components/layout/ProtectedRoute.jsx` | Role-based route protection |
 | `client/src/components/layout/Sidebar.jsx` | Role-based navigation |
 | `client/src/components/ui/badge.jsx` | Flat, background-free badge variants |
+| `client/src/components/ui/book.jsx` | Bookshelf-style module cover with open animation |
+| `client/src/components/ui/use-responsive.js` | Responsive width hook used by `Book` |
 | `client/src/components/certificate/ProfessionalCertificate.jsx` | Print certificate and verification view |
 | `docs/DESIGN_SYSTEM.md` | Visual language and component rules |
 | `README.md` | Product overview and quick start |

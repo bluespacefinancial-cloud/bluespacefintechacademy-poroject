@@ -57,6 +57,17 @@ export default {
           finops: '#f59e0b',    // amber-500
           fininfra: '#64748b',  // slate-500
         },
+        // Book component tokens
+        background: {
+          200: 'var(--ds-background-200)',
+        },
+        'gray-alpha': {
+          400: 'var(--ds-gray-alpha-400)',
+        },
+      },
+      boxShadow: {
+        book: 'var(--ds-shadow-book)',
+        'book-border': 'var(--ds-shadow-book-border)',
       },
       transitionTimingFunction: {
         'ease-out-expo': 'cubic-bezier(0.23, 1, 0.32, 1)',

@@ -295,7 +295,60 @@ route's `roles` array; otherwise it redirects to `/unauthorized`.
 
 ---
 
-## 7. Frontend Structure
+## 7. Design System
+
+The full design source of truth is [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
+The rules below are the ones most likely to be broken by new work.
+
+### Direction
+
+Institutional, editorial and operational. BlueSPACE blue (`#0000FF`) is the
+only brand accent; hierarchy comes from typography, spacing and borders rather
+than decorative colour.
+
+### Layout
+
+- Authenticated pages are **full width** inside the shell. Do not wrap a page
+  in `max-w-7xl` or another page-level max width.
+- The shell is a fixed 256px sidebar (`lg:pl-64`) plus a 56px sticky top bar
+  (`h-14`).
+- The top bar carries only global search, the current cohort name (hidden below
+  `sm`) and notifications. Do not add date/time or student IDs there.
+- Main content uses `w-full min-w-0 px-4 sm:px-6 lg:px-8 py-6`.
+- Narrow widths are legitimate only for narrow content: auth cards (`max-w-sm`),
+  confirmation states (`max-w-md`), short forms (`max-w-2xl`/`max-w-3xl`) and
+  the certificate (`max-w-5xl`, `print:max-w-none`).
+
+### Surfaces and status
+
+- Cards: `rounded-xl border border-gray-200/90 bg-white shadow-sm`.
+- Badges and chips are **flat and border-only**: `border` plus text colour, no
+  filled pastel pills and no gradients. Variants live in
+  `client/src/components/ui/badge.jsx`.
+- Dates, times, student IDs and reference codes are plain text, never badges.
+- Use the shared `Badge`, `Button`, `Card` and `Input` primitives rather than
+  re-implementing styles per page.
+
+### Typography and tokens
+
+- Manrope (200–800) across the product; the certificate is the only exception
+  and uses its own serif pairing.
+- Tokens live in `client/tailwind.config.js` and `client/src/index.css`. Do not
+  introduce new hex values outside those files.
+- Domain colours (`domain.faas`, `domain.fincore`, `domain.finops`,
+  `domain.fininfra`) identify domains only, never success/error states.
+
+### Certificate
+
+The certificate is a separate editorial surface
+(`client/src/components/certificate/ProfessionalCertificate.jsx`): A3
+landscape, formal serif hierarchy, executive palette, and self-contained
+verification metadata. It must stay legible in black and white, and the public
+`/verify/:token` view must be checked alongside the in-app dialog.
+
+---
+
+## 8. Frontend Structure
 
 ```
 client/
@@ -307,11 +360,12 @@ client/
     ├── context/
     │   └── AuthContext.jsx  # Auth provider, profile loading, inactivity logout
     ├── components/
-    │   ├── ui/              # shadcn/ui primitives
-    │   └── layout/
-    │       ├── AppLayout.jsx
-    │       ├── ProtectedRoute.jsx
-    │       └── Sidebar.jsx
+    │   ├── ui/              # shadcn/ui primitives (flat badge, button, card…)
+    │   ├── layout/
+    │   │   ├── AppLayout.jsx
+    │   │   ├── ProtectedRoute.jsx
+    │   │   └── Sidebar.jsx
+    │   └── certificate/     # ProfessionalCertificate + verification view
     ├── lib/
     │   ├── backend.js       # Laravel API client + query builder
     │   ├── profile.js       # Profile column list and lookup
@@ -319,6 +373,19 @@ client/
     │   └── emailService.js  # Transactional email composer
     └── pages/               # Route components
 ```
+
+### Repository layout (outside `client/`)
+
+```
+lms/
+├── backend/        # Laravel API, auth, PostgREST proxy, certificate script
+├── database/       # Reproducible PostgreSQL bootstrap (sequential files)
+├── docs/           # Design system, plans, examples, archive
+├── assets/brand/   # Brand source assets
+└── docker-compose.yml
+```
+
+See [`docs/README.md`](docs/README.md) for the documentation index.
 
 ### Unused page files
 
@@ -334,7 +401,7 @@ These exist but are not imported by `App.jsx`:
 
 ---
 
-## 8. Demo Accounts and Provisioning
+## 9. Demo Accounts and Provisioning
 
 Demo data is in `database/01_schema.sql`; hashes are in
 `database/03_demo_passwords.sql`. Every demo account uses `BlueSpace2026!`.
@@ -380,7 +447,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 9. Common Issues & Troubleshooting
+## 10. Common Issues & Troubleshooting
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
@@ -397,7 +464,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 10. Deployment Checklist
+## 11. Deployment Checklist
 
 - [ ] Provision PostgreSQL 17 and apply `database/*.sql` in order
 - [ ] Run PostgREST privately with the same `PGRST_JWT_SECRET` as Laravel
@@ -412,7 +479,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 11. Contributing
+## 12. Contributing
 
 1. Create a branch from `main`.
 2. Make changes.
@@ -423,7 +490,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 12. File Reference
+## 13. File Reference
 
 | File | Purpose |
 |------|---------|
@@ -444,6 +511,11 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `client/src/components/layout/ProtectedRoute.jsx` | Role-based route protection |
 | `client/src/components/layout/Sidebar.jsx` | Role-based navigation |
 | `client/src/components/ui/badge.jsx` | Flat, background-free badge variants |
+| `client/src/components/certificate/ProfessionalCertificate.jsx` | Print certificate and verification view |
+| `docs/DESIGN_SYSTEM.md` | Visual language and component rules |
+| `docs/README.md` | Documentation index |
+| `assets/brand/` | Brand source assets (logos) |
+| `backend/scripts/certificate_generator.py` | Certificate PDF generator |
 
 ### Known gaps
 
@@ -459,7 +531,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ---
 
-## 13. Security Notes
+## 14. Security Notes
 
 - **Never commit `.env` files, tokens, or passwords.**
 - **Never insert a password into a client-readable column.** `users.password` is

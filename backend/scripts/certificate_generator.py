@@ -315,8 +315,8 @@ def main():
         here = os.path.dirname(os.path.abspath(__file__))
         candidates = [
             os.path.join(here, "..", "public", "images", "certificate-logo.png"),
-            os.path.join(here, "..", "..", "BFALogo.png"),
-            os.path.join(here, "..", "..", "BFALogo2.png"),
+            os.path.join(here, "..", "..", "assets", "brand", "BFALogo.png"),
+            os.path.join(here, "..", "..", "assets", "brand", "BFALogo2.png"),
         ]
         for candidate in candidates:
             if os.path.exists(candidate):

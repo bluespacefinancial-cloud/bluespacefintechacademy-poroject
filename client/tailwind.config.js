@@ -10,7 +10,7 @@ export default {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Bluespace design tokens (from DESIGN.md)
+        // BlueSPACE design tokens (see docs/DESIGN_SYSTEM.md)
         bluespace: {
           50: '#f0f0ff',
           100: '#e0e0ff',

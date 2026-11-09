@@ -8,6 +8,9 @@ dist/
 dist-ssr/
 *.local
 
+# Generated certificate output
+BlueSPACE_Certificate.pdf
+
 # Environment files
 .env
 .env.local

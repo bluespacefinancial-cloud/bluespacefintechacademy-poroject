@@ -21,6 +21,7 @@ lms/
 │   └── src/
 │       ├── components/ui/      # shadcn/ui components
 │       ├── components/layout/  # AppLayout, Sidebar, ProtectedRoute
+│       ├── components/certificate/  # Print certificate and verification view
 │       ├── context/            # AuthContext
 │       ├── lib/backend.js      # Laravel API client + query builder
 │       ├── pages/              # Route components
@@ -30,17 +31,28 @@ lms/
 │   ├── app/Http/Controllers/   # Auth, DataProxy, Rpc, Functions
 │   ├── app/Support/            # AuthStore (tokens), Jwt (PostgREST signing)
 │   ├── bin/artisan             # Artisan wrapper with local pdo_pgsql
+│   ├── scripts/                # Certificate generator, local PHP helpers
 │   └── routes/api.php          # The complete API surface
 ├── database/                   # Reproducible PostgreSQL bootstrap (run in order)
 │   ├── 00_bootstrap.sql        # Roles, auth schema/functions, extensions
 │   ├── 01_schema.sql           # Tables, data, grants, RLS policies
 │   ├── 02_auth_tokens.sql      # API tokens + password reset tokens
 │   └── 03_demo_passwords.sql   # Demo account password hashes
+├── docs/                       # Design system, plans, examples, archive
+│   ├── DESIGN_SYSTEM.md        # Visual language and component rules
+│   ├── plans/                  # Strategic and phased delivery plans
+│   ├── examples/               # Reference output (e.g. certificate PDF)
+│   └── archive/                # Supabase-era material, reference only
+├── assets/brand/               # Brand source assets (BFALogo.png, BFALogo2.png)
 ├── docker-compose.yml          # PostgreSQL + PostgREST
 ├── .env.example                # Compose settings (PGRST_JWT_SECRET)
 ├── vercel.json                 # Vercel frontend config
+├── DEVELOPER_GUIDE.md          # Technical guide
 └── README.md
 ```
+
+The documentation index is at [`docs/README.md`](docs/README.md). The design
+source of truth is [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
 
 ## Architecture
 
@@ -71,6 +83,22 @@ operations. Column-level grants hide `users.password`, `labs.solution_code`, and
 **Why a proxy:** the browser never receives a PostgREST token, so it cannot
 forge a role claim. Laravel fixes the role to `authenticated` and forwards the
 request with a five-minute JWT.
+
+## Design System
+
+The interface is institutional, editorial and operational: full-width working
+pages, flat border-only badges and chips, and a quiet top bar that carries only
+search, the current cohort and notifications. BlueSPACE blue (`#0000FF`) is the
+single brand accent; hierarchy comes from typography, spacing and borders.
+
+- **Design source of truth:** [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md)
+- **Tokens:** `client/tailwind.config.js` and `client/src/index.css`
+- **Shell:** `client/src/components/layout/AppLayout.jsx`
+- **Shared primitives:** `client/src/components/ui/`
+
+Keep new work inside those rules: do not wrap pages in a page-level `max-w-*`,
+do not add filled status pills, and do not put dates, times or student IDs in
+the top bar.
 
 ## Getting Started
 

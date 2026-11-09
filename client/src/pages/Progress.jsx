@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart3, Clock, Award, FileText, CheckCircle2, BookOpen, AlertCircle } from 'lucide-react'
+import { BarChart3, Clock, Award, FileText, CheckCircle2, BookOpen, AlertCircle, Trophy } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { useAuth } from '../context/AuthContext'
+import { AchievementBadge } from '../components/ui/achievement-badge'
 
 const DOMAIN_COLORS = {
-  FaaS: { bg: 'bg-brand-50', text: 'text-brand-700', border: 'border-brand-200', fill: 'bg-brand-600' },
-  FinCore: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', fill: 'bg-emerald-600' },
-  FinOps: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-600' },
-  FinInfra: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-600' },
-  General: { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', fill: 'bg-gray-600' },
+  FaaS: { text: 'text-brand-700', border: 'border-brand-200', fill: 'bg-brand-600' },
+  FinCore: { text: 'text-emerald-700', border: 'border-emerald-200', fill: 'bg-emerald-600' },
+  FinOps: { text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-600' },
+  FinInfra: { text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-600' },
+  General: { text: 'text-gray-700', border: 'border-gray-200', fill: 'bg-gray-600' },
 }
 
 const STAGES = [
@@ -42,7 +43,7 @@ export default function Progress() {
         return
       }
 
-      const { data: enrolments } = await supabase
+      const { data: enrolments } = await api
         .from('enrolments')
         .select('cohort_id, track, cohorts(name)')
         .eq('user_id', user.id)
@@ -65,7 +66,7 @@ export default function Progress() {
         return
       }
 
-      const { data: modules } = await supabase
+      const { data: modules } = await api
         .from('modules')
         .select('*')
         .in('cohort_id', cohortIds)
@@ -82,7 +83,7 @@ export default function Progress() {
         return
       }
 
-      const { data: lessons } = await supabase
+      const { data: lessons } = await api
         .from('lessons')
         .select('*')
         .in('module_id', moduleIds)
@@ -90,7 +91,7 @@ export default function Progress() {
       const lessonIds = lessons?.map((l) => l.id) || []
 
       const { data: progress } = lessonIds.length
-        ? await supabase
+        ? await api
             .from('lesson_progress')
             .select('*')
             .eq('user_id', user.id)
@@ -151,8 +152,8 @@ export default function Progress() {
       const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
       const [{ data: attendance }, { data: gradedWork }] = await Promise.all([
-        supabase.from('live_class_attendance').select('status').eq('user_id', user.id),
-        supabase
+        api.from('live_class_attendance').select('status').eq('user_id', user.id),
+        api
           .from('submissions')
           .select('score')
           .eq('user_id', user.id)
@@ -262,6 +263,91 @@ export default function Progress() {
         ))}
       </div>
 
+      {/* Achievement & Mastery Badges */}
+      <Card className="border border-gray-200/90 shadow-sm bg-white overflow-hidden">
+        <CardHeader className="pb-3 border-b border-gray-100 bg-gray-50/40">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0000ff]">
+                <Trophy size={15} />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-bold text-gray-900">
+                  Achievement Badges & Milestones
+                </CardTitle>
+                <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  Recognition for technical deliverables, lab mastery, and partner coursework
+                </CardDescription>
+              </div>
+            </div>
+            <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50/50">
+              4 of 6 Earned
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              {
+                id: 'p-ach-1',
+                name: 'First Ledger Lab',
+                trigger: 'metric',
+                achievedAt: '2026-11-01T10:00:00Z',
+                progress: 100,
+                rarity: 88,
+              },
+              {
+                id: 'p-ach-2',
+                name: 'Idempotency Specialist',
+                trigger: 'metric',
+                achievedAt: '2026-11-03T14:30:00Z',
+                progress: 100,
+                rarity: 42,
+              },
+              {
+                id: 'p-ach-3',
+                name: 'Live Masterclass Streak',
+                trigger: 'streak',
+                achievedAt: '2026-11-05T18:00:00Z',
+                progress: 100,
+                rarity: 28,
+              },
+              {
+                id: 'p-ach-4',
+                name: 'TrustNet Rails Certified',
+                trigger: 'api',
+                achievedAt: '2026-11-06T11:20:00Z',
+                progress: 100,
+                rarity: 18,
+              },
+              {
+                id: 'p-ach-5',
+                name: 'Samsub AML Engine Builder',
+                trigger: 'metric',
+                achievedAt: null,
+                progress: 60,
+                rarity: 12,
+              },
+              {
+                id: 'p-ach-6',
+                name: 'Capstone Finalist',
+                trigger: 'metric',
+                achievedAt: null,
+                progress: 30,
+                rarity: 6,
+              },
+            ].map((ach) => (
+              <AchievementBadge
+                key={ach.id}
+                achievement={ach}
+                badgeSize="sm"
+                className="bg-white border-gray-200 shadow-sm hover:border-[#0000ff]/40 hover:shadow-md transition-all text-center py-3.5 px-2"
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Content: Domain Progress (2/3) + Learning Stages (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Domain Progress */}
@@ -300,7 +386,7 @@ export default function Progress() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-xs font-bold px-2 py-0.5 rounded border ${style.bg} ${style.text} ${style.border}`}
+                            className={`text-xs font-bold px-2 py-0.5 rounded border ${style.text} ${style.border}`}
                           >
                             {domain.label}
                           </span>
@@ -380,10 +466,10 @@ export default function Progress() {
                         variant="outline"
                         className={`text-[10px] capitalize font-medium ${
                           isCompleted
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'text-emerald-700 border-emerald-200'
                             : isActive
-                            ? 'bg-deep-50 text-deep-700 border-deep-200'
-                            : 'bg-gray-50 text-gray-500 border-gray-200'
+                            ? 'text-deep-700 border-deep-200'
+                            : 'text-gray-500 border-gray-200'
                         }`}
                       >
                         {stage.status}

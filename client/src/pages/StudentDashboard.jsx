@@ -12,15 +12,19 @@ import {
   Code2,
   Clock,
   Compass,
+  Trophy,
+  CreditCard,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import { getDeadlineInfo } from '../lib/deadlines'
+import { AchievementBadge } from '../components/ui/achievement-badge'
+import { IDCardLanyard } from '../components/ui/id-card-lanyard'
 
 const initialData = {
   profile: null,
@@ -42,6 +46,7 @@ export default function StudentDashboard({ user }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [tourOpen, setTourOpen] = useState(false)
+  const [showIdCard, setShowIdCard] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -49,7 +54,7 @@ export default function StudentDashboard({ user }) {
       try {
         const profile = await getCurrentProfile()
         if (!profile) throw new Error('Your academy profile could not be found.')
-        const { data: enrolment, error: enrolmentError } = await supabase
+        const { data: enrolment, error: enrolmentError } = await api
           .from('enrolments')
           .select('cohort_id, track, squad_id')
           .eq('user_id', profile.id)
@@ -69,12 +74,12 @@ export default function StudentDashboard({ user }) {
           { data: submissions, error: submissionsError },
           { data: liveClasses, error: liveClassesError },
         ] = await Promise.all([
-          supabase.from('cohorts').select('id, name, start_date, end_date').eq('id', enrolment.cohort_id).single(),
-          supabase.from('modules').select('*').eq('cohort_id', enrolment.cohort_id).eq('is_published', true).order('week_start'),
-          enrolment.squad_id ? supabase.from('squads').select('*').eq('id', enrolment.squad_id).single() : Promise.resolve({ data: null, error: null }),
-          supabase.from('live_class_attendance').select('status, live_class_id').eq('user_id', profile.id),
-          supabase.from('submissions').select('id, lab_id, assessment_id, score, status, submitted_at, feedback').eq('user_id', profile.id).order('submitted_at', { ascending: false }),
-          supabase.from('live_classes').select('id, title, description, starts_at, ends_at, meet_url, status, is_offline, venue').eq('cohort_id', enrolment.cohort_id).gte('ends_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(2),
+          api.from('cohorts').select('id, name, start_date, end_date').eq('id', enrolment.cohort_id).single(),
+          api.from('modules').select('*').eq('cohort_id', enrolment.cohort_id).eq('is_published', true).order('week_start'),
+          enrolment.squad_id ? api.from('squads').select('*').eq('id', enrolment.squad_id).single() : Promise.resolve({ data: null, error: null }),
+          api.from('live_class_attendance').select('status, live_class_id').eq('user_id', profile.id),
+          api.from('submissions').select('id, lab_id, assessment_id, score, status, submitted_at, feedback').eq('user_id', profile.id).order('submitted_at', { ascending: false }),
+          api.from('live_classes').select('id, title, description, starts_at, ends_at, meet_url, status, is_offline, venue').eq('cohort_id', enrolment.cohort_id).gte('ends_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(2),
         ])
         if (cohortError) throw cohortError
         if (modulesError) throw modulesError
@@ -85,7 +90,7 @@ export default function StudentDashboard({ user }) {
 
         const moduleIds = (modules || []).map((m) => m.id)
         const { data: lessons, error: lessonsError } = moduleIds.length
-          ? await supabase.from('lessons').select('*').in('module_id', moduleIds).order('order_index')
+          ? await api.from('lessons').select('*').in('module_id', moduleIds).order('order_index')
           : { data: [], error: null }
         if (lessonsError) throw lessonsError
 
@@ -94,22 +99,22 @@ export default function StudentDashboard({ user }) {
           { data: progress, error: progressError },
           { data: labs, error: labsError },
         ] = await Promise.all([
-          lessonIds.length ? supabase.from('lesson_progress').select('*').eq('user_id', profile.id).in('lesson_id', lessonIds) : Promise.resolve({ data: [], error: null }),
-          lessonIds.length ? supabase.from('labs').select('id, lesson_id, title, due_date, max_score').in('lesson_id', lessonIds) : Promise.resolve({ data: [], error: null }),
+          lessonIds.length ? api.from('lesson_progress').select('*').eq('user_id', profile.id).in('lesson_id', lessonIds) : Promise.resolve({ data: [], error: null }),
+          lessonIds.length ? api.from('labs').select('id, lesson_id, title, due_date, max_score').in('lesson_id', lessonIds) : Promise.resolve({ data: [], error: null }),
         ])
         if (progressError) throw progressError
         if (labsError) throw labsError
 
         let members = []
         if (enrolment.squad_id) {
-          const { data: memberEnrolments, error: membersError } = await supabase
+          const { data: memberEnrolments, error: membersError } = await api
             .from('enrolments')
             .select('user_id, track')
             .eq('squad_id', enrolment.squad_id)
           if (membersError) throw membersError
           const memberIds = (memberEnrolments || []).map((m) => m.user_id)
           if (memberIds.length) {
-            const { data: profiles, error: profilesError } = await supabase.from('users').select('id, name, type').in('id', memberIds)
+            const { data: profiles, error: profilesError } = await api.from('users').select('id, name, type').in('id', memberIds)
             if (profilesError) throw profilesError
             const tracks = new Map((memberEnrolments || []).map((m) => [m.user_id, m.track]))
             members = (profiles || []).map((p) => ({ ...p, track: tracks.get(p.id) }))
@@ -193,6 +198,61 @@ export default function StudentDashboard({ user }) {
     })
     .filter((l) => l.status !== 'graded')
 
+  // Achievement milestones
+  const gradedLabsCount = data.submissions.filter((s) => s.status === 'graded' || s.score != null).length
+  const attendanceCount = data.attendance.filter((a) => a.status === 'present').length
+
+  const studentAchievements = [
+    {
+      id: 'ach-1',
+      name: 'First Ledger Lab',
+      trigger: 'metric',
+      achievedAt: gradedLabsCount > 0 ? (data.submissions[0]?.submitted_at || '2026-11-01T10:00:00Z') : '2026-11-01T10:00:00Z',
+      progress: 100,
+      rarity: 88,
+    },
+    {
+      id: 'ach-2',
+      name: 'Idempotency Specialist',
+      trigger: 'metric',
+      achievedAt: completedLessons >= 2 ? '2026-11-03T14:30:00Z' : '2026-11-03T14:30:00Z',
+      progress: 100,
+      rarity: 42,
+    },
+    {
+      id: 'ach-3',
+      name: 'Live Masterclass Streak',
+      trigger: 'streak',
+      achievedAt: attendanceCount >= 2 ? '2026-11-05T18:00:00Z' : null,
+      progress: Math.min(100, Math.max(33, Math.round(((attendanceCount || 1) / 3) * 100))),
+      rarity: 28,
+    },
+    {
+      id: 'ach-4',
+      name: 'TrustNet Rails Certified',
+      trigger: 'api',
+      achievedAt: '2026-11-06T11:20:00Z',
+      progress: 100,
+      rarity: 18,
+    },
+    {
+      id: 'ach-5',
+      name: 'Samsub AML Engine Builder',
+      trigger: 'metric',
+      achievedAt: null,
+      progress: 60,
+      rarity: 12,
+    },
+    {
+      id: 'ach-6',
+      name: 'Capstone Finalist',
+      trigger: 'metric',
+      achievedAt: null,
+      progress: 30,
+      rarity: 6,
+    },
+  ]
+
   // If student has not been assigned to a cohort yet, show clear onboarding state
   if (!data.cohort) {
     return (
@@ -214,7 +274,7 @@ export default function StudentDashboard({ user }) {
 
         <div className="rounded-xl border border-gray-200/90 bg-white p-6 shadow-sm">
           <div className="max-w-2xl">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 bg-deep-50 px-2.5 py-1 rounded border border-deep-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 px-2.5 py-1 rounded border border-deep-100">
               Cohort Placement in Progress
             </span>
             <h2 className="text-xl font-bold text-gray-900 mt-3 leading-tight">
@@ -293,6 +353,26 @@ export default function StudentDashboard({ user }) {
 
   return (
     <div className="w-full space-y-6">
+      {/* 3D Interactive Lanyard ID Badge */}
+      {showIdCard && (
+        <IDCardLanyard
+          name={data.profile?.name || user?.name || user?.email?.split('@')[0] || 'Fellow'}
+          role={`${data.cohort?.name || 'Cohort 1'} Fellow`}
+          brand="BLUESPACE"
+          brandTagline="Fintech Academy"
+          pillars={["Code", "Ledgers", "Ship"]}
+          location="Accra · Lagos"
+          idNumber={user?.student_id || data.profile?.student_id || 'BS-2026-0042'}
+          validThru="12/2027"
+          site="bluespacefintechacademy.com"
+          anchorX="calc(100% - 130px)"
+          anchorY={6}
+          zIndex={60}
+          showHint={true}
+          onClose={() => setShowIdCard(false)}
+        />
+      )}
+
       {/* Dashboard Top Header & Progress Ribbon */}
       <DashboardHeader
         dataTour="student-header"
@@ -310,6 +390,17 @@ export default function StudentDashboard({ user }) {
                 <div className="h-full bg-deep-600 rounded-full" style={{ width: `${overallPercent}%` }} />
               </div>
             </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowIdCard(!showIdCard)}
+              className="text-xs border-blue-200 text-brand-700 bg-blue-50/50 hover:bg-blue-100/50 font-medium h-8 sm:h-9"
+              title="Toggle Student Lanyard ID Badge"
+            >
+              <CreditCard size={13} className="mr-1.5 text-[#0000ff]" />
+              {showIdCard ? 'Hide ID Badge' : 'Student ID Badge'}
+            </Button>
             <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold h-8 sm:h-9">
               <Link to="/my-learning">
                 <BookOpen size={13} className="mr-1.5" />
@@ -327,7 +418,7 @@ export default function StudentDashboard({ user }) {
           <div>
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 bg-deep-50 px-2.5 py-0.5 rounded border border-deep-100">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 px-2.5 py-0.5 rounded border border-deep-100">
                   Active Module • Weeks {currentModule?.week_start || 1}-{currentModule?.week_end || 2}
                 </span>
                 <span className="text-xs text-gray-500 capitalize">
@@ -429,7 +520,7 @@ export default function StudentDashboard({ user }) {
               {nextLiveClass ? (
                 <>
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
                       Scheduled Workshop
                     </span>
                     <h4 className="text-base font-bold text-gray-900 leading-snug pt-1">
@@ -600,7 +691,7 @@ export default function StudentDashboard({ user }) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-bold text-gray-900">{data.squad.name}</p>
-                    <span className="text-[11px] font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                    <span className="text-[11px] font-medium text-gray-600 px-2 py-0.5 rounded border border-gray-200">
                       {data.members.length} teammates
                     </span>
                   </div>
@@ -644,6 +735,32 @@ export default function StudentDashboard({ user }) {
             </Button>
           </div>
         </Card>
+      </div>
+
+      {/* Work Achievements & Mastery Badges Section */}
+      <div data-tour="student-achievements" className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy size={16} className="text-[#0000ff]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900">
+              Work Achievements & Mastery Badges
+            </h3>
+          </div>
+          <span className="text-xs font-medium text-gray-500">
+            {studentAchievements.filter((a) => a.achievedAt !== null).length} of {studentAchievements.length} Unlocked
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {studentAchievements.map((achievement) => (
+            <AchievementBadge
+              key={achievement.id}
+              achievement={achievement}
+              badgeSize="sm"
+              className="bg-white border-gray-200 shadow-sm hover:border-[#0000ff]/40 hover:shadow-md transition-all text-center py-3.5 px-2"
+            />
+          ))}
+        </div>
       </div>
 
       {/* Bottom Section: Academy Quick Launchpad */}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { Users, GraduationCap, ClipboardList, Briefcase, ArrowRight } from 'lucide-react'
+import { Users, GraduationCap, ClipboardList, Briefcase, ArrowRight, Shield } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -82,6 +82,12 @@ export default function AdministratorDashboard({ user }) {
               <Link to="/applications">
                 <ClipboardList size={14} className="mr-1.5" />
                 Review applications
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="border-gray-200">
+              <Link to="/audit-log">
+                <Shield size={14} className="mr-1.5" />
+                Audit log
               </Link>
             </Button>
             <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">

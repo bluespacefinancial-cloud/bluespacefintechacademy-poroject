@@ -77,7 +77,7 @@ export default function AdministratorDashboard({ user }) {
         subtitle={`Welcome, ${user?.name || 'Administrator'}. Review admissions, track cohorts, and oversee partner curriculum.`}
         onStartTour={() => setTourOpen(true)}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <Button asChild size="sm" variant="outline" className="border-gray-200">
               <Link to="/applications">
                 <ClipboardList size={14} className="mr-1.5" />

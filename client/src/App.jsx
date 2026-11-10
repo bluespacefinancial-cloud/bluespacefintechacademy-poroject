@@ -36,6 +36,7 @@ import PeerReview from './pages/PeerReview'
 import MentorEvaluation from './pages/MentorEvaluation'
 import InstructorAssignments from './pages/InstructorAssignments'
 import PartnerCourses from './pages/PartnerCourses'
+import PartnerOrganisation from './pages/PartnerOrganisation'
 import PartnerCatalog from './pages/PartnerCatalog'
 import PartnerManagement from './pages/PartnerManagement'
 import PartnerCourseReview from './pages/PartnerCourseReview'
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="quiz/:assessmentId" element={<ProtectedRoute roles={['Student']}><Quiz /></ProtectedRoute>} />
         <Route path="project-workspace" element={<Navigate to="/my-squad" replace />} />
         <Route path="partner-courses" element={<ProtectedRoute roles={['Partner']}><PartnerCourses /></ProtectedRoute>} />
+        <Route path="partner-organisation" element={<ProtectedRoute roles={['Partner']}><PartnerOrganisation /></ProtectedRoute>} />
         <Route path="partner-catalog" element={<ProtectedRoute roles={['Student']}><PartnerCatalog /></ProtectedRoute>} />
         <Route path="partner-course/:courseId" element={<ProtectedRoute roles={['Student']}><PartnerCourseLearning /></ProtectedRoute>} />
         <Route path="partner-management" element={<ProtectedRoute roles={['Administrator']}><PartnerManagement /></ProtectedRoute>} />

@@ -454,7 +454,7 @@ export default function StudentDashboard({ user }) {
                               {resumeTarget?.duration_minutes ? `${resumeTarget.duration_minutes} min` : 'Self-paced'}
                             </span>
                           </div>
-                          <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 truncate mt-0.5">
+                          <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 truncate mt-0.5" title={resumeTarget?.title || 'Start Coursework'}>
                             {resumeTarget?.title || 'Start Coursework'}
                           </p>
                         </div>
@@ -624,7 +624,7 @@ export default function StudentDashboard({ user }) {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <Code2 size={15} className="text-deep-600 dark:text-deep-400 shrink-0" />
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{lab.title}</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate" title={lab.title}>{lab.title}</p>
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                           <span>Max score: {lab.max_score} pts</span>

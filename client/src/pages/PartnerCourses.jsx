@@ -378,7 +378,7 @@ export default function PartnerCourses() {
                   selected?.id === course.id ? 'border-deep-300 bg-deep-50' : 'border-gray-200 hover:bg-gray-50'
                 }`}
               >
-                <p className="truncate text-sm font-medium text-gray-900">{course.title}</p>
+                <p className="truncate text-sm font-medium text-gray-900" title={course.title}>{course.title}</p>
                 <div className="mt-1 flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px]">
                     {STATUS_LABELS[course.status] || course.status}
@@ -424,7 +424,7 @@ export default function PartnerCourses() {
               <div key={item.id} className="flex items-center justify-between gap-2 rounded-md border border-gray-200 p-2.5">
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="w-5 text-center text-[10px] font-semibold text-gray-400">{index + 1}</span>
-                  <p className="truncate text-xs text-gray-800">{item.title}</p>
+                  <p className="truncate text-xs text-gray-800" title={item.title}>{item.title}</p>
                 </div>
                 {canEdit && (
                   <Button

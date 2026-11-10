@@ -215,11 +215,11 @@ export default function InstructorDashboard({ user }) {
                   {data.submissions.map((item) => (
                     <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.labTitle}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={item.labTitle}>{item.labTitle}</p>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                           <span className="font-semibold text-gray-800 dark:text-gray-200">{item.studentName}</span>
                           <span>•</span>
-                          <span className="truncate">{item.moduleTitle}</span>
+                          <span className="truncate" title={item.moduleTitle}>{item.moduleTitle}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -377,13 +377,13 @@ export default function InstructorDashboard({ user }) {
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3.5 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{module.title}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={module.title}>{module.title}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <span className="capitalize">{module.stage ? module.stage.replaceAll('_', ' ') : 'Foundations'}</span>
                         <span>•</span>
                         <span>{module.domain || module.track || 'Fintech Core'}</span>
                         <span>•</span>
-                        <span className="truncate">{cohortNamesFor(module, data.cohorts)}</span>
+                        <span className="truncate" title={cohortNamesFor(module, data.cohorts)}>{cohortNamesFor(module, data.cohorts)}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

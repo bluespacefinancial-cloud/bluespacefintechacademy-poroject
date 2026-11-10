@@ -234,6 +234,7 @@ order, when Docker creates the volume:
 | `08_column_grants.sql` | Re-asserts column-level grants lost to `ALTER DEFAULT PRIVILEGES`: hidden `users.password`, `labs.solution_code`, `assessment_questions.correct_answer` |
 | `09_media_assets.sql` | Service-only `media_assets` upload index; `type`, `audio_url`, `duration_seconds`, `thumbnail_url`, `caption_url` on `partner_course_lessons` |
 | `10_partner_enrolment_scope.sql` | Scopes Partner access on `partner_course_enrolments` to courses owned by the caller's organisation (students stay self-only, Administrators stay global) |
+| `11_partner_profile_update.sql` | Partners can update their own organisation profile; a guard trigger freezes identity, slug and review/approval columns |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -285,12 +286,12 @@ helpers, so the schema and policies carried over unchanged.
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/11_add_something.sql`. Never
+Add a new sequential file, for example `database/12_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/11_add_something.sql
+  < database/12_add_something.sql
 ```
 
 `00_bootstrap.sql` grants `ALL` on new tables to `anon` and `authenticated`
@@ -326,6 +327,7 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 | Partner review states | `enforce_partner_course_review` trigger: clients can only create drafts and move `draft`/`changes_requested` → `submitted`; reviewer columns and timestamps are frozen |
 | Partner lesson publication | `enforce_partner_lesson_publish` trigger forces `is_published = false` for clients; `sync_partner_lesson_publication` publishes lessons when an administrator publishes the course |
 | Partner enrolment scope | `10_partner_enrolment_scope.sql` limits Partner access on `partner_course_enrolments` to courses owned by the caller's organisation; students keep their own rows and Administrators stay global |
+| Partner organisation profile | `11_partner_profile_update.sql` lets a Partner update its own `partners` row; `guard_partner_profile` freezes `id`, `slug`, `status`, `created_by`, `approved_by`, `approved_at` and `created_at` |
 | Notification writes | `create_notification` is executable by `service_role` only; `PUBLIC`, `anon`, and `authenticated` are revoked |
 | Audit log writes | `INSERT`/`UPDATE`/`DELETE`/`TRUNCATE` on `audit_logs` revoked from client roles; administrators keep `SELECT` |
 | Instructor content scope | Module and lesson writes are limited to cohorts in `instructor_cohort_assignments`; Administrators stay unrestricted |
@@ -336,7 +338,7 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 |------|---------|----------|--------|
 | Student | Own enrolments, squad, learning, partner catalog | Own profile, submissions, progress | `/student-login` |
 | Instructor | Cohort data, submissions to grade, own assigned cohort content | Grading, modules and lessons for assigned cohorts, direct publish | `/instructor-login` |
-| Partner | Own organization's courses | Own drafts and lessons, and enrolments in own courses; may submit for review, never approve or publish | `/partner-login` |
+| Partner | Own organization's courses and profile | Own drafts and lessons, own organisation profile, and enrolments in own courses; may submit for review, never approve or publish | `/partner-login` |
 | Administrator | Everything | All academy operations, partner review and publication | `/admin-login` |
 
 ### Squad, enrolment, and user management
@@ -759,12 +761,14 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `backend/php/uploads.ini` | Upload size limits loaded by `backend/bin/artisan` |
 | `database/09_media_assets.sql` | `media_assets` plus partner lesson media columns |
 | `database/10_partner_enrolment_scope.sql` | Partner enrolment RLS scoped to the caller's own courses |
+| `database/11_partner_profile_update.sql` | Partner organisation profile update policy and column guard |
 | `backend/app/Support/AuthStore.php` | Service-role data access and sessions |
 | `backend/app/Support/Jwt.php` | PostgREST JWT signing |
 | `client/src/lib/backend.js` | Client transport and query builder |
 | `client/src/components/MediaUpload.jsx` | Inline authoring upload control (image, caption, audio, video) |
 | `client/src/context/AuthContext.jsx` | Auth provider, fail-closed guard |
 | `client/src/pages/Login.jsx` | Four role-based login portals |
+| `client/src/pages/PartnerOrganisation.jsx` | Partner organisation profile editor (name, description, website, logo) |
 | `client/src/App.jsx` | Route definitions with role guards |
 | `client/src/components/layout/ProtectedRoute.jsx` | Role-based route protection |
 | `client/src/components/layout/Sidebar.jsx` | Role-based navigation |

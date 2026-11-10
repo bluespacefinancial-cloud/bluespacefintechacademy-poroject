@@ -197,7 +197,7 @@ export default function PartnerDashboard({ user }) {
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{course.title}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={course.title}>{course.title}</p>
                     <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                       {new Date(course.created_at).toLocaleDateString()} ·{' '}
                       {course.status.replace('_', ' ')}
@@ -242,7 +242,7 @@ export default function PartnerDashboard({ user }) {
             </Link>
 
             <Link
-              to="/profile-settings"
+              to="/partner-organisation"
               className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
             >
               <div className="flex items-center gap-2.5">

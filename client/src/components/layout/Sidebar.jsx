@@ -109,6 +109,7 @@ const sidebarGroups = {
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
         { to: '/partner-courses', icon: BookOpen, label: 'Course Studio', ariaLabel: 'Course Studio' },
+        { to: '/partner-organisation', icon: Briefcase, label: 'Organisation', ariaLabel: 'Organisation Profile' },
       ],
     },
     {
@@ -433,7 +434,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
             <NavLink
               key={item.to}
               to={item.to}
-              className={`flex-none flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium transition-colors ${
+              className={`flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium transition-colors ${
                 active ? 'text-deep-600 font-bold' : 'text-gray-500 hover:text-gray-800'
               }`}
               aria-current={active ? 'page' : undefined}
@@ -446,14 +447,14 @@ export default function Sidebar({ open, onOpen, onClose }) {
                   </span>
                 )}
               </div>
-              <span className="text-[10px] truncate max-w-full mt-0.5 leading-tight">{item.shortLabel || item.label}</span>
+              <span className="text-[10px] truncate max-w-full mt-0.5 leading-tight" title={item.shortLabel || item.label}>{item.shortLabel || item.label}</span>
             </NavLink>
           )
         })}
         {groups.flatMap((g) => g.items).length > 5 && (
           <button
             onClick={onOpen}
-            className="flex-none flex flex-col items-center justify-center py-2 px-1 text-center text-gray-500 hover:text-gray-800 transition-colors min-w-0"
+            className="flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-center text-gray-500 hover:text-gray-800 transition-colors"
             aria-label="More options"
           >
             <div className="relative">
@@ -464,7 +465,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-medium truncate max-w-full mt-0.5 leading-tight">More</span>
+            <span className="text-[10px] font-medium truncate max-w-full mt-0.5 leading-tight" title="More">More</span>
           </button>
         )}
       </nav>
@@ -478,7 +479,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
               <span className="text-sm font-bold text-deep-600">Academy Menu</span>
               <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-deep-600 rounded-md">
                 <X size={20} />
-                <span className="visually-hidden">Close menu</span>
+                <span className="sr-only">Close menu</span>
               </button>
             </div>
 

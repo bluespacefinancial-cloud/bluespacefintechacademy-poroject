@@ -278,7 +278,7 @@ export default function PartnerCourseLearning() {
                         )}
                         <span className="min-w-0">
                           <span className="block text-[10px] font-medium text-gray-400">Lesson {index + 1}</span>
-                          <span className="block truncate text-xs font-medium text-gray-800">{lesson.title}</span>
+                          <span className="block truncate text-xs font-medium text-gray-800" title={lesson.title}>{lesson.title}</span>
                         </span>
                       </button>
                     )

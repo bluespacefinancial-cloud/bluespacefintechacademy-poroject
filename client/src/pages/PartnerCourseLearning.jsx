@@ -1,62 +1,269 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { CheckCircle, PlayCircle } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { CheckCircle, Circle } from 'lucide-react'
+import { Card, CardContent } from '../components/ui/card'
 import { api } from '../lib/backend'
-import { parseYouTubeId } from '../components/YouTubeFrame'
+import { getCurrentProfile } from '../lib/profile'
+import MediaPlayer from '../components/MediaPlayer'
 
-function getYouTubeEmbedUrl(url, provider = 'auto') {
-  if (provider === 'none' || provider === 'self') return null
-  const videoId = parseYouTubeId(url)
-  return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : null
-}
-
+/**
+ * Partner course player.
+ *
+ * Partner lessons are video-shaped (no audio/text variants yet), so they are
+ * normalised to the MediaPlayer contract. Progress lives in
+ * `partner_course_progress` rather than `lesson_progress`; that store has a
+ * different shape, so MediaPlayer gets an explicit adapter. This gives partner
+ * students the same resume, 90%-watch completion and playback controls as
+ * academy lessons instead of the old manual "mark complete" button.
+ */
 export default function PartnerCourseLearning() {
   const { courseId } = useParams()
   const [course, setCourse] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [progress, setProgress] = useState([])
+  const [selectedLessonId, setSelectedLessonId] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
   useEffect(() => {
+    let cancelled = false
     const load = async () => {
-      const { data: courseData, error: courseError } = await api.from('partner_courses').select('*, partners(name, logo_url), partner_course_lessons(*)').eq('id', courseId).single()
-      if (courseError) throw courseError
-      const { data: user } = await api.auth.getUser()
-      const { data: profile } = await api.from('users').select('id').eq('email', user.user.email).single()
-      const { data: progressData, error: progressError } = await api.from('partner_course_progress').select('*').eq('course_id', courseId).eq('user_id', profile.id)
-      if (progressError) throw progressError
-      setCourse(courseData); setProgress(progressData || [])
+      try {
+        const currentProfile = await getCurrentProfile()
+        if (!currentProfile) {
+          throw new Error('Your session has expired. Please sign in again.')
+        }
+
+        // Explicit columns. RLS already limits students to published lessons in
+        // published courses for their cohort; the client filter below keeps the
+        // page correct even if that policy is ever relaxed for another role.
+        const { data: courseRow, error: courseError } = await api
+          .from('partner_courses')
+          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, video_url, content_url, order_index, is_published, media_provider)')
+          .eq('id', courseId)
+          .single()
+        if (courseError) throw courseError
+
+        const { data: progressRows, error: progressError } = await api
+          .from('partner_course_progress')
+          .select('lesson_id, is_completed, completion_percentage, last_position_seconds')
+          .eq('course_id', courseId)
+          .eq('user_id', currentProfile.id)
+        if (progressError) throw progressError
+
+        const lessons = (courseRow.partner_course_lessons || [])
+          .filter((lesson) => lesson.is_published)
+          .sort((a, b) => a.order_index - b.order_index)
+
+        if (cancelled) return
+        setCourse({ ...courseRow, partner_course_lessons: lessons })
+        setProfile(currentProfile)
+        setProgress(progressRows || [])
+        setSelectedLessonId((current) => {
+          if (current && lessons.some((lesson) => lesson.id === current)) return current
+          const firstIncomplete = lessons.find(
+            (lesson) => !(progressRows || []).some((item) => item.lesson_id === lesson.id && item.is_completed),
+          )
+          return firstIncomplete?.id ?? lessons[0]?.id ?? null
+        })
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError.message || 'This course is not available to your account yet.')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-    load().catch((loadError) => setError(loadError.message || 'Unable to load course'))
+    load()
+    return () => { cancelled = true }
   }, [courseId])
-  const complete = async (lessonId) => {
-    const { data: user } = await api.auth.getUser()
-    const { data: profile } = await api.from('users').select('id').eq('email', user.user.email).single()
-    const { error: saveError } = await api.from('partner_course_progress').upsert({ course_id: Number(courseId), lesson_id: lessonId, user_id: profile.id, completion_percentage: 100, is_completed: true }, { onConflict: 'lesson_id,user_id' })
-    if (saveError) { setError(saveError.message); return }
-    const nextProgress = [...progress.filter((item) => item.lesson_id !== lessonId), { lesson_id: lessonId, is_completed: true }]
-    setProgress(nextProgress)
-    const publishedLessons = (course?.partner_course_lessons || []).filter((item) => item.is_published)
-    if (publishedLessons.length > 0 && publishedLessons.every((item) => nextProgress.some((itemProgress) => itemProgress.lesson_id === item.id && itemProgress.is_completed))) {
-      const { error: certificateError } = await api.rpc('issue_partner_certificate', { p_user_id: profile.id, p_course_id: Number(courseId), p_final_grade: 100 })
-      if (certificateError) setError(certificateError.message)
+
+  const progressAdapter = useMemo(() => ({
+    async load(userId, lessonId) {
+      const { data, error: loadError } = await api
+        .from('partner_course_progress')
+        .select('is_completed, completion_percentage')
+        .eq('course_id', Number(courseId))
+        .eq('user_id', userId)
+        .eq('lesson_id', lessonId)
+        .maybeSingle()
+      if (loadError || !data) return null
+      return data
+    },
+    async save({ userId, lessonId, percent, completed, position }) {
+      await api.from('partner_course_progress').upsert({
+        course_id: Number(courseId),
+        lesson_id: lessonId,
+        user_id: userId,
+        completion_percentage: percent,
+        is_completed: completed,
+        last_position_seconds: position,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'lesson_id,user_id' })
+    },
+  }), [courseId])
+
+  const handleComplete = async (lessonId) => {
+    const next = [
+      ...progress.filter((item) => item.lesson_id !== lessonId),
+      { lesson_id: lessonId, is_completed: true, completion_percentage: 100 },
+    ]
+    setProgress(next)
+
+    const published = course?.partner_course_lessons || []
+    if (!profile || published.length === 0) return
+
+    const allDone = published.every((lesson) =>
+      next.some((item) => item.lesson_id === lesson.id && item.is_completed),
+    )
+    if (!allDone) return
+
+    const { error: certificateError } = await api.rpc('issue_partner_certificate', {
+      p_user_id: profile.id,
+      p_course_id: Number(courseId),
+      p_final_grade: 100,
+    })
+    if (certificateError) {
+      setError(certificateError.message)
+      return
     }
+    setMessage('Course complete — your certificate has been issued.')
   }
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6 flex items-center gap-3">{course?.partners?.logo_url && <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />}<div><h1 className="text-2xl font-bold text-deep-600">{course?.title || 'Partner course'}</h1><p className="text-sm text-gray-500">{course?.partners?.name}</p></div></div>{error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="space-y-3">{(course?.partner_course_lessons || []).sort((a, b) => a.order_index - b.order_index).map((lesson) => { const done = progress.some((item) => item.lesson_id === lesson.id && item.is_completed); return <Card key={lesson.id}><CardHeader><CardTitle className="text-sm">{lesson.title}</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-gray-600">{lesson.description}</p>{lesson.video_url && (
-  getYouTubeEmbedUrl(lesson.video_url, lesson.media_provider) ? (
-    <div className="relative aspect-video w-full max-w-2xl bg-black rounded-lg overflow-hidden my-2 shadow">
-      <iframe
-        src={getYouTubeEmbedUrl(lesson.video_url, lesson.media_provider)}
-        title={lesson.title}
-        className="w-full h-full border-0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+
+  if (loading) {
+    return <p className="py-12 text-center text-sm text-gray-500">Loading course…</p>
+  }
+
+  if (!course) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16">
+        <Card>
+          <CardContent className="space-y-3 p-6 text-center">
+            <p className="text-sm font-semibold text-gray-900">This course isn’t available yet</p>
+            <p className="text-sm text-gray-600">
+              {error || 'You need an active enrolment in a published course to open it.'}
+            </p>
+            <Link to="/partner-catalog" className="text-sm font-semibold text-deep-600 hover:text-deep-700">
+              Back to the partner catalog
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const lessons = course.partner_course_lessons || []
+  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || null
+  const playerLesson = selectedLesson
+    ? {
+        ...selectedLesson,
+        type: 'video',
+        duration_minutes: 0,
+        video_url: selectedLesson.media_provider === 'none' ? null : selectedLesson.video_url,
+      }
+    : null
+  const completedCount = lessons.filter((lesson) =>
+    progress.some((item) => item.lesson_id === lesson.id && item.is_completed),
+  ).length
+  const isDone = (lessonId) => progress.some((item) => item.lesson_id === lessonId && item.is_completed)
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center gap-3">
+          {course.partners?.logo_url && (
+            <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-deep-600">{course.title}</h1>
+            <p className="text-sm text-gray-500">
+              {course.partners?.name}
+              {lessons.length > 0 ? ` · ${completedCount}/${lessons.length} lessons complete` : ''}
+            </p>
+          </div>
+        </div>
+
+        {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+
+        {lessons.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-sm text-gray-500">
+              This course has no published lessons yet.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-3 lg:col-span-2">
+              {playerLesson ? (
+                <MediaPlayer
+                  key={playerLesson.id}
+                  lesson={playerLesson}
+                  user={profile}
+                  onComplete={handleComplete}
+                  progressAdapter={progressAdapter}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center text-sm text-gray-500">
+                    Select a lesson to begin.
+                  </CardContent>
+                </Card>
+              )}
+
+              {selectedLesson?.content_url && (
+                <a
+                  href={selectedLesson.content_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-block text-sm font-semibold text-deep-600 hover:text-deep-700"
+                >
+                  Open the lesson resource
+                </a>
+              )}
+
+              {selectedLesson?.description && (
+                <p className="whitespace-pre-line text-sm text-gray-600">{selectedLesson.description}</p>
+              )}
+            </div>
+
+            <aside>
+              <Card>
+                <CardContent className="space-y-1 p-3">
+                  <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    Lessons
+                  </p>
+                  {lessons.map((lesson, index) => {
+                    const done = isDone(lesson.id)
+                    const active = lesson.id === selectedLessonId
+                    return (
+                      <button
+                        key={lesson.id}
+                        type="button"
+                        onClick={() => setSelectedLessonId(lesson.id)}
+                        className={`flex w-full items-start gap-2 rounded-md p-2 text-left transition-colors ${
+                          active ? 'bg-deep-50' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        {done ? (
+                          <CheckCircle size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                        ) : (
+                          <Circle size={16} className="mt-0.5 shrink-0 text-gray-300" />
+                        )}
+                        <span className="min-w-0">
+                          <span className="block text-[10px] font-medium text-gray-400">Lesson {index + 1}</span>
+                          <span className="block truncate text-xs font-medium text-gray-800">{lesson.title}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </CardContent>
+              </Card>
+            </aside>
+          </div>
+        )}
+      </div>
     </div>
-  ) : (
-    <a className="flex items-center gap-2 text-sm text-brand-700 hover:underline" href={lesson.video_url} target="_blank" rel="noreferrer">
-      <PlayCircle size={16} />Open lesson video
-    </a>
   )
-)}{lesson.content_url && <a className="text-sm text-brand-700 hover:underline" href={lesson.content_url} target="_blank" rel="noreferrer">Open lesson resource</a>}<Button variant={done ? 'secondary' : 'outline'} onClick={() => complete(lesson.id)} disabled={done}>{done ? <><CheckCircle size={14} className="mr-2" />Completed</> : 'Mark lesson complete'}</Button></CardContent></Card> })}</div></div>
 }

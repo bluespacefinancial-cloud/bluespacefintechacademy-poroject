@@ -10,6 +10,37 @@ const SAVE_INTERVAL_MS = 10000 // save progress every 10 seconds
 const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
 /**
+ * Default progress store: academy lessons use `lesson_progress`, keyed on
+ * `(user_id, lesson_id)`. Partner courses pass their own adapter because they
+ * persist to `partner_course_progress`, which has a different shape (no
+ * `watch_time_seconds` / `completed_at`, plus a required `course_id`).
+ */
+const defaultProgressAdapter = {
+  async load(userId, lessonId) {
+    const { data, error } = await api
+      .from('lesson_progress')
+      .select('is_completed, completion_percentage')
+      .eq('user_id', userId)
+      .eq('lesson_id', lessonId)
+      .maybeSingle()
+    if (error || !data) return null
+    return data
+  },
+  async save({ userId, lessonId, watchSeconds, percent, completed, position }) {
+    await api.from('lesson_progress').upsert({
+      user_id: userId,
+      lesson_id: lessonId,
+      watch_time_seconds: watchSeconds,
+      completion_percentage: percent,
+      is_completed: completed,
+      last_position_seconds: position,
+      completed_at: completed ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id, lesson_id' })
+  },
+}
+
+/**
  * Explicit `media_provider` wins; `auto` infers YouTube from the URL. Audio is
  * always native, even when a media_provider is set to youtube on the row.
  */
@@ -24,6 +55,7 @@ export default function MediaPlayer({
   user,
   onComplete,
   readOnly = false,
+  progressAdapter = defaultProgressAdapter,
 }) {
   const mediaRef = useRef(null)
   const saveIntervalRef = useRef(null)
@@ -55,14 +87,8 @@ export default function MediaPlayer({
     try {
       const profile = await getCurrentProfile()
       if (!profile) return
-      const { data, error } = await api
-        .from('lesson_progress')
-        .select('is_completed, completion_percentage')
-        .eq('user_id', profile.id)
-        .eq('lesson_id', lesson.id)
-        .single()
-
-      if (error || !data) {
+      const data = await progressAdapter.load(profile.id, lesson.id)
+      if (!data) {
         // No progress yet, start from 0
         return
       }
@@ -103,20 +129,16 @@ export default function MediaPlayer({
     const completed = isCompletedVal || percent >= COMPLETION_THRESHOLD
 
     try {
-      await api
-        .from('lesson_progress')
-        .upsert({
-          user_id: profile.id,
-          lesson_id: lesson.id,
-          watch_time_seconds: Math.floor(currentTimeVal),
-          completion_percentage: Math.round(percent * 100) / 100,
-          is_completed: completed,
-          last_position_seconds: Math.floor(currentTimeVal),
-          completed_at: completed ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id, lesson_id' })
+      await progressAdapter.save({
+        userId: profile.id,
+        lessonId: lesson.id,
+        watchSeconds: Math.floor(currentTimeVal),
+        percent: Math.round(percent * 100) / 100,
+        completed,
+        position: Math.floor(currentTimeVal),
+      })
     } catch {
-      // Ignore upsert errors
+      // Ignore save errors; the next tick retries.
     }
 
     setCompletionPercent(percent)
@@ -125,7 +147,7 @@ export default function MediaPlayer({
     if (completed && !isCompletedVal && onComplete) {
       onComplete(lesson.id)
     }
-  }, [user, lesson.id, duration, onComplete, api, readOnly])
+  }, [user, lesson.id, duration, onComplete, readOnly, progressAdapter])
 
   const handleLoadedMetadata = () => {
     if (mediaRef.current) {

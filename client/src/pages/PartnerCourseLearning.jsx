@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CheckCircle, Circle } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/card'
+import { Button } from '../components/ui/button'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import MediaPlayer from '../components/MediaPlayer'
@@ -41,7 +42,7 @@ export default function PartnerCourseLearning() {
         // page correct even if that policy is ever relaxed for another role.
         const { data: courseRow, error: courseError } = await api
           .from('partner_courses')
-          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, video_url, content_url, order_index, is_published, media_provider)')
+          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, type, video_url, audio_url, thumbnail_url, caption_url, content_url, order_index, is_published, media_provider)')
           .eq('id', courseId)
           .single()
         if (courseError) throw courseError
@@ -156,14 +157,14 @@ export default function PartnerCourseLearning() {
 
   const lessons = course.partner_course_lessons || []
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || null
-  const playerLesson = selectedLesson
+  const playerLesson = selectedLesson && selectedLesson.type !== 'text'
     ? {
         ...selectedLesson,
-        type: 'video',
         duration_minutes: 0,
         video_url: selectedLesson.media_provider === 'none' ? null : selectedLesson.video_url,
       }
     : null
+  const isTextLesson = selectedLesson?.type === 'text'
   const completedCount = lessons.filter((lesson) =>
     progress.some((item) => item.lesson_id === lesson.id && item.is_completed),
   ).length
@@ -211,6 +212,23 @@ export default function PartnerCourseLearning() {
                   onComplete={handleComplete}
                   progressAdapter={progressAdapter}
                 />
+              ) : isTextLesson ? (
+                <Card>
+                  <CardContent className="space-y-3 p-6">
+                    <h2 className="text-lg font-semibold text-gray-900">{selectedLesson.title}</h2>
+                    <div className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                      {selectedLesson.description || 'This reading lesson has no text yet.'}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={isDone(selectedLesson.id) ? 'secondary' : 'default'}
+                      disabled={isDone(selectedLesson.id)}
+                      onClick={() => handleComplete(selectedLesson.id)}
+                    >
+                      {isDone(selectedLesson.id) ? 'Completed' : 'Mark as read'}
+                    </Button>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card>
                   <CardContent className="py-12 text-center text-sm text-gray-500">
@@ -230,7 +248,7 @@ export default function PartnerCourseLearning() {
                 </a>
               )}
 
-              {selectedLesson?.description && (
+              {!isTextLesson && selectedLesson?.description && (
                 <p className="whitespace-pre-line text-sm text-gray-600">{selectedLesson.description}</p>
               )}
             </div>

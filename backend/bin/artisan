@@ -5,12 +5,19 @@
 # it needs sudo. scripts/install-php-pgsql-local.sh downloads the Ubuntu
 # packages into backend/.php-ext without touching the system. Once that has run
 # (or the extension is installed normally), `php artisan` works directly.
+#
+# The project also loads backend/php/uploads.ini here so `artisan serve` (and
+# the `php -S` process it spawns) accept the media sizes the upload endpoint
+# allows. PHP's defaults cap uploads at 2 MB.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXT_DIR="$ROOT/.php-ext"
+INI_DIR="$ROOT/php"
 
 if php -m | grep -qx 'pdo_pgsql'; then
+    # Add the project ini directory after the system scan directories.
+    export PHP_INI_SCAN_DIR="$INI_DIR${PHP_INI_SCAN_DIR:+:$PHP_INI_SCAN_DIR}"
     exec php "$ROOT/artisan" "$@"
 fi
 
@@ -18,10 +25,10 @@ if [[ -f "$EXT_DIR/pdo_pgsql.so" ]]; then
     mkdir -p "$EXT_DIR/conf.d"
     printf 'extension=%s\n' "$EXT_DIR/pdo_pgsql.so" > "$EXT_DIR/conf.d/pdo_pgsql.ini"
 
-    # PHP_INI_SCAN_DIR with a leading colon keeps the system scan directories
-    # and adds ours, so child processes (artisan serve spawns `php -S`) load
-    # pdo_pgsql too.
-    export PHP_INI_SCAN_DIR=":$EXT_DIR/conf.d${PHP_INI_SCAN_DIR:+:$PHP_INI_SCAN_DIR}"
+    # A leading colon keeps the system scan directories first (pdo must load
+    # before pdo_pgsql), then the extracted extension, then this project's ini.
+    # Child processes (artisan serve spawns `php -S`) inherit this.
+    export PHP_INI_SCAN_DIR=":$EXT_DIR/conf.d:$INI_DIR${PHP_INI_SCAN_DIR:+:$PHP_INI_SCAN_DIR}"
     export LD_LIBRARY_PATH="$EXT_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     exec php "$ROOT/artisan" "$@"
 fi

@@ -232,6 +232,7 @@ order, when Docker creates the volume:
 | `06_media_provider.sql` | `media_provider` on `lessons` and `partner_course_lessons` (`auto`/`youtube`/`self`/`none`) |
 | `07_audit_spine.sql` | Trigger-written audit trail on 14 core tables, `administrators manage users` policy, credential-takeover guard |
 | `08_column_grants.sql` | Re-asserts column-level grants lost to `ALTER DEFAULT PRIVILEGES`: hidden `users.password`, `labs.solution_code`, `assessment_questions.correct_answer` |
+| `09_media_assets.sql` | Service-only `media_assets` upload index; `type`, `audio_url`, `duration_seconds`, `thumbnail_url`, `caption_url` on `partner_course_lessons` |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -279,15 +280,16 @@ helpers, so the schema and policies carried over unchanged.
 | `partner_course_lessons` | Lessons within partner courses |
 | `partner_course_enrolments` | Student enrolments in partner courses |
 | `partner_course_progress` | Per-user lesson progress in partner courses |
+| `media_assets` | Uploaded asset index (storage key, URL, MIME, size, checksum, owner). No browser grants — Laravel writes it through `service_role`; clients only receive the returned URL |
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/09_add_something.sql`. Never
+Add a new sequential file, for example `database/10_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/09_add_something.sql
+  < database/10_add_something.sql
 ```
 
 `00_bootstrap.sql` grants `ALL` on new tables to `anon` and `authenticated`
@@ -390,6 +392,7 @@ The complete surface is in `backend/routes/api.php`.
 | `DataProxyController` | Forwards table requests to PostgREST with a signed JWT |
 | `RpcController` | Forwards database function calls with the same JWT |
 | `FunctionsController` | `auth-handler` compatibility shim and transactional email |
+| `MediaController` | Authenticated multipart upload to the public disk; validates per-kind type/size, hashes the stored name, checksums the bytes and records a `media_assets` row |
 
 ### Support classes
 
@@ -410,14 +413,39 @@ host or service.
 ### Rate limits
 
 `login` and `apply` are limited to 20 requests per minute per IP; the three
-password-reset endpoints are limited to 10 per minute.
+password-reset endpoints are limited to 10 per minute; media uploads are limited
+to 30 per minute.
+
+### Media uploads
+
+`POST /api/media` accepts `multipart/form-data` with `kind` and `file`. Only
+`Partner`, `Instructor` and `Administrator` profiles may upload.
+
+| Kind | Accepted | Max size |
+|------|----------|----------|
+| `image` | JPG, JPEG, PNG, WebP | 5 MB |
+| `caption` | WebVTT (`.vtt`), SRT (`.srt`) | 2 MB |
+| `audio` | MP3, M4A, WAV, OGG | 50 MB |
+| `video` | MP4, WebM | 200 MB |
+
+Files are written to the public disk under `media/<kind>/` with a generated
+random name (the client filename is recorded only as metadata). The response is
+`{ "data": { "id", "kind", "url", "mime", "bytes", "checksum" } }`; save `url`
+on the course or lesson row. `media_assets` is not client-readable — do not try
+to query it from the browser.
+
+PHP's defaults (`upload_max_filesize=2M`, `post_max_size=8M`) reject these
+sizes before Laravel sees them. `backend/php/uploads.ini` raises them to 200 MB
+and 210 MB and is loaded by `backend/bin/artisan`. A production PHP-FPM/Nginx
+deployment must set the same values, including `client_max_body_size`.
 
 ### Local PHP requirement
 
 `backend/bin/artisan` loads the locally extracted `pdo_pgsql` extension from
-`backend/.php-ext`. On a normal host with `php8.3-pgsql` installed, plain
-`php artisan` works and the wrapper simply delegates to it. To extract the
-extension without sudo:
+`backend/.php-ext` and the upload limits in `backend/php/uploads.ini`. On a
+normal host with `php8.3-pgsql` installed, plain `php artisan` works; the
+wrapper adds the project ini directory and delegates. Start the API through the
+wrapper so both the parent process and the `php -S` child inherit the limits:
 
 ```bash
 cd backend
@@ -451,6 +479,11 @@ Supported auth calls: `signInWithPassword`, `signOut`, `getSession`, `getUser`,
 
 Supported function calls: `functions.invoke('auth-handler' | 'email-service')`
 and `rpc(name, params)`.
+
+`api.uploadMedia(file, kind)` posts multipart form data to `/api/media` and
+returns `{ data, error }`. It must not be sent through the JSON query builder:
+the browser sets the multipart boundary. `components/MediaUpload.jsx` wraps it
+with size/type hints, upload state and inline validation for authoring forms.
 
 ### Password recovery
 
@@ -500,8 +533,18 @@ route's `roles` array; otherwise it redirects to `/unauthorized`.
   academy. `components/YouTubeFrame.jsx` uses the YouTube IFrame Player API so
   watch time is still recorded for YouTube lectures, and `MediaPlayer.jsx`
   falls back to a native `<video>`/`<audio>` element for self-hosted files.
+  Uploaded caption tracks render as a `<track>` on native video; thumbnails
+  render as the poster image.
 - `PartnerCourses.jsx` is the partner studio: drafts, lessons, and submission
-  for review. Lessons are created unpublished.
+  for review. Lessons are created unpublished and can be `video`, `audio` or
+  `text`. Authors add a video by unlisted YouTube URL or by uploading a file;
+  audio, thumbnails and caption tracks use the same inline upload control.
+  Uploaded bytes are indexed by `POST /api/media`, and only the returned URL is
+  stored on the course or lesson row.
+- `PartnerCourseLearning.jsx` plays partner lessons through the shared
+  `MediaPlayer` with a `partner_course_progress` adapter, so resume, speed and
+  90%-watch completion match academy lessons. `text` lessons render a reading
+  panel with an explicit “Mark as read” action instead of a player.
 - `PartnerCourseReview.jsx` is the Administrator review queue: approve and
   publish, or return with written notes. Publishing the course publishes its
   lessons through the database trigger.
@@ -676,6 +719,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 - [ ] Provision PostgreSQL 17 and apply `database/*.sql` in order
 - [ ] Run PostgREST privately with the same `PGRST_JWT_SECRET` as Laravel
 - [ ] Deploy `backend/` with PHP 8.3, `pdo_pgsql`, and `composer install --no-dev`
+- [ ] Raise PHP `upload_max_filesize` (200M) and `post_max_size` (210M), and Nginx `client_max_body_size`, to match the media allow-list
 - [ ] Set `APP_URL`, database credentials, `POSTGREST_URL`, and mail settings
 - [ ] Change every development password and rotate the JWT secret
 - [ ] Set `LMS_FRONTEND_URL` and `CORS_ALLOWED_ORIGINS` to the production origin
@@ -709,9 +753,13 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `backend/routes/api.php` | Complete API surface |
 | `backend/app/Http/Controllers/AuthController.php` | Auth, applications, password reset |
 | `backend/app/Http/Controllers/DataProxyController.php` | RLS-preserving PostgREST proxy |
+| `backend/app/Http/Controllers/MediaController.php` | Course-asset upload, validation and `media_assets` index |
+| `backend/php/uploads.ini` | Upload size limits loaded by `backend/bin/artisan` |
+| `database/09_media_assets.sql` | `media_assets` plus partner lesson media columns |
 | `backend/app/Support/AuthStore.php` | Service-role data access and sessions |
 | `backend/app/Support/Jwt.php` | PostgREST JWT signing |
 | `client/src/lib/backend.js` | Client transport and query builder |
+| `client/src/components/MediaUpload.jsx` | Inline authoring upload control (image, caption, audio, video) |
 | `client/src/context/AuthContext.jsx` | Auth provider, fail-closed guard |
 | `client/src/pages/Login.jsx` | Four role-based login portals |
 | `client/src/App.jsx` | Route definitions with role guards |
@@ -749,6 +797,11 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 - **A table-level grant defeats column-level grants.** Any new table with a
   secret column must `REVOKE ALL` from `anon`/`authenticated` and re-grant the
   safe columns, as `08_column_grants.sql` does.
+- **`media_assets` is backend-only.** `09_media_assets.sql` revokes the
+  bootstrap default grants from `anon` and `authenticated`; uploads are written
+  by Laravel under `service_role`. Stored filenames are generated, not taken
+  from the request, and MIME/size are validated per kind before any bytes are
+  indexed. Clients only store the URL returned by `POST /api/media`.
 - **Audit rows are trigger-written.** Clients have `SELECT` only (Administrators)
   and cannot forge or erase history.
 - **Deactivated accounts are blocked at both layers** — RLS returns no rows and

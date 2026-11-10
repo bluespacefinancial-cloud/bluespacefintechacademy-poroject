@@ -556,6 +556,59 @@ const FUNCTION_PATHS = {
   'email-service': '/functions/email',
 }
 
+/**
+ * Upload one course asset (image, caption track, audio or video).
+ *
+ * Uses multipart/form-data rather than the JSON transport above, so the
+ * browser sets the boundary header itself — do not pass Content-Type here.
+ * The backend validates the extension/MIME and size against a per-kind
+ * allow-list, stores the bytes on the public disk and returns the asset URL to
+ * save on a course or lesson row.
+ */
+async function uploadMedia(file, kind) {
+  if (!file) {
+    return { data: null, error: new ApiError('Choose a file to upload.') }
+  }
+
+  const token = localStorage.getItem(TOKEN_KEY)
+  const form = new FormData()
+  form.append('kind', kind)
+  form.append('file', file)
+
+  let response
+  try {
+    response = await fetch(`${API_BASE}/media`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: form,
+    })
+  } catch {
+    return {
+      data: null,
+      error: new ApiError('The upload could not reach the academy service. Check your connection and try again.'),
+    }
+  }
+
+  const text = await response.text()
+  let payload = null
+  if (text) {
+    try {
+      payload = JSON.parse(text)
+    } catch {
+      payload = text
+    }
+  }
+
+  if (!response.ok) {
+    return { data: null, error: toError(payload, response) }
+  }
+
+  return { data: payload?.data ?? payload, error: null }
+}
+
 async function invoke(functionName, { body } = {}) {
   const path = FUNCTION_PATHS[functionName]
 
@@ -587,6 +640,7 @@ async function invoke(functionName, { body } = {}) {
 export const api = {
   from: (table) => new QueryBuilder(table),
   rpc,
+  uploadMedia,
   auth: {
     signInWithPassword,
     signOut,

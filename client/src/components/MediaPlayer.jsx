@@ -543,7 +543,6 @@ export default function MediaPlayer({
       ref={mediaRef}
       src={mediaUrl}
       type={mediaType}
-      crossOrigin="anonymous"
       preload="metadata"
       className="w-full h-full object-center object-cover bg-gray-900"
       onLoadedMetadata={handleLoadedMetadata}
@@ -553,7 +552,11 @@ export default function MediaPlayer({
       onPlay={handlePlay}
       onError={() => setError('Failed to load media. Please check your connection.')}
       poster={lesson.thumbnail_url || undefined}
-    />
+    >
+      {lesson.caption_url && (
+        <track kind="captions" src={lesson.caption_url} srcLang="en" label="English" default />
+      )}
+    </video>
   ) : (
     <audio
       ref={mediaRef}

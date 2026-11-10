@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '../components/ui/select'
 import { api } from '../lib/backend'
+import MediaUpload from '../components/MediaUpload'
 
 const STATUS_LABELS = {
   draft: 'Draft',
@@ -39,8 +40,12 @@ const emptyCourseForm = {
 const emptyLessonForm = {
   title: '',
   description: '',
+  type: 'video',
   media_provider: 'auto',
   video_url: '',
+  audio_url: '',
+  thumbnail_url: '',
+  caption_url: '',
   content_url: '',
 }
 
@@ -155,6 +160,17 @@ export default function PartnerCourses() {
     setMessage('')
     setSavingLesson(true)
     try {
+      const lessonType = lesson.type || 'video'
+      if (lessonType === 'video' && !lesson.video_url.trim()) {
+        throw new Error('Add a video URL or upload a video file before adding this lesson.')
+      }
+      if (lessonType === 'audio' && !lesson.audio_url.trim()) {
+        throw new Error('Upload an audio file before adding this lesson.')
+      }
+      if (lessonType === 'text' && !lesson.description.trim()) {
+        throw new Error('Write the lesson text before adding this lesson.')
+      }
+
       const nextIndex = lessons.reduce((max, item) => Math.max(max, item.order_index ?? 0), -1) + 1
       const { data: created, error: lessonError } = await api
         .from('partner_course_lessons')
@@ -162,8 +178,12 @@ export default function PartnerCourses() {
           course_id: selected.id,
           title: lesson.title.trim(),
           description: lesson.description.trim() || null,
-          media_provider: lesson.media_provider || 'auto',
-          video_url: lesson.video_url.trim() || null,
+          type: lessonType,
+          media_provider: lessonType === 'text' ? 'none' : (lesson.media_provider || 'auto'),
+          video_url: lessonType === 'video' ? lesson.video_url.trim() || null : null,
+          audio_url: lessonType === 'audio' ? lesson.audio_url.trim() || null : null,
+          thumbnail_url: lesson.thumbnail_url.trim() || null,
+          caption_url: lesson.caption_url.trim() || null,
           content_url: lesson.content_url.trim() || null,
           order_index: nextIndex,
           // Lessons stay unpublished until an administrator publishes the course.
@@ -296,6 +316,16 @@ export default function PartnerCourses() {
                   value={form.thumbnail_url}
                   onChange={(event) => setForm({ ...form, thumbnail_url: event.target.value })}
                 />
+                <div className="mt-2">
+                  <MediaUpload
+                    kind="image"
+                    label="Upload thumbnail"
+                    value={form.thumbnail_url}
+                    helper="Landscape, 1200×675"
+                    onUploaded={(asset) => setForm((current) => ({ ...current, thumbnail_url: asset.url }))}
+                    onClear={() => setForm((current) => ({ ...current, thumbnail_url: '' }))}
+                  />
+                </div>
               </div>
               <div>
                 <label htmlFor="course-partner-logo" className="mb-1 block text-xs font-medium text-deep-600">Partner logo URL</label>
@@ -306,6 +336,16 @@ export default function PartnerCourses() {
                   value={form.partner_logo_url}
                   onChange={(event) => setForm({ ...form, partner_logo_url: event.target.value })}
                 />
+                <div className="mt-2">
+                  <MediaUpload
+                    kind="image"
+                    label="Upload partner logo"
+                    value={form.partner_logo_url}
+                    helper="Square or wide, transparent PNG works best"
+                    onUploaded={(asset) => setForm((current) => ({ ...current, partner_logo_url: asset.url }))}
+                    onClear={() => setForm((current) => ({ ...current, partner_logo_url: '' }))}
+                  />
+                </div>
               </div>
               <div>
                 <label htmlFor="course-certificate" className="mb-1 block text-xs font-medium text-deep-600">Certificate title</label>
@@ -417,35 +457,92 @@ export default function PartnerCourses() {
                   className="text-sm"
                 />
                 <Textarea
-                  placeholder="Short description"
+                  placeholder={lesson.type === 'text' ? 'Lesson body (shown as the reading)' : 'Short description'}
                   value={lesson.description}
                   onChange={(event) => setLesson({ ...lesson, description: event.target.value })}
-                  className="min-h-[60px] text-sm"
-                />
-                <Input
-                  type="url"
-                  placeholder="Video URL (YouTube unlisted or hosted)"
-                  value={lesson.video_url}
-                  onChange={(event) => setLesson({ ...lesson, video_url: event.target.value })}
-                  className="text-sm"
+                  className={lesson.type === 'text' ? 'min-h-[140px] text-sm' : 'min-h-[60px] text-sm'}
                 />
                 <Select
-                  value={lesson.media_provider}
-                  onValueChange={(value) => setLesson({ ...lesson, media_provider: value })}
+                  value={lesson.type}
+                  onValueChange={(value) => setLesson({ ...lesson, type: value })}
                 >
-                  <SelectTrigger className="w-full text-sm">
+                  <SelectTrigger className="w-full text-sm" aria-label="Lesson type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">Auto-detect from URL</SelectItem>
-                    <SelectItem value="youtube">YouTube (unlisted)</SelectItem>
-                    <SelectItem value="self">Self-hosted file</SelectItem>
-                    <SelectItem value="none">No media</SelectItem>
+                    <SelectItem value="video">Video lesson</SelectItem>
+                    <SelectItem value="audio">Audio lesson</SelectItem>
+                    <SelectItem value="text">Reading lesson</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {lesson.type === 'video' && (
+                  <>
+                    <Input
+                      type="url"
+                      placeholder="Video URL (YouTube unlisted or hosted)"
+                      value={lesson.video_url}
+                      onChange={(event) => setLesson({ ...lesson, video_url: event.target.value })}
+                      className="text-sm"
+                    />
+                    <Select
+                      value={lesson.media_provider}
+                      onValueChange={(value) => setLesson({ ...lesson, media_provider: value })}
+                    >
+                      <SelectTrigger className="w-full text-sm" aria-label="Video source">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">Auto-detect from URL</SelectItem>
+                        <SelectItem value="youtube">YouTube (unlisted)</SelectItem>
+                        <SelectItem value="self">Self-hosted file</SelectItem>
+                        <SelectItem value="none">No media</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <MediaUpload
+                      kind="video"
+                      label="Upload video file"
+                      value={lesson.video_url}
+                      helper="MP4 or WebM, max 200 MB"
+                      onUploaded={(asset) => setLesson((current) => ({ ...current, video_url: asset.url, media_provider: 'self' }))}
+                      onClear={() => setLesson((current) => ({ ...current, video_url: '', media_provider: 'auto' }))}
+                    />
+                  </>
+                )}
+
+                {lesson.type === 'audio' && (
+                  <MediaUpload
+                    kind="audio"
+                    label="Audio file"
+                    value={lesson.audio_url}
+                    helper="MP3, M4A, WAV or OGG, max 50 MB"
+                    onUploaded={(asset) => setLesson((current) => ({ ...current, audio_url: asset.url }))}
+                    onClear={() => setLesson((current) => ({ ...current, audio_url: '' }))}
+                  />
+                )}
+
+                <MediaUpload
+                  kind="image"
+                  label={lesson.type === 'text' ? 'Cover image (optional)' : 'Lesson thumbnail (optional)'}
+                  value={lesson.thumbnail_url}
+                  onUploaded={(asset) => setLesson((current) => ({ ...current, thumbnail_url: asset.url }))}
+                  onClear={() => setLesson((current) => ({ ...current, thumbnail_url: '' }))}
+                />
+
+                {lesson.type !== 'text' && (
+                  <MediaUpload
+                    kind="caption"
+                    label="Captions (optional)"
+                    value={lesson.caption_url}
+                    helper="WebVTT or SRT"
+                    onUploaded={(asset) => setLesson((current) => ({ ...current, caption_url: asset.url }))}
+                    onClear={() => setLesson((current) => ({ ...current, caption_url: '' }))}
+                  />
+                )}
+
                 <Input
                   type="url"
-                  placeholder="Reading or resource URL"
+                  placeholder={lesson.type === 'text' ? 'Extra resource URL (optional)' : 'Reading or resource URL'}
                   value={lesson.content_url}
                   onChange={(event) => setLesson({ ...lesson, content_url: event.target.value })}
                   className="text-sm"

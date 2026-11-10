@@ -108,7 +108,7 @@ order, when Docker creates the volume:
 | `00_bootstrap.sql` | PostgREST roles, Laravel role, `auth` schema/functions, extensions |
 | `01_schema.sql` | Tables, indexes, triggers, grants, RLS policies, demo data |
 | `02_auth_tokens.sql` | `auth_tokens` and `password_resets` (service-role only) |
-| `03_demo_passwords.sql` | Demo account bcrypt hashes (`BlueSpace2026!`) |
+| `03_demo_passwords.sql` | Demo account bcrypt hashes (see Test Logins) |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -455,7 +455,7 @@ VALUES (
   gen_random_uuid(),
   'New User',
   'new@user.com',
-  crypt('BlueSpace2026!', gen_salt('bf')),
+  crypt('<set-a-strong-password>', gen_salt('bf')),
   'Student',
   1,
   '/avatars/student.png'
@@ -471,7 +471,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | Login 500 with `could not find driver` | PHP missing `pdo_pgsql` | Use `./bin/artisan`, or install `php8.3-pgsql` |
-| Login 500 with `password authentication failed` | `.env` password does not match `00_bootstrap.sql` | Use `lms_service` / `bluespace_laravel_2026` locally |
+| Login 500 with `password authentication failed` | `.env` password does not match `00_bootstrap.sql` | Set `DB_PASSWORD` in `backend/.env` to the `lms_service` password defined in `database/00_bootstrap.sql`, and keep `docker-compose.yml` in sync |
 | PostgREST returns 401 for every request | `PGRST_JWT_SECRET` differs between compose and Laravel | Set the same value in `lms/.env` and `backend/.env`, then restart both |
 | Data request returns `[]` unexpectedly | RLS policy or wrong role | Check the signed-in profile's `type` and `is_active` |
 | `select('*')` on `users` fails | `password` is not in the column grant | Use `PROFILE_COLUMNS` from `lib/profile.js` |

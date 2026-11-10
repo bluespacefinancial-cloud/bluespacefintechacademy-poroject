@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   BookOpen,
+  ClipboardList,
   Eye,
   Pencil,
   Plus,
@@ -80,6 +81,14 @@ const emptyLessonForm = {
   order_index: 0,
 }
 
+const emptyLabForm = {
+  title: '',
+  instructions: '',
+  starter_code: '',
+  due_date: '',
+  max_score: 100,
+}
+
 export default function ModuleEditor() {
   const { moduleId } = useParams()
   const navigate = useNavigate()
@@ -91,6 +100,10 @@ export default function ModuleEditor() {
   const [cohorts, setCohorts] = useState([])
   const [module, setModule] = useState(null)
   const [lessons, setLessons] = useState([])
+  const [labsByLesson, setLabsByLesson] = useState({})
+  const [labEditorLessonId, setLabEditorLessonId] = useState(null)
+  const [labForm, setLabForm] = useState(emptyLabForm)
+  const [savingLab, setSavingLab] = useState(false)
   const [form, setForm] = useState(emptyModuleForm)
   const [lessonForm, setLessonForm] = useState(emptyLessonForm)
   const [editingLessonId, setEditingLessonId] = useState(null)
@@ -149,6 +162,23 @@ export default function ModuleEditor() {
       .order('order_index', { ascending: true })
     if (lessonError) throw lessonError
     setLessons(lessonRows || [])
+
+    const lessonIds = (lessonRows || []).map((lesson) => lesson.id)
+    if (lessonIds.length === 0) {
+      setLabsByLesson({})
+      return
+    }
+    const { data: labRows, error: labError } = await api
+      .from('labs')
+      .select('id, lesson_id, title, instructions, starter_code, solution_code, due_date, max_score')
+      .in('lesson_id', lessonIds)
+      .order('id', { ascending: true })
+    if (labError) throw labError
+    const grouped = {}
+    for (const lab of labRows || []) {
+      if (!grouped[lab.lesson_id]) grouped[lab.lesson_id] = lab
+    }
+    setLabsByLesson(grouped)
   }, [isNew, moduleId])
 
   useEffect(() => {
@@ -365,14 +395,26 @@ export default function ModuleEditor() {
   }
 
   const deleteLesson = async (lesson) => {
-    if (!window.confirm(`Delete “${lesson.title}”?`)) return
+    if (!window.confirm(`Delete “${lesson.title}”?${labsByLesson[lesson.id] ? ' Its lab will be removed too.' : ''}`)) return
     setError('')
+    // `labs.lesson_id` has no cascade, so an attached lab goes first.
+    const { error: labDeleteError } = await api.from('labs').delete().eq('lesson_id', lesson.id)
+    if (labDeleteError) {
+      setError(labDeleteError.message)
+      return
+    }
     const { error: deleteError } = await api.from('lessons').delete().eq('id', lesson.id)
     if (deleteError) {
       setError(deleteError.message)
       return
     }
     setLessons((current) => current.filter((item) => item.id !== lesson.id))
+    setLabsByLesson((current) => {
+      const next = { ...current }
+      delete next[lesson.id]
+      return next
+    })
+    if (labEditorLessonId === lesson.id) setLabEditorLessonId(null)
     setMessage('Lesson deleted.')
   }
 
@@ -397,6 +439,82 @@ export default function ModuleEditor() {
       if (item.id === neighbour.id) return { ...item, order_index: index }
       return item
     }))
+  }
+
+  const openLabEditor = (lesson) => {
+    const existing = labsByLesson[lesson.id]
+    setLabEditorLessonId(lesson.id)
+    setLabForm(existing ? {
+      title: existing.title || '',
+      instructions: existing.instructions || '',
+      starter_code: existing.starter_code || '',
+      due_date: existing.due_date ? String(existing.due_date).slice(0, 10) : '',
+      max_score: existing.max_score ?? 100,
+    } : emptyLabForm)
+    setError('')
+    setMessage('')
+  }
+
+  const saveLab = async (event) => {
+    event.preventDefault()
+    const lessonId = labEditorLessonId
+    if (!lessonId) return
+    setError('')
+    setMessage('')
+    if (!labForm.title.trim() || !labForm.instructions.trim()) {
+      setError('A lab needs both a title and instructions.')
+      return
+    }
+    setSavingLab(true)
+
+    const payload = {
+      lesson_id: lessonId,
+      title: labForm.title.trim(),
+      instructions: labForm.instructions.trim(),
+      starter_code: labForm.starter_code.trim() || null,
+      due_date: labForm.due_date || null,
+      max_score: Number(labForm.max_score) || 100,
+      created_by: user?.id ?? 0,
+      updated_at: new Date().toISOString(),
+    }
+
+    try {
+      const existing = labsByLesson[lessonId]
+      const query = existing
+        ? api.from('labs').update(payload).eq('id', existing.id)
+        : api.from('labs').insert(payload)
+      const { data, error: labError } = await query
+        .select('id, lesson_id, title, instructions, starter_code, solution_code, due_date, max_score')
+        .single()
+      if (labError) throw labError
+      setLabsByLesson((current) => ({ ...current, [lessonId]: data }))
+      setLabEditorLessonId(null)
+      setLabForm(emptyLabForm)
+      setMessage(existing ? 'Lab updated.' : 'Lab attached to lesson.')
+    } catch (labError) {
+      setError(labError.message || 'Unable to save this lab')
+    } finally {
+      setSavingLab(false)
+    }
+  }
+
+  const deleteLab = async (lesson) => {
+    const existing = labsByLesson[lesson.id]
+    if (!existing) return
+    if (!window.confirm(`Remove the lab “${existing.title}” from this lesson?`)) return
+    setError('')
+    const { error: labError } = await api.from('labs').delete().eq('id', existing.id)
+    if (labError) {
+      setError(labError.message)
+      return
+    }
+    setLabsByLesson((current) => {
+      const next = { ...current }
+      delete next[lesson.id]
+      return next
+    })
+    if (labEditorLessonId === lesson.id) setLabEditorLessonId(null)
+    setMessage('Lab removed.')
   }
 
   if (loading) {
@@ -613,10 +731,10 @@ export default function ModuleEditor() {
             )}
 
             {lessons.map((lesson, index) => (
-              <div
-                key={lesson.id}
-                className="flex flex-col gap-3 rounded-lg border border-gray-200/90 p-3 sm:flex-row sm:items-center sm:justify-between"
-              >
+              <div key={lesson.id} className="space-y-3">
+                <div
+                  className="flex flex-col gap-3 rounded-lg border border-gray-200/90 p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
                 <div className="flex items-start gap-3 min-w-0">
                   <span className="mt-0.5 w-6 text-center text-[11px] font-semibold text-gray-400">{index + 1}</span>
                   <div className="min-w-0">
@@ -625,9 +743,27 @@ export default function ModuleEditor() {
                       {LESSON_TYPE_LABELS[lesson.type] || lesson.type} · {lesson.duration_minutes} min
                       {lesson.is_required ? ' · Required' : ' · Optional'}
                     </p>
+                    {labsByLesson[lesson.id] && (
+                      <Badge variant="secondary" className="mt-1.5 text-[10px]">
+                        <ClipboardList size={10} className="mr-1" />
+                        {labsByLesson[lesson.id].title}
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    size="sm"
+                    variant={labsByLesson[lesson.id] ? 'ghost' : 'outline'}
+                    onClick={() => (labEditorLessonId === lesson.id
+                      ? setLabEditorLessonId(null)
+                      : openLabEditor(lesson))}
+                    aria-label={labsByLesson[lesson.id] ? `Edit lab for ${lesson.title}` : `Attach lab to ${lesson.title}`}
+                    title={labsByLesson[lesson.id] ? 'Edit lab' : 'Attach lab'}
+                  >
+                    <ClipboardList size={13} className="mr-1" />
+                    {labsByLesson[lesson.id] ? 'Lab' : 'Attach lab'}
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -660,6 +796,114 @@ export default function ModuleEditor() {
                     <Trash2 size={13} className="text-red-600" />
                   </Button>
                 </div>
+                </div>
+
+                {labEditorLessonId === lesson.id && (
+                  <form onSubmit={saveLab} className="space-y-3 rounded-lg border border-deep-200 bg-deep-50/40 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ClipboardList size={15} className="text-deep-600" />
+                        <p className="text-sm font-semibold text-gray-900">
+                          {labsByLesson[lesson.id] ? 'Edit lab' : 'Attach a lab'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setLabEditorLessonId(null); setLabForm(emptyLabForm) }}
+                        className="rounded p-1 text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-deep-600"
+                        aria-label="Close lab editor"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Attached to <span className="font-medium text-gray-700">{lesson.title}</span>. Students see this in their lab workspace.
+                    </p>
+
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="sm:col-span-2">
+                        <label htmlFor={`lab-title-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Lab title</label>
+                        <Input
+                          id={`lab-title-${lesson.id}`}
+                          value={labForm.title}
+                          onChange={(event) => setLabForm({ ...labForm, title: event.target.value })}
+                          placeholder="e.g. Build a settlement reconciliation sheet"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`lab-due-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Due date</label>
+                        <Input
+                          id={`lab-due-${lesson.id}`}
+                          type="date"
+                          value={labForm.due_date}
+                          onChange={(event) => setLabForm({ ...labForm, due_date: event.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`lab-score-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Max score</label>
+                        <Input
+                          id={`lab-score-${lesson.id}`}
+                          type="number"
+                          min="1"
+                          value={labForm.max_score}
+                          onChange={(event) => setLabForm({ ...labForm, max_score: event.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor={`lab-instructions-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Instructions</label>
+                      <Textarea
+                        id={`lab-instructions-${lesson.id}`}
+                        value={labForm.instructions}
+                        onChange={(event) => setLabForm({ ...labForm, instructions: event.target.value })}
+                        placeholder="What students should build, the inputs to use, and how it will be marked."
+                        className="min-h-[110px] text-sm"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor={`lab-starter-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Starter code or template (optional)</label>
+                      <Textarea
+                        id={`lab-starter-${lesson.id}`}
+                        value={labForm.starter_code}
+                        onChange={(event) => setLabForm({ ...labForm, starter_code: event.target.value })}
+                        placeholder="Paste starter code, a spreadsheet template link, or a starting query."
+                        className="min-h-[80px] font-mono text-xs"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      {labsByLesson[lesson.id] ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteLab(lesson)}
+                          disabled={savingLab}
+                        >
+                          <Trash2 size={13} className="mr-1.5 text-red-600" />
+                          Remove lab
+                        </Button>
+                      ) : <span />}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setLabEditorLessonId(null); setLabForm(emptyLabForm) }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" size="sm" disabled={savingLab}>
+                          {savingLab ? 'Saving…' : labsByLesson[lesson.id] ? 'Save lab' : 'Attach lab'}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                )}
               </div>
             ))}
 

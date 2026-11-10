@@ -110,7 +110,7 @@ export default function App() {
         <Route path="labs-to-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
         <Route path="grading" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
         <Route path="mentor-clinics" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MentorClinics /></ProtectedRoute>} />
-        <Route path="announcements" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Announcements /></ProtectedRoute>} />
+        <Route path="announcements" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><Announcements /></ProtectedRoute>} />
         <Route path="squads" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><SquadManagement /></ProtectedRoute>} />
         <Route path="use-case-assignment" element={<ProtectedRoute roles={['Administrator']}><UseCaseAssignment /></ProtectedRoute>} />
         <Route path="capstone" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><CapstoneSubmission /></ProtectedRoute>} />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Activity,
   ArrowRight,
+  Bell,
   BookOpen,
   ClipboardList,
   FileText,
@@ -31,6 +32,7 @@ const GROUPS = {
   live_classes: { label: 'Live classes', icon: Video },
   clinics: { label: 'Mentor clinics', icon: Activity },
   partner_courses: { label: 'Partner courses', icon: School },
+  announcements: { label: 'Announcements', icon: Bell },
 }
 
 function hrefFor(table, row, role) {
@@ -40,7 +42,7 @@ function hrefFor(table, row, role) {
     case 'lessons':
       return `/lesson/${row.id}`
     case 'labs':
-      return '/lab-workspace'
+      return role === 'Student' ? '/lab-workspace' : '/grading'
     case 'live_classes':
       return '/live-classes'
     case 'clinics':
@@ -49,6 +51,8 @@ function hrefFor(table, row, role) {
       if (role === 'Partner') return '/partner-courses'
       if (role === 'Administrator') return '/partner-course-review'
       return `/partner-course/${row.id}`
+    case 'announcements':
+      return '/announcements'
     default:
       return '/'
   }
@@ -60,12 +64,12 @@ function hrefFor(table, row, role) {
  */
 function searchTargets(role) {
   if (role === 'Student') {
-    return ['modules', 'lessons', 'labs', 'live_classes', 'clinics', 'partner_courses']
+    return ['modules', 'lessons', 'labs', 'live_classes', 'clinics', 'partner_courses', 'announcements']
   }
   if (role === 'Partner') {
     return ['partner_courses']
   }
-  return ['modules', 'lessons', 'labs', 'live_classes', 'clinics', 'partner_courses']
+  return ['modules', 'lessons', 'labs', 'live_classes', 'clinics', 'partner_courses', 'announcements']
 }
 
 export default function GlobalSearch({ open, onOpenChange }) {

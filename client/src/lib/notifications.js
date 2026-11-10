@@ -22,7 +22,7 @@ const ROUTE_RULES = [
   { tokens: ['squad'], Student: '/my-squad', Instructor: '/squads', Administrator: '/squads' },
   { tokens: ['project', 'deliverable'], Student: '/my-squad', Instructor: '/project-review', Administrator: '/project-review' },
   { tokens: ['module'], Student: '/my-learning', Instructor: '/my-modules', Administrator: '/curriculum' },
-  { tokens: ['announcement'], Student: '/notifications', Instructor: '/announcements', Administrator: '/announcements' },
+  { tokens: ['announcement'], Student: '/announcements', Instructor: '/announcements', Administrator: '/announcements' },
   { tokens: ['grade', 'graded', 'feedback', 'submission', 'lab'], Student: '/lab-workspace', Instructor: '/grading', Administrator: '/grading' },
   { tokens: ['live', 'class'], Student: '/live-classes', Instructor: '/live-classes', Administrator: '/live-classes' },
 ]

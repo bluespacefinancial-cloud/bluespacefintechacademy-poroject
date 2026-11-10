@@ -228,6 +228,7 @@ order, when Docker creates the volume:
 | `02_auth_tokens.sql` | `auth_tokens` and `password_resets` (service-role only) |
 | `03_demo_passwords.sql` | Demo account bcrypt hashes (see Test Logins) |
 | `04_partner_review_guard.sql` | Partner review guard triggers, notification and audit-log grants, instructor content scope |
+| `05_announcement_admin_reach.sql` | Administrators can edit, pin and delete any announcement (instructors stay author-only) |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -278,12 +279,12 @@ helpers, so the schema and policies carried over unchanged.
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/05_add_something.sql`. Never
+Add a new sequential file, for example `database/06_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/05_add_something.sql
+  < database/06_add_something.sql
 ```
 
 For a repeatable local rebuild:
@@ -456,8 +457,10 @@ route's `roles` array; otherwise it redirects to `/unauthorized`.
 - `MyModules.jsx` lists the modules an Instructor can edit.
 - `ModuleEditor.jsx` handles both `/modules/create` and `/modules/:moduleId`:
   module fields, lesson create/edit/delete, reordering, per-lesson preview and
-  publishing. Publishing requires at least one lesson. Instructors publish
-  directly; the database scopes their writes to their assigned cohorts.
+  publishing. Each lesson can also carry one lab (title, instructions, starter
+  code, due date and max score), attached inline from the lesson row. Publishing
+  requires at least one lesson. Instructors publish directly; the database
+  scopes their writes to their assigned cohorts.
 - `LessonPlayer.jsx` is used by Students and, with `readOnly`, by staff
   previewing a lesson. In preview mode no `lesson_progress` row is written and
   the lab call to action points at `/grading`.
@@ -466,8 +469,13 @@ route's `roles` array; otherwise it redirects to `/unauthorized`.
 - `PartnerCourseReview.jsx` is the Administrator review queue: approve and
   publish, or return with written notes. Publishing the course publishes its
   lessons through the database trigger.
+- `Announcements.jsx` is readable by every signed-in role. Instructors and
+  Administrators get the composer, pin toggle and delete; an Instructor only
+  manages their own posts, while an Administrator can correct anyone's. Students
+  get read tracking through `announcement_reads`.
 - The global search palette (`components/layout/GlobalSearch.jsx`) is opened
-  with Ctrl/Cmd+K or `/` and searches only the tables the current role can read.
+  with Ctrl/Cmd+K or `/` and searches only the tables the current role can read,
+  including announcements.
 
 ---
 

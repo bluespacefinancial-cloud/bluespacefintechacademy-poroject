@@ -57,6 +57,7 @@ const sidebarGroups = {
         { to: '/my-squad', icon: Users, label: 'Squad Workspace', ariaLabel: 'Squad Workspace' },
         { to: '/peer-reviews', icon: ClipboardList, label: 'Peer Reviews', ariaLabel: 'Peer Reviews' },
         { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Courses', ariaLabel: 'Partner Catalog' },
+        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
       ],
     },
     {
@@ -142,6 +143,7 @@ const sidebarGroups = {
         { to: '/reports', icon: BarChart3, label: 'Reports', ariaLabel: 'Reports' },
         { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
         { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
+        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
         { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring', ariaLabel: 'Quiz Authoring' },
       ],
     },

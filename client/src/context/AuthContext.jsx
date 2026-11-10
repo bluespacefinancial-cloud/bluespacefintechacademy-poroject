@@ -20,7 +20,7 @@ async function loadProfile(authUser) {
   const { data: profile, error } = await api
     .from('users')
     // Explicit columns: public.users.password is deliberately not selectable
-    // (see lms/database/01_schema.sql).
+    // (see lms/database/08_column_grants.sql).
     .select(PROFILE_COLUMNS)
     .eq('email', authUser.email)
     .maybeSingle()

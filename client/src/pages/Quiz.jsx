@@ -26,7 +26,7 @@ export default function Quiz() {
         const [{ data: assessmentRow, error: assessmentError }, { data: questionRows, error: questionsError }, { data: attempts, error: attemptsError }] = await Promise.all([
           api.from('assessments').select('*').eq('id', assessmentId).single(),
           // correct_answer is intentionally not selectable by students; see
-          // lms/database/01_schema.sql.
+          // lms/database/08_column_grants.sql.
           api.from('assessment_questions').select('id, assessment_id, prompt, question_type, options, points, order_index').eq('assessment_id', assessmentId).order('order_index'),
           api.from('assessment_attempts').select('*').eq('assessment_id', assessmentId).eq('user_id', profile.id).order('started_at', { ascending: false }).limit(1),
         ])

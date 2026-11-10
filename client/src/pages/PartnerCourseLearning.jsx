@@ -4,15 +4,12 @@ import { CheckCircle, PlayCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { api } from '../lib/backend'
+import { parseYouTubeId } from '../components/YouTubeFrame'
 
 function getYouTubeEmbedUrl(url, provider = 'auto') {
-  if (!url || typeof url !== 'string') return null
   if (provider === 'none' || provider === 'self') return null
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return match && match[2].length === 11
-    ? `https://www.youtube.com/embed/${match[2]}?rel=0`
-    : null
+  const videoId = parseYouTubeId(url)
+  return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : null
 }
 
 export default function PartnerCourseLearning() {

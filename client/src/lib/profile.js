@@ -1,7 +1,7 @@
 import { api } from './backend'
 
 // Must match the column-level SELECT grant on public.users
-// (lms/database/01_schema.sql). select('*') is denied
+// (lms/database/08_column_grants.sql). select('*') is denied
 // because the legacy password column is not granted.
 export const PROFILE_COLUMNS =
   'id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at, student_id'

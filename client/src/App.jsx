@@ -42,6 +42,7 @@ import PartnerCourseReview from './pages/PartnerCourseReview'
 import PartnerCourseLearning from './pages/PartnerCourseLearning'
 import ProfileSettings from './pages/ProfileSettings'
 import UserManagement from './pages/UserManagement'
+import AuditLog from './pages/AuditLog'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 import Register from './pages/Register'
@@ -127,6 +128,7 @@ export default function App() {
         <Route path="placement" element={<ProtectedRoute roles={['Administrator']}><Placement /></ProtectedRoute>} />
         <Route path="reports" element={<ProtectedRoute roles={['Administrator']}><Reports /></ProtectedRoute>} />
         <Route path="user-management" element={<ProtectedRoute roles={['Administrator']}><UserManagement /></ProtectedRoute>} />
+        <Route path="audit-log" element={<ProtectedRoute roles={['Administrator']}><AuditLog /></ProtectedRoute>} />
         <Route path="profile-settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>

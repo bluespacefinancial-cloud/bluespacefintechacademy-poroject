@@ -171,7 +171,7 @@ export default function ModuleEditor() {
     }
     const { data: labRows, error: labError } = await api
       .from('labs')
-      .select('id, lesson_id, title, instructions, starter_code, solution_code, due_date, max_score')
+      .select('id, lesson_id, title, instructions, starter_code, due_date, max_score')
       .in('lesson_id', lessonIds)
       .order('id', { ascending: true })
     if (labError) throw labError
@@ -487,7 +487,7 @@ export default function ModuleEditor() {
         ? api.from('labs').update(payload).eq('id', existing.id)
         : api.from('labs').insert(payload)
       const { data, error: labError } = await query
-        .select('id, lesson_id, title, instructions, starter_code, solution_code, due_date, max_score')
+        .select('id, lesson_id, title, instructions, starter_code, due_date, max_score')
         .single()
       if (labError) throw labError
       setLabsByLesson((current) => ({ ...current, [lessonId]: data }))

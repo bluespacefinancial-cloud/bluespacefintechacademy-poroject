@@ -141,6 +141,7 @@ const sidebarGroups = {
       items: [
         { to: '/squads', icon: Target, label: 'Squads', ariaLabel: 'Squads' },
         { to: '/reports', icon: BarChart3, label: 'Reports', ariaLabel: 'Reports' },
+        { to: '/audit-log', icon: Shield, label: 'Audit Log', ariaLabel: 'Audit Log' },
         { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
         { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
         { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },

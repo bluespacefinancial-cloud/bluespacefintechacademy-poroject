@@ -230,6 +230,8 @@ order, when Docker creates the volume:
 | `04_partner_review_guard.sql` | Partner review guard triggers, notification and audit-log grants, instructor content scope |
 | `05_announcement_admin_reach.sql` | Administrators can edit, pin and delete any announcement (instructors stay author-only) |
 | `06_media_provider.sql` | `media_provider` on `lessons` and `partner_course_lessons` (`auto`/`youtube`/`self`/`none`) |
+| `07_audit_spine.sql` | Trigger-written audit trail on 14 core tables, `administrators manage users` policy, credential-takeover guard |
+| `08_column_grants.sql` | Re-asserts column-level grants lost to `ALTER DEFAULT PRIVILEGES`: hidden `users.password`, `labs.solution_code`, `assessment_questions.correct_answer` |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -280,13 +282,18 @@ helpers, so the schema and policies carried over unchanged.
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/07_add_something.sql`. Never
+Add a new sequential file, for example `database/09_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/07_add_something.sql
+  < database/09_add_something.sql
 ```
+
+`00_bootstrap.sql` grants `ALL` on new tables to `anon` and `authenticated`
+through `ALTER DEFAULT PRIVILEGES`. A table-level grant overrides column-level
+grants, so any new table holding a secret column must revoke the table grant and
+re-grant the safe columns explicitly (see `08_column_grants.sql`).
 
 For a repeatable local rebuild:
 
@@ -308,8 +315,8 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 |------------|----------------|
 | Table access | RLS enabled on every public table; policies keyed to `current_profile_id()` / `current_profile_role()` |
 | Deactivated accounts | Helpers return `NULL` when `is_active = 0`, so policies yield no rows |
-| `users` self-promotion | Table `UPDATE` is revoked; only `name`, `avatar`, `phone` are grantable |
-| `users.password` | Not granted to `anon`/`authenticated`; Laravel uses `lms_service` |
+| `users` writes | RLS limits self-service to the caller's own row; column grants allow only `name`, `avatar`, `phone` (plus administrator-managed fields); `guard_user_credentials` rejects non-administrator changes to role, email or status and blocks credential changes from any browser session |
+| `users.password` | Excluded from the `SELECT`/`UPDATE` column grants on `authenticated`; authentication reads and writes it over `lms_service` |
 | `labs.solution_code` | Column-level `SELECT` grant excludes it |
 | `assessment_questions.correct_answer` | Column-level `SELECT` grant excludes it |
 | Token tables | `REVOKE ALL` from client roles; only `service_role` may read/write |
@@ -334,10 +341,31 @@ and do not describe this schema. Do not run `php artisan migrate` here.
   intentionally limits the UI to Administrators and shows a read-only notice
   for Instructors.
 - `enrolments` management is Administrator-only.
-- `UserManagement` role, activation, and delete mutations are intentionally
-  blocked by security hardening. Use SQL for those operations.
+- Administrators manage roles, activation and account deletion from
+  `UserManagement`. The `administrators manage users` policy provides the write
+  access; the credential guard still prevents password or auth-identity
+  takeover, so those remain server-side operations.
 - Zero-row updates surface an explicit permission error instead of failing
   silently.
+
+### Audit trail
+
+- `record_audit_row()` is an `AFTER INSERT OR UPDATE OR DELETE` trigger on 14
+  core tables: `users`, `cohorts`, `enrolments`, `modules`, `lessons`, `labs`,
+  `assessments`, `announcements`, `partners`, `partner_courses`,
+  `partner_course_lessons`, `instructor_cohort_assignments`, `certifications`
+  and `placements`.
+- Triggers write the log, so entries cannot be forged or erased from the
+  browser: `audit_logs` keeps `SELECT` (Administrators only) and no client write
+  grant.
+- Each entry snapshots the actor's id, name and role, the entity and its id, and
+  the **names** of the columns that changed. Values are never copied, so
+  passwords, quiz answers and lab solutions stay out of the log.
+- Creates and ordinary updates are `INFO`; deletes and changes to roles,
+  activation, partner ownership or enrolment status are `WARNING`.
+- No-op updates (including login `last_login_at` touches) are skipped.
+- `/audit-log` is the Administrator viewer: last 300 entries, filters by
+  severity, entity and free text, plus CSV export. It is read-only.
 
 ### Fail-closed behavior
 
@@ -700,8 +728,6 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ### Known gaps
 
-- Administrator role/activation/delete mutations in `UserManagement` are
-  intentionally blocked by security hardening.
 - Squad mutations are Administrator-only in the UI even though the `squads`
   policy allows Instructors.
 - Dead page files: `LabsToReview.jsx`, `ProjectWorkspace.jsx`,
@@ -716,10 +742,15 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 - **Never commit `.env` files, tokens, or passwords.**
 - **Never insert a password into a client-readable column.** `users.password` is
-  revoked from `anon` and `authenticated`.
+  not granted to `anon` or `authenticated`.
 - **Never expose `service_role` or the PostgREST JWT secret to the browser.**
 - **Use explicit column lists** on `users`, `labs`, and `assessment_questions`;
   `select('*')` is denied by the grants.
+- **A table-level grant defeats column-level grants.** Any new table with a
+  secret column must `REVOKE ALL` from `anon`/`authenticated` and re-grant the
+  safe columns, as `08_column_grants.sql` does.
+- **Audit rows are trigger-written.** Clients have `SELECT` only (Administrators)
+  and cannot forge or erase history.
 - **Deactivated accounts are blocked at both layers** — RLS returns no rows and
   `AuthContext` clears the session.
 - **Rotate the JWT secret** if it is ever shared outside Laravel/PostgREST.

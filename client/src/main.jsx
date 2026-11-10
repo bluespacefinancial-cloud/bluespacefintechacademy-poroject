@@ -20,5 +20,31 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         }} />
       </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>,
+  </React.StrictMode>
 )
+
+// PWA offline support. A service worker must never run in development: it
+// caches static assets cache-first, so Vite edits (including Tailwind's dark
+// mode output) would keep serving the first copy until the cache is cleared.
+if ('serviceWorker' in navigator) {
+  if (import.meta.env.PROD) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then((registration) => {
+          console.log('BlueSPACE PWA service worker registered:', registration.scope)
+        })
+        .catch((error) => {
+          console.warn('BlueSPACE PWA service worker registration failed:', error)
+        })
+    })
+  } else {
+    // Clean up workers and caches left behind by earlier dev sessions.
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .then(() => caches.keys())
+      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .catch(() => {})
+  }
+}
+

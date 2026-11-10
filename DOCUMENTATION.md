@@ -152,6 +152,20 @@ From `lms/`:
 - `npm run stack:reset` — rebuild the database from `database/*.sql`
 - `npm run api` — start Laravel on `127.0.0.1:8001`
 
+### PWA
+
+The client is a Progressive Web App. Build it once and it installs on devices:
+
+- `client/public/manifest.json` — app metadata, icons, standalone display, shortcuts to My Learning and Dashboard
+- `client/public/sw.js` — service worker: caches the SPA shell (index.html, favicons, logos), serves `index.html` for offline navigation, uses network-first with cache fallback for API calls (`/data/`, `/auth/`, `/rpc/`), cache-first for static assets
+- `client/src/main.jsx` — registers the service worker on load, **production only**.
+  In dev it unregisters any existing worker and clears its caches, because the
+  worker's cache-first static-asset strategy would otherwise serve stale Vite
+  output (and mask CSS/theme changes).
+- `client/index.html` — `manifest` link, `apple-touch-icon`, `theme-color`, `apple-mobile-web-app-capable`, `mobile-web-app-capable` meta tags
+
+Users can "Add to Home Screen" on mobile/desktop and the app loads offline for cached routes.
+
 ---
 
 ## 1. System Overview
@@ -159,13 +173,14 @@ From `lms/`:
 BlueSPACE Fintech Academy LMS is a learning management system training Finsoft and Finops Fellows on the AI Fintech Factory domains (FaaS, FinCore, FinOps, FinInfra). It provides role-based portals for Students, Instructors, Partners, and Administrators.
 
 **Tech stack:**
-- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui + Framer Motion
+- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui + Framer Motion + recharts
 - **API/Auth:** Laravel 13 (`backend/`)
 - **Data API:** PostgREST v16 (internal only)
 - **Database:** PostgreSQL 17 with row-level security
 - **Local stack:** Docker Compose (`db` + `rest`)
 - **Icons:** Lucide React
 - **Notifications:** React Hot Toast
+- **PWA:** Web app manifest + service worker (offline shell, cached API responses)
 - **Deployment:** Vercel (frontend) + Laravel host + managed PostgreSQL/PostgREST
 
 ---
@@ -571,30 +586,70 @@ The rules below are the ones most likely to be broken by new work.
 
 Institutional, editorial and operational. BlueSPACE blue (`#0000FF`) is the
 only brand accent; hierarchy comes from typography, spacing and borders rather
-than decorative colour.
+than decorative colour. Dark mode is supported: `tailwind.config.js` uses
+`darkMode: 'class'`, the `dark` class is synced to `<html>` from `AuthContext`,
+and a `DarkModeToggle` lives in the top bar. Saved preference persists in
+`localStorage` under `bluespace-dark-mode`.
+
+- `client/index.html` runs a tiny inline script **before first paint** that
+  applies the saved `dark` class and `color-scheme`, so dark users never see a
+  light flash. `AuthContext` then keeps the class and `documentElement.style.colorScheme`
+  in sync, and mirrors changes across tabs via the `storage` event.
+- `DarkModeToggle` is a real `role="switch"` with `aria-checked`; the knob sits
+  over the inactive icon so the visible icon always shows the target mode.
+  Space/Enter toggle it like any button.
+- If the theme ever stops responding, check the served CSS: it must contain
+  `:is(.dark *)` selectors, not `@media (prefers-color-scheme: dark)`. A stale
+  Vite process or a dev-mode service worker is the usual cause.
 
 ### Layout
 
 - Authenticated pages are **full width** inside the shell. Do not wrap a page
-  in `max-w-7xl` or another page-level max width.
+  in `max-w-7xl` or another page-level max width. Use the shared `PageContainer`
+  (`client/src/components/layout/page-container.jsx`), which is **width-only**
+  (`w-full`, or `max-w-7xl mx-auto` when `fullWidth={false}`).
+- All gutters live on the shell's `<main>`
+  (`px-4 sm:px-5 lg:px-6 py-6 pb-24 lg:pb-10`). The top bar uses the same
+  `px-4 sm:px-5 lg:px-6`, so at `lg` the content sits **24px** from the 256px
+  sidebar (280px from the viewport edge). Do not add page-level padding on top
+  of `<main>`; that reintroduces the old double gutter (64px).
 - The shell is a fixed 256px sidebar (`lg:pl-64`) plus a 56px sticky top bar
   (`h-14`).
 - The top bar carries only global search, the current cohort name (hidden below
-  `sm`) and notifications. Do not add date/time or student IDs there.
-- Main content uses `w-full min-w-0 px-4 sm:px-6 lg:px-8 py-6`.
+  `sm`), notifications and the theme toggle. Do not add date/time or student IDs there.
 - Narrow widths are legitimate only for narrow content: auth cards (`max-w-sm`),
   confirmation states (`max-w-md`), short forms (`max-w-2xl`/`max-w-3xl`) and
   the certificate (`max-w-5xl`, `print:max-w-none`).
 
 ### Surfaces and status
 
-- Cards: `rounded-xl border border-gray-200/90 bg-white shadow-sm`.
+- Cards: `rounded-xl border border-gray-200/90 bg-white shadow-sm`, with `dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100` variants.
 - Badges and chips are **flat and border-only**: `border` plus text colour, no
   filled pastel pills and no gradients. Variants live in
   `client/src/components/ui/badge.jsx`.
 - Dates, times, student IDs and reference codes are plain text, never badges.
-- Use the shared `Badge`, `Button`, `Card` and `Input` primitives rather than
-  re-implementing styles per page.
+- Use the shared `Badge`, `Button`, `Card`, `Input`, `EmptyState`, `Breadcrumb`,
+  `DarkModeToggle`, `KeyboardShortcutsPanel` and `BackToTop` primitives rather
+  than re-implementing styles per page.
+
+### Media player
+
+`MediaPlayer.jsx` is a self-contained light card (`max-w-[960px] mx-auto`)
+so it never overstretches on ultra-wide screens. The video viewport stays dark
+for contrast. Native video and YouTube have parity: play/pause (Space/K),
+seek ±10s (J/L), mute (M), fullscreen (F), volume, playback rate and keyboard
+shortcuts active on hover. YouTube uses the IFrame Player API with imperative
+controls exposed via ref.
+
+### Accessibility
+
+- Skip link is the first focusable element.
+- `aria-current="page"` on active navigation.
+- Toasts mount with `aria-label="Notifications"`; progress percentages use
+  `aria-live="polite"`.
+- Breadcrumb trail uses `aria-label="Breadcrumb"` and `aria-current="page"`.
+- Print styles (`@media print` in `index.css`) hide shell chrome and show
+  dashboards/reports full-width with bordered tables.
 
 ### Typography and tokens
 
@@ -619,24 +674,33 @@ verification metadata. It must stay legible in black and white, and the public
 
 ```
 client/
-├── public/              # logo-dark.png, logo-light.png, logo-white.png, favicon.*
+├── public/              # logo-dark.png, logo-light.png, logo-white.png, favicon.*, manifest.json, sw.js
 └── src/
     ├── App.jsx              # React router with role-gated routes
-    ├── main.jsx             # Entry point
-    ├── index.css            # Global styles + design tokens
+    ├── main.jsx             # Entry point (+ service worker registration)
+    ├── index.css            # Global styles + design tokens + print styles
     ├── context/
-    │   └── AuthContext.jsx  # Auth provider, profile loading, inactivity logout
+    │   └── AuthContext.jsx  # Auth provider, profile loading, inactivity logout, session-expiration warning
     ├── components/
     │   ├── ui/              # shadcn/ui primitives (flat badge, button, card…)
+    │   │   ├── empty-state.jsx     # shared empty-state component
+    │   │   ├── breadcrumb.jsx      # accessible breadcrumb trail
+    │   │   ├── dark-mode-toggle.jsx
+    │   │   ├── keyboard-shortcuts-panel.jsx
+    │   │   └── back-to-top.jsx
     │   ├── layout/
     │   │   ├── AppLayout.jsx
+    │   │   ├── page-container.jsx  # unified full-width content wrapper
     │   │   ├── ProtectedRoute.jsx
+    │   │   ├── GlobalSearch.jsx
+    │   │   ├── NotificationDropdown.jsx
     │   │   └── Sidebar.jsx
     │   └── certificate/     # ProfessionalCertificate + verification view
     ├── lib/
     │   ├── backend.js       # Laravel API client + query builder
     │   ├── profile.js       # Profile column list and lookup
     │   ├── deadlines.js     # Deadline formatting helpers
+    │   ├── csv.js           # RFC 4180 CSV export helper
     │   └── emailService.js  # Transactional email composer
     └── pages/               # Route components
 ```
@@ -771,11 +835,20 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `client/src/pages/PartnerOrganisation.jsx` | Partner organisation profile editor (name, description, website, logo) |
 | `client/src/App.jsx` | Route definitions with role guards |
 | `client/src/components/layout/ProtectedRoute.jsx` | Role-based route protection |
+| `client/src/components/layout/page-container.jsx` | Unified full-width content wrapper |
 | `client/src/components/layout/Sidebar.jsx` | Role-based navigation |
 | `client/src/components/ui/badge.jsx` | Flat, background-free badge variants |
+| `client/src/components/ui/breadcrumb.jsx` | Accessible breadcrumb trail |
+| `client/src/components/ui/dark-mode-toggle.jsx` | Light/dark theme switch |
+| `client/src/components/ui/empty-state.jsx` | Shared empty-state component |
+| `client/src/components/ui/back-to-top.jsx` | Scroll-to-top button |
+| `client/src/components/ui/keyboard-shortcuts-panel.jsx` | `Shift+/` shortcuts disclosure |
 | `client/src/components/ui/book.jsx` | Bookshelf-style module cover with open animation |
 | `client/src/components/ui/use-responsive.js` | Responsive width hook used by `Book` |
 | `client/src/components/certificate/ProfessionalCertificate.jsx` | Print certificate and verification view |
+| `client/src/lib/csv.js` | RFC 4180 CSV export helper |
+| `client/public/manifest.json` | PWA app metadata, icons, shortcuts |
+| `client/public/sw.js` | Service worker: offline shell, cached API fallback |
 | `docs/DESIGN_SYSTEM.md` | Visual language and component rules |
 | `README.md` | Product overview and quick start |
 | `assets/brand/` | Brand source assets (logos) |
@@ -790,6 +863,25 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 - `/quiz/:assessmentId` has no UI link.
 - The `payments` table is unused.
 - Google Meet/Calendar automation is not enabled.
+
+### Quality-of-life features added
+
+- **Dark mode** — toggle in top bar, persisted to `localStorage`, `dark` class on `<html>`
+- **Toast confirmations** — lesson complete, grade record, module/lab save/publish/delete, password change
+- **Resume surface** — "Continue where you left off" on StudentDashboard hero card
+- **Session-expiration warning** — toast at 2 minutes before 30-minute inactivity logout
+- **Bulk grading** — select multiple submissions, bulk grade/remediate in Grading
+- **Password strength meter** — real-time weak/fair/strong indicator in ProfileSettings
+- **Keyboard shortcuts panel** — `Shift+/` disclosure with global/media/orientation shortcuts
+- **Back-to-top button** — appears after 300px scroll on long pages
+- **Dirty-form warning** — `beforeunload` in ModuleEditor when unsaved changes exist
+- **Mac command key** — `⌘ K` hint on macOS, `Ctrl K` elsewhere
+- **Breadcrumbs** — on all deep pages (LessonPlayer, ModuleEditor, Grading, PartnerCourseLearning, Announcements, Certificates, CertificateDetail, CertificateVerify, ProfileSettings, Reports, LiveClasses, MentorClinics, CapstoneSubmission, MySquad)
+- **CSV export** — Reports and AuditLog pages
+- **Print styles** — dashboards and reports print full-width without shell chrome
+- **ARIA live regions** — toasts and progress announced to screen readers
+- **PWA** — installable offline app with service worker caching
+- **Admin analytics** — completion trend, cohort enrollment, lesson mix charts on AdministratorDashboard
 
 ---
 

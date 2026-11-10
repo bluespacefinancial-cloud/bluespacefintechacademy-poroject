@@ -9,6 +9,7 @@ import { Input } from '../components/ui/input'
 import { Breadcrumb } from '../components/ui/breadcrumb'
 import { api } from '../lib/backend'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
+import toast from 'react-hot-toast'
 
 const RUBRIC_PRESETS = [
   {
@@ -42,6 +43,7 @@ export default function Grading() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [bulkSelected, setBulkSelected] = useState(new Set())
 
   const loadSubmissions = useCallback(async () => {
     try {
@@ -94,6 +96,24 @@ export default function Grading() {
     setError('')
   }
 
+  function toggleBulkSelect(subId) {
+    setBulkSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(subId)) next.delete(subId)
+      else next.add(subId)
+      return next
+    })
+  }
+
+  function toggleBulkSelectAll() {
+    const allIds = new Set(displayedSubmissions.map((s) => s.id))
+    if (bulkSelected.size === displayedSubmissions.length && displayedSubmissions.length > 0) {
+      setBulkSelected(new Set())
+    } else {
+      setBulkSelected(allIds)
+    }
+  }
+
   function appendPreset(presetText) {
     setFeedback((prev) => {
       const trimmed = prev.trim()
@@ -139,8 +159,47 @@ export default function Grading() {
       setSubmissions((prev) => prev.map((row) => (row.id === data.id ? data : row)))
       setSelected(data)
       setMessage(newStatus === 'graded' ? 'Grade and evaluation recorded successfully.' : 'Remediation requested from student.')
+      toast.success(newStatus === 'graded' ? 'Grade recorded' : 'Remediation requested')
     } catch (saveError) {
       setError(saveError.message || 'Unable to record grade.')
+      toast.error('Unable to record grade')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function bulkGrade(newStatus) {
+    const ids = Array.from(bulkSelected)
+    if (ids.length === 0) return
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const results = await Promise.all(
+        ids.map((id) =>
+          api
+            .from('submissions')
+            .update({ status: newStatus, graded_by: user.id, graded_at: new Date().toISOString() })
+            .eq('id', id)
+        )
+      )
+      const failed = results.find((r) => r.error)
+      if (failed) throw failed.error
+      setSubmissions((prev) =>
+        prev.map((row) => (bulkSelected.has(row.id) ? { ...row, status: newStatus } : row))
+      )
+      setBulkSelected(new Set())
+      setMessage(
+        newStatus === 'graded'
+          ? `${ids.length} submission(s) graded.`
+          : `${ids.length} submission(s) sent for remediation.`
+      )
+      toast.success(
+        newStatus === 'graded' ? 'Bulk grade recorded' : 'Bulk remediation requested'
+      )
+    } catch (bulkError) {
+      setError(bulkError.message || 'Bulk action failed')
+      toast.error('Bulk action failed')
     } finally {
       setSaving(false)
     }
@@ -190,6 +249,25 @@ export default function Grading() {
         </div>
       )}
 
+      {/* Bulk Action Bar */}
+      {bulkSelected.size > 0 && (
+        <div className="rounded-xl border border-deep-200 bg-deep-50 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-sm">
+          <span className="text-xs font-bold text-deep-700">
+            {bulkSelected.size} submission(s) selected
+          </span>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => bulkGrade('graded')} disabled={saving} className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold">
+              <Save size={12} className="mr-1.5" />
+              Bulk Grade
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => bulkGrade('remediation')} disabled={saving} className="border-amber-200 text-amber-700 hover:bg-amber-50 text-xs font-semibold">
+              <AlertCircle size={12} className="mr-1.5" />
+              Bulk Remediate
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Submissions Queue (1/3) */}
         <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
@@ -235,6 +313,28 @@ export default function Grading() {
 
             {/* Submissions List */}
             <CardContent className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto space-y-1.5">
+              {bulkSelected.size > 0 && (
+                <div className="flex items-center justify-between px-3 py-2 text-xs border-b border-gray-100 bg-gray-50/50">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={bulkSelected.size === displayedSubmissions.length && displayedSubmissions.length > 0}
+                      onChange={toggleBulkSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-deep-600 focus:ring-deep-500"
+                    />
+                    <span className="text-gray-600 font-medium">
+                      {bulkSelected.size === displayedSubmissions.length ? 'Deselect all' : 'Select all visible'}
+                    </span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setBulkSelected(new Set())}
+                    className="text-[10px] font-semibold text-deep-600 hover:text-deep-700 hover:underline"
+                  >
+                    Clear selection
+                  </button>
+                </div>
+              )}
               {loading ? (
                 <p className="py-12 text-center text-xs text-gray-500">Loading evaluation queue...</p>
               ) : displayedSubmissions.length === 0 ? (
@@ -248,6 +348,7 @@ export default function Grading() {
               ) : (
                 displayedSubmissions.map((sub) => {
                   const isSelected = selected?.id === sub.id
+                  const isBulkSelected = bulkSelected.has(sub.id)
                   const isGraded = sub.status === 'graded'
                   const isRemediation = sub.status === 'remediation'
 
@@ -263,7 +364,18 @@ export default function Grading() {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-gray-900 truncate">{title(sub)}</span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={isBulkSelected}
+                            onChange={(e) => {
+                              e.stopPropagation()
+                              toggleBulkSelect(sub.id)
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 text-deep-600 focus:ring-deep-500"
+                          />
+                          <span className="font-bold text-gray-900 truncate">{title(sub)}</span>
+                        </div>
                         <Badge
                           variant={isGraded ? 'secondary' : isRemediation ? 'outline' : 'default'}
                           className={`text-[10px] capitalize shrink-0 ${

@@ -24,6 +24,8 @@ import DashboardHeader from '../components/dashboard/DashboardHeader'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import { IDCardLanyard } from '../components/ui/id-card-lanyard'
+import { Breadcrumb } from '../components/ui/breadcrumb'
+import toast from 'react-hot-toast'
 
 const ROLES = [
   { id: 'Project Manager', label: 'Project Manager', desc: 'Team execution, sprint roadmaps, and stakeholder alignment' },
@@ -252,8 +254,10 @@ export default function ProfileSettings() {
       if (pwError) throw pwError
       setMessage('Your password has been changed successfully.')
       setPasswordForm({ current_password: '', new_password: '', confirm_password: '' })
+      toast.success('Password updated successfully')
     } catch (err) {
       setError(err.message || 'Unable to change password.')
+      toast.error('Password change failed')
     } finally {
       setSavingPassword(false)
     }
@@ -321,6 +325,7 @@ export default function ProfileSettings() {
       )}
 
       {/* Top Header */}
+      <Breadcrumb items={[{ label: 'Profile & Settings' }]} />
       <DashboardHeader
         title="Fellow Profile & Showcase"
         subtitle={`${profile.name || 'Fellow'} • ${profile.type || 'Student'} • ${cohortName}`}

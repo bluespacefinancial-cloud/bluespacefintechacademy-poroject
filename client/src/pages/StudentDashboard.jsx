@@ -119,6 +119,25 @@ export default function StudentDashboard({ user }) {
         }
 
         if (!cancelled) {
+          // Resume surface: last incomplete lesson the student started, or the
+          // first not-yet-started lesson in curriculum order.
+          const progressByLesson = new Map((progress || []).map((p) => [p.lesson_id, p]))
+          const incompleteLessons = (lessons || []).filter((lesson) => {
+            const p = progressByLesson.get(lesson.id)
+            return !p || p.is_completed === 0 || p.completion_percentage < 100
+          })
+          const resumeLesson =
+            incompleteLessons.length > 0
+              ? incompleteLessons
+                  .sort((a, b) => {
+                    const pa = progressByLesson.get(a.id) || {}
+                    const pb = progressByLesson.get(b.id) || {}
+                    const ta = new Date(pa.updated_at || 0).getTime()
+                    const tb = new Date(pb.updated_at || 0).getTime()
+                    return tb - ta
+                  })[0]
+              : null
+
           setData({
             profile,
             cohort,
@@ -131,6 +150,7 @@ export default function StudentDashboard({ user }) {
             squad,
             members,
             liveClasses: liveClasses || [],
+            resumeLesson,
           })
         }
       } catch (loadError) {
@@ -174,6 +194,7 @@ export default function StudentDashboard({ user }) {
 
   const currentLessons = currentModule ? data.lessons.filter((l) => l.module_id === currentModule.id) : []
   const nextLesson = currentLessons.find((l) => !completedLessonIdSet.has(l.id)) || currentLessons[0]
+  const resumeTarget = data.resumeLesson || nextLesson
   const currentModuleCompleted = currentLessons.filter((l) => completedLessonIdSet.has(l.id)).length
   const currentModulePercent = currentLessons.length ? Math.round((currentModuleCompleted / currentLessons.length) * 100) : 0
 
@@ -358,12 +379,12 @@ export default function StudentDashboard({ user }) {
         onStartTour={() => setTourOpen(true)}
         actions={
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-200/90 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm text-[11px] sm:text-xs">
-              <span className="font-semibold text-gray-900">{overallPercent}%</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-white dark:bg-card border border-gray-200/90 dark:border-gray-800 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm text-[11px] sm:text-xs">
+              <span className="font-semibold text-gray-900 dark:text-gray-100">{overallPercent}%</span>
               <span className="text-gray-400">•</span>
-              <span className="text-gray-600 hidden xs:inline">{completedLessons}/{totalLessons} lessons</span>
-              <span className="text-gray-600 xs:hidden">{completedLessons}/{totalLessons}</span>
-              <div className="w-10 sm:w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden ml-0.5 sm:ml-1">
+              <span className="text-gray-600 dark:text-gray-300 hidden xs:inline">{completedLessons}/{totalLessons} lessons</span>
+              <span className="text-gray-600 dark:text-gray-300 xs:hidden">{completedLessons}/{totalLessons}</span>
+              <div className="w-10 sm:w-16 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden ml-0.5 sm:ml-1">
                 <div className="h-full bg-deep-600 rounded-full" style={{ width: `${overallPercent}%` }} />
               </div>
             </div>
@@ -380,18 +401,18 @@ export default function StudentDashboard({ user }) {
       {/* Primary Section: Continue Learning Hero (2/3) + Next Live Session (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* RESUME LEARNING HERO CARD */}
-        <Card data-tour="student-current-learning" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card data-tour="student-current-learning" className="lg:col-span-2 border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/40">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 px-2.5 py-0.5 rounded border border-deep-100">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 dark:text-deep-400 px-2.5 py-0.5 rounded border border-deep-100 dark:border-deep-900/60 dark:bg-deep-950/30">
                   Active Module • Weeks {currentModule?.week_start || 1}-{currentModule?.week_end || 2}
                 </span>
-                <span className="text-xs text-gray-500 capitalize">
+                <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                   {currentModule?.stage ? currentModule.stage.replace('_', ' ') : 'Foundations'}
                 </span>
               </div>
-              <Badge variant="outline" className="text-[11px] font-medium border-gray-200 text-gray-700">
+              <Badge variant="outline" className="text-[11px] font-medium border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300">
                 {currentModuleCompleted}/{currentLessons.length} Completed
               </Badge>
             </div>
@@ -399,55 +420,55 @@ export default function StudentDashboard({ user }) {
             <div className="p-5 sm:p-6 space-y-5">
               {!currentModule ? (
                 <div className="py-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2">
                     <BookOpen size={18} />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">No active module published</h3>
-                  <p className="mt-1 text-xs text-gray-500">Your cohort syllabus will unlock as scheduled.</p>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">No active module published</h3>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Your cohort syllabus will unlock as scheduled.</p>
                 </div>
               ) : (
                 <>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 leading-tight">
+                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
                       {currentModule.title}
                     </h2>
-                    <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                    <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                       {currentModule.domain || 'Fintech Core Systems'} • Practical hands-on curriculum
                     </p>
                   </div>
 
-                  {/* NEXT UP LESSON CALLOUT BOX */}
-                  <div className="rounded-xl border border-gray-200/90 bg-white p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-deep-600/40 transition-colors">
-                    <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0 mt-0.5">
-                        <PlayCircle size={20} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-deep-600">
-                            Up Next
-                          </span>
-                          <span className="text-xs text-gray-400">•</span>
-                          <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <Clock size={11} />
-                            {nextLesson?.duration_minutes ? `${nextLesson.duration_minutes} min` : 'Self-paced'}
-                          </span>
+                    {/* NEXT UP LESSON CALLOUT BOX */}
+                    <div className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/60 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-deep-600/40 dark:hover:border-deep-500/50 transition-colors">
+                      <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                        <div className="w-10 h-10 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0 mt-0.5">
+                          <PlayCircle size={20} />
                         </div>
-                        <p className="text-sm sm:text-base font-bold text-gray-900 truncate mt-0.5">
-                          {nextLesson?.title || 'Start Coursework'}
-                        </p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-deep-600 dark:text-deep-400">
+                              {data.resumeLesson ? 'Resume' : 'Up Next'}
+                            </span>
+                            <span className="text-xs text-gray-400">•</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                              <Clock size={11} />
+                              {resumeTarget?.duration_minutes ? `${resumeTarget.duration_minutes} min` : 'Self-paced'}
+                            </span>
+                          </div>
+                          <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 truncate mt-0.5">
+                            {resumeTarget?.title || 'Start Coursework'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <Button
-                      size="sm"
-                      onClick={() => navigate(nextLesson ? `/lesson/${nextLesson.id}` : '/my-learning')}
-                      className="bg-deep-600 text-white hover:bg-deep-700 font-semibold px-4 shrink-0 shadow-sm"
-                    >
-                      Resume Lesson
-                      <ArrowRight size={14} className="ml-1.5" />
-                    </Button>
-                  </div>
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(resumeTarget ? `/lesson/${resumeTarget.id}` : '/my-learning')}
+                        className="bg-deep-600 text-white hover:bg-deep-700 font-semibold px-4 shrink-0 shadow-sm"
+                      >
+                        {data.resumeLesson ? 'Resume Lesson' : 'Start Lesson'}
+                        <ArrowRight size={14} className="ml-1.5" />
+                      </Button>
+                    </div>
                 </>
               )}
             </div>
@@ -455,11 +476,11 @@ export default function StudentDashboard({ user }) {
 
           {/* Module Progress Bar Footer */}
           {currentModule && (
-            <div className="px-5 sm:px-6 py-3.5 bg-gray-50/60 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <span className="text-gray-500">
-                Module Progress: <strong className="text-gray-900">{currentModulePercent}%</strong> ({currentModuleCompleted} of {currentLessons.length} lessons finished)
+            <div className="px-5 sm:px-6 py-3.5 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+              <span className="text-gray-500 dark:text-gray-400">
+                Module Progress: <strong className="text-gray-900 dark:text-gray-100">{currentModulePercent}%</strong> ({currentModuleCompleted} of {currentLessons.length} lessons finished)
               </span>
-              <div className="w-full sm:w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="w-full sm:w-48 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-deep-600 rounded-full transition-all duration-300"
                   style={{ width: `${currentModulePercent}%` }}
@@ -470,14 +491,14 @@ export default function StudentDashboard({ user }) {
         </Card>
 
         {/* NEXT LIVE SESSION CARD */}
-        <Card data-tour="student-live-class" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card data-tour="student-live-class" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <Video size={16} className="text-deep-600" />
-                <h3 className="text-base font-bold text-gray-900 leading-tight">Live Session</h3>
+                <Video size={16} className="text-deep-600 dark:text-deep-400" />
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">Live Session</h3>
               </div>
-              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
                 <Link to="/live-classes">Calendar</Link>
               </Button>
             </div>
@@ -486,21 +507,21 @@ export default function StudentDashboard({ user }) {
               {nextLiveClass ? (
                 <>
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/30">
                       Scheduled Workshop
                     </span>
-                    <h4 className="text-base font-bold text-gray-900 leading-snug pt-1">
+                    <h4 className="text-base font-bold text-gray-900 dark:text-gray-100 leading-snug pt-1">
                       {nextLiveClass.title}
                     </h4>
-                    <p className="text-xs text-gray-500 line-clamp-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                       {nextLiveClass.description || 'Cohort live class and interactive Q&A session with faculty.'}
                     </p>
                   </div>
 
-                  <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <Calendar size={13} className="text-deep-600 shrink-0" />
-                      <span className="font-semibold text-gray-900">
+                  <div className="rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 p-3 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                      <Calendar size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
                         {new Date(nextLiveClass.starts_at).toLocaleDateString(undefined, {
                           weekday: 'short',
                           month: 'short',
@@ -516,8 +537,8 @@ export default function StudentDashboard({ user }) {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <Video size={13} className="text-deep-600 shrink-0" />
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                      <Video size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                       <span>{nextLiveClass.is_offline ? nextLiveClass.venue : 'Virtual Live Stream'}</span>
                     </div>
                   </div>
@@ -531,7 +552,7 @@ export default function StudentDashboard({ user }) {
                         </a>
                       </Button>
                     ) : (
-                      <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200">
+                      <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-800">
                         <Link to="/live-classes">View Session Details</Link>
                       </Button>
                     )}
@@ -539,14 +560,14 @@ export default function StudentDashboard({ user }) {
                 </>
               ) : (
                 <div className="py-8 text-center space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto">
                     <Calendar size={18} />
                   </div>
-                  <p className="text-sm font-semibold text-gray-900">No live sessions today</p>
-                  <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">No live sessions today</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
                     Weekly live masterclasses and squad mentoring sessions are published ahead of schedule.
                   </p>
-                  <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-gray-200">
+                  <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-gray-200 dark:border-gray-800">
                     <Link to="/live-classes">View Class Schedule</Link>
                   </Button>
                 </div>
@@ -554,8 +575,8 @@ export default function StudentDashboard({ user }) {
             </CardContent>
           </div>
 
-          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-center">
-            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 hover:text-deep-700">
+          <div className="px-5 py-3 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 text-center">
+            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300">
               Need 1-on-1 guidance? Book a slot in Mentor Clinics →
             </Link>
           </div>
@@ -565,13 +586,13 @@ export default function StudentDashboard({ user }) {
       {/* Middle Section: Active Tasks & Labs (2/3) + My Squad (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ACTIONABLE TASKS & LABS */}
-        <Card data-tour="student-tasks" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <Card data-tour="student-tasks" className="lg:col-span-2 border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
             <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Active Tasks & Labs</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Hands-on coding exercises awaiting submission or grading</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">Active Tasks & Labs</h3>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Hands-on coding exercises awaiting submission or grading</p>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
               <Link to="/lab-workspace">
                 Lab Workspace
                 <ArrowRight size={13} className="ml-1.5" />
@@ -582,19 +603,19 @@ export default function StudentDashboard({ user }) {
           <CardContent className="p-5">
             {pendingLabs.length === 0 ? (
               <div className="py-8 text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto mb-1">
+                <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-1">
                   <CheckCircle2 size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900">You&apos;re all caught up!</p>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">You&apos;re all caught up!</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
                   No pending lab assignments or required remediations. Keep progressing through the modules.
                 </p>
-                <Button asChild size="sm" variant="outline" className="mt-2 text-xs border-gray-200">
+                <Button asChild size="sm" variant="outline" className="mt-2 text-xs border-gray-200 dark:border-gray-800">
                   <Link to="/my-learning">Explore upcoming modules</Link>
                 </Button>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
                 {pendingLabs.slice(0, 4).map((lab) => {
                   const isSubmitted = lab.status === 'submitted'
                   const deadline = getDeadlineInfo(lab.due_date)
@@ -602,10 +623,10 @@ export default function StudentDashboard({ user }) {
                     <div key={lab.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <Code2 size={15} className="text-deep-600 shrink-0" />
-                          <p className="text-sm font-semibold text-gray-900 truncate">{lab.title}</p>
+                          <Code2 size={15} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{lab.title}</p>
                         </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                           <span>Max score: {lab.max_score} pts</span>
                           {deadline && (
                             <>
@@ -625,7 +646,7 @@ export default function StudentDashboard({ user }) {
                         >
                           {isSubmitted ? 'Awaiting grading' : 'Pending submission'}
                         </Badge>
-                        <Button asChild size="sm" variant="outline" className="h-8 px-3 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
+                        <Button asChild size="sm" variant="outline" className="h-8 px-3 text-xs border-gray-200 dark:border-gray-800 text-deep-600 dark:text-deep-400 hover:bg-deep-50 dark:hover:bg-deep-950/40">
                           <Link to="/lab-workspace">
                             {isSubmitted ? 'View Submission' : 'Submit Lab'}
                           </Link>
@@ -640,14 +661,14 @@ export default function StudentDashboard({ user }) {
         </Card>
 
         {/* MY SQUAD CARD */}
-        <Card data-tour="student-squad" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card data-tour="student-squad" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h3 className="text-base font-bold text-gray-900 leading-tight">My Squad</h3>
-                <p className="mt-0.5 text-xs text-gray-500">Cohort collaborative unit</p>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">My Squad</h3>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Cohort collaborative unit</p>
               </div>
-              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
                 <Link to="/my-squad">Squad Page</Link>
               </Button>
             </div>
@@ -656,20 +677,20 @@ export default function StudentDashboard({ user }) {
               {data.squad ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-gray-900">{data.squad.name}</p>
-                    <span className="text-[11px] font-medium text-gray-600 px-2 py-0.5 rounded border border-gray-200">
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{data.squad.name}</p>
+                    <span className="text-[11px] font-medium text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-800">
                       {data.members.length} teammates
                     </span>
                   </div>
 
-                  <div className="divide-y divide-gray-100 pt-1">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800 pt-1">
                     {data.members.slice(0, 4).map((member) => (
                       <div key={member.id} className="flex items-center justify-between py-2.5 text-xs first:pt-0 last:pb-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-6 h-6 rounded-full bg-deep-50 border border-deep-100 flex items-center justify-center text-[10px] font-bold text-deep-700 shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-[10px] font-bold text-deep-700 dark:text-deep-400 shrink-0">
                             {member.name?.charAt(0)?.toUpperCase() || 'M'}
                           </div>
-                          <span className="font-semibold text-gray-800 truncate">{member.name}</span>
+                          <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">{member.name}</span>
                         </div>
                         <Badge variant="outline" className="text-[10px] font-normal capitalize shrink-0 ml-2">
                           {member.track || 'Student'}
@@ -680,11 +701,11 @@ export default function StudentDashboard({ user }) {
                 </div>
               ) : (
                 <div className="py-8 text-center space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto">
                     <Users size={18} />
                   </div>
-                  <p className="text-sm font-semibold text-gray-900">Squad forming</p>
-                  <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Squad forming</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
                     You will be grouped with cohort teammates for practical fintech sprint use-cases.
                   </p>
                 </div>
@@ -692,8 +713,8 @@ export default function StudentDashboard({ user }) {
             </CardContent>
           </div>
 
-          <div className="p-4 bg-gray-50/60 border-t border-gray-100">
-            <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200">
+          <div className="p-4 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800">
+            <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-800">
               <Link to="/my-squad">
                 <Users size={13} className="mr-1.5" />
                 Open Squad Workspace
@@ -707,12 +728,12 @@ export default function StudentDashboard({ user }) {
       <div data-tour="student-achievements" className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy size={16} className="text-[#0000ff]" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900">
+            <Trophy size={16} className="text-[#0000ff] dark:text-blue-400" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-100">
               Work Achievements & Mastery Badges
             </h3>
           </div>
-          <span className="text-xs font-medium text-gray-500">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
             {studentAchievements.filter((a) => a.achievedAt !== null).length} of {studentAchievements.length} Unlocked
           </span>
         </div>
@@ -723,7 +744,7 @@ export default function StudentDashboard({ user }) {
               key={achievement.id}
               achievement={achievement}
               badgeSize="sm"
-              className="bg-white border-gray-200 shadow-sm hover:border-[#0000ff]/40 hover:shadow-md transition-all text-center py-3.5 px-2"
+              className="bg-card border-gray-200 dark:border-gray-800 shadow-sm hover:border-[#0000ff]/40 dark:hover:border-blue-500/50 hover:shadow-md transition-all text-center py-3.5 px-2"
             />
           ))}
         </div>
@@ -731,59 +752,59 @@ export default function StudentDashboard({ user }) {
 
       {/* Bottom Section: Academy Quick Launchpad */}
       <div data-tour="student-launchpad" className="space-y-3 pt-2">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           Academy Launchpad
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Link
             to="/lab-workspace"
-            className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm hover:border-deep-600/50 hover:shadow-md transition-all flex flex-col justify-between"
+            className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-4 shadow-sm hover:border-deep-600/50 dark:hover:border-deep-500/50 hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div className="w-9 h-9 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-deep-600 dark:text-deep-400 mb-3">
               <Code2 size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Lab Workspace</p>
-              <p className="text-xs text-gray-500 mt-0.5">Submit & inspect code repositories</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Lab Workspace</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Submit & inspect code repositories</p>
             </div>
           </Link>
 
           <Link
             to="/live-classes"
-            className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm hover:border-deep-600/50 hover:shadow-md transition-all flex flex-col justify-between"
+            className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-4 shadow-sm hover:border-deep-600/50 dark:hover:border-deep-500/50 hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
               <Video size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Live Classes</p>
-              <p className="text-xs text-gray-500 mt-0.5">Workshops, streams & recordings</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Live Classes</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Workshops, streams & recordings</p>
             </div>
           </Link>
 
           <Link
             to="/my-squad"
-            className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm hover:border-deep-600/50 hover:shadow-md transition-all flex flex-col justify-between"
+            className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-4 shadow-sm hover:border-deep-600/50 dark:hover:border-deep-500/50 hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
               <Users size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Squad Workspace</p>
-              <p className="text-xs text-gray-500 mt-0.5">Sprint deliverables & team roster</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Squad Workspace</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sprint deliverables & team roster</p>
             </div>
           </Link>
 
           <Link
             to="/partner-catalog"
-            className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm hover:border-deep-600/50 hover:shadow-md transition-all flex flex-col justify-between"
+            className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-4 shadow-sm hover:border-deep-600/50 dark:hover:border-deep-500/50 hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div className="w-9 h-9 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-950/60 border border-purple-100 dark:border-purple-900/50 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
               <Compass size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Partner Courses</p>
-              <p className="text-xs text-gray-500 mt-0.5">Industry-certified external modules</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Partner Courses</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Industry-certified external modules</p>
             </div>
           </Link>
         </div>

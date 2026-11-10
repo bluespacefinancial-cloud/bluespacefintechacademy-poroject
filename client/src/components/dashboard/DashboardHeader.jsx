@@ -15,11 +15,11 @@ export default function DashboardHeader({
       className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-1"
     >
       <div data-tour="tour-dashboard-title" className="min-w-0 flex-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 leading-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {subtitle}
           </p>
         )}
@@ -31,7 +31,7 @@ export default function DashboardHeader({
             variant="outline"
             size="sm"
             onClick={onStartTour}
-            className="text-xs text-gray-600 hover:text-deep-600 border-gray-200"
+            className="text-xs text-gray-600 dark:text-gray-300 hover:text-deep-600 dark:hover:text-white border-gray-200 dark:border-gray-700 dark:bg-gray-800/80"
             title="Start interactive tour"
           >
             <HelpCircle size={14} className="mr-1.5" />

@@ -17,9 +17,9 @@ export function EmptyState({
         </div>
       )}
       <div className="flex-1 min-w-0 mx-auto sm:mx-0">
-        <h2 className="text-base font-bold text-gray-900 leading-tight">{title}</h2>
+        <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight">{title}</h2>
         {description && (
-          <p className="mt-1 text-sm text-gray-500 leading-relaxed">{description}</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
         )}
       </div>
       {action && (

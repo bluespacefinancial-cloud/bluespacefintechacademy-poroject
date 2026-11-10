@@ -85,7 +85,7 @@ export default function MarketingHome() {
           </Reveal>
           <Reveal delay={0.12} className="relative">
             <div className="relative overflow-hidden rounded-2xl bg-gray-100">
-              <img src={images.hero} alt="A diverse group of learners collaborating around a laptop" className="h-[300px] w-full object-cover sm:h-[410px] lg:h-[480px]" fetchPriority="high" />
+              <img src={images.hero} alt="A diverse group of learners collaborating around a laptop" className="h-[300px] w-full object-cover sm:h-[410px] lg:h-[480px]" />
               <div className="absolute bottom-4 left-4 right-4 rounded-xl bg-white p-4 shadow-lg sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-xs sm:p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0000ff]">Learn by doing</p>
                 <p className="mt-2 text-base font-semibold text-deep-700">Build confidence through real practice and thoughtful feedback.</p>

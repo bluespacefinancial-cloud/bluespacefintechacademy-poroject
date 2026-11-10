@@ -1,4 +1,6 @@
+import { Fragment } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +25,13 @@ const BreadcrumbItem = ({ to, label, isLast, className }) => {
   )
 }
 
+BreadcrumbItem.propTypes = {
+  to: PropTypes.string,
+  label: PropTypes.string,
+  isLast: PropTypes.bool,
+  className: PropTypes.string,
+}
+
 export function Breadcrumb({ items, className }) {
   const location = useLocation()
   const hasItems = items && items.length > 0
@@ -40,15 +49,27 @@ export function Breadcrumb({ items, className }) {
 
         if (!isLast && to) {
           return (
-            <>
+            <Fragment key={index}>
               <BreadcrumbItem to={to} label={label} isLast={false} />
               <ChevronRight size={12} className="text-gray-400 shrink-0 mx-0.5" aria-hidden="true" />
-            </>
+            </Fragment>
           )
         }
         return <BreadcrumbItem key={index} label={label} isLast={true} />
       })}
-      <span className="visually-hidden">You are here: {location.pathname}</span>
+      <span className="sr-only">You are here: {location.pathname}</span>
     </nav>
   )
+}
+
+Breadcrumb.propTypes = {
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string,
+      title: PropTypes.string,
+      to: PropTypes.string,
+      href: PropTypes.string,
+    })
+  ),
+  className: PropTypes.string,
 }

@@ -14,6 +14,7 @@ import {
 } from '../components/ui/select'
 import { api } from '../lib/backend'
 import { useAuth } from '../context/AuthContext'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 const TYPE_LABELS = {
   announcement: 'Announcement',
@@ -180,6 +181,7 @@ export default function Announcements() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: 'Announcements' }]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Announcements</h1>

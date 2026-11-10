@@ -109,7 +109,6 @@ const sidebarGroups = {
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
         { to: '/partner-courses', icon: BookOpen, label: 'Course Studio', ariaLabel: 'Course Studio' },
-        { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Catalog', ariaLabel: 'Partner Catalog' },
       ],
     },
     {

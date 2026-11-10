@@ -9,7 +9,7 @@ export default function Unauthorized() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="flex min-h-[60vh] items-center justify-center py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-3" />
@@ -19,7 +19,7 @@ export default function Unauthorized() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button onClick={() => navigate('/design-system')}>
+          <Button onClick={() => navigate('/dashboard')}>
             Go to Dashboard
           </Button>
         </CardContent>

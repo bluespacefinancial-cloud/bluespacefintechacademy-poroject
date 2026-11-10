@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
 import { api } from '../lib/backend'
 import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 export default function CertificateVerify() {
   const { token } = useParams()
@@ -57,6 +58,7 @@ export default function CertificateVerify() {
 
   return (
     <div className="min-h-screen bg-gray-50/70 pb-12 print:bg-white print:p-0">
+      <Breadcrumb items={[{ to: '/certificates', label: 'Certificates' }, { label: 'Verify Certificate' }]} />
       {/* Minimal Top Header (Hidden on print) */}
       <header className="print:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">

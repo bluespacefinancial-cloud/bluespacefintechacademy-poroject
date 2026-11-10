@@ -4,7 +4,7 @@ import { api } from './backend'
 // (lms/database/08_column_grants.sql). select('*') is denied
 // because the legacy password column is not granted.
 export const PROFILE_COLUMNS =
-  'id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at, student_id'
+  'id, name, email, type, avatar, phone, is_active, force_password_change, last_login_at, created_at, updated_at, student_id, partner_id'
 
 export async function getCurrentProfile() {
   const { data: authData, error: authError } = await api.auth.getUser()

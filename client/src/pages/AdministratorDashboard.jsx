@@ -131,13 +131,13 @@ export default function AdministratorDashboard({ user }) {
 
       {/* Grid: Applications + Partner Reviews */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card data-tour="admin-applications" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <Card data-tour="admin-applications" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
             <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Pending applications</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Candidate applications awaiting admissions decision</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Pending applications</h3>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Candidate applications awaiting admissions decision</p>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
               <Link to="/applications">
                 Open queue
                 <ArrowRight size={13} className="ml-1.5" />
@@ -147,19 +147,19 @@ export default function AdministratorDashboard({ user }) {
           <CardContent className="p-5">
             {data.applications.length === 0 ? (
               <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
                   <ClipboardList size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900">No applications waiting</p>
-                <p className="mt-1 text-xs text-gray-500">All student and partner applications have been reviewed.</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">No applications waiting</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">All student and partner applications have been reviewed.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {data.applications.map((item) => (
-                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p>
-                      <p className="mt-0.5 text-xs text-gray-500 truncate">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.name}</p>
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
                         {item.email}{item.track ? ` • ${item.track}` : ''}
                       </p>
                     </div>
@@ -173,13 +173,13 @@ export default function AdministratorDashboard({ user }) {
           </CardContent>
         </Card>
 
-        <Card data-tour="admin-partner-reviews" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <Card data-tour="admin-partner-reviews" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
             <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Partner course reviews</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Partner courses submitted for curriculum audit</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Partner course reviews</h3>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Partner courses submitted for curriculum audit</p>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
               <Link to="/partner-course-review">
                 Review courses
                 <ArrowRight size={13} className="ml-1.5" />
@@ -189,19 +189,19 @@ export default function AdministratorDashboard({ user }) {
           <CardContent className="p-5">
             {data.courses.length === 0 ? (
               <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
                   <Briefcase size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900">No partner courses to review</p>
-                <p className="mt-1 text-xs text-gray-500">No pending partner submissions at this time.</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">No partner courses to review</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">No pending partner submissions at this time.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {data.courses.map((item) => (
-                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
-                      <p className="mt-0.5 text-xs text-gray-500">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                         {item.submitted_at ? `Submitted ${new Date(item.submitted_at).toLocaleDateString()}` : 'Date unavailable'}
                       </p>
                     </div>
@@ -217,13 +217,13 @@ export default function AdministratorDashboard({ user }) {
       </div>
 
       {/* Cohorts Card */}
-      <Card data-tour="admin-cohorts" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <Card data-tour="admin-cohorts" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h3 className="text-base font-bold text-gray-900 leading-tight">Upcoming and active cohorts</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Cohort scheduling, enrollment statuses, and capacities</p>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Upcoming and active cohorts</h3>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Cohort scheduling, enrollment statuses, and capacities</p>
           </div>
-          <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+          <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
             <Link to="/cohorts">
               Manage cohorts
               <ArrowRight size={13} className="ml-1.5" />
@@ -233,19 +233,19 @@ export default function AdministratorDashboard({ user }) {
         <CardContent className="p-5">
           {data.cohorts.length === 0 ? (
             <div className="py-8 text-center">
-              <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+              <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
                 <GraduationCap size={18} />
               </div>
-              <p className="text-sm font-semibold text-gray-900">No active or planned cohorts</p>
-              <p className="mt-1 text-xs text-gray-500">Create a cohort to begin enrolling students.</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">No active or planned cohorts</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Create a cohort to begin enrolling students.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {data.cohorts.map((cohort) => (
-                <div key={cohort.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-3.5 hover:border-gray-200 transition-colors bg-white">
+                <div key={cohort.id} className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 p-3.5 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{cohort.name}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{cohort.name}</p>
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                       Starts {new Date(`${cohort.start_date}T00:00:00`).toLocaleDateString()} • Capacity {cohort.capacity}
                     </p>
                   </div>

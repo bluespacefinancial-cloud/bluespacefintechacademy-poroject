@@ -7,11 +7,14 @@ import NotificationDropdown from '../notifications/NotificationDropdown'
 import { SkipLink } from '../ui/accessibility'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../lib/backend'
+import { DarkModeToggle } from '../ui/dark-mode-toggle'
+import { KeyboardShortcutsPanel } from '../ui/keyboard-shortcuts-panel'
 
 export default function AppLayout() {
-  const { user } = useAuth()
+  const { user, isDarkMode } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [cohortName, setCohortName] = useState(null)
 
   // Command palette shortcut: Cmd/Ctrl + K, and "/" when not typing.
@@ -59,15 +62,36 @@ export default function AppLayout() {
     }
   }, [user?.id])
 
+  // Sync dark mode class to document root
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isDarkMode])
+
+  // Open keyboard shortcuts panel on Shift + / (?)
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.shiftKey && event.key === '/') {
+        event.preventDefault()
+        setShortcutsOpen(true)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   if (!user) return <Navigate to="/login" />
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       <SkipLink />
       <Sidebar open={sidebarOpen} onOpen={() => setSidebarOpen(true)} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-        <header className="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
+        <header className="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center justify-between w-full gap-4">
             <div className="flex items-center lg:hidden mr-1">
               <img src="/logo-dark.png" alt="BlueSPACE" className="h-6 w-auto" />
@@ -78,13 +102,13 @@ export default function AppLayout() {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="relative w-full flex items-center gap-2 pl-9 pr-3 py-1.5 text-xs text-left bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 transition-colors"
+                className="relative w-full flex items-center gap-2 pl-9 pr-3 py-1.5 text-xs text-left bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600"
                 aria-label="Search the academy"
                 aria-haspopup="dialog"
               >
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} aria-hidden="true" />
-                <span className="text-gray-400 truncate">Search modules, labs, clinics…</span>
-                <kbd className="ml-auto hidden xl:inline-flex items-center gap-0.5 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-400">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400" size={15} aria-hidden="true" />
+                <span className="text-gray-400 truncate dark:text-gray-300">Search modules, labs, clinics…</span>
+                <kbd className="ml-auto hidden xl:inline-flex items-center gap-0.5 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-400 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300">
                   Ctrl K
                 </kbd>
               </button>
@@ -94,7 +118,7 @@ export default function AppLayout() {
             <div className="flex items-center gap-3 ml-auto">
               {cohortName && (
                 <span
-                  className="hidden sm:flex items-center gap-1 text-xs text-gray-600 font-medium truncate max-w-[220px]"
+                  className="hidden sm:flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300 font-medium truncate max-w-[220px]"
                   title={cohortName}
                 >
                   <GraduationCap size={13} className="text-deep-600 shrink-0" />
@@ -106,6 +130,9 @@ export default function AppLayout() {
               <div className="flex items-center shrink-0">
                 <NotificationDropdown />
               </div>
+
+              {/* Theme toggle */}
+              <DarkModeToggle className="ml-2" />
             </div>
           </div>
         </header>
@@ -116,6 +143,12 @@ export default function AppLayout() {
       </div>
 
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+
+      {/* Keyboard Shortcuts Panel */}
+      <KeyboardShortcutsPanel
+        open={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </div>
   )
 }

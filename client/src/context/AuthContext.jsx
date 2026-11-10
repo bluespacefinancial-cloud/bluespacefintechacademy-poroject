@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { api } from '../lib/backend'
 import { PROFILE_COLUMNS } from '../lib/profile'
+import toast from 'react-hot-toast'
 
 const AuthContext = createContext(null)
 
@@ -51,15 +52,24 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('bluespace-dark-mode')
-    return saved ? saved === 'true' : false
+    if (saved !== null) {
+      return saved === 'true'
+    }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
   })
 
+  // Synchronize dark class to document root immediately and persistently
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    localStorage.setItem('bluespace-dark-mode', String(isDarkMode))
+  }, [isDarkMode])
+
   const toggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      const next = !prev
-      localStorage.setItem('bluespace-dark-mode', String(next))
-      return next
-    })
+    setIsDarkMode((prev) => !prev)
   }
 
   useEffect(() => {
@@ -117,32 +127,39 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  // Session timeout: auto-logout after 30 minutes of inactivity
+  // Session timeout: warn at 28 minutes, auto-logout after 30 minutes of inactivity
   useEffect(() => {
     if (!user) return
 
     const INACTIVITY_TIMEOUT = 30 * 60 * 1000 // 30 minutes
-    let timer
+    const WARN_TIMEOUT = 28 * 60 * 1000 // 28 minutes (2-minute warning)
+    let logoutTimer
+    let warnTimer
 
-    const resetTimer = () => {
-      if (timer) clearTimeout(timer)
-      timer = setTimeout(() => {
+    const resetTimers = () => {
+      if (logoutTimer) clearTimeout(logoutTimer)
+      if (warnTimer) clearTimeout(warnTimer)
+      logoutTimer = setTimeout(() => {
         api.auth.signOut()
         setUser(null)
       }, INACTIVITY_TIMEOUT)
+      warnTimer = setTimeout(() => {
+        toast.warning('Your session will expire in 2 minutes due to inactivity. Any activity will extend it.')
+      }, WARN_TIMEOUT)
     }
 
-    const activityHandler = () => resetTimer()
+    const activityHandler = () => resetTimers()
 
     window.addEventListener('mousemove', activityHandler)
     window.addEventListener('keydown', activityHandler)
     window.addEventListener('click', activityHandler)
     window.addEventListener('scroll', activityHandler)
 
-    resetTimer()
+    resetTimers()
 
     return () => {
-      if (timer) clearTimeout(timer)
+      if (logoutTimer) clearTimeout(logoutTimer)
+      if (warnTimer) clearTimeout(warnTimer)
       window.removeEventListener('mousemove', activityHandler)
       window.removeEventListener('keydown', activityHandler)
       window.removeEventListener('click', activityHandler)

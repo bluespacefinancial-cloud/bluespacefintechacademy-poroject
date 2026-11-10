@@ -11,7 +11,6 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
           src={image}
           alt={imageAlt}
           className="absolute inset-0 h-full w-full object-cover"
-          fetchPriority="high"
           onError={(event) => { event.currentTarget.style.display = 'none' }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-bluespace-700/90 via-bluespace-600/75 to-transparent" />

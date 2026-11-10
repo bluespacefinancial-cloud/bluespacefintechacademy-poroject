@@ -6,6 +6,7 @@ import { Card, CardContent } from '../components/ui/card'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 export default function CertificateDetail() {
   const { id } = useParams()
@@ -63,6 +64,7 @@ export default function CertificateDetail() {
 
   return (
     <div className="min-h-screen bg-slate-100/70 py-6 sm:py-8 px-4 sm:px-6 print:bg-white print:p-0">
+      <Breadcrumb items={[{ to: '/certificates', label: 'Certificates' }, { label: 'Certificate Detail' }]} />
       {/* Subtle Top Utility Bar (Hidden on print) */}
       <div className="print:hidden max-w-5xl mx-auto mb-5 flex items-center justify-between">
         <button

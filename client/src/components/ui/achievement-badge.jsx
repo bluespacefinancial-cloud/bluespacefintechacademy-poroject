@@ -144,8 +144,8 @@ const AchievementBadge = React.forwardRef(
 
         <span
           className={cn(
-            "text-center text-sm leading-tight font-bold text-gray-900",
-            !isUnlocked && "text-muted-foreground"
+            "text-center text-sm leading-tight font-bold text-gray-900 dark:text-white",
+            !isUnlocked && "text-muted-foreground dark:text-gray-400"
           )}
         >
           {achievement.name}

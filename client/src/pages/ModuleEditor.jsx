@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import { Breadcrumb } from '../components/ui/breadcrumb'
+import toast from 'react-hot-toast'
 
 const STAGE_OPTIONS = [
   { value: 'foundations', label: 'Foundations' },
@@ -259,6 +260,7 @@ export default function ModuleEditor() {
           .single()
         if (createError) throw createError
         setMessage('Module created. Add its lessons below.')
+        toast.success('Module created')
         navigate(`/modules/${data.id}`, { replace: true })
       } else {
         const { error: updateError } = await api
@@ -268,9 +270,11 @@ export default function ModuleEditor() {
         if (updateError) throw updateError
         setModule((current) => ({ ...current, ...payload() }))
         setMessage('Module saved.')
+        toast.success('Module saved')
       }
     } catch (saveError) {
       setError(saveError.message || 'Unable to save this module')
+      toast.error('Unable to save module')
     } finally {
       setSaving(false)
     }
@@ -296,6 +300,7 @@ export default function ModuleEditor() {
     setModule((current) => ({ ...current, is_published: next }))
     setForm((current) => ({ ...current, is_published: next }))
     setMessage(next ? 'Module published to students.' : 'Module returned to draft.')
+    toast.success(next ? 'Module published' : 'Module returned to draft')
   }
 
   const deleteModule = async () => {
@@ -306,13 +311,16 @@ export default function ModuleEditor() {
     const { error: lessonError } = await api.from('lessons').delete().eq('module_id', module.id)
     if (lessonError) {
       setError(lessonError.message)
+      toast.error('Unable to delete module')
       return
     }
     const { error: deleteError } = await api.from('modules').delete().eq('id', module.id)
     if (deleteError) {
       setError(deleteError.message)
+      toast.error('Unable to delete module')
       return
     }
+    toast.success('Module deleted')
     navigate('/my-modules', { replace: true })
   }
 
@@ -378,6 +386,7 @@ export default function ModuleEditor() {
         if (updateError) throw updateError
         setLessons((current) => current.map((lesson) => (lesson.id === editingLessonId ? data : lesson)))
         setMessage('Lesson saved.')
+        toast.success('Lesson saved')
       } else {
         const { data, error: createError } = await api
           .from('lessons')
@@ -387,12 +396,14 @@ export default function ModuleEditor() {
         if (createError) throw createError
         setLessons((current) => [...current, data])
         setMessage('Lesson added.')
+        toast.success('Lesson added')
       }
       setLessonEditorOpen(false)
       setEditingLessonId(null)
       setLessonForm(emptyLessonForm)
     } catch (lessonError) {
       setError(lessonError.message || 'Unable to save this lesson')
+      toast.error('Unable to save lesson')
     } finally {
       setSavingLesson(false)
     }
@@ -405,11 +416,13 @@ export default function ModuleEditor() {
     const { error: labDeleteError } = await api.from('labs').delete().eq('lesson_id', lesson.id)
     if (labDeleteError) {
       setError(labDeleteError.message)
+      toast.error('Unable to delete lesson')
       return
     }
     const { error: deleteError } = await api.from('lessons').delete().eq('id', lesson.id)
     if (deleteError) {
       setError(deleteError.message)
+      toast.error('Unable to delete lesson')
       return
     }
     setLessons((current) => current.filter((item) => item.id !== lesson.id))
@@ -420,6 +433,7 @@ export default function ModuleEditor() {
     })
     if (labEditorLessonId === lesson.id) setLabEditorLessonId(null)
     setMessage('Lesson deleted.')
+    toast.success('Lesson deleted')
   }
 
   const moveLesson = async (lesson, direction) => {
@@ -436,6 +450,7 @@ export default function ModuleEditor() {
     const failed = updates.find((result) => result.error)
     if (failed) {
       setError(failed.error.message)
+      toast.error('Unable to reorder lesson')
       return
     }
     setLessons((current) => current.map((item) => {
@@ -495,8 +510,10 @@ export default function ModuleEditor() {
       setLabEditorLessonId(null)
       setLabForm(emptyLabForm)
       setMessage(existing ? 'Lab updated.' : 'Lab attached to lesson.')
+      toast.success(existing ? 'Lab updated' : 'Lab attached')
     } catch (labError) {
       setError(labError.message || 'Unable to save this lab')
+      toast.error('Unable to save lab')
     } finally {
       setSavingLab(false)
     }
@@ -510,6 +527,7 @@ export default function ModuleEditor() {
     const { error: labError } = await api.from('labs').delete().eq('id', existing.id)
     if (labError) {
       setError(labError.message)
+      toast.error('Unable to remove lab')
       return
     }
     setLabsByLesson((current) => {
@@ -519,6 +537,7 @@ export default function ModuleEditor() {
     })
     if (labEditorLessonId === lesson.id) setLabEditorLessonId(null)
     setMessage('Lab removed.')
+    toast.success('Lab removed')
   }
 
   if (loading) {

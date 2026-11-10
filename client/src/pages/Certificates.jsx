@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Dialog, DialogContent } from '../components/ui/dialog'
 import { api } from '../lib/backend'
 import ProfessionalCertificate from '../components/certificate/ProfessionalCertificate'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 const statusStyle = {
   certified: 'text-emerald-700 border-emerald-200 bg-emerald-50',
@@ -69,6 +70,7 @@ export default function Certificates() {
 
   return (
     <div className="min-h-screen bg-gray-50/60 pb-12">
+      <Breadcrumb items={[{ label: 'Certificates' }]} />
       {/* Page Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>

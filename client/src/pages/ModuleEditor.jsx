@@ -31,6 +31,7 @@ import {
 } from '../components/ui/select'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 const STAGE_OPTIONS = [
   { value: 'foundations', label: 'Foundations' },
@@ -551,6 +552,12 @@ export default function ModuleEditor() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { to: '/my-modules', label: 'My Modules' },
+          { label: isNew ? 'New module' : (module?.title || form.title || 'Untitled module') },
+        ]}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3 min-w-0">
           <Link

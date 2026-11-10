@@ -6,6 +6,7 @@ import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 import { api } from '../lib/backend'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 
@@ -162,6 +163,7 @@ export default function Grading() {
 
   return (
     <div className="w-full space-y-6">
+      <Breadcrumb items={[{ label: 'Evaluation & Grading' }]} />
       <DashboardHeader
         title="Evaluation & Grading Center"
         subtitle="Review student code deliverables, inspect Git repositories, and provide rubric-aligned feedback."

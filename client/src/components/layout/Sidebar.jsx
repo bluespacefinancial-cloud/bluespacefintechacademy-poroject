@@ -109,6 +109,14 @@ const sidebarGroups = {
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
         { to: '/partner-courses', icon: BookOpen, label: 'Course Studio', ariaLabel: 'Course Studio' },
+        { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Catalog', ariaLabel: 'Partner Catalog' },
+      ],
+    },
+    {
+      category: 'Community',
+      icon: Users,
+      items: [
+        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
       ],
     },
   ],
@@ -163,10 +171,29 @@ export default function Sidebar({ open, onOpen, onClose }) {
   const { user, logout } = useAuth()
   const location = useLocation()
   const groups = sidebarGroups[user?.type] || sidebarGroups.Student
-  const [openCategories, setOpenCategories] = useState({})
+  const SIDEBAR_STORAGE_KEY = 'bluespace:sidebar:openCategories'
+
+  const loadOpenCategories = () => {
+    try {
+      const raw = localStorage.getItem(SIDEBAR_STORAGE_KEY)
+      return raw ? JSON.parse(raw) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  const [openCategories, setOpenCategories] = useState(loadOpenCategories)
   const [unreadCount, setUnreadCount] = useState(0)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const profileMenuRef = useRef(null)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(openCategories))
+    } catch {
+      // localStorage unavailable or quota exceeded; state still works in memory
+    }
+  }, [openCategories, SIDEBAR_STORAGE_KEY])
 
   const userInitials = user?.name
     ? user.name

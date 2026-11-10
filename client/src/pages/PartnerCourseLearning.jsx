@@ -5,6 +5,7 @@ import { Card, CardContent } from '../components/ui/card'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import MediaPlayer from '../components/MediaPlayer'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 /**
  * Partner course player.
@@ -171,6 +172,12 @@ export default function PartnerCourseLearning() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <Breadcrumb
+          items={[
+            { to: '/partner-catalog', label: 'Partner Catalog' },
+            { label: course?.title || 'Course' },
+          ]}
+        />
         <div className="mb-6 flex items-center gap-3">
           {course.partners?.logo_url && (
             <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />

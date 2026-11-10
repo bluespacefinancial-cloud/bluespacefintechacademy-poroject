@@ -5,9 +5,11 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import MediaPlayer from '../components/MediaPlayer'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
+import toast from 'react-hot-toast'
 
 export default function LessonPlayer() {
   const navigate = useNavigate()
@@ -118,6 +120,7 @@ export default function LessonPlayer() {
             { onConflict: 'user_id,lesson_id' }
           )
           setCompleted(true)
+          toast.success('Lesson marked complete')
         }
       }
       if (targetLessonId) {
@@ -160,6 +163,12 @@ export default function LessonPlayer() {
 
   return (
     <div className="w-full space-y-6">
+      <Breadcrumb
+        items={[
+          { to: backTarget, label: isPreview ? 'My Modules' : 'My Learning' },
+          { label: lesson.title },
+        ]}
+      />
       {/* Top Header & Breadcrumbs Bar */}
       <div className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
@@ -209,11 +218,9 @@ export default function LessonPlayer() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-5">
           {/* Main Media Player */}
-          <Card className="overflow-hidden border border-gray-200/90 shadow-sm rounded-xl bg-white">
-            <div className="p-0">
-              <MediaPlayer lesson={lesson} user={user} onComplete={handleLessonComplete} readOnly={isPreview} />
-            </div>
-          </Card>
+          <div className="overflow-hidden">
+            <MediaPlayer lesson={lesson} user={user} onComplete={handleLessonComplete} readOnly={isPreview} />
+          </div>
 
           {/* Attached Lab Exercise Box (if lab exists for this lesson) */}
           {attachedLab && (

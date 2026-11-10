@@ -3,24 +3,32 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {
   BookOpen,
-  Clock,
-  CheckCircle,
-  Plus,
+  ClipboardList,
+  GraduationCap,
+  Users,
   ArrowRight,
-  ShieldAlert,
-  CheckCircle2,
-  AlertCircle,
-  Award,
+  Plus,
+  Briefcase,
+  FileText,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { getCurrentProfile } from '../lib/profile'
 import { api } from '../lib/backend'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import MetricCard from '../components/dashboard/MetricCard'
+import { EmptyState } from '../components/ui/empty-state'
 
-const emptyData = { partner: null, courses: [], linked: false }
+const emptyData = {
+  profile: null,
+  courses: [],
+  drafts: 0,
+  submitted: 0,
+  published: 0,
+  totalEnrolments: 0,
+}
 
 export default function PartnerDashboard({ user }) {
   const [data, setData] = useState(emptyData)
@@ -32,21 +40,38 @@ export default function PartnerDashboard({ user }) {
     let cancelled = false
     const load = async () => {
       try {
-        const { data: partnerId, error: partnerIdError } = await api.rpc('current_partner_id')
-        if (partnerIdError) throw partnerIdError
-        if (!partnerId) {
-          if (!cancelled) setData({ ...emptyData, linked: false })
-          return
-        }
-        const [{ data: partner, error: partnerError }, { data: courses, error: coursesError }] = await Promise.all([
-          api.from('partners').select('id, name, status').eq('id', partnerId).maybeSingle(),
-          api.from('partner_courses').select('id, title, status, submitted_at, updated_at').eq('partner_id', partnerId).order('updated_at', { ascending: false }),
+        const profile = await getCurrentProfile()
+        if (!profile) throw new Error('Your partner profile could not be found')
+        const [courseResult, enrolmentResult] = await Promise.all([
+          api
+            .from('partner_courses')
+            .select('id, title, status, submitted_at, created_at')
+            .eq('partner_id', profile.partner_id || profile.id)
+            .order('created_at', { ascending: false }),
+          api
+            .from('partner_course_enrolments')
+            .select('id', { count: 'exact', head: true }),
         ])
-        if (partnerError) throw partnerError
-        if (coursesError) throw coursesError
-        if (!cancelled) setData({ partner, courses: courses || [], linked: Boolean(partner) })
+        if (courseResult.error) throw courseResult.error
+        if (enrolmentResult.error) throw enrolmentResult.error
+
+        const courses = courseResult.data || []
+        const drafts = courses.filter((c) => c.status === 'draft').length
+        const submitted = courses.filter((c) => c.status === 'submitted' || c.status === 'under_review').length
+        const published = courses.filter((c) => c.status === 'published').length
+
+        if (!cancelled) {
+          setData({
+            profile,
+            courses,
+            drafts,
+            submitted,
+            published,
+            totalEnrolments: enrolmentResult.count || 0,
+          })
+        }
       } catch (loadError) {
-        if (!cancelled) setError(loadError.message || 'Unable to load partner workspace')
+        if (!cancelled) setError(loadError.message || 'Unable to load partner dashboard')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -58,7 +83,7 @@ export default function PartnerDashboard({ user }) {
   if (loading) {
     return (
       <div className="py-20 text-center">
-        <p className="text-sm font-medium text-gray-500">Loading partner workspace...</p>
+        <p className="text-sm font-medium text-gray-500">Loading your partner studio...</p>
       </div>
     )
   }
@@ -66,231 +91,176 @@ export default function PartnerDashboard({ user }) {
   if (error) {
     return (
       <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-        <p className="font-semibold">Unable to load partner workspace</p>
+        <p className="font-semibold">Unable to load dashboard</p>
         <p className="mt-1 text-xs">{error}</p>
       </div>
     )
   }
 
-  if (!data.linked) {
-    return (
-      <div className="w-full space-y-6">
-        <DashboardHeader
-          title="Partner dashboard"
-          subtitle={`Welcome, ${user?.name || 'Partner'}.`}
-        />
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white w-full overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
-              <ShieldAlert size={18} />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Agency connection required</h3>
-              <p className="text-xs text-gray-500">Account pending organization assignment</p>
-            </div>
-          </div>
-          <CardContent className="p-5 space-y-3">
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Your partner account is not linked to a registered partner agency yet. An academy administrator must connect your account before you can create and publish courses.
-            </p>
-            <p className="text-xs text-gray-500">
-              Once linked, this dashboard will show your course drafts, reviews in progress, and published fintech curricula.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  const count = (statuses) => data.courses.filter((course) => statuses.includes(course.status)).length
+  const recentCourses = data.courses.slice(0, 5)
 
   return (
     <div className="w-full space-y-6">
       <DashboardHeader
         dataTour="partner-header"
-        title="Partner dashboard"
-        subtitle={`${data.partner?.name || 'Partner Agency'} • Manage course authoring, review requests, and academy distributions.`}
+        title="Partner Course Studio"
+        subtitle={`Welcome back, ${data.profile?.name || user?.name || 'Partner'}. Manage your organisation’s courses, drafts and submissions for review.`}
         onStartTour={() => setTourOpen(true)}
         actions={
-          <Button
-            data-tour="partner-action"
-            asChild
-            size="sm"
-            className="bg-deep-600 text-white hover:bg-deep-700"
-          >
-            <Link to="/partner-courses">
-              <Plus size={14} className="mr-1.5" />
-              Open course studio
-            </Link>
-          </Button>
-        }
-      />
-
-      {/* Metric Cards Row */}
-      <div data-tour="partner-metrics" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MetricCard
-          label="Total courses"
-          value={data.courses.length}
-          icon={BookOpen}
-          helper="All registered curricula"
-          to="/partner-courses"
-        />
-        <MetricCard
-          label="Changes requested"
-          value={count(['changes_requested'])}
-          icon={AlertCircle}
-          helper="Needs partner revision"
-          to="/partner-courses"
-        />
-        <MetricCard
-          label="In academy review"
-          value={count(['submitted', 'under_review'])}
-          icon={Clock}
-          helper="Awaiting administrator review"
-          to="/partner-courses"
-        />
-        <MetricCard
-          label="Published courses"
-          value={count(['published'])}
-          icon={CheckCircle}
-          helper="Live in academy catalog"
-          to="/partner-courses"
-        />
-      </div>
-
-      {/* Main Grid: Courses + Studio Operations */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Course List Card */}
-        <Card data-tour="partner-courses" className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <div>
-                <h3 className="text-base font-bold text-gray-900 leading-tight">Course Studio & Curricula</h3>
-                <p className="mt-0.5 text-xs text-gray-500">Authored fintech programs and academy review statuses</p>
-              </div>
-              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
-                <Link to="/partner-courses">
-                  Open studio
-                  <ArrowRight size={13} className="ml-1.5" />
-                </Link>
-              </Button>
-            </div>
-            <CardContent className="p-5">
-              {data.courses.length === 0 ? (
-                <div className="py-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
-                    <BookOpen size={18} />
-                  </div>
-                  <p className="text-sm font-semibold text-gray-900">No courses authored yet</p>
-                  <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
-                    Create your first course draft in the studio and submit it for academy curriculum review.
-                  </p>
-                  <Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700">
-                    <Link to="/partner-courses">Create your first course</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {data.courses.slice(0, 6).map((course) => {
-                    const isChangesRequested = course.status === 'changes_requested'
-                    const isPublished = course.status === 'published'
-                    const statusLabel = course.status ? course.status.replace('_', ' ') : 'draft'
-
-                    return (
-                      <div
-                        key={course.id}
-                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border p-3.5 transition-colors bg-white ${
-                          isChangesRequested
-                            ? 'border-amber-200 bg-amber-50/20'
-                            : 'border-gray-100 hover:border-gray-200'
-                        }`}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
-                            {isChangesRequested && (
-                              <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-200 shrink-0">
-                                Action Required
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="mt-1 text-xs text-gray-500">
-                            Updated {new Date(course.updated_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <Badge
-                            variant={isPublished ? 'secondary' : 'outline'}
-                            className="text-[11px] font-medium capitalize"
-                          >
-                            {statusLabel}
-                          </Badge>
-                          <Button asChild size="sm" variant="outline" className="h-8 px-3 text-xs border-gray-200 text-deep-600 hover:bg-deep-50">
-                            <Link to="/partner-courses">
-                              {isChangesRequested ? 'Revise Draft' : 'Open in Studio'}
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </div>
-
-          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 flex items-center justify-between text-xs">
-            <span className="text-gray-500">
-              Need to add video lectures or resources to an existing course?
-            </span>
-            <Link to="/partner-courses" className="font-semibold text-deep-600 hover:text-deep-700">
-              Edit Lessons in Studio →
-            </Link>
-          </div>
-        </Card>
-
-        {/* Studio Operations & Guidelines Card */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
-          <div>
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900 leading-tight">Curriculum Accreditation</h3>
-              <p className="mt-0.5 text-xs text-gray-500">Standards for publishing to academy fellows</p>
-            </div>
-            <CardContent className="p-5 space-y-4 text-xs text-gray-600">
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-gray-900">Industry-Grounded Syllabus</p>
-                  <p className="mt-0.5 text-gray-500">Structure modules around hands-on banking, mobile money, digital payments, or fintech security workflows.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Award size={16} className="text-deep-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-gray-900">Automated Certification</p>
-                  <p className="mt-0.5 text-gray-500">Fellows who complete 100% of your course lessons earn verified credentials co-branded with your agency.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Clock size={16} className="text-deep-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-gray-900">Review Turnaround</p>
-                  <p className="mt-0.5 text-gray-500">Submitted courses undergo technical review by academy staff within 3 to 5 business days.</p>
-                </div>
-              </div>
-            </CardContent>
-          </div>
-
-          <div className="p-4 bg-gray-50/60 border-t border-gray-100">
-            <Button asChild size="sm" className="w-full text-xs bg-deep-600 text-white hover:bg-deep-700 font-semibold">
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
               <Link to="/partner-courses">
-                <Plus size={13} className="mr-1.5" />
-                Author New Course Draft
+                <Plus size={14} className="mr-1.5" />
+                New Course
               </Link>
             </Button>
           </div>
-        </Card>
+        }
+      />
+
+      {/* Metrics Row */}
+      <div data-tour="partner-metrics" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <MetricCard
+          label="Your courses"
+          value={data.courses.length}
+          icon={BookOpen}
+          helper="Courses owned by your organisation"
+          to="/partner-courses"
+        />
+        <MetricCard
+          label="Drafts"
+          value={data.drafts}
+          icon={FileText}
+          helper="Unpublished course drafts"
+          to="/partner-courses"
+        />
+        <MetricCard
+          label="Submitted for review"
+          value={data.submitted}
+          icon={ClipboardList}
+          helper="Awaiting academy approval"
+          to="/partner-courses"
+        />
+        <MetricCard
+          label="Student enrolments"
+          value={data.totalEnrolments}
+          icon={Users}
+          helper="Learners across your courses"
+        />
       </div>
+
+      {/* Recent Courses */}
+      <Card data-tour="partner-courses" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div>
+            <h3 className="text-base font-bold text-gray-900 leading-tight">Recent courses</h3>
+            <p className="mt-0.5 text-xs text-gray-500">Courses owned by your organisation</p>
+          </div>
+          <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+            <Link to="/partner-courses">
+              Open course studio
+              <ArrowRight size={13} className="ml-1.5" />
+            </Link>
+          </Button>
+        </div>
+        <CardContent className="p-5">
+          {recentCourses.length === 0 ? (
+            <div className="py-16 text-center">
+              <EmptyState
+                icon={Briefcase}
+                title="No courses yet"
+                description="Create your first course in the Course Studio to begin offering partner electives to academy fellows."
+                action={
+                  <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
+                    <Link to="/partner-courses">
+                      <Plus size={14} className="mr-1.5" />
+                      Create course
+                    </Link>
+                  </Button>
+                }
+              />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 p-3 hover:border-gray-200 transition-colors bg-white"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{course.title}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {new Date(course.created_at).toLocaleDateString()} ·{' '}
+                      {course.status.replace('_', ' ')}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      course.status === 'published'
+                        ? 'secondary'
+                        : course.status === 'draft'
+                        ? 'outline'
+                        : 'default'
+                    }
+                    className="text-[11px] font-medium shrink-0 capitalize"
+                  >
+                    {course.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Quick actions */}
+      <Card data-tour="partner-actions" className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <div>
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h3 className="text-base font-bold text-gray-900 leading-tight">Studio actions</h3>
+            <p className="mt-0.5 text-xs text-gray-500">Quick actions for partner course operations</p>
+          </div>
+          <CardContent className="p-4 space-y-2">
+            <Link
+              to="/partner-courses"
+              className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+            >
+              <div className="flex items-center gap-2.5">
+                <BookOpen size={16} className="text-deep-600 shrink-0" />
+                <span>Course Studio</span>
+              </div>
+              <ArrowRight size={13} className="text-gray-400" />
+            </Link>
+
+            <Link
+              to="/partner-catalog"
+              className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+            >
+              <div className="flex items-center gap-2.5">
+                <GraduationCap size={16} className="text-deep-600 shrink-0" />
+                <span>Browse Partner Catalog</span>
+              </div>
+              <ArrowRight size={13} className="text-gray-400" />
+            </Link>
+
+            <Link
+              to="/profile-settings"
+              className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-white text-xs font-semibold text-gray-800"
+            >
+              <div className="flex items-center gap-2.5">
+                <Users size={16} className="text-deep-600 shrink-0" />
+                <span>Organisation Profile</span>
+              </div>
+              <ArrowRight size={13} className="text-gray-400" />
+            </Link>
+          </CardContent>
+        </div>
+        <div className="p-4 bg-gray-50/60 border-t border-gray-100">
+          <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200">
+            <Link to="/partner-courses">View All Courses ({data.courses.length})</Link>
+          </Button>
+        </div>
+      </Card>
 
       <WelcomeGuide
         role="Partner"

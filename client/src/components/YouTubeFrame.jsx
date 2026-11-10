@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 
 let apiPromise = null
 
@@ -46,9 +46,11 @@ function loadIframeApi() {
  *
  * The native controls stay enabled; this component only reports play state and
  * time so the lesson page can persist progress. Callbacks live in a ref so
- * re-renders do not tear down the player.
+ * re-renders do not tear down the player. Imperative methods are exposed via
+ * ref so the surrounding MediaPlayer can drive playback, seeking, volume and
+ * speed parity with the native player.
  */
-export default function YouTubeFrame({
+const YouTubeFrame = forwardRef(function YouTubeFrame({
   videoUrl,
   title,
   onTick,
@@ -56,9 +58,43 @@ export default function YouTubeFrame({
   onPaused,
   onEnded,
   onError,
-}) {
+}, ref) {
   const containerRef = useRef(null)
   const callbacksRef = useRef({})
+  const playerRef = useRef(null)
+  const isPlayingRef = useRef(false)
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const p = playerRef.current
+      if (p && typeof p.playVideo === 'function') p.playVideo()
+    },
+    pause: () => {
+      const p = playerRef.current
+      if (p && typeof p.pauseVideo === 'function') p.pauseVideo()
+    },
+    seekTo: (seconds) => {
+      const p = playerRef.current
+      if (p && typeof p.seekTo === 'function') p.seekTo(seconds, true)
+    },
+    setVolume: (volume) => {
+      const p = playerRef.current
+      if (p && typeof p.setVolume === 'function') p.setVolume(Math.round(volume * 100))
+    },
+    setPlaybackRate: (rate) => {
+      const p = playerRef.current
+      if (p && typeof p.setPlaybackRate === 'function') p.setPlaybackRate(rate)
+    },
+    isPlaying: () => isPlayingRef.current,
+    getCurrentTime: () => {
+      const p = playerRef.current
+      return p && typeof p.getCurrentTime === 'function' ? p.getCurrentTime() || 0 : 0
+    },
+    getDuration: () => {
+      const p = playerRef.current
+      return p && typeof p.getDuration === 'function' ? p.getDuration() || 0 : 0
+    },
+  }))
 
   useEffect(() => {
     callbacksRef.current = { onTick, onPlaying, onPaused, onEnded, onError }
@@ -117,18 +153,22 @@ export default function YouTubeFrame({
           events: {
             onReady: () => {
               if (cancelled) return
+              playerRef.current = player
               emitTick()
             },
             onStateChange: (event) => {
               if (cancelled) return
               if (event.data === YT.PlayerState.PLAYING) {
+                isPlayingRef.current = true
                 callbacksRef.current.onPlaying?.()
                 startPoller()
               } else if (event.data === YT.PlayerState.PAUSED) {
+                isPlayingRef.current = false
                 stopPoller()
                 emitTick()
                 callbacksRef.current.onPaused?.()
               } else if (event.data === YT.PlayerState.ENDED) {
+                isPlayingRef.current = false
                 stopPoller()
                 emitTick()
                 callbacksRef.current.onEnded?.()
@@ -154,9 +194,14 @@ export default function YouTubeFrame({
           // The iframe is already gone; nothing to clean up.
         }
       }
+      playerRef.current = null
       if (host.parentNode) host.parentNode.removeChild(host)
     }
   }, [videoUrl, title])
 
   return <div ref={containerRef} className="h-full w-full" />
-}
+})
+
+YouTubeFrame.displayName = 'YouTubeFrame'
+
+export default YouTubeFrame

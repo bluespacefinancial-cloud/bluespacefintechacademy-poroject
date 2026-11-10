@@ -58,6 +58,7 @@ export default function MediaPlayer({
   progressAdapter = defaultProgressAdapter,
 }) {
   const mediaRef = useRef(null)
+  const ytRef = useRef(null)
   const saveIntervalRef = useRef(null)
   const isMountedRef = useRef(true)
   const lastYouTubeSaveRef = useRef(0)
@@ -75,6 +76,7 @@ export default function MediaPlayer({
   const [playbackRate, setPlaybackRate] = useState(1)
   const [showControls, setShowControls] = useState(true)
   const [speedMenuVisible, setSpeedMenuVisible] = useState(false)
+  const [keyboardActive, setKeyboardActive] = useState(false)
 
   const isVideo = lesson.type === 'video'
   const mediaUrl = lesson.type === 'video' ? lesson.video_url : lesson.audio_url
@@ -223,6 +225,16 @@ export default function MediaPlayer({
   }
 
   const toggleFullscreen = () => {
+    if (useYouTube) {
+      const p = ytRef.current
+      const host = p?.getIframe?.()
+      if (!document.fullscreenElement) {
+        host?.requestFullscreen?.()
+      } else {
+        document.exitFullscreen()
+      }
+      return
+    }
     if (!mediaRef.current) return
     if (!document.fullscreenElement) {
       mediaRef.current.requestFullscreen()
@@ -230,6 +242,74 @@ export default function MediaPlayer({
       document.exitFullscreen()
     }
   }
+
+  const handleKeyDown = (event) => {
+    if (!keyboardActive || readOnly) return
+    const { target } = event
+    const isTyping =
+      target instanceof HTMLElement &&
+      (target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable)
+    if (isTyping) return
+
+    const key = event.key.toLowerCase()
+    if (key === ' ' || key === 'k') {
+      event.preventDefault()
+      togglePlay()
+    } else if (key === 'j') {
+      event.preventDefault()
+      seekBackward(10)
+    } else if (key === 'l') {
+      event.preventDefault()
+      seekForward(10)
+    } else if (key === 'm') {
+      event.preventDefault()
+      toggleMute()
+    } else if (key === 'f') {
+      event.preventDefault()
+      toggleFullscreen()
+    }
+  }
+
+  const seekBackward = (seconds) => {
+    if (useYouTube) {
+      const p = ytRef.current
+      if (p) {
+        const next = Math.max(0, p.getCurrentTime() - seconds)
+        p.seekTo(next)
+        setCurrentTime(next)
+      }
+      return
+    }
+    if (!mediaRef.current || !duration) return
+    const next = Math.max(0, mediaRef.current.currentTime - seconds)
+    mediaRef.current.currentTime = next
+    setCurrentTime(next)
+  }
+
+  const seekForward = (seconds) => {
+    if (useYouTube) {
+      const p = ytRef.current
+      if (p) {
+        const dur = p.getDuration() || duration || lesson.duration_minutes * 60
+        const next = Math.min(dur, p.getCurrentTime() + seconds)
+        p.seekTo(next)
+        setCurrentTime(next)
+      }
+      return
+    }
+    if (!mediaRef.current || !duration) return
+    const next = Math.min(duration, mediaRef.current.currentTime + seconds)
+    mediaRef.current.currentTime = next
+    setCurrentTime(next)
+  }
+
+  useEffect(() => {
+    if (!keyboardActive) return
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [keyboardActive, handleKeyDown, readOnly])
 
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return '0:00'
@@ -240,6 +320,14 @@ export default function MediaPlayer({
 
   const toggleMute = () => {
     setIsMuted(!isMuted)
+    if (useYouTube) {
+      const p = ytRef.current
+      if (p) {
+        p.setVolume(isMuted ? volume : 0)
+      }
+      setIsMuted(!isMuted)
+      return
+    }
     if (mediaRef.current) {
       mediaRef.current.muted = !isMuted
       mediaRef.current.volume = isMuted ? 0 : volume
@@ -250,6 +338,13 @@ export default function MediaPlayer({
     const vol = parseFloat(e.target.value)
     setVolume(vol)
     setIsMuted(vol === 0)
+    if (useYouTube) {
+      const p = ytRef.current
+      if (p) {
+        p.setVolume(Math.round(vol * 100))
+      }
+      return
+    }
     if (mediaRef.current) {
       mediaRef.current.volume = vol
       mediaRef.current.muted = vol === 0
@@ -259,6 +354,13 @@ export default function MediaPlayer({
   const handleSpeedChange = (e) => {
     const rate = parseFloat(e.target.value)
     setPlaybackRate(rate)
+    if (useYouTube) {
+      const p = ytRef.current
+      if (p) {
+        p.setPlaybackRate(rate)
+      }
+      return
+    }
     if (mediaRef.current) {
       mediaRef.current.playbackRate = rate
     }
@@ -276,9 +378,10 @@ export default function MediaPlayer({
   if (useYouTube) {
     const youtubeDuration = duration || lesson.duration_minutes * 60
     return (
-      <div className="bg-gray-900 text-white rounded-xl overflow-hidden flex flex-col shadow-2xl relative border border-gray-800">
+      <div className="rounded-xl overflow-hidden flex flex-col shadow-sm border border-gray-200/90 bg-white relative">
         <div className="relative aspect-video w-full bg-black">
           <YouTubeFrame
+            ref={ytRef}
             videoUrl={mediaUrl}
             title={lesson.title || 'Lesson video'}
             onTick={handleYouTubeTick}
@@ -289,35 +392,128 @@ export default function MediaPlayer({
           />
         </div>
         {error && (
-          <p role="alert" className="border-t border-red-500/30 bg-red-950/60 px-4 py-2 text-xs text-red-200">
+          <p role="alert" className="border-t border-red-200/60 bg-red-50 px-4 py-2 text-xs text-red-700">
             {error}
           </p>
         )}
-        <div className="p-4 bg-gray-950 border-t border-gray-800 flex items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-400 font-medium">Video Stream • YouTube</span>
-            <span className="text-xs text-gray-400">
-              {isCompleted ? 'Completed' : `${Math.round(completionPercent)}% watched`}
-            </span>
-            {isCompleted && (
-              <Badge variant="outline" className="text-xs text-emerald-400 border-emerald-500/20 font-semibold">
-                Completed
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={togglePlay}
+              className="w-10 h-10 rounded-full bg-deep-600 flex items-center justify-center text-white hover:bg-deep-700 transition-colors"
+              title={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </button>
+            <div className="flex items-center gap-2 min-w-[120px] shrink-0">
+              <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
+              <input
+                type="range"
+                min="0"
+                max={youtubeDuration || 100}
+                value={currentTime}
+                onChange={(e) => {
+                  const pct = parseFloat(e.target.value)
+                  const t = (pct / 100) * youtubeDuration
+                  ytRef.current?.seekTo(t)
+                  setCurrentTime(t)
+                }}
+                className="w-full accent-deep-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-xs text-gray-500">{formatTime(youtubeDuration)}</span>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {isVideo && (
+                <>
+                  <button
+                    onClick={toggleMute}
+                    className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm transition-colors"
+                    title={isMuted ? 'Unmute' : 'Mute'}
+                  >
+                    {isMuted ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1v1.5a1 1 0 001 1h1.5a1 1 0 011 1v7.5a1 1 0 01-1 1zM17 14a2 2 0 10-4 0h3.586l-1.293-1.293a1 1 0 010-1.414l4.293-4.293a1 1 0 011.414 1.414L17.414 15H17z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 18l2-2m0 0l2-2m-2 2l-2-2m-2 2l-2-2" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.343C7.67 6.165 6 8.388 6 11v3.159c0 .538.214 1.055.595 1.436L4 17h1m6 0a1 1 0 100-2 1 1 0 000 2z" />
+                      </svg>
+                    )}
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    className="w-24 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-deep-600"
+                  />
+                </>
+              )}
+              <div className="relative group">
+                <button
+                  onClick={() => setSpeedMenuVisible(!speedMenuVisible)}
+                  className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm text-gray-700 transition-colors"
+                >
+                  <span className="text-xs font-medium">{playbackRate.toFixed(1)}x</span>
+                  <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {speedMenuVisible && (
+                  <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg p-2 shadow-lg min-w-[80px] border border-gray-100">
+                    {speedOptions.map((rate) => (
+                      <button
+                        key={rate}
+                        onClick={() => handleSpeedChange({ target: { value: rate.toString() } })}
+                        className={`w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100 transition-colors ${
+                          playbackRate === rate ? 'bg-deep-600 text-white' : 'text-gray-700'
+                        }`}
+                      >
+                        {rate.toFixed(1)}x
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={toggleFullscreen}
+                className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm transition-colors"
+                title="Fullscreen"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l4 4m4-4 4 4m-4 4v4m0 0h4m-4 4l-4-4M4 16v4m0 0h4m-4 4l4-4m-4 4V8m8 0v-4m0 0h-4M4 8l-4 4m4 4 4-4m8 8v-4m0 0h-4m-4 4 4-4m4 4 4-4" />
+                </svg>
+              </button>
+            </div>
+            {readOnly ? (
+              <Badge variant="secondary" className="text-xs font-medium text-gray-600 border-gray-200">
+                Staff preview · progress not recorded
               </Badge>
+            ) : (
+              <button
+                type="button"
+                onClick={() => saveProgress(youtubeDuration, true, youtubeDuration)}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
+              >
+                {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
+              </button>
             )}
           </div>
-          {readOnly ? (
-            <Badge variant="outline" className="text-xs font-medium text-gray-300 border-gray-700">
-              Staff preview · progress not recorded
-            </Badge>
-          ) : (
-            <button
-              type="button"
-              onClick={() => saveProgress(youtubeDuration, true, youtubeDuration)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
-            >
-              {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
-            </button>
-          )}
         </div>
       </div>
     )
@@ -325,15 +521,15 @@ export default function MediaPlayer({
 
   if (!mediaUrl) {
     return (
-      <div className="bg-gray-900 text-white rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 p-10 text-center shadow-2xl border border-gray-800">
-        <p className="text-sm font-medium text-gray-200">No playable media is attached to this lesson.</p>
-        <p className="text-xs text-gray-400">Use the lesson resource below, or ask your instructor to add the recording.</p>
+      <div className="rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 p-10 text-center shadow-sm border border-gray-200/90 bg-white">
+        <p className="text-sm font-medium text-gray-900">No playable media is attached to this lesson.</p>
+        <p className="text-xs text-gray-500">Use the lesson resource below, or ask your instructor to add the recording.</p>
         {lesson.content_url && (
           <a
             href={lesson.content_url}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-semibold text-deep-300 underline hover:text-deep-200"
+            className="mt-2 text-xs font-semibold text-deep-600 underline hover:text-deep-700"
           >
             Open the lesson resource
           </a>
@@ -375,9 +571,14 @@ export default function MediaPlayer({
   )
 
   return (
-    <div className="bg-gray-900 text-white rounded-xl overflow-hidden flex flex-col min-h-[400px] max-h-[600px] shadow-2xl relative">
+    <div className="rounded-xl overflow-hidden flex flex-col min-h-[400px] max-h-[600px] shadow-sm border border-gray-200/90 bg-white relative">
       {/* Media Area */}
-      <div className="relative flex-1 w-full bg-black group cursor-pointer" onClick={togglePlay}>
+      <div
+        className="relative flex-1 w-full bg-black group cursor-pointer"
+        onClick={togglePlay}
+        onMouseEnter={() => setKeyboardActive(true)}
+        onMouseLeave={() => setKeyboardActive(false)}
+      >
         {mediaElement}
         {lesson.thumbnail_url && isVideo && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />

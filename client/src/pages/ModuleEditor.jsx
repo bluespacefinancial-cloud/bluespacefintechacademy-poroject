@@ -73,6 +73,7 @@ const emptyLessonForm = {
   title: '',
   type: 'video',
   duration_minutes: 60,
+  media_provider: 'auto',
   video_url: '',
   audio_url: '',
   content_url: '',
@@ -327,6 +328,7 @@ export default function ModuleEditor() {
       title: lesson.title || '',
       type: lesson.type || 'video',
       duration_minutes: lesson.duration_minutes ?? 60,
+      media_provider: lesson.media_provider || 'auto',
       video_url: lesson.video_url || '',
       audio_url: lesson.audio_url || '',
       content_url: lesson.content_url || '',
@@ -353,6 +355,7 @@ export default function ModuleEditor() {
       title: lessonForm.title.trim(),
       type: lessonForm.type,
       duration_minutes: Number(lessonForm.duration_minutes) || 60,
+      media_provider: lessonForm.media_provider || 'auto',
       video_url: lessonForm.video_url.trim() || null,
       audio_url: lessonForm.audio_url.trim() || null,
       content_url: lessonForm.content_url.trim() || null,
@@ -956,6 +959,29 @@ export default function ModuleEditor() {
                       onChange={(event) => setLessonForm({ ...lessonForm, duration_minutes: event.target.value })}
                     />
                   </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:max-w-md">
+                  <div>
+                    <label htmlFor="lesson-provider" className="mb-1 block text-xs font-medium text-deep-600">Media provider</label>
+                    <Select
+                      value={lessonForm.media_provider}
+                      onValueChange={(value) => setLessonForm({ ...lessonForm, media_provider: value })}
+                    >
+                      <SelectTrigger id="lesson-provider" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">Auto-detect from URL</SelectItem>
+                        <SelectItem value="youtube">YouTube (unlisted)</SelectItem>
+                        <SelectItem value="self">Self-hosted file</SelectItem>
+                        <SelectItem value="none">No media</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="self-end pb-2 text-[11px] leading-snug text-gray-500">
+                    Lectures normally use an unlisted YouTube link. Keep only audio, captions and short assets on your own storage.
+                  </p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">

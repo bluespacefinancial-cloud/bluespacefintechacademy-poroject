@@ -6,6 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
 import { Badge } from '../components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 import { api } from '../lib/backend'
 
 const STATUS_LABELS = {
@@ -32,6 +39,7 @@ const emptyCourseForm = {
 const emptyLessonForm = {
   title: '',
   description: '',
+  media_provider: 'auto',
   video_url: '',
   content_url: '',
 }
@@ -154,6 +162,7 @@ export default function PartnerCourses() {
           course_id: selected.id,
           title: lesson.title.trim(),
           description: lesson.description.trim() || null,
+          media_provider: lesson.media_provider || 'auto',
           video_url: lesson.video_url.trim() || null,
           content_url: lesson.content_url.trim() || null,
           order_index: nextIndex,
@@ -420,6 +429,20 @@ export default function PartnerCourses() {
                   onChange={(event) => setLesson({ ...lesson, video_url: event.target.value })}
                   className="text-sm"
                 />
+                <Select
+                  value={lesson.media_provider}
+                  onValueChange={(value) => setLesson({ ...lesson, media_provider: value })}
+                >
+                  <SelectTrigger className="w-full text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Auto-detect from URL</SelectItem>
+                    <SelectItem value="youtube">YouTube (unlisted)</SelectItem>
+                    <SelectItem value="self">Self-hosted file</SelectItem>
+                    <SelectItem value="none">No media</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Input
                   type="url"
                   placeholder="Reading or resource URL"

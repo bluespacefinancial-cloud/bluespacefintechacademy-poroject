@@ -229,6 +229,7 @@ order, when Docker creates the volume:
 | `03_demo_passwords.sql` | Demo account bcrypt hashes (see Test Logins) |
 | `04_partner_review_guard.sql` | Partner review guard triggers, notification and audit-log grants, instructor content scope |
 | `05_announcement_admin_reach.sql` | Administrators can edit, pin and delete any announcement (instructors stay author-only) |
+| `06_media_provider.sql` | `media_provider` on `lessons` and `partner_course_lessons` (`auto`/`youtube`/`self`/`none`) |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -279,12 +280,12 @@ helpers, so the schema and policies carried over unchanged.
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/06_add_something.sql`. Never
+Add a new sequential file, for example `database/07_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/06_add_something.sql
+  < database/07_add_something.sql
 ```
 
 For a repeatable local rebuild:
@@ -464,6 +465,13 @@ route's `roles` array; otherwise it redirects to `/unauthorized`.
 - `LessonPlayer.jsx` is used by Students and, with `readOnly`, by staff
   previewing a lesson. In preview mode no `lesson_progress` row is written and
   the lab call to action points at `/grading`.
+- Media is provider-neutral. `lessons.media_provider` and
+  `partner_course_lessons.media_provider` accept `auto` (infer from the URL),
+  `youtube`, `self` or `none`. Lectures normally use unlisted YouTube links;
+  audio, captions, thumbnails and short assets are the only files hosted by the
+  academy. `components/YouTubeFrame.jsx` uses the YouTube IFrame Player API so
+  watch time is still recorded for YouTube lectures, and `MediaPlayer.jsx`
+  falls back to a native `<video>`/`<audio>` element for self-hosted files.
 - `PartnerCourses.jsx` is the partner studio: drafts, lessons, and submission
   for review. Lessons are created unpublished.
 - `PartnerCourseReview.jsx` is the Administrator review queue: approve and

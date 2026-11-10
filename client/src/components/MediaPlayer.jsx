@@ -2,19 +2,21 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import { Badge } from '../components/ui/badge'
+import YouTubeFrame, { parseYouTubeId } from './YouTubeFrame'
 
 const COMPLETION_THRESHOLD = 90 // percent
 const SAVE_INTERVAL_MS = 10000 // save progress every 10 seconds
 
 const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
-function getYouTubeEmbedUrl(url) {
-  if (!url || typeof url !== 'string') return null
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return match && match[2].length === 11
-    ? `https://www.youtube.com/embed/${match[2]}?rel=0`
-    : null
+/**
+ * Explicit `media_provider` wins; `auto` infers YouTube from the URL. Audio is
+ * always native, even when a media_provider is set to youtube on the row.
+ */
+function resolveMediaProvider(lesson) {
+  const configured = lesson.media_provider || 'auto'
+  if (configured !== 'auto') return configured
+  return lesson.type === 'video' && parseYouTubeId(lesson.video_url) ? 'youtube' : 'self'
 }
 
 export default function MediaPlayer({
@@ -26,6 +28,7 @@ export default function MediaPlayer({
   const mediaRef = useRef(null)
   const saveIntervalRef = useRef(null)
   const isMountedRef = useRef(true)
+  const lastYouTubeSaveRef = useRef(0)
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -44,7 +47,8 @@ export default function MediaPlayer({
   const isVideo = lesson.type === 'video'
   const mediaUrl = lesson.type === 'video' ? lesson.video_url : lesson.audio_url
   const mediaType = lesson.type === 'video' ? 'video/mp4' : 'audio/mpeg'
-  const youtubeEmbedUrl = isVideo && mediaUrl ? getYouTubeEmbedUrl(mediaUrl) : null
+  const mediaProvider = resolveMediaProvider(lesson)
+  const useYouTube = isVideo && mediaProvider === 'youtube'
 
   const loadProgress = async () => {
     if (!user || !lesson.id) return
@@ -88,13 +92,13 @@ export default function MediaPlayer({
     }
   }, [])
 
-  const saveProgress = useCallback(async (currentTimeVal, isCompletedVal) => {
+  const saveProgress = useCallback(async (currentTimeVal, isCompletedVal, durationOverride) => {
     if (!user || !lesson.id || !isMountedRef.current) return
     // Staff previewing a lesson must not create student progress rows.
     if (readOnly) return
     const profile = await getCurrentProfile()
     if (!profile) return
-    const durationVal = duration || lesson.duration_minutes * 60
+    const durationVal = durationOverride || duration || lesson.duration_minutes * 60
     const percent = durationVal > 0 ? (currentTimeVal / durationVal) * 100 : 0
     const completed = isCompletedVal || percent >= COMPLETION_THRESHOLD
 
@@ -156,6 +160,26 @@ export default function MediaPlayer({
     saveIntervalRef.current = setInterval(() => {
       saveProgress(currentTime, isCompleted)
     }, SAVE_INTERVAL_MS)
+  }
+
+  // YouTube reports time through the IFrame API instead of DOM events.
+  const handleYouTubeTick = (time, durationValue) => {
+    setCurrentTime(time)
+    if (durationValue) setDuration(durationValue)
+    const dur = durationValue || duration || lesson.duration_minutes * 60
+    setCompletionPercent(dur > 0 ? (time / dur) * 100 : 0)
+
+    if (readOnly || isCompleted) return
+    const now = Date.now()
+    if (now - lastYouTubeSaveRef.current < SAVE_INTERVAL_MS) return
+    lastYouTubeSaveRef.current = now
+    saveProgress(time, false, dur)
+  }
+
+  const handleYouTubeEnded = () => {
+    setIsPlaying(false)
+    const dur = duration || lesson.duration_minutes * 60
+    saveProgress(dur, true, dur)
   }
 
   const togglePlay = () => {
@@ -227,21 +251,32 @@ export default function MediaPlayer({
     }
   }, [])
 
-  if (youtubeEmbedUrl) {
+  if (useYouTube) {
+    const youtubeDuration = duration || lesson.duration_minutes * 60
     return (
       <div className="bg-gray-900 text-white rounded-xl overflow-hidden flex flex-col shadow-2xl relative border border-gray-800">
         <div className="relative aspect-video w-full bg-black">
-          <iframe
-            src={youtubeEmbedUrl}
-            title={lesson.title || 'Lesson Video'}
-            className="w-full h-full min-h-[380px] border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
+          <YouTubeFrame
+            videoUrl={mediaUrl}
+            title={lesson.title || 'Lesson video'}
+            onTick={handleYouTubeTick}
+            onPlaying={() => setIsPlaying(true)}
+            onPaused={() => setIsPlaying(false)}
+            onEnded={handleYouTubeEnded}
+            onError={(message) => setError(message)}
           />
         </div>
-        <div className="p-4 bg-gray-950 border-t border-gray-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 font-medium">Video Stream • YouTube Embedded</span>
+        {error && (
+          <p role="alert" className="border-t border-red-500/30 bg-red-950/60 px-4 py-2 text-xs text-red-200">
+            {error}
+          </p>
+        )}
+        <div className="p-4 bg-gray-950 border-t border-gray-800 flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-400 font-medium">Video Stream • YouTube</span>
+            <span className="text-xs text-gray-400">
+              {isCompleted ? 'Completed' : `${Math.round(completionPercent)}% watched`}
+            </span>
             {isCompleted && (
               <Badge variant="outline" className="text-xs text-emerald-400 border-emerald-500/20 font-semibold">
                 Completed
@@ -255,13 +290,32 @@ export default function MediaPlayer({
           ) : (
             <button
               type="button"
-              onClick={() => saveProgress(duration || 300, true)}
+              onClick={() => saveProgress(youtubeDuration, true, youtubeDuration)}
               className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
             >
               {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
             </button>
           )}
         </div>
+      </div>
+    )
+  }
+
+  if (!mediaUrl) {
+    return (
+      <div className="bg-gray-900 text-white rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 p-10 text-center shadow-2xl border border-gray-800">
+        <p className="text-sm font-medium text-gray-200">No playable media is attached to this lesson.</p>
+        <p className="text-xs text-gray-400">Use the lesson resource below, or ask your instructor to add the recording.</p>
+        {lesson.content_url && (
+          <a
+            href={lesson.content_url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-semibold text-deep-300 underline hover:text-deep-200"
+          >
+            Open the lesson resource
+          </a>
+        )}
       </div>
     )
   }

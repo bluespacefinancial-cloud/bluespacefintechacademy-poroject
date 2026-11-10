@@ -233,6 +233,7 @@ order, when Docker creates the volume:
 | `07_audit_spine.sql` | Trigger-written audit trail on 14 core tables, `administrators manage users` policy, credential-takeover guard |
 | `08_column_grants.sql` | Re-asserts column-level grants lost to `ALTER DEFAULT PRIVILEGES`: hidden `users.password`, `labs.solution_code`, `assessment_questions.correct_answer` |
 | `09_media_assets.sql` | Service-only `media_assets` upload index; `type`, `audio_url`, `duration_seconds`, `thumbnail_url`, `caption_url` on `partner_course_lessons` |
+| `10_partner_enrolment_scope.sql` | Scopes Partner access on `partner_course_enrolments` to courses owned by the caller's organisation (students stay self-only, Administrators stay global) |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -284,12 +285,12 @@ helpers, so the schema and policies carried over unchanged.
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/10_add_something.sql`. Never
+Add a new sequential file, for example `database/11_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/10_add_something.sql
+  < database/11_add_something.sql
 ```
 
 `00_bootstrap.sql` grants `ALL` on new tables to `anon` and `authenticated`
@@ -324,6 +325,7 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 | Token tables | `REVOKE ALL` from client roles; only `service_role` may read/write |
 | Partner review states | `enforce_partner_course_review` trigger: clients can only create drafts and move `draft`/`changes_requested` → `submitted`; reviewer columns and timestamps are frozen |
 | Partner lesson publication | `enforce_partner_lesson_publish` trigger forces `is_published = false` for clients; `sync_partner_lesson_publication` publishes lessons when an administrator publishes the course |
+| Partner enrolment scope | `10_partner_enrolment_scope.sql` limits Partner access on `partner_course_enrolments` to courses owned by the caller's organisation; students keep their own rows and Administrators stay global |
 | Notification writes | `create_notification` is executable by `service_role` only; `PUBLIC`, `anon`, and `authenticated` are revoked |
 | Audit log writes | `INSERT`/`UPDATE`/`DELETE`/`TRUNCATE` on `audit_logs` revoked from client roles; administrators keep `SELECT` |
 | Instructor content scope | Module and lesson writes are limited to cohorts in `instructor_cohort_assignments`; Administrators stay unrestricted |
@@ -334,7 +336,7 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 |------|---------|----------|--------|
 | Student | Own enrolments, squad, learning, partner catalog | Own profile, submissions, progress | `/student-login` |
 | Instructor | Cohort data, submissions to grade, own assigned cohort content | Grading, modules and lessons for assigned cohorts, direct publish | `/instructor-login` |
-| Partner | Own organization's courses | Own drafts and lessons; may submit for review, never approve or publish | `/partner-login` |
+| Partner | Own organization's courses | Own drafts and lessons, and enrolments in own courses; may submit for review, never approve or publish | `/partner-login` |
 | Administrator | Everything | All academy operations, partner review and publication | `/admin-login` |
 
 ### Squad, enrolment, and user management
@@ -756,6 +758,7 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 | `backend/app/Http/Controllers/MediaController.php` | Course-asset upload, validation and `media_assets` index |
 | `backend/php/uploads.ini` | Upload size limits loaded by `backend/bin/artisan` |
 | `database/09_media_assets.sql` | `media_assets` plus partner lesson media columns |
+| `database/10_partner_enrolment_scope.sql` | Partner enrolment RLS scoped to the caller's own courses |
 | `backend/app/Support/AuthStore.php` | Service-role data access and sessions |
 | `backend/app/Support/Jwt.php` | PostgREST JWT signing |
 | `client/src/lib/backend.js` | Client transport and query builder |

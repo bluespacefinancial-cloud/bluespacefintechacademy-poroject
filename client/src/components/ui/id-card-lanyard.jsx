@@ -184,7 +184,7 @@ const CSS = `
 .idcl-hint svg{ width:13px; height:13px; opacity:.85; flex-shrink:0; }
 
 .idcl-close-btn{
-  position:fixed; top:16px; right:16px;
+  position:fixed; top:68px; right:16px;
   width:32px; height:32px; border-radius:50%;
   background:rgba(11,25,44,.85); color:#ffffff;
   display:flex; align-items:center; justify-content:center;

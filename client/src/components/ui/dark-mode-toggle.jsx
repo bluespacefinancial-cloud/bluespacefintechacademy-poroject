@@ -31,7 +31,7 @@ export function DarkModeToggle({ className }) {
         aria-hidden="true"
         className={cn(
           'pointer-events-none absolute inset-y-0 left-0 flex w-5 items-center justify-center transition-opacity duration-200',
-          isDarkMode ? 'opacity-50' : 'opacity-100',
+          isDarkMode ? 'opacity-100' : 'opacity-50',
         )}
       >
         <Sun size={11} className="text-amber-600 dark:text-amber-300" />
@@ -41,7 +41,7 @@ export function DarkModeToggle({ className }) {
         aria-hidden="true"
         className={cn(
           'pointer-events-none absolute inset-y-0 right-0 flex w-5 items-center justify-center transition-opacity duration-200',
-          isDarkMode ? 'opacity-100' : 'opacity-50',
+          isDarkMode ? 'opacity-50' : 'opacity-100',
         )}
       >
         <Moon size={11} className="text-gray-700 dark:text-gray-200" />

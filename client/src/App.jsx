@@ -11,6 +11,7 @@ import MySquad from './pages/MySquad'
 import Certificates from './pages/Certificates'
 import CertificateDetail from './pages/CertificateDetail'
 import MyModules from './pages/MyModules'
+import ModuleEditor from './pages/ModuleEditor'
 import Grading from './pages/Grading'
 import MentorClinics from './pages/MentorClinics'
 import Announcements from './pages/Announcements'
@@ -104,6 +105,8 @@ export default function App() {
         <Route path="mentor-evaluation" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MentorEvaluation /></ProtectedRoute>} />
         <Route path="quiz-management" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><QuizManagement /></ProtectedRoute>} />
         <Route path="my-modules" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><MyModules /></ProtectedRoute>} />
+        <Route path="modules/create" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><ModuleEditor /></ProtectedRoute>} />
+        <Route path="modules/:moduleId" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><ModuleEditor /></ProtectedRoute>} />
         <Route path="labs-to-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
         <Route path="grading" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><Grading /></ProtectedRoute>} />
         <Route path="mentor-clinics" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><MentorClinics /></ProtectedRoute>} />
@@ -111,7 +114,7 @@ export default function App() {
         <Route path="squads" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><SquadManagement /></ProtectedRoute>} />
         <Route path="use-case-assignment" element={<ProtectedRoute roles={['Administrator']}><UseCaseAssignment /></ProtectedRoute>} />
         <Route path="capstone" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><CapstoneSubmission /></ProtectedRoute>} />
-        <Route path="lesson/:lessonId" element={<ProtectedRoute roles={['Student']}><LessonPlayer /></ProtectedRoute>} />
+        <Route path="lesson/:lessonId" element={<ProtectedRoute roles={['Student', 'Instructor', 'Administrator']}><LessonPlayer /></ProtectedRoute>} />
         <Route path="live-classes" element={<ProtectedRoute><LiveClasses /></ProtectedRoute>} />
         <Route path="student-monitoring" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><StudentMonitoring /></ProtectedRoute>} />
         <Route path="panel-review" element={<ProtectedRoute roles={['Instructor', 'Administrator']}><PanelReview /></ProtectedRoute>} />

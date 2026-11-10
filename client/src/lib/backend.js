@@ -224,6 +224,10 @@ class QueryBuilder {
     return this.addFilter(column, 'eq', value)
   }
 
+  ilike(column, pattern) {
+    return this.addFilter(column, 'ilike', pattern)
+  }
+
   in(column, values) {
     return this.addFilter(column, 'in', values)
   }

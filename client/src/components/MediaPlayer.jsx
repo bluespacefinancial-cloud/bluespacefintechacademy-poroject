@@ -21,6 +21,7 @@ export default function MediaPlayer({
   lesson,
   user,
   onComplete,
+  readOnly = false,
 }) {
   const mediaRef = useRef(null)
   const saveIntervalRef = useRef(null)
@@ -89,6 +90,8 @@ export default function MediaPlayer({
 
   const saveProgress = useCallback(async (currentTimeVal, isCompletedVal) => {
     if (!user || !lesson.id || !isMountedRef.current) return
+    // Staff previewing a lesson must not create student progress rows.
+    if (readOnly) return
     const profile = await getCurrentProfile()
     if (!profile) return
     const durationVal = duration || lesson.duration_minutes * 60
@@ -118,7 +121,7 @@ export default function MediaPlayer({
     if (completed && !isCompletedVal && onComplete) {
       onComplete(lesson.id)
     }
-  }, [user, lesson.id, duration, onComplete, api])
+  }, [user, lesson.id, duration, onComplete, api, readOnly])
 
   const handleLoadedMetadata = () => {
     if (mediaRef.current) {
@@ -245,13 +248,19 @@ export default function MediaPlayer({
               </Badge>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => saveProgress(duration || 300, true)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
-          >
-            {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
-          </button>
+          {readOnly ? (
+            <Badge variant="outline" className="text-xs font-medium text-gray-300 border-gray-700">
+              Staff preview · progress not recorded
+            </Badge>
+          ) : (
+            <button
+              type="button"
+              onClick={() => saveProgress(duration || 300, true)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
+            >
+              {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
+            </button>
+          )}
         </div>
       </div>
     )

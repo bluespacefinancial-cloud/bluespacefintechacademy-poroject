@@ -103,22 +103,27 @@ export default function LessonPlayer() {
   const markCompleteAndNavigate = async (targetLessonId) => {
     try {
       setSavingProgress(true)
-      const profile = await getCurrentProfile()
-      if (profile && lesson) {
-        await api.from('lesson_progress').upsert(
-          {
-            user_id: profile.id,
-            lesson_id: lesson.id,
-            is_completed: true,
-            completion_percentage: 100,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,lesson_id' }
-        )
-        setCompleted(true)
+      // Previewing staff move between lessons without writing student progress.
+      if (!isPreview) {
+        const profile = await getCurrentProfile()
+        if (profile && lesson) {
+          await api.from('lesson_progress').upsert(
+            {
+              user_id: profile.id,
+              lesson_id: lesson.id,
+              is_completed: true,
+              completion_percentage: 100,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id,lesson_id' }
+          )
+          setCompleted(true)
+        }
       }
       if (targetLessonId) {
         navigate(`/lesson/${targetLessonId}`)
+      } else {
+        navigate(backTarget)
       }
     } catch (err) {
       console.error('Error completing lesson:', err)
@@ -146,6 +151,9 @@ export default function LessonPlayer() {
   }
 
   const isVideo = lesson.type === 'video'
+  // Instructors and administrators preview lessons; they never accrue progress.
+  const isPreview = Boolean(user?.type) && user.type !== 'Student'
+  const backTarget = isPreview ? '/my-modules' : '/my-learning'
   const currentIndex = moduleLessons.findIndex((l) => l.id === lesson.id)
   const prevLesson = currentIndex > 0 ? moduleLessons[currentIndex - 1] : null
   const nextLesson = currentIndex >= 0 && currentIndex < moduleLessons.length - 1 ? moduleLessons[currentIndex + 1] : null
@@ -156,9 +164,9 @@ export default function LessonPlayer() {
       <div className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <button
-            onClick={() => navigate('/my-learning')}
+            onClick={() => navigate(backTarget)}
             className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shrink-0"
-            title="Return to curriculum"
+            title={isPreview ? 'Return to module editor' : 'Return to curriculum'}
           >
             <ArrowLeft size={16} />
           </button>
@@ -178,10 +186,10 @@ export default function LessonPlayer() {
 
         <div className="flex items-center gap-2.5 shrink-0">
           <Badge
-            variant={completed ? 'secondary' : 'outline'}
+            variant={isPreview ? 'outline' : completed ? 'secondary' : 'outline'}
             className="text-xs font-medium"
           >
-            {completed ? 'Completed' : 'In Progress'}
+            {isPreview ? 'Staff preview' : completed ? 'Completed' : 'In Progress'}
           </Badge>
           <Button
             asChild
@@ -189,9 +197,9 @@ export default function LessonPlayer() {
             size="sm"
             className="text-xs border-gray-200 text-gray-700 hover:bg-gray-50"
           >
-            <Link to="/my-learning">
+            <Link to={backTarget}>
               <BookOpen size={13} className="mr-1.5" />
-              Syllabus
+              {isPreview ? 'My Modules' : 'Syllabus'}
             </Link>
           </Button>
         </div>
@@ -203,7 +211,7 @@ export default function LessonPlayer() {
           {/* Main Media Player */}
           <Card className="overflow-hidden border border-gray-200/90 shadow-sm rounded-xl bg-white">
             <div className="p-0">
-              <MediaPlayer lesson={lesson} user={user} onComplete={handleLessonComplete} />
+              <MediaPlayer lesson={lesson} user={user} onComplete={handleLessonComplete} readOnly={isPreview} />
             </div>
           </Card>
 
@@ -221,10 +229,12 @@ export default function LessonPlayer() {
                   </div>
                 </div>
                 <Badge
-                  variant={labSubmission?.status === 'graded' ? 'secondary' : 'outline'}
+                  variant={!isPreview && labSubmission?.status === 'graded' ? 'secondary' : 'outline'}
                   className="text-[11px] font-medium"
                 >
-                  {labSubmission?.status === 'graded'
+                  {isPreview
+                    ? 'Preview'
+                    : labSubmission?.status === 'graded'
                     ? `Graded: ${labSubmission.score}/${attachedLab.max_score}`
                     : labSubmission?.status === 'submitted'
                     ? 'Submitted · In Review'
@@ -257,9 +267,9 @@ export default function LessonPlayer() {
                   size="sm"
                   className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold shrink-0"
                 >
-                  <Link to="/lab-workspace">
+                  <Link to={isPreview ? '/grading' : '/lab-workspace'}>
                     <Code2 size={13} className="mr-1.5" />
-                    {labSubmission ? 'View Submission' : 'Open Lab Workspace'}
+                    {isPreview ? 'Review submissions' : labSubmission ? 'View Submission' : 'Open Lab Workspace'}
                   </Link>
                 </Button>
               </CardContent>
@@ -282,7 +292,7 @@ export default function LessonPlayer() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium text-gray-500">Status</span>
-                <span className="font-semibold text-gray-900">{completed ? 'Completed' : 'In Progress'}</span>
+                <span className="font-semibold text-gray-900">{isPreview ? 'Preview' : completed ? 'Completed' : 'In Progress'}</span>
               </div>
               {lesson.description && (
                 <div className="pt-2 border-t border-gray-100">
@@ -309,11 +319,11 @@ export default function LessonPlayer() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate('/my-learning')}
+                  onClick={() => navigate(backTarget)}
                   className="text-xs border-gray-200 text-gray-500"
                 >
                   <BookOpen size={13} className="mr-1.5" />
-                  Curriculum
+                  {isPreview ? 'My Modules' : 'Curriculum'}
                 </Button>
               )}
             </div>
@@ -326,7 +336,7 @@ export default function LessonPlayer() {
                   disabled={savingProgress}
                   className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
                 >
-                  {completed ? 'Next Lesson' : 'Complete & Next'}
+                  {isPreview || completed ? 'Next Lesson' : 'Complete & Next'}
                   <ChevronRight size={14} className="ml-1" />
                 </Button>
               ) : (
@@ -337,7 +347,7 @@ export default function LessonPlayer() {
                   className="bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-semibold"
                 >
                   <CheckCircle2 size={14} className="mr-1.5" />
-                  Finish Module
+                  {isPreview ? 'Back to module' : 'Finish Module'}
                 </Button>
               )}
             </div>

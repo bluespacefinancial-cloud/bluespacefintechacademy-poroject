@@ -227,6 +227,7 @@ order, when Docker creates the volume:
 | `01_schema.sql` | Tables, indexes, triggers, grants, RLS policies, demo data |
 | `02_auth_tokens.sql` | `auth_tokens` and `password_resets` (service-role only) |
 | `03_demo_passwords.sql` | Demo account bcrypt hashes (see Test Logins) |
+| `04_partner_review_guard.sql` | Partner review guard triggers, notification and audit-log grants, instructor content scope |
 
 `00_bootstrap.sql` creates these API roles:
 
@@ -277,12 +278,12 @@ helpers, so the schema and policies carried over unchanged.
 
 ### Changing the schema
 
-Add a new sequential file, for example `database/04_add_something.sql`. Never
+Add a new sequential file, for example `database/05_add_something.sql`. Never
 edit a file that has already been applied to a shared environment.
 
 ```bash
 docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
-  < database/04_add_something.sql
+  < database/05_add_something.sql
 ```
 
 For a repeatable local rebuild:
@@ -310,15 +311,20 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 | `labs.solution_code` | Column-level `SELECT` grant excludes it |
 | `assessment_questions.correct_answer` | Column-level `SELECT` grant excludes it |
 | Token tables | `REVOKE ALL` from client roles; only `service_role` may read/write |
+| Partner review states | `enforce_partner_course_review` trigger: clients can only create drafts and move `draft`/`changes_requested` → `submitted`; reviewer columns and timestamps are frozen |
+| Partner lesson publication | `enforce_partner_lesson_publish` trigger forces `is_published = false` for clients; `sync_partner_lesson_publication` publishes lessons when an administrator publishes the course |
+| Notification writes | `create_notification` is executable by `service_role` only; `PUBLIC`, `anon`, and `authenticated` are revoked |
+| Audit log writes | `INSERT`/`UPDATE`/`DELETE`/`TRUNCATE` on `audit_logs` revoked from client roles; administrators keep `SELECT` |
+| Instructor content scope | Module and lesson writes are limited to cohorts in `instructor_cohort_assignments`; Administrators stay unrestricted |
 
 ### Role-based access
 
 | Role | Can see | Can edit | Portal |
 |------|---------|----------|--------|
 | Student | Own enrolments, squad, learning, partner catalog | Own profile, submissions, progress | `/student-login` |
-| Instructor | Cohort data, submissions to grade | Grading, lessons (squad mutations are Administrator-only in the UI) | `/instructor-login` |
-| Partner | Own organization's courses | Own courses and lessons | `/partner-login` |
-| Administrator | Everything | All academy operations | `/admin-login` |
+| Instructor | Cohort data, submissions to grade, own assigned cohort content | Grading, modules and lessons for assigned cohorts, direct publish | `/instructor-login` |
+| Partner | Own organization's courses | Own drafts and lessons; may submit for review, never approve or publish | `/partner-login` |
+| Administrator | Everything | All academy operations, partner review and publication | `/admin-login` |
 
 ### Squad, enrolment, and user management
 
@@ -407,7 +413,7 @@ const { data, error } = await api
 ```
 
 Supported builder methods: `select`, `insert`, `update`, `upsert`, `delete`,
-`eq`, `in`, `is`, `not`, `gte`, `lte`, `order`, `limit`, `single`,
+`eq`, `in`, `is`, `not`, `gte`, `lte`, `ilike`, `order`, `limit`, `single`,
 `maybeSingle`.
 
 Supported auth calls: `signInWithPassword`, `signOut`, `getSession`, `getUser`,
@@ -442,6 +448,26 @@ access.
 
 `ProtectedRoute` checks that a user exists and that `user.type` is in the
 route's `roles` array; otherwise it redirects to `/unauthorized`.
+
+### Authoring and review flows
+
+- `Curriculum.jsx` is the Administrator overview; it links into the shared
+  editor rather than duplicating a module form.
+- `MyModules.jsx` lists the modules an Instructor can edit.
+- `ModuleEditor.jsx` handles both `/modules/create` and `/modules/:moduleId`:
+  module fields, lesson create/edit/delete, reordering, per-lesson preview and
+  publishing. Publishing requires at least one lesson. Instructors publish
+  directly; the database scopes their writes to their assigned cohorts.
+- `LessonPlayer.jsx` is used by Students and, with `readOnly`, by staff
+  previewing a lesson. In preview mode no `lesson_progress` row is written and
+  the lab call to action points at `/grading`.
+- `PartnerCourses.jsx` is the partner studio: drafts, lessons, and submission
+  for review. Lessons are created unpublished.
+- `PartnerCourseReview.jsx` is the Administrator review queue: approve and
+  publish, or return with written notes. Publishing the course publishes its
+  lessons through the database trigger.
+- The global search palette (`components/layout/GlobalSearch.jsx`) is opened
+  with Ctrl/Cmd+K or `/` and searches only the tables the current role can read.
 
 ---
 

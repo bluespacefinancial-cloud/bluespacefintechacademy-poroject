@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Bell, Check, CheckCircle2, Calendar, Video, FileText, ExternalLink } from 'lucide-react'
 import { api } from '../../lib/backend'
+import { humaniseNotificationType, notificationRoute } from '../../lib/notifications'
 import { useAuth } from '../../context/AuthContext'
 
 export default function NotificationDropdown() {
@@ -97,22 +98,7 @@ export default function NotificationDropdown() {
       await markAsRead(item)
     }
     setOpen(false)
-
-    // Route intelligently based on type
-    const typeLower = (item.type || '').toLowerCase()
-    if (typeLower.includes('lab') || typeLower.includes('submission') || typeLower.includes('grade')) {
-      navigate('/lab-workspace')
-    } else if (typeLower.includes('clinic')) {
-      navigate('/mentor-clinics')
-    } else if (typeLower.includes('live') || typeLower.includes('class')) {
-      navigate('/live-classes')
-    } else if (typeLower.includes('squad') || typeLower.includes('sprint')) {
-      navigate('/my-squad')
-    } else if (typeLower.includes('certificate')) {
-      navigate('/certificates')
-    } else {
-      navigate('/notifications')
-    }
+    navigate(notificationRoute(item.type, user?.type))
   }
 
   const getIcon = (type) => {
@@ -224,15 +210,15 @@ export default function NotificationDropdown() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={`text-xs capitalize truncate ${isUnread ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
-                          {item.type || 'Academy Update'}
+                        <p className={`text-xs truncate ${isUnread ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
+                          {humaniseNotificationType(item.type)}
                         </p>
                         <span className="text-[10px] text-gray-400 shrink-0">
                           {formatTimeAgo(item.created_at)}
                         </span>
                       </div>
                       <p className="text-[11px] text-gray-600 line-clamp-2 mt-0.5 leading-relaxed">
-                        {typeof item.data === 'string' ? item.data : JSON.stringify(item.data)}
+                        {item.data}
                       </p>
                     </div>
                     {isUnread && (

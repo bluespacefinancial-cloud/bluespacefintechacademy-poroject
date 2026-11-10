@@ -2,15 +2,37 @@ import { Outlet, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Search, GraduationCap } from 'lucide-react'
 import Sidebar from './Sidebar'
+import GlobalSearch from './GlobalSearch'
 import NotificationDropdown from '../notifications/NotificationDropdown'
+import { SkipLink } from '../ui/accessibility'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../lib/backend'
 
 export default function AppLayout() {
   const { user } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
   const [cohortName, setCohortName] = useState(null)
+
+  // Command palette shortcut: Cmd/Ctrl + K, and "/" when not typing.
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      const { target } = event
+      const isTyping = target instanceof HTMLElement
+        && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen((open) => !open)
+      } else if (event.key === '/' && !isTyping) {
+        event.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   // Fetch current user cohort
   useEffect(() => {
@@ -41,6 +63,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <SkipLink />
       <Sidebar open={sidebarOpen} onOpen={() => setSidebarOpen(true)} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
@@ -50,18 +73,21 @@ export default function AppLayout() {
               <img src="/logo-dark.png" alt="BlueSPACE" className="h-6 w-auto" />
             </div>
 
-            {/* Global Search Bar */}
+            {/* Global Search */}
             <div className="hidden lg:flex items-center w-72 max-w-sm">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                <input
-                  type="text"
-                  placeholder="Search modules, labs, clinics..."
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-deep-600 focus:border-deep-600 outline-none transition-all placeholder:text-gray-400"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="relative w-full flex items-center gap-2 pl-9 pr-3 py-1.5 text-xs text-left bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 transition-colors"
+                aria-label="Search the academy"
+                aria-haspopup="dialog"
+              >
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} aria-hidden="true" />
+                <span className="text-gray-400 truncate">Search modules, labs, clinics…</span>
+                <kbd className="ml-auto hidden xl:inline-flex items-center gap-0.5 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-400">
+                  Ctrl K
+                </kbd>
+              </button>
             </div>
 
             {/* Top Navigation Right: Cohort + Notifications */}
@@ -84,10 +110,12 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 w-full min-w-0 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-10 overflow-y-auto">
+        <main id="main-content" className="flex-1 w-full min-w-0 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-10 overflow-y-auto">
           <Outlet />
         </main>
       </div>
+
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   )
 }

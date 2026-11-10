@@ -88,25 +88,25 @@ export default function MyModules() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="mb-1 text-2xl font-bold text-deep-600">My Modules</h1>
-          <p className="text-sm text-gray-500">Build and manage course modules for the academy</p>
+          <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">My Modules</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Build and manage course modules for the academy</p>
         </div>
         <Button onClick={() => navigate('/modules/create')}><Plus size={16} className="mr-2" />Create Module</Button>
       </div>
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
       <div className="mb-6 flex gap-4">
         <Select value={filterStage} onValueChange={setFilterStage}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="All stages" /></SelectTrigger>
+          <SelectTrigger className="w-[180px] dark:border-gray-800"><SelectValue placeholder="All stages" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Stages</SelectItem>
             {Object.entries(STAGE_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterTrack} onValueChange={setFilterTrack}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="All tracks" /></SelectTrigger>
+          <SelectTrigger className="w-[140px] dark:border-gray-800"><SelectValue placeholder="All tracks" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Tracks</SelectItem>
             <SelectItem value="All">All</SelectItem>
@@ -116,13 +116,13 @@ export default function MyModules() {
         </Select>
       </div>
       <div className="space-y-3">
-        {loading && <p className="py-8 text-center text-sm text-gray-500">Loading modules...</p>}
+        {loading && <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">Loading modules...</p>}
         {!loading && filteredModules.length === 0 && <div className="py-12 text-center text-gray-400"><Eye size={32} className="mx-auto mb-3 opacity-50" /><p>No modules found</p></div>}
         {!loading && filteredModules.map((module) => (
-          <Card key={module.id} className="cursor-pointer hover:border-brand-200" onClick={() => navigate(`/modules/${module.id}`)}>
+          <Card key={module.id} className="cursor-pointer hover:border-brand-200 dark:border-gray-800 dark:hover:border-gray-700" onClick={() => navigate(`/modules/${module.id}`)}>
             <CardHeader className="flex flex-row items-center justify-between py-3">
               <div className="flex items-center gap-3">
-                <BookOpen size={16} className="text-deep-600" />
+                <BookOpen size={16} className="text-deep-600 dark:text-deep-400" />
                 <div><CardTitle className="text-sm">{module.title}</CardTitle><CardDescription className="text-[10px]">{module.cohortName} · {module.lessonCount} lessons · {module.track || 'All'} track</CardDescription></div>
               </div>
               <Badge variant={module.is_published ? 'secondary' : 'outline'}>{module.is_published ? 'published' : 'draft'}</Badge>

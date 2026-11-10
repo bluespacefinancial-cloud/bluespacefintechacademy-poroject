@@ -56,5 +56,99 @@ export default function Quiz() {
   }
 
   const answer = (questionId, value) => setAnswers((current) => ({ ...current, [questionId]: value }))
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6"><h1 className="text-2xl font-bold text-deep-600">{assessment?.title || 'Quiz'}</h1><p className="text-sm text-gray-500">Complete the assessment and submit when ready.</p></div>{error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}{message && <p className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}{loading ? <p className="py-10 text-center text-sm text-gray-500">Loading quiz...</p> : <div className="max-w-3xl space-y-4">{attempt?.status === 'graded' && <Card><CardContent className="flex items-center justify-between p-4"><span className="text-sm">Result</span><Badge variant={attempt.score >= (assessment?.pass_mark || 70) ? 'secondary' : 'outline'}>{attempt.score}%</Badge></CardContent></Card>}{questions.map((question, index) => <Card key={question.id}><CardHeader><CardTitle className="text-sm">{index + 1}. {question.prompt}</CardTitle></CardHeader><CardContent>{question.question_type === 'short_answer' ? <Input value={answers[question.id] || ''} onChange={(event) => answer(question.id, event.target.value)} disabled={attempt?.status === 'submitted' || attempt?.status === 'graded'} /> : <div className="space-y-2">{(question.options || []).map((option) => <label key={option} className="flex cursor-pointer items-center gap-2 rounded border p-3 text-sm"><input type={question.question_type === 'multiple_choice' ? 'checkbox' : 'radio'} name={`question-${question.id}`} checked={question.question_type === 'multiple_choice' ? (answers[question.id] || []).includes(option) : answers[question.id] === option} onChange={() => answer(question.id, question.question_type === 'multiple_choice' ? ((answers[question.id] || []).includes(option) ? answers[question.id].filter((item) => item !== option) : [...(answers[question.id] || []), option]) : option)} disabled={attempt?.status === 'submitted' || attempt?.status === 'graded'} />{option}</label>)}</div>}</CardContent></Card>)}{questions.length === 0 && <Card><CardContent className="py-10 text-center text-sm text-gray-500">No questions have been published for this assessment.</CardContent></Card>}{attempt?.status !== 'submitted' && attempt?.status !== 'graded' && <div className="flex gap-2"><Button variant="outline" onClick={() => saveAttempt()}><Save size={14} className="mr-2" />Save progress</Button><Button onClick={submit} disabled={saving}><Send size={14} className="mr-2" />{saving ? 'Submitting...' : 'Submit quiz'}</Button></div>}<p className="flex items-center gap-2 text-xs text-gray-500"><CheckCircle size={14} /> Pass mark: {assessment?.pass_mark || 70}%</p></div>}</div>
+  return (
+    <div className="w-full space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{assessment?.title || 'Quiz'}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Complete the assessment and submit when ready.</p>
+      </div>
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+      {message && <p className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
+      {loading ? (
+        <p className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading quiz...</p>
+      ) : (
+        <div className="max-w-3xl space-y-4">
+          {attempt?.status === 'graded' && (
+            <Card className="dark:border-gray-800">
+              <CardContent className="flex items-center justify-between p-4">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">Result</span>
+                <Badge variant={attempt.score >= (assessment?.pass_mark || 70) ? 'secondary' : 'outline'}>
+                  {attempt.score}%
+                </Badge>
+              </CardContent>
+            </Card>
+          )}
+          {questions.map((question, index) => (
+            <Card key={question.id} className="dark:border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-sm">{index + 1}. {question.prompt}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {question.question_type === 'short_answer' ? (
+                  <Input
+                    value={answers[question.id] || ''}
+                    onChange={(event) => answer(question.id, event.target.value)}
+                    disabled={attempt?.status === 'submitted' || attempt?.status === 'graded'}
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    {(question.options || []).map((option) => (
+                      <label
+                        key={option}
+                        className="flex cursor-pointer items-center gap-2 rounded border border-gray-200 dark:border-gray-800 p-3 text-sm text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-850/60"
+                      >
+                        <input
+                          type={question.question_type === 'multiple_choice' ? 'checkbox' : 'radio'}
+                          name={`question-${question.id}`}
+                          checked={
+                            question.question_type === 'multiple_choice'
+                              ? (answers[question.id] || []).includes(option)
+                              : answers[question.id] === option
+                          }
+                          onChange={() =>
+                            answer(
+                              question.id,
+                              question.question_type === 'multiple_choice'
+                                ? (answers[question.id] || []).includes(option)
+                                  ? answers[question.id].filter((item) => item !== option)
+                                  : [...(answers[question.id] || []), option]
+                                : option
+                            )
+                          }
+                          disabled={attempt?.status === 'submitted' || attempt?.status === 'graded'}
+                        />
+                        {option}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+          {questions.length === 0 && (
+            <Card className="dark:border-gray-800">
+              <CardContent className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                No questions have been published for this assessment.
+              </CardContent>
+            </Card>
+          )}
+          {attempt?.status !== 'submitted' && attempt?.status !== 'graded' && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => saveAttempt()}>
+                <Save size={14} className="mr-2" />
+                Save progress
+              </Button>
+              <Button onClick={submit} disabled={saving}>
+                <Send size={14} className="mr-2" />
+                {saving ? 'Submitting...' : 'Submit quiz'}
+              </Button>
+            </div>
+          )}
+          <p className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <CheckCircle size={14} /> Pass mark: {assessment?.pass_mark || 70}%
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }

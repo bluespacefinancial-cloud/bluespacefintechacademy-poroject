@@ -145,12 +145,12 @@ export default function Cohorts() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6">
+    <div className="w-full space-y-6">
+      <div>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">Cohorts</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Cohorts</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Manage quarterly cohorts and enrolment capacity
             </p>
           </div>
@@ -167,8 +167,8 @@ export default function Cohorts() {
         </div>
       </div>
 
-      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
+      {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-400">{message}</p>}
 
       {editingId === 'new' && (
         <Card>
@@ -254,24 +254,24 @@ export default function Cohorts() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{cohorts.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Cohorts</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{cohorts.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Cohorts</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {cohorts.filter(c => c.status === 'active').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {cohorts.reduce((sum, c) => sum + c.capacity, 0)}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Capacity</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Capacity</p>
           </CardContent>
         </Card>
       </div>
@@ -279,13 +279,13 @@ export default function Cohorts() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="border-b border-gray-100 text-left">
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cohort</th>
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Tracks</th>
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <tr className="border-b border-gray-100 dark:border-gray-800 text-left">
+              <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cohort</th>
+              <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dates</th>
+              <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Capacity</th>
+              <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tracks</th>
+              <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -299,7 +299,7 @@ export default function Cohorts() {
               filteredCohorts.map((cohort) => (
                 <tr
                   key={cohort.id}
-                  className={`border-b border-gray-50 hover:bg-gray-50 transition-colors duration-150 ${editingId === cohort.id ? 'bg-brand-50' : ''}`}
+                  className={`border-b border-gray-50 dark:border-gray-800/60 hover:bg-gray-50 dark:hover:bg-gray-800/40 text-gray-800 dark:text-gray-200 transition-colors duration-150 ${editingId === cohort.id ? 'bg-brand-50/50 dark:bg-blue-950/40' : ''}`}
                 >
                   {editingId === cohort.id ? (
                     <td colSpan={6} className="p-4">

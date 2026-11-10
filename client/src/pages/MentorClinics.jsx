@@ -3,6 +3,7 @@ import { Calendar, Clock, Plus, Users, Video } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import {
@@ -122,6 +123,7 @@ export default function MentorClinics() {
 
   return (
     <div className="w-full space-y-6">
+      <Breadcrumb items={[{ label: 'Mentor Clinics' }]} />
       <DashboardHeader
         title="Mentor Clinics & Office Hours"
         subtitle={
@@ -166,7 +168,7 @@ export default function MentorClinics() {
           <CardContent className="p-5">
             <form onSubmit={scheduleClinic} className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-700">Clinic Title</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Clinic Title</label>
                 <Input
                   required
                   maxLength={200}
@@ -178,7 +180,7 @@ export default function MentorClinics() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-700">Assigned Cohort</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Assigned Cohort</label>
                 <Select
                   required
                   value={form.cohort_id}
@@ -198,7 +200,7 @@ export default function MentorClinics() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-700">Start Time</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Start Time</label>
                 <Input
                   required
                   type="datetime-local"
@@ -209,7 +211,7 @@ export default function MentorClinics() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-700">End Time</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">End Time</label>
                 <Input
                   required
                   type="datetime-local"
@@ -220,7 +222,7 @@ export default function MentorClinics() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-700">Meeting URL (Google Meet / Zoom)</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Meeting URL (Google Meet / Zoom)</label>
                 <Input
                   type="url"
                   placeholder="https://meet.google.com/xyz-abcd-efg"
@@ -231,7 +233,7 @@ export default function MentorClinics() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-700">Attendee Capacity</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Attendee Capacity</label>
                 <Input
                   type="number"
                   min="1"
@@ -249,7 +251,7 @@ export default function MentorClinics() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowForm(false)}
-                  className="text-xs border-gray-200"
+                  className="text-xs border-gray-200 dark:border-gray-700"
                 >
                   Cancel
                 </Button>
@@ -268,24 +270,24 @@ export default function MentorClinics() {
       )}
 
       {/* Clinics Schedule Card */}
-      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h3 className="text-base font-bold text-gray-900 leading-tight">Clinic Schedule</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Upcoming mentor office hours and consultations</p>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Clinic Schedule</h3>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Upcoming mentor office hours and consultations</p>
           </div>
-          <Badge variant="outline" className="text-xs font-medium border-gray-200">
+          <Badge variant="outline" className="text-xs font-medium border-gray-200 dark:border-gray-700">
             {clinics.length} Available
           </Badge>
         </div>
 
         <CardContent className="p-5">
           {loading ? (
-            <p className="py-12 text-center text-xs text-gray-500">Loading clinic schedule...</p>
+            <p className="py-12 text-center text-xs text-gray-500 dark:text-gray-400">Loading clinic schedule...</p>
           ) : clinics.length === 0 ? (
-            <div className="py-12 text-center text-xs text-gray-500 space-y-2">
-              <Calendar size={28} className="mx-auto text-gray-300 mb-1" />
-              <p className="font-semibold text-gray-800">No clinics currently scheduled</p>
+            <div className="py-12 text-center text-xs text-gray-500 dark:text-gray-400 space-y-2">
+              <Calendar size={28} className="mx-auto text-gray-300 dark:text-gray-600 mb-1" />
+              <p className="font-semibold text-gray-800 dark:text-gray-200">No clinics currently scheduled</p>
               <p className="text-gray-400 max-w-sm mx-auto">
                 {isStudent
                   ? 'Your cohort instructors will publish clinic hours ahead of weekly milestone submissions.'
@@ -293,7 +295,7 @@ export default function MentorClinics() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 dark:divide-gray-800">
               {clinics.map((clinic) => {
                 const startsAt = new Date(clinic.starts_at)
                 const endsAt = new Date(clinic.ends_at)
@@ -306,7 +308,7 @@ export default function MentorClinics() {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-gray-900 truncate">{clinic.title}</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white truncate">{clinic.title}</span>
                         <Badge
                           variant={isScheduled ? 'default' : 'outline'}
                           className="text-[10px] font-medium capitalize shrink-0"
@@ -315,26 +317,26 @@ export default function MentorClinics() {
                         </Badge>
                       </div>
 
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {clinic.cohorts?.name || 'All Assigned Cohorts'}
                       </p>
 
-                      <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-600">
-                        <span className="flex items-center gap-1.5 font-medium text-gray-800">
-                          <Calendar size={13} className="text-deep-600 shrink-0" />
+                      <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+                        <span className="flex items-center gap-1.5 font-medium text-gray-800 dark:text-gray-200">
+                          <Calendar size={13} className="text-deep-600 dark:text-blue-400 shrink-0" />
                           {startsAt.toLocaleDateString(undefined, {
                             weekday: 'short',
                             month: 'short',
                             day: 'numeric',
                           })}
                         </span>
-                        <span className="flex items-center gap-1.5 text-gray-500">
-                          <Clock size={13} className="text-deep-600 shrink-0" />
+                        <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                          <Clock size={13} className="text-deep-600 dark:text-blue-400 shrink-0" />
                           {startsAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
                           {endsAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
-                        <span className="flex items-center gap-1.5 text-gray-500">
-                          <Users size={13} className="text-deep-600 shrink-0" />
+                        <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                          <Users size={13} className="text-deep-600 dark:text-blue-400 shrink-0" />
                           {clinic.attendee_count || 0}/{clinic.capacity} Attendees
                         </span>
                       </div>

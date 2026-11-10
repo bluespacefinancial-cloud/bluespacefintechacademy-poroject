@@ -58,15 +58,42 @@ export function AuthProvider({ children }) {
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
   })
 
-  // Synchronize dark class to document root immediately and persistently
+  // Synchronize the theme class, native colour-scheme and storage.
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
+    const root = document.documentElement
+    root.classList.toggle('dark', isDarkMode)
+    root.style.colorScheme = isDarkMode ? 'dark' : 'light'
+    try {
+      localStorage.setItem('bluespace-dark-mode', String(isDarkMode))
+    } catch {
+      /* ignore unavailable storage */
     }
-    localStorage.setItem('bluespace-dark-mode', String(isDarkMode))
   }, [isDarkMode])
+
+  // Keep other tabs in sync, and follow the OS only until the user picks a side.
+  useEffect(() => {
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
+
+    const onStorage = (event) => {
+      if (event.key !== 'bluespace-dark-mode' || event.newValue === null) return
+      setIsDarkMode(event.newValue === 'true')
+    }
+    const onSystemChange = (event) => {
+      try {
+        if (localStorage.getItem('bluespace-dark-mode') !== null) return
+      } catch {
+        /* ignore unavailable storage */
+      }
+      setIsDarkMode(event.matches)
+    }
+
+    window.addEventListener('storage', onStorage)
+    media?.addEventListener?.('change', onSystemChange)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      media?.removeEventListener?.('change', onSystemChange)
+    }
+  }, [])
 
   const toggleDarkMode = () => {
     setIsDarkMode((prev) => !prev)

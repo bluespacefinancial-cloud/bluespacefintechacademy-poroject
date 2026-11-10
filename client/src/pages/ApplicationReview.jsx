@@ -72,8 +72,8 @@ export default function ApplicationReview() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-deep-600">Applications</h1>
-        <p className="text-sm text-gray-500">Review student, teacher and partner applications in one queue.</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Review student, teacher and partner applications in one queue.</p>
       </div>
       <Card className="mb-6">
         <CardContent className="flex items-center gap-3 p-4">

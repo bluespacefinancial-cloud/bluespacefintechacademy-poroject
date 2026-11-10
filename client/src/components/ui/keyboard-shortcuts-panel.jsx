@@ -2,37 +2,37 @@ import { useEffect, useCallback } from 'react'
 import { X, Keyboard, HelpCircle } from 'lucide-react'
 import { Button } from './button'
 
-const SHORTCUTS = [
-  {
-    section: 'Global',
-    items: [
-      { keys: ['Ctrl', 'K'], label: 'Open global search' },
-      { keys: ['/'], label: 'Open global search (when not typing)' },
-      { keys: ['?'], label: 'Show this keyboard shortcuts panel' },
-      { keys: ['Escape'], label: 'Close modals, dropdowns, and panels' },
-    ],
-  },
-  {
-    section: 'Media Player',
-    items: [
-      { keys: ['Space', 'K'], label: 'Play / Pause video' },
-      { keys: ['J'], label: 'Seek backward 10 seconds' },
-      { keys: ['L'], label: 'Seek forward 10 seconds' },
-      { keys: ['M'], label: 'Mute / Unmute audio' },
-      { keys: ['F'], label: 'Toggle fullscreen' },
-    ],
-  },
-  {
-    section: 'Orientation Guide',
-    items: [
-      { keys: ['ArrowRight'], label: 'Next screen' },
-      { keys: ['ArrowLeft'], label: 'Previous screen' },
-      { keys: ['Escape'], label: 'Skip / Close orientation' },
-    ],
-  },
-]
+export function KeyboardShortcutsPanel({ open, onClose, isMac }) {
+  const SHORTCUTS = [
+    {
+      section: 'Global',
+      items: [
+        { keys: [isMac ? '⌘' : 'Ctrl', 'K'], label: 'Open global search' },
+        { keys: ['/'], label: 'Open global search (when not typing)' },
+        { keys: ['?'], label: 'Show this keyboard shortcuts panel' },
+        { keys: ['Escape'], label: 'Close modals, dropdowns, and panels' },
+      ],
+    },
+    {
+      section: 'Media Player',
+      items: [
+        { keys: ['Space', 'K'], label: 'Play / Pause video' },
+        { keys: ['J'], label: 'Seek backward 10 seconds' },
+        { keys: ['L'], label: 'Seek forward 10 seconds' },
+        { keys: ['M'], label: 'Mute / Unmute audio' },
+        { keys: ['F'], label: 'Toggle fullscreen' },
+      ],
+    },
+    {
+      section: 'Orientation Guide',
+      items: [
+        { keys: ['ArrowRight'], label: 'Next screen' },
+        { keys: ['ArrowLeft'], label: 'Previous screen' },
+        { keys: ['Escape'], label: 'Skip / Close orientation' },
+      ],
+    },
+  ]
 
-export function KeyboardShortcutsPanel({ open, onClose }) {
   const handleKeyDown = useCallback(
     (event) => {
       if (open && event.key === 'Escape') {
@@ -60,14 +60,12 @@ export function KeyboardShortcutsPanel({ open, onClose }) {
       aria-label="Keyboard shortcuts"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
     >
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300"
         onClick={close}
         aria-hidden="true"
       />
 
-      {/* Panel */}
       <div className="relative w-full max-w-2xl bg-white border border-gray-200/90 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-50 animate-scale-in">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/60">
           <div className="flex items-center gap-3">

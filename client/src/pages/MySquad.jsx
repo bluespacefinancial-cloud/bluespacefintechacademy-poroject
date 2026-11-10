@@ -20,6 +20,7 @@ import { Input } from '../components/ui/input'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 
 export default function MySquad() {
   const [activeTab, setActiveTab] = useState('deliverables') // 'deliverables' | 'roster'
@@ -149,10 +150,10 @@ export default function MySquad() {
           title="Squad Workspace"
           subtitle="Collaborative live project delivery, team roster, and sprint evidence."
         />
-        <div className="min-h-[300px] flex items-center justify-center bg-white border border-gray-200/90 rounded-xl">
+        <div className="min-h-[300px] flex items-center justify-center bg-card border border-gray-200/90 dark:border-gray-800 rounded-xl">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-gray-500">Loading squad workspace...</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Loading squad workspace...</span>
           </div>
         </div>
       </div>
@@ -166,17 +167,17 @@ export default function MySquad() {
           title="Squad Workspace"
           subtitle="Collaborative live project delivery, team roster, and sprint evidence."
         />
-        <Card className="border border-gray-200/90 shadow-sm bg-white">
+        <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
           <CardContent className="py-16 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 mx-auto">
+            <div className="w-12 h-12 rounded-full bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-deep-600 dark:text-deep-400 mx-auto">
               <Users size={22} />
             </div>
-            <h3 className="text-base font-bold text-gray-900">No Squad Assigned Yet</h3>
-            <p className="text-xs text-gray-500 max-w-md mx-auto">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">No Squad Assigned Yet</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
               Fellows are grouped into multi-disciplinary squads during Weeks 5-8 ahead of the live fintech use-case sprints. You will receive an alert once staff confirm your squad assignment.
             </p>
             <div className="pt-2 flex justify-center gap-3">
-              <Button asChild variant="outline" size="sm" className="border-gray-200 text-xs">
+              <Button asChild variant="outline" size="sm" className="border-gray-200 dark:border-gray-700 text-xs">
                 <Link to="/dashboard">Back to Dashboard</Link>
               </Button>
               <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700 text-xs">
@@ -194,6 +195,7 @@ export default function MySquad() {
 
   return (
     <div className="w-full space-y-6">
+      <Breadcrumb items={[{ label: 'Squad Workspace' }]} />
       {/* Top Header */}
       <DashboardHeader
         title="Squad Workspace"
@@ -265,13 +267,13 @@ export default function MySquad() {
       {activeTab === 'deliverables' && (
         <div className="space-y-6">
           {sprints.length === 0 ? (
-            <Card className="border border-gray-200/90 bg-white shadow-sm">
+            <Card className="border border-gray-200/90 dark:border-gray-800 bg-card shadow-sm">
               <CardContent className="py-12 text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto">
+                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto">
                   <Target size={18} />
                 </div>
-                <p className="text-sm font-bold text-gray-900">No Sprints Published Yet</p>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                <p className="text-sm font-bold text-gray-900 dark:text-white">No Sprints Published Yet</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
                   Live project use cases and sprint milestones will be released during the project phase.
                 </p>
               </CardContent>
@@ -281,7 +283,7 @@ export default function MySquad() {
               {/* Sprint Selector Column */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Project Sprints
                   </h3>
                   <span className="text-[11px] text-gray-400">{sprints.length} Total</span>
@@ -297,31 +299,31 @@ export default function MySquad() {
                         onClick={() => handleSelectSprint(sprint)}
                         className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                           isSelected
-                            ? 'border-deep-600 bg-deep-50/40 shadow-sm'
-                            : 'border-gray-200/90 bg-white hover:border-gray-300'
+                            ? 'border-deep-600 dark:border-blue-500 bg-deep-50/40 dark:bg-blue-950/40 shadow-sm'
+                            : 'border-gray-200/90 dark:border-gray-800 bg-card hover:border-gray-300 dark:hover:border-gray-700'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-sm font-bold ${isSelected ? 'text-deep-700' : 'text-gray-900'}`}>
+                          <span className={`text-sm font-bold ${isSelected ? 'text-deep-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
                             Sprint {sprint.sprint_number}
                           </span>
                           <Badge
                             variant="outline"
                             className={`text-[10px] capitalize font-medium ${
                               sprint.status === 'active'
-                                ? 'text-emerald-700 border-emerald-200'
+                                ? 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/60'
                                 : sprint.status === 'completed'
-                                ? 'text-gray-600 border-gray-200'
-                                : 'text-slate-600 border-slate-200'
+                                ? 'text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                : 'text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                             }`}
                           >
                             {sprint.status}
                           </Badge>
                         </div>
-                        <p className="text-xs text-gray-600 mt-1 line-clamp-1">
+                        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-1">
                           {sprint.use_cases?.title || 'Live Fintech Architecture Sprint'}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-2.5 text-[11px] text-gray-500">
+                        <div className="flex items-center gap-1.5 mt-2.5 text-[11px] text-gray-500 dark:text-gray-400">
                           <Calendar size={12} className="text-gray-400" />
                           <span>
                             {sprint.start_date} to {sprint.end_date}
@@ -338,15 +340,15 @@ export default function MySquad() {
                 {selectedSprint ? (
                   <>
                     {/* Submit Deliverable Form */}
-                    <Card className="border border-gray-200/90 shadow-sm bg-white">
-                      <CardHeader className="pb-3 border-b border-gray-100">
+                    <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
+                      <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div className="flex items-center justify-between">
                           <div>
-                            <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                              <Target size={15} className="text-deep-600" />
+                            <CardTitle className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                              <Target size={15} className="text-deep-600 dark:text-blue-400" />
                               Submit Sprint {selectedSprint.sprint_number} Deliverable
                             </CardTitle>
-                            <CardDescription className="text-xs text-gray-500 mt-0.5">
+                            <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                               {selectedSprint.use_cases?.title
                                 ? `${selectedSprint.use_cases.title} • Domain: ${selectedSprint.use_cases.domain || 'Fintech'}`
                                 : 'Submit code repository, deployed endpoint, or architectural evidence'}
@@ -426,10 +428,10 @@ export default function MySquad() {
                       </div>
 
                       {deliverables.length === 0 ? (
-                        <div className="rounded-xl border border-gray-200/90 bg-white p-8 text-center space-y-1.5">
+                        <div className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-8 text-center space-y-1.5">
                           <FileText size={18} className="text-gray-400 mx-auto mb-1" />
-                          <p className="text-xs font-bold text-gray-800">No deliverables submitted yet for this sprint</p>
-                          <p className="text-[11px] text-gray-500">
+                          <p className="text-xs font-bold text-gray-800 dark:text-gray-200">No deliverables submitted yet for this sprint</p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400">
                             Use the form above to submit your pull request, architecture diagram, or demo link.
                           </p>
                         </div>
@@ -438,11 +440,11 @@ export default function MySquad() {
                           {deliverables.map((item) => (
                             <div
                               key={item.id}
-                              className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm space-y-2.5"
+                              className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-4 shadow-sm space-y-2.5"
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div>
-                                  <h5 className="text-sm font-bold text-gray-900">{item.title}</h5>
+                                  <h5 className="text-sm font-bold text-gray-900 dark:text-white">{item.title}</h5>
                                   <p className="text-[11px] text-gray-400 mt-0.5">
                                     Submitted{' '}
                                     {item.submitted_at
@@ -456,19 +458,19 @@ export default function MySquad() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {item.score !== null ? (
-                                    <span className="text-xs font-bold px-2 py-0.5 rounded text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 flex items-center gap-1">
                                       <CheckCircle size={12} />
                                       {item.score}/100
                                     </span>
                                   ) : (
-                                    <Badge variant="outline" className="text-[10px] capitalize text-amber-700 border-amber-200">
+                                    <Badge variant="outline" className="text-[10px] capitalize text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/60">
                                       {item.status || 'Under Review'}
                                     </Badge>
                                   )}
                                 </div>
                               </div>
 
-                              <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">
+                              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                                 {item.description}
                               </p>
 
@@ -478,7 +480,7 @@ export default function MySquad() {
                                     href={item.evidence_url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-deep-600 hover:text-deep-700 hover:underline"
+                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300 hover:underline"
                                   >
                                     <ExternalLink size={13} />
                                     <span>Open Live Evidence</span>
@@ -487,12 +489,12 @@ export default function MySquad() {
                               )}
 
                               {item.feedback && (
-                                <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 text-xs space-y-1 mt-2">
-                                  <p className="font-semibold text-gray-800 flex items-center gap-1">
-                                    <ShieldCheck size={13} className="text-deep-600" />
+                                <div className="rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 p-3 text-xs space-y-1 mt-2">
+                                  <p className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                                    <ShieldCheck size={13} className="text-deep-600 dark:text-blue-400" />
                                     Faculty Reviewer Feedback:
                                   </p>
-                                  <p className="text-gray-600 leading-relaxed">{item.feedback}</p>
+                                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.feedback}</p>
                                 </div>
                               )}
                             </div>
@@ -502,8 +504,8 @@ export default function MySquad() {
                     </div>
                   </>
                 ) : (
-                  <Card className="border border-gray-200/90 bg-white">
-                    <CardContent className="py-12 text-center text-xs text-gray-500">
+                  <Card className="border border-gray-200/90 dark:border-gray-800 bg-card">
+                    <CardContent className="py-12 text-center text-xs text-gray-500 dark:text-gray-400">
                       Select a sprint from the left column to view its deliverables.
                     </CardContent>
                   </Card>
@@ -517,16 +519,16 @@ export default function MySquad() {
       {/* TAB 2: TEAM ROSTER & ROLES */}
       {activeTab === 'roster' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
+          <Card className="lg:col-span-2 border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900">{squad.name}</CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardTitle className="text-sm font-bold text-gray-900 dark:text-white">{squad.name}</CardTitle>
+                  <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {cohort} • Multi-disciplinary fintech delivery unit
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs font-semibold text-gray-700">
+                <Badge variant="outline" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                   {members.length} Members
                 </Badge>
               </div>
@@ -537,34 +539,34 @@ export default function MySquad() {
                 return (
                   <div
                     key={member.user_id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-gray-200/90 bg-white gap-3 hover:border-gray-300 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card gap-3 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-deep-50 border border-deep-100 flex items-center justify-center text-xs font-bold text-deep-700 shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-xs font-bold text-deep-700 dark:text-deep-400 shrink-0">
                         {member.users?.name?.charAt(0)?.toUpperCase() || 'F'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-gray-900">
+                          <p className="text-sm font-bold text-gray-900 dark:text-white">
                             {member.users?.name || 'Fellow'}
                           </p>
                           {isLead && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded text-amber-800 border border-amber-200">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/60">
                               Squad Lead
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 font-mono mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">
                           {member.users?.email}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-center">
-                      <Badge variant="outline" className="text-xs font-medium capitalize border-gray-200 text-gray-700">
+                      <Badge variant="outline" className="text-xs font-medium capitalize border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">
                         {member.track || 'Fintech Core'}
                       </Badge>
-                      <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 h-8 px-2.5">
+                      <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-700 h-8 px-2.5">
                         <a href={`mailto:${member.users?.email}`}>Contact</a>
                       </Button>
                     </div>
@@ -576,10 +578,10 @@ export default function MySquad() {
 
           {/* Squad Status & Info */}
           <div className="space-y-4">
-            <Card className="border border-gray-200/90 shadow-sm bg-white">
-              <CardHeader className="pb-3 border-b border-gray-100">
-                <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <Briefcase size={15} className="text-deep-600" />
+            <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
+              <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                <CardTitle className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Briefcase size={15} className="text-deep-600 dark:text-blue-400" />
                   Squad Structure
                 </CardTitle>
               </CardHeader>

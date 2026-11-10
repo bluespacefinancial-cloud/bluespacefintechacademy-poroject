@@ -121,20 +121,20 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">User Management</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">User Management</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Manage academy user accounts, roles and activation status
             </p>
           </div>
         </div>
       </div>
 
-      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+      {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
 
       <div className="flex gap-4 mb-6">
         <div className="flex-1">
@@ -177,26 +177,26 @@ export default function UserManagement() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{users.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Users</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{users.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Users</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {users.filter((u) => u.is_active === 1).length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {users.filter((u) => u.is_active !== 1).length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Inactive</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Inactive</p>
           </CardContent>
         </Card>
       </div>

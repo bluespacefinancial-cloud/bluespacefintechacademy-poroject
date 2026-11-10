@@ -150,34 +150,126 @@ export default function StudentMonitoring() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6">
-        <h1 className="mb-1 text-2xl font-bold text-deep-600">Student Monitoring</h1>
-        <p className="text-sm text-gray-500">Track learning activity, progress, attendance and intervention needs across the academy.</p>
+        <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">Student Monitoring</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Track learning activity, progress, attendance and intervention needs across the academy.</p>
       </div>
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
         {[
-          ['Students', metrics.total, Users, 'text-brand-600 bg-brand-100'],
-          ['Active this week', metrics.active, Activity, 'text-emerald-600 bg-emerald-100'],
-          ['At risk', metrics.atRisk, AlertTriangle, 'text-amber-600 bg-amber-100'],
-          ['Average completion', `${metrics.averageCompletion}%`, CheckCircle, 'text-brand-600 bg-brand-100'],
-        ].map(([label, value, Icon, color]) => <Card key={label}><CardContent className="flex items-center justify-between p-4"><div><p className="text-2xl font-bold text-deep-600">{value}</p><p className="text-xs uppercase tracking-wider text-gray-500">{label}</p></div><div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}><Icon size={16} /></div></CardContent></Card>)}
+          ['Students', metrics.total, Users, 'text-deep-600 dark:text-deep-400 bg-deep-50 dark:bg-deep-950/60'],
+          ['Active this week', metrics.active, Activity, 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'],
+          ['At risk', metrics.atRisk, AlertTriangle, 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60'],
+          ['Average completion', `${metrics.averageCompletion}%`, CheckCircle, 'text-deep-600 dark:text-deep-400 bg-deep-50 dark:bg-deep-950/60'],
+        ].map(([label, value, Icon, color]) => (
+          <Card key={label} className="dark:border-gray-800">
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</p>
+              </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}>
+                <Icon size={16} />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-      <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2 text-sm"><BookOpen size={14} /> Learning activity</CardTitle></CardHeader>
+      <Card className="dark:border-gray-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <BookOpen size={14} /> Learning activity
+          </CardTitle>
+        </CardHeader>
         <CardContent>
           <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-[1fr_180px_160px]">
-            <div className="relative"><Search size={15} className="absolute left-3 top-2.5 text-gray-400" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search students, cohorts, tracks or squads" className="pl-9" /></div>
-            <Select value={filterCohort} onValueChange={setFilterCohort}><SelectTrigger><SelectValue placeholder="All cohorts" /></SelectTrigger><SelectContent><SelectItem value="all">All Cohorts</SelectItem>{cohorts.map((cohort) => <SelectItem key={cohort.id} value={String(cohort.id)}>{cohort.name}</SelectItem>)}</SelectContent></Select>
-            <Select value={filterStatus} onValueChange={setFilterStatus}><SelectTrigger><SelectValue placeholder="All activity" /></SelectTrigger><SelectContent><SelectItem value="all">All Activity</SelectItem><SelectItem value="active">Active this week</SelectItem><SelectItem value="inactive">Inactive 7+ days</SelectItem><SelectItem value="at_risk">At risk</SelectItem></SelectContent></Select>
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-2.5 text-gray-400" />
+              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search students, cohorts, tracks or squads" className="pl-9" />
+            </div>
+            <Select value={filterCohort} onValueChange={setFilterCohort}>
+              <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="All cohorts" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cohorts</SelectItem>
+                {cohorts.map((cohort) => <SelectItem key={cohort.id} value={String(cohort.id)}>{cohort.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="All activity" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Activity</SelectItem>
+                <SelectItem value="active">Active this week</SelectItem>
+                <SelectItem value="inactive">Inactive 7+ days</SelectItem>
+                <SelectItem value="at_risk">At risk</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          {loading && <p className="py-12 text-center text-sm text-gray-500">Loading student activity...</p>}
-          {!loading && filteredStudents.length === 0 && <p className="py-12 text-center text-sm text-gray-500">No students match the current filters.</p>}
-          {!loading && filteredStudents.length > 0 && <div className="overflow-x-auto"><table className="w-full min-w-[980px] text-left text-xs"><thead><tr className="border-b border-gray-100 text-[10px] uppercase tracking-wider text-gray-500"><th className="px-3 py-3">Student</th><th className="px-3 py-3">Cohort / Track</th><th className="px-3 py-3">Squad</th><th className="px-3 py-3">Completion</th><th className="px-3 py-3">Attendance</th><th className="px-3 py-3">Grade</th><th className="px-3 py-3">Submissions</th><th className="px-3 py-3">Last activity</th><th className="px-3 py-3">Status</th></tr></thead><tbody>{filteredStudents.map((student) => <tr key={student.id} className="border-b border-gray-50 last:border-0"><td className="px-3 py-3"><p className="font-medium text-deep-600">{student.name || 'Unnamed student'}</p><p className="text-[10px] text-gray-400">{student.email}</p></td><td className="px-3 py-3"><p>{student.cohortName}</p><p className="text-[10px] text-gray-400">{student.track}</p></td><td className="px-3 py-3">{student.squadName}</td><td className="px-3 py-3"><div className="flex items-center gap-2"><div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100"><div className="h-full rounded-full bg-brand-600" style={{ width: `${student.completion}%` }} /></div><span>{student.completion}%</span></div></td><td className="px-3 py-3">{student.attendance === null ? 'N/A' : `${student.attendance}%`}</td><td className="px-3 py-3">{student.averageGrade === null ? 'N/A' : `${student.averageGrade}%`}</td><td className="px-3 py-3">{student.submissions}{student.pendingSubmissions > 0 && <span className="ml-1 text-amber-600">({student.pendingSubmissions} pending)</span>}</td><td className="px-3 py-3"><span className={student.inactive ? 'font-medium text-amber-700' : 'text-gray-600'}>{formatActivity(student.activityDate)}</span></td><td className="px-3 py-3"><Badge className={student.atRisk ? 'text-amber-700 border-amber-200' : 'text-emerald-700 border-emerald-200'}>{student.atRisk ? 'Needs attention' : 'On track'}</Badge></td></tr>)}</tbody></table></div>}
+          {loading && <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">Loading student activity...</p>}
+          {!loading && filteredStudents.length === 0 && <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">No students match the current filters.</p>}
+          {!loading && filteredStudents.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[980px] text-left text-xs">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800 text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <th className="px-3 py-3">Student</th>
+                    <th className="px-3 py-3">Cohort / Track</th>
+                    <th className="px-3 py-3">Squad</th>
+                    <th className="px-3 py-3">Completion</th>
+                    <th className="px-3 py-3">Attendance</th>
+                    <th className="px-3 py-3">Grade</th>
+                    <th className="px-3 py-3">Submissions</th>
+                    <th className="px-3 py-3">Last activity</th>
+                    <th className="px-3 py-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStudents.map((student) => (
+                    <tr key={student.id} className="border-b border-gray-50 dark:border-gray-800/60 last:border-0 hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                      <td className="px-3 py-3">
+                        <p className="font-medium text-gray-900 dark:text-white">{student.name || 'Unnamed student'}</p>
+                        <p className="text-[10px] text-gray-400">{student.email}</p>
+                      </td>
+                      <td className="px-3 py-3">
+                        <p className="text-gray-800 dark:text-gray-200">{student.cohortName}</p>
+                        <p className="text-[10px] text-gray-400">{student.track}</p>
+                      </td>
+                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{student.squadName}</td>
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                            <div className="h-full rounded-full bg-deep-600" style={{ width: `${student.completion}%` }} />
+                          </div>
+                          <span className="text-gray-700 dark:text-gray-300">{student.completion}%</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{student.attendance === null ? 'N/A' : `${student.attendance}%`}</td>
+                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{student.averageGrade === null ? 'N/A' : `${student.averageGrade}%`}</td>
+                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+                        {student.submissions}
+                        {student.pendingSubmissions > 0 && <span className="ml-1 text-amber-600 dark:text-amber-400">({student.pendingSubmissions} pending)</span>}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className={student.inactive ? 'font-medium text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-300'}>
+                          {formatActivity(student.activityDate)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <Badge className={student.atRisk ? 'text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900/60 dark:bg-amber-950/40' : 'text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/60 dark:bg-emerald-950/40'}>
+                          {student.atRisk ? 'Needs attention' : 'On track'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
-      <p className="mt-4 flex items-center gap-2 text-[11px] text-gray-500"><Clock size={13} /> At-risk status includes no recorded activity for {INACTIVE_DAYS}+ days, suspended enrolments or remediation submissions.</p>
+      <p className="mt-4 flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
+        <Clock size={13} /> At-risk status includes no recorded activity for {INACTIVE_DAYS}+ days, suspended enrolments or remediation submissions.
+      </p>
     </div>
   )
 }

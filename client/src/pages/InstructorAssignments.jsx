@@ -68,23 +68,72 @@ export default function InstructorAssignments() {
   const cohortName = (id) => cohorts.find((item) => item.id === id)?.name || `Cohort ${id}`
   const squadName = (id) => squads.find((item) => item.id === id)?.name || `Squad ${id}`
 
-  return <div className="min-h-screen bg-gray-50">
-    <div className="mb-6"><h1 className="text-2xl font-bold text-deep-600">Instructor Assignments</h1><p className="text-sm text-gray-500">Control which cohorts and squads each instructor can support.</p></div>
-    {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-    <div className="grid gap-6 lg:grid-cols-2">
-      <Card><CardHeader><CardTitle className="text-sm">Assign a cohort</CardTitle></CardHeader><CardContent className="space-y-3">
-        <Select value={cohortInstructorId} onValueChange={setCohortInstructorId}><SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger><SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent></Select>
-        <Select value={cohortId} onValueChange={setCohortId}><SelectTrigger><SelectValue placeholder="Select cohort" /></SelectTrigger><SelectContent>{cohorts.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}</SelectContent></Select>
-        <Button onClick={() => addAssignment('instructor_cohort_assignments', { instructor_id: Number(cohortInstructorId), cohort_id: Number(cohortId) }, () => { setCohortInstructorId(''); setCohortId('') })}>Add cohort assignment</Button>
-        <div className="space-y-2 pt-3">{cohortAssignments.map((item) => <div key={item.id} className="flex items-center justify-between rounded border bg-white p-2 text-sm"><span>{instructorName(item.instructor_id)} · {cohortName(item.cohort_id)}</span><Button variant="ghost" size="icon" onClick={() => removeAssignment('instructor_cohort_assignments', item.id)} aria-label="Remove cohort assignment"><Trash2 size={15} /></Button></div>)}</div>
-      </CardContent></Card>
-      <Card><CardHeader><CardTitle className="text-sm">Assign a squad</CardTitle></CardHeader><CardContent className="space-y-3">
-        <Select value={squadInstructorId} onValueChange={setSquadInstructorId}><SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger><SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent></Select>
-        <Select value={squadId} onValueChange={setSquadId}><SelectTrigger><SelectValue placeholder="Select squad" /></SelectTrigger><SelectContent>{squads.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}</SelectContent></Select>
-        <Button onClick={() => addAssignment('instructor_squad_assignments', { instructor_id: Number(squadInstructorId), squad_id: Number(squadId) }, () => { setSquadInstructorId(''); setSquadId('') })}>Add squad assignment</Button>
-        <div className="space-y-2 pt-3">{squadAssignments.map((item) => <div key={item.id} className="flex items-center justify-between rounded border bg-white p-2 text-sm"><span>{instructorName(item.instructor_id)} · {squadName(item.squad_id)}</span><Button variant="ghost" size="icon" onClick={() => removeAssignment('instructor_squad_assignments', item.id)} aria-label="Remove squad assignment"><Trash2 size={15} /></Button></div>)}</div>
-      </CardContent></Card>
+  return (
+    <div className="w-full space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Instructor Assignments</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Control which cohorts and squads each instructor can support.</p>
+      </div>
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="dark:border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm">Assign a cohort</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Select value={cohortInstructorId} onValueChange={setCohortInstructorId}>
+              <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="Select instructor" /></SelectTrigger>
+              <SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={cohortId} onValueChange={setCohortId}>
+              <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="Select cohort" /></SelectTrigger>
+              <SelectContent>{cohorts.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}</SelectContent>
+            </Select>
+            <Button onClick={() => addAssignment('instructor_cohort_assignments', { instructor_id: Number(cohortInstructorId), cohort_id: Number(cohortId) }, () => { setCohortInstructorId(''); setCohortId('') })}>
+              Add cohort assignment
+            </Button>
+            <div className="space-y-2 pt-3">
+              {cohortAssignments.map((item) => (
+                <div key={item.id} className="flex items-center justify-between rounded border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-2 text-sm text-gray-900 dark:text-white">
+                  <span>{instructorName(item.instructor_id)} · {cohortName(item.cohort_id)}</span>
+                  <Button variant="ghost" size="icon" onClick={() => removeAssignment('instructor_cohort_assignments', item.id)} aria-label="Remove cohort assignment">
+                    <Trash2 size={15} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="dark:border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm">Assign a squad</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Select value={squadInstructorId} onValueChange={setSquadInstructorId}>
+              <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="Select instructor" /></SelectTrigger>
+              <SelectContent>{instructors.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name || item.email}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={squadId} onValueChange={setSquadId}>
+              <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="Select squad" /></SelectTrigger>
+              <SelectContent>{squads.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}</SelectContent>
+            </Select>
+            <Button onClick={() => addAssignment('instructor_squad_assignments', { instructor_id: Number(squadInstructorId), squad_id: Number(squadId) }, () => { setSquadInstructorId(''); setSquadId('') })}>
+              Add squad assignment
+            </Button>
+            <div className="space-y-2 pt-3">
+              {squadAssignments.map((item) => (
+                <div key={item.id} className="flex items-center justify-between rounded border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-2 text-sm text-gray-900 dark:text-white">
+                  <span>{instructorName(item.instructor_id)} · {squadName(item.squad_id)}</span>
+                  <Button variant="ghost" size="icon" onClick={() => removeAssignment('instructor_squad_assignments', item.id)} aria-label="Remove squad assignment">
+                    <Trash2 size={15} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      {!loading && !instructors.length && <p className="mt-6 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 p-3 text-sm text-amber-800 dark:text-amber-300">No instructor profiles are available to assign.</p>}
     </div>
-    {!loading && !instructors.length && <p className="mt-6 rounded-md bg-amber-50 p-3 text-sm text-amber-800">No instructor profiles are available to assign.</p>}
-  </div>
+  )
 }

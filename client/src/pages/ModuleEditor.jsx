@@ -105,17 +105,22 @@ export default function ModuleEditor() {
   const [lessons, setLessons] = useState([])
   const [labsByLesson, setLabsByLesson] = useState({})
   const [labEditorLessonId, setLabEditorLessonId] = useState(null)
-  const [labForm, setLabForm] = useState(emptyLabForm)
+  const [labForm, _setLabForm] = useState(emptyLabForm)
   const [savingLab, setSavingLab] = useState(false)
-  const [form, setForm] = useState(emptyModuleForm)
-  const [lessonForm, setLessonForm] = useState(emptyLessonForm)
+  const [form, _setForm] = useState(emptyModuleForm)
+  const [lessonForm, _setLessonForm] = useState(emptyLessonForm)
   const [editingLessonId, setEditingLessonId] = useState(null)
   const [lessonEditorOpen, setLessonEditorOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [savingLesson, setSavingLesson] = useState(false)
+  const [dirty, setDirty] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+
+  const setLabForm = (next) => { _setLabForm(next); setDirty(true) }
+  const setForm = (next) => { _setForm(next); setDirty(true) }
+  const setLessonForm = (next) => { _setLessonForm(next); setDirty(true) }
 
   const loadCohorts = useCallback(async () => {
     if (!userId) return []
@@ -203,6 +208,17 @@ export default function ModuleEditor() {
     return () => { cancelled = true }
   }, [isNew, loadCohorts, loadModule])
 
+  // Warn before navigating away with unsaved changes
+  useEffect(() => {
+    const onBeforeUnload = (event) => {
+      if (!dirty) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [dirty])
+
   const selectedCohort = useMemo(
     () => cohorts.find((cohort) => String(cohort.id) === String(form.cohort_id)),
     [cohorts, form.cohort_id]
@@ -261,6 +277,7 @@ export default function ModuleEditor() {
         if (createError) throw createError
         setMessage('Module created. Add its lessons below.')
         toast.success('Module created')
+        setDirty(false)
         navigate(`/modules/${data.id}`, { replace: true })
       } else {
         const { error: updateError } = await api
@@ -271,6 +288,7 @@ export default function ModuleEditor() {
         setModule((current) => ({ ...current, ...payload() }))
         setMessage('Module saved.')
         toast.success('Module saved')
+        setDirty(false)
       }
     } catch (saveError) {
       setError(saveError.message || 'Unable to save this module')
@@ -301,6 +319,7 @@ export default function ModuleEditor() {
     setForm((current) => ({ ...current, is_published: next }))
     setMessage(next ? 'Module published to students.' : 'Module returned to draft.')
     toast.success(next ? 'Module published' : 'Module returned to draft')
+    setDirty(false)
   }
 
   const deleteModule = async () => {
@@ -400,7 +419,8 @@ export default function ModuleEditor() {
       }
       setLessonEditorOpen(false)
       setEditingLessonId(null)
-      setLessonForm(emptyLessonForm)
+      _setLessonForm(emptyLessonForm)
+      setDirty(false)
     } catch (lessonError) {
       setError(lessonError.message || 'Unable to save this lesson')
       toast.error('Unable to save lesson')
@@ -508,9 +528,10 @@ export default function ModuleEditor() {
       if (labError) throw labError
       setLabsByLesson((current) => ({ ...current, [lessonId]: data }))
       setLabEditorLessonId(null)
-      setLabForm(emptyLabForm)
+      _setLabForm(emptyLabForm)
       setMessage(existing ? 'Lab updated.' : 'Lab attached to lesson.')
       toast.success(existing ? 'Lab updated' : 'Lab attached')
+      setDirty(false)
     } catch (labError) {
       setError(labError.message || 'Unable to save this lab')
       toast.error('Unable to save lab')
@@ -838,7 +859,7 @@ export default function ModuleEditor() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => { setLabEditorLessonId(null); setLabForm(emptyLabForm) }}
+                        onClick={() => { setLabEditorLessonId(null); _setLabForm(emptyLabForm); setDirty(false) }}
                         className="rounded p-1 text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-deep-600"
                         aria-label="Close lab editor"
                       >
@@ -922,7 +943,7 @@ export default function ModuleEditor() {
                           type="button"
                           size="sm"
                           variant="outline"
-                          onClick={() => { setLabEditorLessonId(null); setLabForm(emptyLabForm) }}
+                          onClick={() => { setLabEditorLessonId(null); _setLabForm(emptyLabForm); setDirty(false) }}
                         >
                           Cancel
                         </Button>
@@ -944,7 +965,7 @@ export default function ModuleEditor() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => { setLessonEditorOpen(false); setEditingLessonId(null) }}
+                    onClick={() => { setLessonEditorOpen(false); setEditingLessonId(null); setDirty(false) }}
                     className="rounded p-1 text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-deep-600"
                     aria-label="Close lesson editor"
                   >
@@ -1065,7 +1086,7 @@ export default function ModuleEditor() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => { setLessonEditorOpen(false); setEditingLessonId(null) }}
+                    onClick={() => { setLessonEditorOpen(false); setEditingLessonId(null); setDirty(false) }}
                   >
                     Cancel
                   </Button>

@@ -84,12 +84,12 @@ export default function Reports() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <Breadcrumb items={[{ label: 'Analytics & Reports' }]} />
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-deep-600">Analytics & Reporting</h1>
-          <p className="text-sm text-gray-500">Live academy performance derived from student activity.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Analytics & Reporting</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Live academy performance derived from student activity.</p>
         </div>
         <Button
           type="button"
@@ -102,8 +102,8 @@ export default function Reports() {
           Export CSV
         </Button>
       </div>
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <div className="mb-6">
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
+      <div>
         <Select value={cohortId} onValueChange={setCohortId}>
           <SelectTrigger className="w-64">
             <SelectValue placeholder="All cohorts" />
@@ -118,20 +118,20 @@ export default function Reports() {
           </SelectContent>
         </Select>
       </div>
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {[['Students', filtered.length, Users], ['Completion', average('completion') === null ? 'N/A' : `${average('completion')}%`, BarChart3], ['Attendance', average('attendance') === null ? 'N/A' : `${average('attendance')}%`, Clock], ['Pass rate', average('passRate') === null ? 'N/A' : `${average('passRate')}%`, Award]].map(([label, value, Icon]) => (
           <Card key={label}>
             <CardContent className="flex items-center justify-between p-4">
               <div>
-                <p className="text-2xl font-bold">{value}</p>
-                <p className="text-xs uppercase text-gray-500">{label}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+                <p className="text-xs uppercase text-gray-500 dark:text-gray-400">{label}</p>
               </div>
-              <Icon size={18} className="text-brand-600" />
+              <Icon size={18} className="text-brand-600 dark:text-blue-400" />
             </CardContent>
           </Card>
         ))}
       </div>
-      {loading && <p className="py-10 text-center text-sm text-gray-500">Loading reports...</p>}
+      {loading && <p className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading reports...</p>}
       {!loading && (
         <Card>
           <CardHeader>
@@ -148,7 +148,7 @@ export default function Reports() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-xs">
                 <thead>
-                  <tr className="border-b text-[10px] uppercase text-gray-500">
+                  <tr className="border-b border-gray-100 dark:border-gray-800 text-[10px] uppercase text-gray-500 dark:text-gray-400">
                     <th className="px-3 py-3">Student</th>
                     <th className="px-3 py-3">Cohort</th>
                     <th className="px-3 py-3">Track</th>
@@ -159,7 +159,7 @@ export default function Reports() {
                 </thead>
                 <tbody>
                   {filtered.map((row) => (
-                    <tr key={row.id} className="border-b border-gray-50">
+                    <tr key={row.id} className="border-b border-gray-50 dark:border-gray-800/60 hover:bg-gray-50 dark:hover:bg-gray-800/40 text-gray-800 dark:text-gray-200">
                       <td className="px-3 py-3">{row.name || row.email}</td>
                       <td className="px-3 py-3">{row.cohortName}</td>
                       <td className="px-3 py-3">{row.track}</td>

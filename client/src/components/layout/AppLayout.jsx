@@ -1,5 +1,5 @@
 import { Outlet, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Search, GraduationCap } from 'lucide-react'
 import Sidebar from './Sidebar'
 import GlobalSearch from './GlobalSearch'
@@ -8,14 +8,18 @@ import { SkipLink } from '../ui/accessibility'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../lib/backend'
 import { DarkModeToggle } from '../ui/dark-mode-toggle'
+import { PageContainer } from './page-container'
+import { BackToTop } from '../ui/back-to-top'
 import { KeyboardShortcutsPanel } from '../ui/keyboard-shortcuts-panel'
 
 export default function AppLayout() {
-  const { user, isDarkMode } = useAuth()
+  const { user } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [cohortName, setCohortName] = useState(null)
+  const mainRef = useRef(null)
+  const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 
   // Command palette shortcut: Cmd/Ctrl + K, and "/" when not typing.
   useEffect(() => {
@@ -62,15 +66,6 @@ export default function AppLayout() {
     }
   }, [user?.id])
 
-  // Sync dark mode class to document root
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [isDarkMode])
-
   // Open keyboard shortcuts panel on Shift + / (?)
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -91,7 +86,7 @@ export default function AppLayout() {
       <Sidebar open={sidebarOpen} onOpen={() => setSidebarOpen(true)} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-        <header className="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 dark:bg-gray-800 dark:border-gray-700">
+        <header className="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center justify-between w-full gap-4">
             <div className="flex items-center lg:hidden mr-1">
               <img src="/logo-dark.png" alt="BlueSPACE" className="h-6 w-auto" />
@@ -109,7 +104,7 @@ export default function AppLayout() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400" size={15} aria-hidden="true" />
                 <span className="text-gray-400 truncate dark:text-gray-300">Search modules, labs, clinics…</span>
                 <kbd className="ml-auto hidden xl:inline-flex items-center gap-0.5 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-400 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                  Ctrl K
+                  {isMac ? '⌘ K' : 'Ctrl K'}
                 </kbd>
               </button>
             </div>
@@ -137,9 +132,14 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main id="main-content" className="flex-1 w-full min-w-0 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-10 overflow-y-auto">
-          <Outlet />
+        <main id="main-content" ref={mainRef} className="flex-1 w-full min-w-0 px-4 sm:px-5 lg:px-6 py-6 pb-24 lg:pb-10 overflow-y-auto">
+          <PageContainer>
+            <Outlet />
+          </PageContainer>
         </main>
+
+      {/* Back to Top */}
+      <BackToTop containerRef={mainRef} />
       </div>
 
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
@@ -148,6 +148,7 @@ export default function AppLayout() {
       <KeyboardShortcutsPanel
         open={shortcutsOpen}
         onClose={() => setShortcutsOpen(false)}
+        isMac={isMac}
       />
     </div>
   )

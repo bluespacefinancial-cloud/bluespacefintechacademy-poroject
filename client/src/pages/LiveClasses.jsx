@@ -3,6 +3,7 @@ import { Calendar, ExternalLink, Plus, Video, Users, RefreshCw } from 'lucide-re
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
+import { Breadcrumb } from '../components/ui/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
@@ -149,18 +150,19 @@ export default function LiveClasses() {
 
   if (selectedClass) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="w-full">
+      <div className="w-full space-y-6">
+        <Breadcrumb items={[{ to: '/live-classes', label: 'Live Classes' }, { label: selectedClass.title }]} />
+        <div>
           <div className="flex items-center justify-between mb-6">
             <div>
               <button
                 onClick={closeVideoPlayer}
-                className="flex items-center gap-2 text-sm font-medium text-deep-600 hover:text-deep-700"
+                className="flex items-center gap-2 text-sm font-medium text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300"
               >
                 <RefreshCw size={16} className="rotate-180" />
                 Back to classes
               </button>
-              <h1 className="ml-4 text-2xl font-bold text-deep-600">{selectedClass.title}</h1>
+              <h1 className="ml-4 text-2xl font-bold text-gray-900 dark:text-white">{selectedClass.title}</h1>
             </div>
             {canManage && (
               <Button variant="outline" size="sm" onClick={() => loadAttendance(selectedClass.id)}>
@@ -195,22 +197,22 @@ export default function LiveClasses() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-gray-100 text-left">
-                            <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                            <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                            <th className="pb-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                          <tr className="border-b border-gray-100 dark:border-gray-800 text-left">
+                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
+                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined</th>
+                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                           {Object.entries(attendance[selectedClass.id] || {}).map(([userId, status]) => (
-                            <tr key={userId} className="hover:bg-gray-50">
+                            <tr key={userId} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
                               <td className="py-3">
                                 <div className="flex items-center gap-2">
-                                  <div className="h-7 w-7 rounded-full bg-deep-100 flex items-center justify-center text-xs font-bold text-deep-600">
+                                  <div className="h-7 w-7 rounded-full bg-deep-100 dark:bg-deep-950/60 flex items-center justify-center text-xs font-bold text-deep-600 dark:text-deep-400">
                                     {userId.charAt(0).toUpperCase()}
                                   </div>
-                                  <span className="text-sm text-gray-700">Student {userId.slice(-4)}</span>
+                                  <span className="text-sm text-gray-700 dark:text-gray-200">Student {userId.slice(-4)}</span>
                                 </div>
                               </td>
                               <td className="py-3">
@@ -218,7 +220,7 @@ export default function LiveClasses() {
                                   {status.charAt(0).toUpperCase() + status.slice(1)}
                                 </Badge>
                               </td>
-                              <td className="py-3 text-xs text-gray-500">
+                              <td className="py-3 text-xs text-gray-500 dark:text-gray-400">
                                 {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </td>
                               <td className="py-3">
@@ -255,51 +257,51 @@ export default function LiveClasses() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Status</span>
                     <Badge className={STATUS_COLORS[selectedClass.status]}>
                       {STATUS_LABELS[selectedClass.status]}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Type</span>
-                    <span className="text-sm font-medium text-deep-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Type</span>
+                    <span className="text-sm font-medium text-deep-600 dark:text-blue-400">
                       {selectedClass.is_offline ? 'Offline (In-person)' : 'Online'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Starts</span>
-                    <span className="text-sm font-medium text-deep-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Starts</span>
+                    <span className="text-sm font-medium text-deep-600 dark:text-blue-400">
                       {new Date(selectedClass.starts_at).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Ends</span>
-                    <span className="text-sm font-medium text-deep-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Ends</span>
+                    <span className="text-sm font-medium text-deep-600 dark:text-blue-400">
                       {new Date(selectedClass.ends_at).toLocaleString()}
                     </span>
                   </div>
                   {selectedClass.is_offline && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Venue</span>
-                      <span className="text-sm font-medium text-deep-600">{selectedClass.venue || 'Not specified'}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Venue</span>
+                      <span className="text-sm font-medium text-deep-600 dark:text-blue-400">{selectedClass.venue || 'Not specified'}</span>
                     </div>
                   )}
                   {!selectedClass.is_offline && selectedClass.meet_url && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Meet Link</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Meet Link</span>
                       <a
                         href={selectedClass.meet_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm font-medium text-brand-600 hover:underline"
+                        className="text-sm font-medium text-brand-600 dark:text-blue-400 hover:underline"
                       >
                         Open Google Meet
                       </a>
                     </div>
                   )}
                   <div className="pt-4">
-                    <span className="text-xs font-semibold text-deep-600 uppercase tracking-wider">Attendees</span>
-                    <p className="text-lg font-bold text-deep-600">
+                    <span className="text-xs font-semibold text-deep-600 dark:text-blue-400 uppercase tracking-wider">Attendees</span>
+                    <p className="text-lg font-bold text-deep-600 dark:text-blue-400">
                       {Object.keys(attendance[selectedClass.id] || {}).length}
                     </p>
                   </div>
@@ -313,11 +315,12 @@ export default function LiveClasses() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="w-full space-y-6">
+      <Breadcrumb items={[{ label: 'Live Classes' }]} />
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-2xl font-bold text-deep-600">Live Classes</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">Live Classes</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Schedule online and offline classes, share Google Meet links, and track attendance.
           </p>
         </div>
@@ -329,7 +332,7 @@ export default function LiveClasses() {
         )}
       </div>
 
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
 
       {showForm && (
         <Card className="mb-6">
@@ -343,7 +346,7 @@ export default function LiveClasses() {
                 required
               />
               <select
-                className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-deep-600"
                 value={form.cohort_id}
                 onChange={(e) => setForm({ ...form, cohort_id: e.target.value })}
                 required
@@ -372,7 +375,7 @@ export default function LiveClasses() {
                 required
               />
               <div className="flex items-end">
-                <label className="flex items-center gap-2 cursor-pointer mr-4">
+                <label className="flex items-center gap-2 cursor-pointer mr-4 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={form.is_offline}
@@ -383,7 +386,7 @@ export default function LiveClasses() {
               </div>
               {!form.is_offline ? (
                 <select
-                  className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                  className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-deep-600"
                   value={form.visibility}
                   onChange={(e) => setForm({ ...form, visibility: e.target.value })}
                 >
@@ -410,23 +413,23 @@ export default function LiveClasses() {
           <CardTitle className="text-sm">Upcoming and recent classes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {loading && <p className="text-sm text-gray-500">Loading classes...</p>}
+          {loading && <p className="text-sm text-gray-500 dark:text-gray-400">Loading classes...</p>}
           {!loading && classes.length === 0 && (
             <p className="py-8 text-center text-sm text-gray-400">No live classes scheduled yet.</p>
           )}
           {classes.map((liveClass) => (
             <div
               key={liveClass.id}
-              className="cursor-pointer hover:bg-brand-50 transition-colors rounded-lg border border-gray-100 bg-white p-4 md:flex-row md:items-center md:justify-between"
+              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-4 md:flex-row md:items-center md:justify-between"
               onClick={() => openVideoPlayer(liveClass)}
             >
               <div>
                 <div className="mb-1 flex items-center gap-2">
-                  <Video size={15} className="text-brand-600" />
-                  <p className="text-sm font-semibold text-deep-600">{liveClass.title}</p>
+                  <Video size={15} className="text-brand-600 dark:text-blue-400" />
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{liveClass.title}</p>
                   <Badge variant="outline">{STATUS_LABELS[liveClass.status]}</Badge>
                 </div>
-                <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+                <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
                   <span>
                     <Calendar size={12} className="mr-1 inline" />
                     {new Date(liveClass.starts_at).toLocaleString()}
@@ -438,7 +441,7 @@ export default function LiveClasses() {
                 </div>
               </div>
               {liveClass.meet_url && !liveClass.is_offline && (
-                <a className="inline-flex items-center text-sm font-medium text-brand-700 hover:underline" href={liveClass.meet_url} target="_blank" rel="noreferrer">
+                <a className="inline-flex items-center text-sm font-medium text-brand-700 dark:text-blue-400 hover:underline" href={liveClass.meet_url} target="_blank" rel="noreferrer">
                   Open Meet <ExternalLink size={14} className="ml-1" />
                 </a>
               )}

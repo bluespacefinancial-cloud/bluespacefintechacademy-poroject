@@ -93,5 +93,93 @@ export default function PanelReview() {
   }
   const filtered = useMemo(() => submissions.filter((item) => (!search || `${item.fellow?.name || ''} ${item.title}`.toLowerCase().includes(search.toLowerCase())) && (filter === 'all' || item.status === filter)), [submissions, search, filter])
 
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6"><h1 className="text-2xl font-bold text-deep-600">Panel Review</h1><p className="text-sm text-gray-500">Review live capstone submissions and record certification decisions.</p></div>{error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}{issued && <p className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">Certificate issued and available for verification.</p>}<div className="mb-5 flex gap-3"><Input placeholder="Search fellow or assessment" value={search} onChange={(event) => setSearch(event.target.value)} /><Select value={filter} onValueChange={setFilter}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="submitted">Pending</SelectItem><SelectItem value="passed">Approved</SelectItem><SelectItem value="remediation">Remediation</SelectItem><SelectItem value="failed">Rejected</SelectItem></SelectContent></Select></div><div className="grid gap-6 lg:grid-cols-3"><Card><CardHeader><CardTitle className="text-sm">Submissions ({submissions.length})</CardTitle></CardHeader><CardContent className="space-y-2">{loading && <p className="text-sm text-gray-500">Loading...</p>}{!loading && filtered.length === 0 && <p className="text-sm text-gray-500">No capstone submissions found.</p>}{filtered.map((item) => <button key={item.id} type="button" onClick={() => { choose(item); setIssued(false) }} className={`w-full rounded border p-3 text-left ${selected?.id === item.id ? 'border-brand-300 bg-brand-50' : 'border-gray-100'}`}><p className="text-xs font-medium">{item.fellow?.name || item.fellow?.email || 'Student'}</p><p className="text-[10px] text-gray-500">{item.title}</p><Badge variant="outline" className="mt-2">{label[item.status] || item.status}</Badge></button>)}</CardContent></Card><Card className="lg:col-span-2"><CardHeader><CardTitle className="text-sm">{selected ? `${selected.fellow?.name || 'Student'} · ${selected.title}` : 'Select a submission'}</CardTitle></CardHeader>{selected ? <CardContent className="space-y-4"><p className="rounded border p-3 text-xs text-gray-600">{selected.content_url || 'No deliverable URL provided.'}</p><Input type="number" min="0" max="100" placeholder="Score 0-100" value={score} onChange={(event) => setScore(event.target.value)} /><textarea rows={5} value={feedback} onChange={(event) => setFeedback(event.target.value)} className="w-full rounded border p-2 text-sm" placeholder="Panel feedback" /><div className="flex flex-wrap gap-2"><Button onClick={() => save('passed')}>Approve</Button><Button variant="outline" onClick={() => save('remediation')}>Request remediation</Button><Button variant="destructive" onClick={() => save('failed')}>Reject</Button>{selected.status === 'passed' && <Button variant="secondary" onClick={issueCertificate} disabled={issuing || issued}>{issued ? 'Certificate issued' : issuing ? 'Issuing...' : 'Issue certificate'}</Button>}</div></CardContent> : <CardContent className="py-16 text-center text-sm text-gray-500"><ClipboardList size={24} className="mx-auto mb-2" />Choose a capstone submission to review.</CardContent>}</Card></div><p className="mt-4 text-xs text-gray-500"><FileText size={13} className="mr-1 inline" />Panel decisions are stored on the submission record and feed certification readiness.</p></div>
+  return (
+    <div className="w-full space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Panel Review</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Review live capstone submissions and record certification decisions.</p>
+      </div>
+      {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+      {issued && <p className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">Certificate issued and available for verification.</p>}
+      <div className="mb-5 flex gap-3">
+        <Input placeholder="Search fellow or assessment" value={search} onChange={(event) => setSearch(event.target.value)} />
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-44 dark:border-gray-800"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="submitted">Pending</SelectItem>
+            <SelectItem value="passed">Approved</SelectItem>
+            <SelectItem value="remediation">Remediation</SelectItem>
+            <SelectItem value="failed">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="dark:border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm">Submissions ({submissions.length})</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {loading && <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>}
+            {!loading && filtered.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">No capstone submissions found.</p>}
+            {filtered.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => { choose(item); setIssued(false) }}
+                className={`w-full rounded border p-3 text-left transition-colors ${
+                  selected?.id === item.id
+                    ? 'border-deep-600 bg-deep-50 dark:border-deep-500 dark:bg-deep-950/40'
+                    : 'border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/60'
+                }`}
+              >
+                <p className="text-xs font-medium text-gray-900 dark:text-white">{item.fellow?.name || item.fellow?.email || 'Student'}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">{item.title}</p>
+                <Badge variant="outline" className="mt-2">{label[item.status] || item.status}</Badge>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2 dark:border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm">{selected ? `${selected.fellow?.name || 'Student'} · ${selected.title}` : 'Select a submission'}</CardTitle>
+          </CardHeader>
+          {selected ? (
+            <CardContent className="space-y-4">
+              <p className="rounded border border-gray-100 dark:border-gray-800 p-3 text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-900/40">
+                {selected.content_url || 'No deliverable URL provided.'}
+              </p>
+              <Input type="number" min="0" max="100" placeholder="Score 0-100" value={score} onChange={(event) => setScore(event.target.value)} />
+              <textarea
+                rows={5}
+                value={feedback}
+                onChange={(event) => setFeedback(event.target.value)}
+                className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                placeholder="Panel feedback"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => save('passed')}>Approve</Button>
+                <Button variant="outline" onClick={() => save('remediation')}>Request remediation</Button>
+                <Button variant="destructive" onClick={() => save('failed')}>Reject</Button>
+                {selected.status === 'passed' && (
+                  <Button variant="secondary" onClick={issueCertificate} disabled={issuing || issued}>
+                    {issued ? 'Certificate issued' : issuing ? 'Issuing...' : 'Issue certificate'}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          ) : (
+            <CardContent className="py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+              <ClipboardList size={24} className="mx-auto mb-2" />
+              Choose a capstone submission to review.
+            </CardContent>
+          )}
+        </Card>
+      </div>
+      <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+        <FileText size={13} className="mr-1 inline" />
+        Panel decisions are stored on the submission record and feed certification readiness.
+      </p>
+    </div>
+  )
 }

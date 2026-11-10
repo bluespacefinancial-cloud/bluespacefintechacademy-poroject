@@ -63,16 +63,16 @@ export default function CertificateDetail() {
   }, [id])
 
   return (
-    <div className="min-h-screen bg-slate-100/70 py-6 sm:py-8 px-4 sm:px-6 print:bg-white print:p-0">
+    <div className="min-h-screen bg-slate-100/70 dark:bg-gray-950 py-6 sm:py-8 px-4 sm:px-6 print:bg-white print:p-0 text-gray-900 dark:text-white">
       <Breadcrumb items={[{ to: '/certificates', label: 'Certificates' }, { label: 'Certificate Detail' }]} />
       {/* Subtle Top Utility Bar (Hidden on print) */}
       <div className="print:hidden max-w-5xl mx-auto mb-5 flex items-center justify-between">
         <button
           type="button"
           onClick={() => navigate('/certificates')}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors py-1.5 px-2.5 rounded-lg hover:bg-slate-200/60 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-2.5 rounded-lg hover:bg-slate-200/60 dark:hover:bg-gray-800 cursor-pointer"
         >
-          <ArrowLeft size={13} className="text-slate-400" />
+          <ArrowLeft size={13} className="text-slate-400 dark:text-gray-400" />
           <span>Back to Certificates</span>
         </button>
 

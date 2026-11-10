@@ -74,12 +74,12 @@ export default function Placement() {
   }), [placements, search, filterTrack, filterStatus, filterRole])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">Placement</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Placement</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Match certified Fellows to project roles and track placements
             </p>
           </div>
@@ -142,32 +142,32 @@ export default function Placement() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{placements.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Placements</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{placements.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Placements</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {placements.filter((p) => p.status === 'placed').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Placed</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Placed</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-deep-600 dark:text-blue-400">
               {placements.filter((p) => p.status === 'matched').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Matched</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matched</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{placements.filter((p) => p.checkin30).length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">30-Day Check-ins</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{placements.filter((p) => p.checkin30).length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">30-Day Check-ins</p>
           </CardContent>
         </Card>
       </div>

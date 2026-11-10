@@ -111,12 +111,12 @@ export default function LabsToReview() {
   const statusConfig = (status) => SUBMISSION_STATUS[status] || { label: status, variant: 'secondary', color: 'text-gray-600' }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">Labs to Review</h1>
-            <p className="text-sm text-gray-500">Review and grade student lab submissions</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Labs to Review</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Review and grade student lab submissions</p>
           </div>
           {pendingCount > 0 && (
             <Badge variant="default">{pendingCount} pending</Badge>
@@ -154,33 +154,33 @@ export default function LabsToReview() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{labs.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Labs</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{labs.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Labs</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{labs.filter((l) => l.status === 'submitted').length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Pending Review</p>
+            <p className="text-2xl font-bold text-deep-600 dark:text-blue-400">{labs.filter((l) => l.status === 'submitted').length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending Review</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{labs.filter((l) => l.status === 'graded').length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Graded</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{labs.filter((l) => l.status === 'graded').length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Graded</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{labs.filter((l) => l.status === 'remediation').length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Needs Remediation</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{labs.filter((l) => l.status === 'remediation').length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Needs Remediation</p>
           </CardContent>
         </Card>
       </div>
 
-      {loading ? <p className="py-10 text-center text-sm text-gray-500">Loading submissions…</p> : <div className="space-y-3">
+      {loading ? <p className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading submissions…</p> : <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <FileText size={32} className="mx-auto mb-3 opacity-50" />
@@ -190,13 +190,13 @@ export default function LabsToReview() {
           filtered.map((lab) => (
             <Card
               key={lab.id}
-              className="cursor-pointer hover:border-brand-200 transition-colors duration-150"
+              className="cursor-pointer hover:border-brand-200 dark:border-gray-800 dark:hover:border-gray-700 transition-colors duration-150"
               onClick={() => navigate(`/grading?submission=${lab.id}`)}
             >
               <CardHeader className="flex flex-row items-center justify-between py-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
-                    <FileText size={14} className="text-deep-600" />
+                  <div className="h-8 w-8 rounded-md bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-xs font-bold shrink-0">
+                    <FileText size={14} className="text-deep-600 dark:text-deep-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-sm">{lab.title}</CardTitle>
@@ -210,25 +210,25 @@ export default function LabsToReview() {
               <CardContent className="pt-0 pb-3">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Student</span>
-                    <span className="text-xs text-gray-600">{lab.student}</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Student</span>
+                    <span className="text-xs text-gray-900 dark:text-gray-100 font-medium">{lab.student}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Track</span>
-                    <span className="text-xs text-gray-600">{lab.track}</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Track</span>
+                    <span className="text-xs text-gray-900 dark:text-gray-100 font-medium">{lab.track}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Squad</span>
-                    <span className="text-xs text-gray-600">{lab.squad}</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Squad</span>
+                    <span className="text-xs text-gray-900 dark:text-gray-100 font-medium">{lab.squad}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-deep-600">Submitted</span>
-                    <span className="text-xs text-gray-600">{formatDate(lab.submittedAt)}</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Submitted</span>
+                    <span className="text-xs text-gray-900 dark:text-gray-100">{formatDate(lab.submittedAt)}</span>
                   </div>
                   {lab.status === 'graded' && (
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-deep-600">Score</span>
-                      <span className="text-xs font-bold text-emerald-600">{lab.score}</span>
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Score</span>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{lab.score}</span>
                     </div>
                   )}
                 </div>

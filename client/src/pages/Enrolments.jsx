@@ -166,12 +166,12 @@ export default function Enrolments() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6">
+    <div className="w-full space-y-6">
+      <div>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">Enrolments</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Enrolments</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Manage trainee enrolments and track assignments
             </p>
           </div>
@@ -188,8 +188,8 @@ export default function Enrolments() {
         </div>
       </div>
 
-      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
+      {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-400">{message}</p>}
 
       {editingId === 'new' ? (
         <Card>
@@ -285,32 +285,32 @@ export default function Enrolments() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{enrolments.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Enrolments</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{enrolments.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Enrolments</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {enrolments.filter((e) => e.track === 'Finsoft').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Finsoft</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Finsoft</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {enrolments.filter((e) => e.track === 'Finops').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Finops</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Finops</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {enrolments.filter((e) => e.status === 'active').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Active</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active</p>
           </CardContent>
         </Card>
       </div>
@@ -325,7 +325,7 @@ export default function Enrolments() {
           filtered.map((enrolment) => (
             <Card
               key={enrolment.id}
-              className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${editingId === enrolment.id ? 'bg-brand-50' : ''}`}
+              className={`cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150 ${editingId === enrolment.id ? 'bg-brand-50/50 dark:bg-blue-950/40' : ''}`}
             >
               {editingId === enrolment.id ? (
                 <>

@@ -290,15 +290,15 @@ export default function StudentDashboard({ user }) {
           }
         />
 
-        <div className="rounded-xl border border-gray-200/90 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-card p-6 shadow-sm">
           <div className="max-w-2xl">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 px-2.5 py-1 rounded border border-deep-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 dark:text-deep-400 px-2.5 py-1 rounded border border-deep-100 dark:border-deep-900/60 dark:bg-deep-950/40">
               Cohort Placement in Progress
             </span>
-            <h2 className="text-xl font-bold text-gray-900 mt-3 leading-tight">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-3 leading-tight">
               Welcome to the Academy
             </h2>
-            <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
               Your fellowship account is active. Our academic team is currently finalizing cohort schedules, instructor assignments, and collaborative squad groupings. Once your cohort is activated, your weekly syllabus, live masterclasses, lab workspaces, and squad channels will unlock here automatically.
             </p>
           </div>
@@ -306,50 +306,50 @@ export default function StudentDashboard({ user }) {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               to="/skills-profile"
-              className="rounded-lg border border-gray-200/90 p-4 hover:border-deep-600/40 hover:shadow-sm transition-all bg-white flex flex-col justify-between"
+              className="rounded-lg border border-gray-200/90 dark:border-gray-800 p-4 hover:border-deep-600/40 dark:hover:border-deep-500/50 hover:shadow-sm transition-all bg-card flex flex-col justify-between"
             >
               <div>
-                <div className="w-9 h-9 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-deep-600 dark:text-deep-400 mb-3">
                   <Compass size={18} />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900">1. Update Skills Profile</h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">1. Update Skills Profile</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Share your technical background, programming proficiency, and career goals to help faculty group your squad.
                 </p>
               </div>
-              <span className="text-xs font-semibold text-deep-600 mt-4 flex items-center gap-1">
+              <span className="text-xs font-semibold text-deep-600 dark:text-deep-400 mt-4 flex items-center gap-1">
                 Complete profile <ArrowRight size={12} />
               </span>
             </Link>
 
             <Link
               to="/partner-catalog"
-              className="rounded-lg border border-gray-200/90 p-4 hover:border-deep-600/40 hover:shadow-sm transition-all bg-white flex flex-col justify-between"
+              className="rounded-lg border border-gray-200/90 dark:border-gray-800 p-4 hover:border-deep-600/40 dark:hover:border-deep-500/50 hover:shadow-sm transition-all bg-card flex flex-col justify-between"
             >
               <div>
-                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
                   <BookOpen size={18} />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900">2. Explore Partner Electives</h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">2. Explore Partner Electives</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Start learning right away with certified courses provided by industry partner agencies in payments and banking.
                 </p>
               </div>
-              <span className="text-xs font-semibold text-deep-600 mt-4 flex items-center gap-1">
+              <span className="text-xs font-semibold text-deep-600 dark:text-deep-400 mt-4 flex items-center gap-1">
                 Browse catalog <ArrowRight size={12} />
               </span>
             </Link>
 
             <Link
               to="/notifications"
-              className="rounded-lg border border-gray-200/90 p-4 hover:border-deep-600/40 hover:shadow-sm transition-all bg-white flex flex-col justify-between"
+              className="rounded-lg border border-gray-200/90 dark:border-gray-800 p-4 hover:border-deep-600/40 dark:hover:border-deep-500/50 hover:shadow-sm transition-all bg-card flex flex-col justify-between"
             >
               <div>
-                <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
                   <Calendar size={18} />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900">3. Orientation Alerts</h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">3. Orientation Alerts</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Receive notifications and live calendar invites as soon as your cohort orientation session is published.
                 </p>
               </div>
@@ -380,7 +380,7 @@ export default function StudentDashboard({ user }) {
         actions={
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-1.5 sm:gap-2 bg-white dark:bg-card border border-gray-200/90 dark:border-gray-800 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm text-[11px] sm:text-xs">
-              <span className="font-semibold text-gray-900 dark:text-gray-100">{overallPercent}%</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-100" aria-live="polite">{overallPercent}%</span>
               <span className="text-gray-400">•</span>
               <span className="text-gray-600 dark:text-gray-300 hidden xs:inline">{completedLessons}/{totalLessons} lessons</span>
               <span className="text-gray-600 dark:text-gray-300 xs:hidden">{completedLessons}/{totalLessons}</span>
@@ -478,7 +478,7 @@ export default function StudentDashboard({ user }) {
           {currentModule && (
             <div className="px-5 sm:px-6 py-3.5 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
               <span className="text-gray-500 dark:text-gray-400">
-                Module Progress: <strong className="text-gray-900 dark:text-gray-100">{currentModulePercent}%</strong> ({currentModuleCompleted} of {currentLessons.length} lessons finished)
+                Module Progress: <strong className="text-gray-900 dark:text-gray-100" aria-live="polite">{currentModulePercent}%</strong> ({currentModuleCompleted} of {currentLessons.length} lessons finished)
               </span>
               <div className="w-full sm:w-48 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
@@ -692,7 +692,7 @@ export default function StudentDashboard({ user }) {
                           </div>
                           <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">{member.name}</span>
                         </div>
-                        <Badge variant="outline" className="text-[10px] font-normal capitalize shrink-0 ml-2">
+                        <Badge variant="outline" className="text-[10px] font-medium capitalize shrink-0 ml-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 dark:bg-gray-800/80">
                           {member.track || 'Student'}
                         </Badge>
                       </div>

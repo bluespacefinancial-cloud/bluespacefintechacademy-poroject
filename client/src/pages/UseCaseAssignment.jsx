@@ -255,12 +255,12 @@ export default function UseCaseAssignment() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-deep-600 mb-1">Use Case Assignment</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Use Case Assignment</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Assign live Factory use cases to squads for project delivery
             </p>
           </div>
@@ -399,34 +399,34 @@ export default function UseCaseAssignment() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">{useCases.length}</p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Use Cases</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{useCases.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Use Cases</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {useCases.filter((u) => u.status === 'assigned').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Assigned to Squads</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned to Squads</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-deep-600 dark:text-blue-400">
               {useCases.filter((u) => u.status === 'proposed').length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Proposed</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600">
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {useCases.filter((u) => u.sandboxAccess).length}
             </p>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Sandbox Access</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sandbox Access</p>
           </CardContent>
         </Card>
       </div>

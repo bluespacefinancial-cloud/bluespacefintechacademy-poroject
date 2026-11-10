@@ -30,5 +30,97 @@ export default function QuizManagement() {
     if (saveError) setError(saveError.message)
     else { setQuestions((current) => [...current, data]); setForm(empty); setMessage('Question added.') }
   }
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6"><h1 className="text-2xl font-bold text-deep-600">Quiz Authoring</h1><p className="text-sm text-gray-500">Create assessment questions for student attempts.</p></div>{error && <p className="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}{message && <p className="mb-4 rounded bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}<Card className="mb-6"><CardHeader><CardTitle className="text-sm">Assessment</CardTitle></CardHeader><CardContent><Select value={assessmentId} onValueChange={setAssessmentId}><SelectTrigger><SelectValue placeholder="Select assessment" /></SelectTrigger><SelectContent>{assessments.map((assessment) => <SelectItem key={assessment.id} value={String(assessment.id)}>{assessment.title}</SelectItem>)}</SelectContent></Select></CardContent></Card>{assessmentId && <div className="grid gap-6 lg:grid-cols-2"><Card><CardHeader><CardTitle className="text-sm">Add question</CardTitle></CardHeader><CardContent><form onSubmit={addQuestion} className="space-y-3"><textarea required rows={3} placeholder="Question prompt" value={form.prompt} onChange={(event) => setForm({ ...form, prompt: event.target.value })} className="w-full rounded border p-2 text-sm" /><Select value={form.question_type} onValueChange={(value) => setForm({ ...form, question_type: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="single_choice">Single choice</SelectItem><SelectItem value="multiple_choice">Multiple choice</SelectItem><SelectItem value="short_answer">Short answer</SelectItem></SelectContent></Select>{form.question_type !== 'short_answer' && <textarea required rows={4} placeholder="One option per line" value={form.options} onChange={(event) => setForm({ ...form, options: event.target.value })} className="w-full rounded border p-2 text-sm" />}<Input placeholder="Correct answer (exact option or answer)" value={form.correct_answer} onChange={(event) => setForm({ ...form, correct_answer: event.target.value })} /><Input type="number" min="1" value={form.points} onChange={(event) => setForm({ ...form, points: event.target.value })} /><Button type="submit"><Plus size={14} className="mr-2" />Add question</Button></form></CardContent></Card><Card><CardHeader><CardTitle className="text-sm">Questions ({questions.length})</CardTitle></CardHeader><CardContent className="space-y-2">{questions.map((question, index) => <div key={question.id} className="rounded border p-3"><p className="text-sm">{index + 1}. {question.prompt}</p><p className="mt-1 text-xs text-gray-500">{question.question_type} · {question.points} point{question.points === 1 ? '' : 's'}</p></div>)}</CardContent></Card></div>}</div>
+  return (
+    <div className="w-full space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Quiz Authoring</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Create assessment questions for student attempts.</p>
+      </div>
+      {error && <p className="mb-4 rounded bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+      {message && <p className="mb-4 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
+      <Card className="mb-6 dark:border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-sm">Assessment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={assessmentId} onValueChange={setAssessmentId}>
+            <SelectTrigger className="dark:border-gray-800"><SelectValue placeholder="Select assessment" /></SelectTrigger>
+            <SelectContent>
+              {assessments.map((assessment) => (
+                <SelectItem key={assessment.id} value={String(assessment.id)}>
+                  {assessment.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+      {assessmentId && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card className="dark:border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-sm">Add question</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={addQuestion} className="space-y-3">
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Question prompt"
+                  value={form.prompt}
+                  onChange={(event) => setForm({ ...form, prompt: event.target.value })}
+                  className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                />
+                <Select value={form.question_type} onValueChange={(value) => setForm({ ...form, question_type: value })}>
+                  <SelectTrigger className="dark:border-gray-800"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single_choice">Single choice</SelectItem>
+                    <SelectItem value="multiple_choice">Multiple choice</SelectItem>
+                    <SelectItem value="short_answer">Short answer</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.question_type !== 'short_answer' && (
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="One option per line"
+                    value={form.options}
+                    onChange={(event) => setForm({ ...form, options: event.target.value })}
+                    className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                  />
+                )}
+                <Input
+                  placeholder="Correct answer (exact option or answer)"
+                  value={form.correct_answer}
+                  onChange={(event) => setForm({ ...form, correct_answer: event.target.value })}
+                />
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.points}
+                  onChange={(event) => setForm({ ...form, points: event.target.value })}
+                />
+                <Button type="submit"><Plus size={14} className="mr-2" />Add question</Button>
+              </form>
+            </CardContent>
+          </Card>
+          <Card className="dark:border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-sm">Questions ({questions.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {questions.map((question, index) => (
+                <div key={question.id} className="rounded border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-3">
+                  <p className="text-sm text-gray-900 dark:text-white">{index + 1}. {question.prompt}</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {question.question_type} · {question.points} point{question.points === 1 ? '' : 's'}
+                  </p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  )
 }

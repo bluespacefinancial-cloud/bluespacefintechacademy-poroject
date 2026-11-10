@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <App />
-        <Toaster position="top-right" toastOptions={{
+        <Toaster position="top-right" aria-label="Notifications" toastOptions={{
           duration: 3000,
           style: {
             fontSize: '13px',

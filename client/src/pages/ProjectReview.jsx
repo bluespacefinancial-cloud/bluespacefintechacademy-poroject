@@ -31,5 +31,88 @@ export default function ProjectReview() {
   }
   const filtered = useMemo(() => items.filter((item) => filter === 'all' || item.status === filter), [items, filter])
 
-  return <div className="min-h-screen bg-gray-50"><div className="mb-6"><h1 className="text-2xl font-bold text-deep-600">Project Review</h1><p className="text-sm text-gray-500">Review sprint evidence and provide project feedback.</p></div>{error && <p className="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="mb-4 flex gap-2"><select className="rounded border p-2 text-sm" value={filter} onChange={(event) => setFilter(event.target.value)}><option value="submitted">Pending review</option><option value="accepted">Accepted</option><option value="remediation">Remediation</option><option value="all">All evidence</option></select></div><div className="grid gap-6 lg:grid-cols-3"><Card><CardHeader><CardTitle className="text-sm">Deliverables ({filtered.length})</CardTitle></CardHeader><CardContent className="space-y-2">{filtered.map((item) => <button key={item.id} type="button" onClick={() => choose(item)} className={`w-full rounded border p-3 text-left ${selected?.id === item.id ? 'border-brand-300 bg-brand-50' : 'border-gray-100'}`}><p className="text-sm font-medium">{item.title}</p><p className="text-xs text-gray-500">{item.users?.name || item.users?.email || 'Student'} · Sprint {item.sprints?.sprint_number}</p><Badge variant="outline" className="mt-2">{item.status}</Badge></button>)}{filtered.length === 0 && <p className="text-sm text-gray-500">No deliverables in this status.</p>}</CardContent></Card><Card className="lg:col-span-2"><CardHeader><CardTitle className="text-sm">{selected?.title || 'Select a deliverable'}</CardTitle></CardHeader>{selected ? <CardContent className="space-y-4"><p className="text-sm text-gray-600">{selected.description}</p>{selected.evidence_url && <a className="text-sm text-brand-700 hover:underline" href={selected.evidence_url} target="_blank" rel="noreferrer">Open evidence</a>}<Input type="number" min="0" max="100" placeholder="Score" value={score} onChange={(event) => setScore(event.target.value)} /><textarea rows={4} className="w-full rounded border p-2 text-sm" placeholder="Feedback" value={feedback} onChange={(event) => setFeedback(event.target.value)} /><div className="flex gap-2"><Button onClick={() => review('accepted')}><CheckCircle size={14} className="mr-1" />Accept</Button><Button variant="outline" onClick={() => review('remediation')}>Request remediation</Button></div></CardContent> : <CardContent className="py-16 text-center text-sm text-gray-500"><ClipboardList size={24} className="mx-auto mb-2" />Select evidence to review.</CardContent>}</Card></div></div>
+  return (
+    <div className="w-full space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Project Review</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Review sprint evidence and provide project feedback.</p>
+      </div>
+      {error && <p className="mb-4 rounded bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/50">{error}</p>}
+      <div className="mb-4 flex gap-2">
+        <select
+          className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+          value={filter}
+          onChange={(event) => setFilter(event.target.value)}
+        >
+          <option value="submitted">Pending review</option>
+          <option value="accepted">Accepted</option>
+          <option value="remediation">Remediation</option>
+          <option value="all">All evidence</option>
+        </select>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="dark:border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm">Deliverables ({filtered.length})</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {filtered.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => choose(item)}
+                className={`w-full rounded border p-3 text-left transition-colors ${
+                  selected?.id === item.id
+                    ? 'border-deep-600 bg-deep-50 dark:border-deep-500 dark:bg-deep-950/40'
+                    : 'border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/60'
+                }`}
+              >
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{item.title}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {item.users?.name || item.users?.email || 'Student'} · Sprint {item.sprints?.sprint_number}
+                </p>
+                <Badge variant="outline" className="mt-2">{item.status}</Badge>
+              </button>
+            ))}
+            {filtered.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">No deliverables in this status.</p>}
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2 dark:border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm">{selected?.title || 'Select a deliverable'}</CardTitle>
+          </CardHeader>
+          {selected ? (
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">{selected.description}</p>
+              {selected.evidence_url && (
+                <a className="text-sm text-deep-600 dark:text-blue-400 hover:underline" href={selected.evidence_url} target="_blank" rel="noreferrer">
+                  Open evidence
+                </a>
+              )}
+              <Input type="number" min="0" max="100" placeholder="Score" value={score} onChange={(event) => setScore(event.target.value)} />
+              <textarea
+                rows={4}
+                className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                placeholder="Feedback"
+                value={feedback}
+                onChange={(event) => setFeedback(event.target.value)}
+              />
+              <div className="flex gap-2">
+                <Button onClick={() => review('accepted')}>
+                  <CheckCircle size={14} className="mr-1" />
+                  Accept
+                </Button>
+                <Button variant="outline" onClick={() => review('remediation')}>Request remediation</Button>
+              </div>
+            </CardContent>
+          ) : (
+            <CardContent className="py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+              <ClipboardList size={24} className="mx-auto mb-2" />
+              Select evidence to review.
+            </CardContent>
+          )}
+        </Card>
+      </div>
+    </div>
+  )
 }

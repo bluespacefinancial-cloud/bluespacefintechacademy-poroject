@@ -171,8 +171,8 @@ export default function PartnerCourseLearning() {
   const isDone = (lessonId) => progress.some((item) => item.lesson_id === lessonId && item.is_completed)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6">
+      <div className="mx-auto max-w-6xl">
         <Breadcrumb
           items={[
             { to: '/partner-catalog', label: 'Partner Catalog' },
@@ -184,16 +184,16 @@ export default function PartnerCourseLearning() {
             <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />
           )}
           <div>
-            <h1 className="text-2xl font-bold text-deep-600">{course.title}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{course.title}</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {course.partners?.name}
               {lessons.length > 0 ? ` · ${completedCount}/${lessons.length} lessons complete` : ''}
             </p>
           </div>
         </div>
 
-        {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+        {error && <p role="alert" className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+        {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
 
         {lessons.length === 0 ? (
           <Card>

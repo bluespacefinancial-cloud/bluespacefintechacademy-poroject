@@ -254,13 +254,13 @@ export default function Progress() {
       {/* Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, i) => (
-          <Card key={i} className="border border-gray-200/90 shadow-sm bg-white">
+          <Card key={i} className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wider font-semibold text-gray-500">
+                <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400">
                   {stat.label}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
               </div>
               <div
                 className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${stat.bg}`}
@@ -273,23 +273,23 @@ export default function Progress() {
       </div>
 
       {/* Achievement & Mastery Badges */}
-      <Card className="border border-gray-200/90 shadow-sm bg-white overflow-hidden">
-        <CardHeader className="pb-3 border-b border-gray-100 bg-gray-50/40">
+      <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card overflow-hidden">
+        <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0000ff]">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-[#0000ff] dark:text-blue-400">
                 <Trophy size={15} />
               </div>
               <div>
-                <CardTitle className="text-sm font-bold text-gray-900">
+                <CardTitle className="text-sm font-bold text-gray-900 dark:text-white">
                   Achievement Badges & Milestones
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500 mt-0.5">
+                <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Recognition for technical deliverables, lab mastery, and partner coursework
                 </CardDescription>
               </div>
             </div>
-            <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50/50">
+            <Badge variant="outline" className="text-xs border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/30">
               4 of 6 Earned
             </Badge>
           </div>
@@ -350,7 +350,7 @@ export default function Progress() {
                 key={ach.id}
                 achievement={ach}
                 badgeSize="sm"
-                className="bg-white border-gray-200 shadow-sm hover:border-[#0000ff]/40 hover:shadow-md transition-all text-center py-3.5 px-2"
+                className="bg-card border-gray-200 dark:border-gray-800 shadow-sm hover:border-[#0000ff]/40 dark:hover:border-blue-500/50 hover:shadow-md transition-all text-center py-3.5 px-2"
               />
             ))}
           </div>
@@ -361,19 +361,19 @@ export default function Progress() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Domain Progress */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-gray-100">
+          <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
+            <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <BarChart3 size={15} className="text-deep-600" />
+                  <CardTitle className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <BarChart3 size={15} className="text-deep-600 dark:text-blue-400" />
                     Fintech Domain Progress
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Completion rate across financial services domains in your cohort
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs font-semibold text-gray-700">
+                <Badge variant="outline" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                   {domains.length} Domains
                 </Badge>
               </div>
@@ -382,8 +382,8 @@ export default function Progress() {
               {domains.length === 0 ? (
                 <div className="py-8 text-center space-y-2">
                   <AlertCircle size={18} className="text-gray-400 mx-auto" />
-                  <p className="text-xs font-bold text-gray-800">No active domain modules found</p>
-                  <p className="text-[11px] text-gray-500">
+                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">No active domain modules found</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
                     Domain modules will appear here once faculty publish curriculum for your cohort.
                   </p>
                 </div>
@@ -399,13 +399,13 @@ export default function Progress() {
                           >
                             {domain.label}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
                             {domain.completed}/{domain.enrollment} lessons completed
                           </span>
                         </div>
-                        <span className="text-xs font-bold text-gray-900">{domain.passRate}%</span>
+                        <span className="text-xs font-bold text-gray-900 dark:text-white">{domain.passRate}%</span>
                       </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${style.fill}`}
                           style={{ width: `${domain.passRate}%` }}
@@ -419,10 +419,10 @@ export default function Progress() {
           </Card>
 
           {/* Quick Learning Note */}
-          <div className="rounded-xl border border-gray-200/90 bg-gray-50/60 p-4 text-xs text-gray-600 flex items-start gap-3">
-            <CheckCircle2 size={16} className="text-deep-600 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-900/40 p-4 text-xs text-gray-600 dark:text-gray-300 flex items-start gap-3">
+            <CheckCircle2 size={16} className="text-deep-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-semibold text-gray-900">Milestone Criteria</p>
+              <p className="font-semibold text-gray-900 dark:text-white">Milestone Criteria</p>
               <p className="leading-relaxed">
                 Progression to subsequent stages requires minimum 80% lesson completion, active squad sprint participation, and submission of assigned hands-on lab code.
               </p>
@@ -432,12 +432,12 @@ export default function Progress() {
 
         {/* Learning Stages Roadmap */}
         <div>
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-gray-100">
-              <CardTitle className="text-sm font-bold text-gray-900">
+          <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
+            <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+              <CardTitle className="text-sm font-bold text-gray-900 dark:text-white">
                 Academy Stages
               </CardTitle>
-              <CardDescription className="text-xs text-gray-500 mt-0.5">
+              <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 16-Week structured progression
               </CardDescription>
             </CardHeader>
@@ -450,10 +450,10 @@ export default function Progress() {
                     key={stage.key}
                     className={`rounded-xl border p-3.5 space-y-1.5 transition-colors ${
                       isActive
-                        ? 'border-deep-600 bg-deep-50/30'
+                        ? 'border-deep-600 dark:border-blue-500 bg-deep-50/30 dark:bg-blue-950/30'
                         : isCompleted
-                        ? 'border-emerald-200 bg-emerald-50/20'
-                        : 'border-gray-200/90 bg-white'
+                        ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/20 dark:bg-emerald-950/20'
+                        : 'border-gray-200/90 dark:border-gray-800 bg-card'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -464,29 +464,29 @@ export default function Progress() {
                               ? 'bg-emerald-600 text-white'
                               : isActive
                               ? 'bg-deep-600 text-white'
-                              : 'bg-gray-100 text-gray-500'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                           }`}
                         >
                           {i + 1}
                         </div>
-                        <span className="text-xs font-bold text-gray-900">{stage.label}</span>
+                        <span className="text-xs font-bold text-gray-900 dark:text-white">{stage.label}</span>
                       </div>
                       <Badge
                         variant="outline"
                         className={`text-[10px] capitalize font-medium ${
                           isCompleted
-                            ? 'text-emerald-700 border-emerald-200'
+                            ? 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/60'
                             : isActive
-                            ? 'text-deep-700 border-deep-200'
-                            : 'text-gray-500 border-gray-200'
+                            ? 'text-deep-700 dark:text-blue-400 border-deep-200 dark:border-blue-900/60'
+                            : 'text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-800'
                         }`}
                       >
                         {stage.status}
                       </Badge>
                     </div>
 
-                    <p className="text-[11px] font-semibold text-deep-700">{stage.weeks}</p>
-                    <p className="text-[11px] text-gray-500 leading-normal">{stage.desc}</p>
+                    <p className="text-[11px] font-semibold text-deep-700 dark:text-blue-400">{stage.weeks}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">{stage.desc}</p>
                   </div>
                 )
               })}

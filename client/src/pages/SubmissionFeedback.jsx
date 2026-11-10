@@ -82,10 +82,10 @@ export default function SubmissionFeedback() {
 
   if (loading || !submission) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-full py-16 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Loading submission...</span>
+          <div className="w-8 h-8 border-2 border-deep-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-500 dark:text-gray-400">Loading submission...</span>
         </div>
       </div>
     )
@@ -97,23 +97,23 @@ export default function SubmissionFeedback() {
   const itemDomain = submission.labs?.lessons?.modules?.domain || ''
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full space-y-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-medium text-deep-600 hover:text-deep-700"
+              className="flex items-center gap-2 text-sm font-medium text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300"
             >
               <ArrowLeft size={16} /> Back
             </button>
-            <h1 className="ml-4 text-2xl font-bold text-deep-600">Submission Feedback</h1>
+            <h1 className="ml-4 text-2xl font-bold text-gray-900 dark:text-white">Submission Feedback</h1>
           </div>
           <Badge variant={statusConfig.variant} className={statusConfig.color}>
             {statusConfig.label}
           </Badge>
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
           {itemTitle} • {isLab ? 'Lab' : 'Assessment'} {itemDomain ? `· ${itemDomain}` : ''}
         </p>
       </div>

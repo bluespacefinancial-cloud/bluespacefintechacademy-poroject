@@ -158,16 +158,16 @@ export default function LabWorkspace() {
 
       {loading ? (
         <div className="py-20 text-center">
-          <p className="text-sm font-medium text-gray-500">Loading your labs...</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading your labs...</p>
         </div>
       ) : orderedLabs.length === 0 ? (
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+        <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
           <div className="py-16 text-center px-4 max-w-md mx-auto">
-            <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-3">
+            <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-3">
               <BookOpen size={20} />
             </div>
-            <h3 className="text-base font-bold text-gray-900">No labs assigned yet</h3>
-            <p className="mt-1.5 text-xs sm:text-sm text-gray-500 leading-relaxed">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">No labs assigned yet</h3>
+            <p className="mt-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
               Hands-on lab exercises will appear here as your cohort progresses through each learning module.
             </p>
             <div className="mt-5">
@@ -183,14 +183,14 @@ export default function LabWorkspace() {
             const submission = submissions[lab.id]
             const deadline = getDeadlineInfo(lab.due_date)
             return (
-              <Card key={lab.id} className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-                <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-gray-100">
+              <Card key={lab.id} className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+                <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
                   <div className="min-w-0 flex-1">
-                    <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 truncate">
-                      <FileText size={16} className="text-deep-600 shrink-0" />
+                    <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white truncate">
+                      <FileText size={16} className="text-deep-600 dark:text-blue-400 shrink-0" />
                       {lab.title}
                     </h3>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                       <span className="truncate">{lab.module?.title || lab.lesson?.title}</span>
                       <span>•</span>
                       <span>{lab.max_score} pts</span>
@@ -210,18 +210,18 @@ export default function LabWorkspace() {
                 </div>
                 <CardContent className="p-5 space-y-4">
                   {lab.instructions && (
-                    <details className="rounded-lg border border-gray-100 p-3 bg-gray-50/50">
-                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 hover:text-deep-700">
+                    <details className="rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-gray-50/50 dark:bg-gray-900/60">
+                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300">
                         Read instructions
                       </summary>
-                      <div className="mt-3 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-gray-600">
+                      <div className="mt-3 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-300">
                         {lab.instructions}
                       </div>
                     </details>
                   )}
                   {lab.starter_code && (
-                    <details className="rounded-lg border border-gray-100 p-3 bg-gray-50/50">
-                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 hover:text-deep-700">
+                    <details className="rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-gray-50/50 dark:bg-gray-900/60">
+                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300">
                         View starter code
                       </summary>
                       <pre className="mt-3 max-h-64 overflow-auto rounded-lg bg-gray-900 p-3 text-xs text-gray-100 font-mono">
@@ -230,13 +230,13 @@ export default function LabWorkspace() {
                     </details>
                   )}
                   {submission?.feedback && (
-                    <div className="rounded-lg bg-blue-50/60 border border-blue-100 p-3.5 text-xs sm:text-sm text-gray-800">
-                      <p className="font-semibold text-deep-900 mb-1">Reviewer feedback</p>
-                      <p className="text-gray-700">{submission.feedback}</p>
+                    <div className="rounded-lg bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 p-3.5 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
+                      <p className="font-semibold text-deep-900 dark:text-blue-300 mb-1">Reviewer feedback</p>
+                      <p className="text-gray-700 dark:text-gray-300">{submission.feedback}</p>
                     </div>
                   )}
                   {submission?.score !== null && submission?.score !== undefined && (
-                    <p className="text-xs sm:text-sm font-semibold text-emerald-700">
+                    <p className="text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                       Score: {submission.score}/{lab.max_score}
                     </p>
                   )}

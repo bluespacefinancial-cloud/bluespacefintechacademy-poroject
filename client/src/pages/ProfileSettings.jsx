@@ -88,6 +88,7 @@ export default function ProfileSettings() {
   const [savingAccount, setSavingAccount] = useState(false)
   const [savingSkills, setSavingSkills] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState(0)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
@@ -232,6 +233,16 @@ export default function ProfileSettings() {
     }
   }
 
+  const calculatePasswordStrength = (password) => {
+    if (!password) return 0
+    let strength = 0
+    if (password.length >= 8) strength += 25
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25
+    if (/\d/.test(password)) strength += 25
+    if (/[^A-Za-z0-9]/.test(password)) strength += 25
+    return strength
+  }
+
   const handlePasswordChange = async (e) => {
     e.preventDefault()
     if (passwordForm.new_password !== passwordForm.confirm_password) {
@@ -354,7 +365,7 @@ export default function ProfileSettings() {
 
       {/* Alerts */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-800 flex items-start gap-2">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-800 flex items-start gap-2">
           <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600" />
           <span>{error}</span>
         </div>
@@ -960,9 +971,44 @@ export default function ProfileSettings() {
                     required
                     placeholder="At least 8 characters"
                     value={passwordForm.new_password}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setPasswordForm({ ...passwordForm, new_password: val })
+                      setPasswordStrength(calculatePasswordStrength(val))
+                    }}
                     className="text-xs"
                   />
+                  {passwordStrength > 0 && (
+                    <div className="mt-1 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            passwordStrength < 40
+                              ? 'bg-red-500'
+                              : passwordStrength < 70
+                              ? 'bg-amber-500'
+                              : 'bg-emerald-500'
+                          }`}
+                          style={{ width: `${passwordStrength}%` }}
+                        />
+                      </div>
+                      <span
+                        className={`text-[10px] font-medium ${
+                          passwordStrength < 40
+                            ? 'text-red-600'
+                            : passwordStrength < 70
+                            ? 'text-amber-600'
+                            : 'text-emerald-600'
+                        }`}
+                      >
+                        {passwordStrength < 40
+                          ? 'Weak'
+                          : passwordStrength < 70
+                          ? 'Fair'
+                          : 'Strong'}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div>

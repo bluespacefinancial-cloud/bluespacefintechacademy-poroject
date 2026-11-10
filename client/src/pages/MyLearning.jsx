@@ -193,10 +193,10 @@ export default function MyLearning() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-full min-h-[300px] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Loading your learning...</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">Loading your learning...</span>
         </div>
       </div>
     )
@@ -204,10 +204,10 @@ export default function MyLearning() {
 
   if (!modules || modules.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="w-full">
         <div className="text-center py-20">
-          <h1 className="text-2xl font-bold text-deep-600 mb-2">No modules found</h1>
-          <p className="text-sm text-gray-500">You are not enrolled in any cohort yet.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No modules found</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">You are not enrolled in any cohort yet.</p>
         </div>
       </div>
     )
@@ -216,10 +216,10 @@ export default function MyLearning() {
   const moduleLessons = lessons.filter(l => l.module_id === currentModule.id)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-deep-600 mb-2">My Learning</h1>
-        <p className="text-sm text-gray-500">
+    <div className="w-full space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">My Learning</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Your learning path through the BlueSPACE Fintech Academy framework
         </p>
       </div>
@@ -229,8 +229,8 @@ export default function MyLearning() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-deep-600">{overallStats.completion}%</p>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Overall Completion</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{overallStats.completion}%</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Overall Completion</p>
               </div>
               <div className="h-8 w-8 rounded-full border-4 border-brand-600 border-t-transparent flex items-center justify-center">
                 <ChevronRight size={14} className="text-brand-600" />
@@ -242,24 +242,11 @@ export default function MyLearning() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-deep-600">{overallStats.labsComplete}</p>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Lessons Complete</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{overallStats.labsComplete}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lessons Complete</p>
               </div>
-              <div className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center">
-                <BookOpen size={14} className="text-brand-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold text-deep-600">{currentModule?.domain || 'All'}</p>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Current Domain</p>
-              </div>
-              <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                <PlayCircle size={14} className="text-emerald-600" />
+              <div className="h-8 w-8 rounded-full bg-brand-100 dark:bg-blue-950/60 flex items-center justify-center">
+                <BookOpen size={14} className="text-brand-600 dark:text-blue-400" />
               </div>
             </div>
           </CardContent>
@@ -268,13 +255,26 @@ export default function MyLearning() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-deep-600">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{currentModule?.domain || 'All'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Domain</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center">
+                <PlayCircle size={14} className="text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {currentModule?.week_start ? `Week ${currentModule.week_start}` : 'Week 1'}
                 </p>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Current Week</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Week</p>
               </div>
-              <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
-                <Clock size={14} className="text-amber-600" />
+              <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center">
+                <Clock size={14} className="text-amber-600 dark:text-amber-400" />
               </div>
             </div>
           </CardContent>
@@ -287,12 +287,12 @@ export default function MyLearning() {
             <div>
               <h2
                 id="course-modules-heading"
-                className="flex items-center gap-2 text-sm font-semibold text-deep-600"
+                className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white"
               >
                 <BookOpen size={14} />
                 Course Modules
               </h2>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Choose a book to open its module and lesson list.
               </p>
             </div>
@@ -385,12 +385,12 @@ export default function MyLearning() {
           <div
             ref={moduleDetailRef}
             id="module-detail"
-            className="scroll-mt-24 border-t border-gray-200/80 pt-8"
+            className="scroll-mt-24 border-t border-gray-200/80 dark:border-gray-800 pt-8"
           >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold text-deep-600">{currentModule.title}</h2>
-                <p className="text-sm text-gray-500">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{currentModule.title}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {STAGE_LABELS[currentModule.stage]}
                   {currentModule.domain ? ` · ${currentModule.domain}` : ''}
                   {currentModule.week_start ? ` · Week ${currentModule.week_start}` : ''}
@@ -414,17 +414,17 @@ export default function MyLearning() {
                   <Card
                     key={lesson.id}
                     onClick={() => handleLessonClick(lesson)}
-                    className={`cursor-pointer hover:border-brand-200 transition-colors duration-150 ${
-                      isCompleted ? 'border-brand-100 bg-brand-50' : ''
+                    className={`cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150 ${
+                      isCompleted ? 'border-brand-100 dark:border-blue-900/50 bg-brand-50/50 dark:bg-blue-950/20' : ''
                     }`}
                   >
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
                         <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
                           {isCompleted ? (
-                            <CheckCircle className="text-white" />
+                            <CheckCircle className="text-emerald-500" />
                           ) : (
-                            <PlayCircle size={14} className="text-brand-600" />
+                            <PlayCircle size={14} className="text-brand-600 dark:text-blue-400" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -432,7 +432,7 @@ export default function MyLearning() {
                             <CardTitle className="text-sm">{lesson.title}</CardTitle>
                             <Badge className={LESSON_TYPE_COLORS[lesson.type]}>{lesson.type}</Badge>
                           </div>
-                          <p className="text-[10px] text-gray-500">{formatTime(lesson.duration_minutes)}</p>
+                          <p className="text-[10px] text-gray-500 dark:text-gray-400">{formatTime(lesson.duration_minutes)}</p>
                         </div>
                       </div>
                       <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleLessonClick(lesson) }}>

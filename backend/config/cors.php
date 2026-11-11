@@ -16,6 +16,11 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    // Bearer tokens travel on cross-origin fetch calls (Vercel frontend ->
+    // PHP API host). Credentials must be enabled so the Authorization header
+    // is sent. With credentials on, allowed_origins must be a list of
+    // specific origins, never '*'. Set CORS_ALLOWED_ORIGINS to the
+    // production frontend origin before deploying.
+    'supports_credentials' => true,
 
 ];

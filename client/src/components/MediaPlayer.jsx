@@ -151,7 +151,9 @@ export default function MediaPlayer({
       }
       if (mediaRef.current) {
         mediaRef.current.pause()
-        mediaRef.current.src = ''
+        // Do not clear src here: StrictMode remounts effects in development,
+        // and clearing src strands the element with an empty source because
+        // React sees an unchanged prop and never re-applies it.
       }
     }
   }, [])

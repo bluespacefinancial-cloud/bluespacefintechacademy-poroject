@@ -357,9 +357,7 @@ and do not describe this schema. Do not run `php artisan migrate` here.
 
 ### Squad, enrolment, and user management
 
-- `squads` RLS permits Instructor and Administrator writes; `SquadManagement`
-  intentionally limits the UI to Administrators and shows a read-only notice
-  for Instructors.
+- `squads` RLS permits Instructor and Administrator writes; `SquadManagement` exposes squad creation and member assignment to both roles.
 - `enrolments` management is Administrator-only.
 - Administrators manage roles, activation and account deletion from
   `UserManagement`. The `administrators manage users` policy provides the write
@@ -419,6 +417,15 @@ The complete surface is in `backend/routes/api.php`.
 | `App\Support\AuthStore` | Service-role database access, opaque token creation, session lookup, user lookup |
 | `App\Support\Jwt` | HS256 signing for PostgREST |
 | `App\Http\Middleware\AuthenticateToken` | Reads the bearer token, validates expiry and active status, sets `auth_user` |
+| `App\Http\Middleware\SecurityHeaders` | Emits CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, HSTS (HTTPS only) on every response |
+
+### updateUser and token revocation
+
+`POST /api/auth/update-user` accepts password, email, and profile metadata. When
+the password or email changes, every bearer token issued to that account is
+revoked (`AuthStore::deleteAllTokensFor`), so a stolen session cannot survive a
+credential change. Profile-only updates (name, phone, avatar) do not revoke
+tokens.
 
 ### Data proxy details
 
@@ -855,8 +862,6 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 
 ### Known gaps
 
-- Squad mutations are Administrator-only in the UI even though the `squads`
-  policy allows Instructors.
 - Dead page files: `LabsToReview.jsx`, `ProjectWorkspace.jsx`,
   `SkillsProfile.jsx`, `SubmissionFeedback.jsx`.
 - `/quiz/:assessmentId` has no UI link.
@@ -905,3 +910,94 @@ Without `is_active = 1`, login fails with "This account has been deactivated."
 - **Deactivated accounts are blocked at both layers** — RLS returns no rows and
   `AuthContext` clears the session.
 - **Rotate the JWT secret** if it is ever shared outside Laravel/PostgREST.
+- **CSP headers** are emitted by `SecurityHeaders` middleware on every response
+  (default-src 'self', script-src 'self', style-src 'self' 'unsafe-inline',
+  frame-ancestors 'none', plus HSTS over HTTPS).
+- **Failed logins** are logged at warning level (email and IP, never the
+  password) for security visibility.
+- **Token revocation:** changing a password or email via `updateUser` revokes
+  every bearer token issued to that account, so a stolen session cannot survive
+  a credential change.
+- **Token lifetime** is `LMS_TOKEN_TTL_MINUTES` (default 10080 = 7 days) and the
+  bearer token lives in `localStorage`. For a controlled cohort this is an
+  accepted residual risk mitigated by a strict CSP and short session TTL; for a
+  public launch, move to `HttpOnly` cookies and shorten the TTL before going
+  live.
+
+---
+
+## 15. Hosting Approach
+
+The application is deployed as two independent tiers:
+
+### Tier 1 — Frontend (Vercel)
+
+The React SPA is built with Vite and deployed to Vercel. `client/vercel.json`
+configures the build command, output directory (`dist`), and SPA rewrites
+(`/**` → `/index.html`). The build compiles `VITE_API_URL` into the bundle, so
+the production frontend must be rebuilt (not just re-configured) when the API
+origin changes.
+
+Build once, deploy many: the PWA service worker (`client/public/sw.js`) caches
+the SPA shell and serves `index.html` for offline navigation, with
+network-first fallback for API calls.
+
+### Tier 2 — Backend API (Laravel host)
+
+The Laravel API runs on a PHP 8.3 host with `pdo_pgsql`. Supported platforms
+include Laravel Cloud, a VPS, or any PHP-FPM host. The backend is never
+exposed without HTTPS in production.
+
+Required runtime:
+- PHP 8.3 + `pdo_pgsql` extension
+- Composer dependencies (`composer install --no-dev`)
+- `backend/php/uploads.ini` loaded (200 MB upload limit)
+- Nginx `client_max_body_size` matching the PHP limit (210 MB `post_max_size`)
+- Environment variables from `backend/.env` (never committed)
+
+### Data layer (PostgreSQL 17 + PostgREST)
+
+PostgreSQL 17 holds the academy schema, data, grants, and RLS policies
+(`database/*.sql`, applied in order). PostgREST v16 is the internal data API;
+it is **not** exposed to the internet. Only Laravel talks to PostgREST,
+signing a short-lived HS256 JWT per request.
+
+PostgreSQL can be self-hosted or managed (RDS, Cloud SQL, etc.). PostgREST
+must run privately, reachable only from the Laravel host, with the same
+`PGRST_JWT_SECRET` as Laravel.
+
+### Network topology
+
+```
+Browser (Vercel)  ──HTTPS /api──▶  Laravel API (PHP host)  ──HS256 JWT──▶  PostgREST (private)
+                                                                                      │
+                                                                                      ▼ SQL + RLS
+                                                                              PostgreSQL 17 (private)
+```
+
+CORS must list the production Vercel origin in `CORS_ALLOWED_ORIGINS` with
+`supports_credentials: true` so bearer-auth cross-origin fetches work.
+
+### Environment variable summary
+
+| Tier | Key variables |
+|------|--------------|
+| Frontend | `VITE_API_URL=https://<api-host>/api` |
+| Backend | `APP_URL`, `DB_*`, `POSTGREST_URL`, `PGRST_JWT_SECRET`, `LMS_FRONTEND_URL`, `LMS_TOKEN_TTL_MINUTES`, `LMS_RECOVERY_TTL_MINUTES`, `CORS_ALLOWED_ORIGINS`, `MAIL_*` |
+| Compose (local only) | `POSTGRES_PASSWORD`, `PGRST_JWT_SECRET`, `LMS_DB_PORT`, `LMS_REST_PORT` |
+
+Never commit `.env` files, JWTs, or database passwords.
+
+---
+
+## 14b. Pre-launch security decisions
+
+These are launch-gate decisions, not code changes:
+
+- **Launch type:** controlled cohort vs public. Public requires HttpOnly
+  cookies, shorter token TTL, and the date moves if not done.
+- **Partner at launch:** Student + Instructor + Administrator first; Partner
+  only if Phase 2 verification passes.
+- **Demo credentials:** the shared `BlueSpace2026!` password must be changed or
+  removed before any external account can log in.
+- **GitHub PAT:** the exposed PAT must be revoked before launch.

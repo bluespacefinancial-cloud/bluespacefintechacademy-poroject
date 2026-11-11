@@ -423,7 +423,7 @@ export default function ProfessionalCertificate({
               <ShieldCheck size={14} className="text-[#0000ff]" />
               Verified Academic Credential
             </span>
-            <span className="text-xs font-mono font-medium text-gray-500 hidden sm:inline">
+            <span className="text-xs font-mono font-medium text-gray-500 hidden sm:inline" style={{ fontVariantNumeric: 'tabular-nums' }}>
               Ref: {certificateNumber}
             </span>
           </div>
@@ -555,7 +555,7 @@ export default function ProfessionalCertificate({
 
           {/* Fellow Identification & Cohort */}
           <p className="text-[11px] sm:text-xs font-medium text-gray-500">
-            Fellow ID: <span className="font-mono font-bold text-gray-900">{studentId}</span>
+            Fellow ID: <span className="font-mono font-bold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{studentId}</span>
             <span className="mx-2 text-gray-300">•</span>
             {cohortName}
           </p>
@@ -639,7 +639,7 @@ export default function ProfessionalCertificate({
                 <span className="text-[9.5px] font-mono text-gray-400 uppercase tracking-wider block">
                   Serial Number
                 </span>
-                <span className="font-mono font-bold text-[#0000ff] text-xs sm:text-sm">
+                <span className="font-mono font-bold text-[#0000ff] text-xs sm:text-sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {certificateNumber}
                 </span>
               </div>

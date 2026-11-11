@@ -343,7 +343,7 @@ export default function ProfileSettings() {
         actions={
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 hidden sm:inline">
-              ID: <span className="font-mono font-medium text-gray-700">{profile.student_id || profile.id}</span>
+              ID: <span className="font-mono font-medium text-gray-700" style={{ fontVariantNumeric: 'tabular-nums' }}>{profile.student_id || profile.id}</span>
             </span>
             <Button
               type="button"
@@ -543,7 +543,7 @@ export default function ProfileSettings() {
               <CardContent className="p-4 space-y-3 text-xs text-gray-600">
                 <div className="flex justify-between items-center py-1 border-b border-gray-100">
                   <span className="text-gray-500">Student ID</span>
-                  <span className="font-mono font-semibold text-gray-900">{profile.student_id || profile.id}</span>
+                  <span className="font-mono font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{profile.student_id || profile.id}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-gray-100">
                   <span className="text-gray-500">Cohort</span>

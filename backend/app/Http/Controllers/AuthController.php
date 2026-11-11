@@ -44,14 +44,29 @@ class AuthController extends Controller
         // missing account and a wrong password, and never fall back to a weaker
         // authentication path when the password column is empty.
         if (! $user || ! is_string($user->password) || $user->password === '') {
+            Log::warning('Failed login attempt: unknown account or no password', [
+                'email' => (string) $request->input('email'),
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json(['message' => 'Invalid email or password.'], 401);
         }
 
         if (! password_verify((string) $request->input('password'), $user->password)) {
+            Log::warning('Failed login attempt: wrong password', [
+                'email' => (string) $request->input('email'),
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json(['message' => 'Invalid email or password.'], 401);
         }
 
         if ((int) $user->is_active !== 1) {
+            Log::warning('Failed login attempt: account inactive', [
+                'email' => (string) $request->input('email'),
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json(['message' => 'This account is not active in the academy.'], 403);
         }
 
@@ -112,6 +127,7 @@ class AuthController extends Controller
         }
 
         $updates = [];
+        $shouldRevokeTokens = false;
 
         if ($request->filled('password')) {
             $password = (string) $request->input('password');
@@ -122,6 +138,7 @@ class AuthController extends Controller
 
             $updates['password'] = password_hash($password, PASSWORD_BCRYPT);
             $updates['force_password_change'] = 0;
+            $shouldRevokeTokens = true;
         }
 
         if ($request->filled('email')) {
@@ -141,6 +158,7 @@ class AuthController extends Controller
             }
 
             $updates['email'] = $email;
+            $shouldRevokeTokens = true;
         }
 
         foreach (['name', 'phone', 'avatar'] as $field) {
@@ -154,6 +172,12 @@ class AuthController extends Controller
             $updates['updated_at'] = now();
             AuthStore::service(fn () => DB::table('users')->where('id', $user->id)->update($updates));
             $user = AuthStore::findUserById((int) $user->id);
+        }
+
+        // A password or email change invalidates every bearer token issued to this
+        // account, so a stolen session cannot survive a credential change.
+        if ($shouldRevokeTokens) {
+            AuthStore::deleteAllTokensFor((int) $user->id);
         }
 
         return response()->json([

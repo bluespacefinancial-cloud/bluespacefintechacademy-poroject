@@ -76,7 +76,7 @@ export default function CertificateDetail() {
           <span>Back to Certificates</span>
         </button>
 
-        <span className="text-[11px] font-mono text-slate-400">
+        <span className="text-[11px] font-mono text-slate-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
           Ref: #{cert?.certificate_number || id}
         </span>
       </div>

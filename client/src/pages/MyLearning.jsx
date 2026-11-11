@@ -20,8 +20,11 @@ import { Badge } from '../components/ui/badge'
 import { Book } from '../components/ui/book'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardTitle } from '../components/ui/card'
+import { Skeleton } from '../components/ui/skeleton'
+import { SkeletonCard } from '../components/ui/skeleton-card'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
+import { cn } from '../lib/utils'
 
 const STAGE_LABELS = {
   foundations: 'Foundations',
@@ -31,12 +34,12 @@ const STAGE_LABELS = {
 }
 
 const LESSON_TYPE_COLORS = {
-  concept: 'text-brand-700 border-brand-200',
-  demonstration: 'text-brand-700 border-brand-200',
-  video: 'text-brand-700 border-brand-200',
-  audio: 'text-purple-700 border-purple-200',
-  lab: 'text-emerald-700 border-emerald-200',
-  assessment: 'text-amber-700 border-amber-200',
+  concept: 'text-deep-700 border-deep-200 dark:text-blue-400 dark:border-blue-900/50 dark:bg-blue-950/30',
+  demonstration: 'text-deep-700 border-deep-200 dark:text-blue-400 dark:border-blue-900/50 dark:bg-blue-950/30',
+  video: 'text-deep-700 border-deep-200 dark:text-blue-400 dark:border-blue-900/50 dark:bg-blue-950/30',
+  audio: 'text-purple-700 border-purple-200 dark:text-purple-400 dark:border-purple-900/50 dark:bg-purple-950/30',
+  lab: 'text-emerald-700 border-emerald-200 dark:text-emerald-400 dark:border-emerald-900/50 dark:bg-emerald-950/30',
+  assessment: 'text-amber-700 border-amber-200 dark:text-amber-400 dark:border-amber-900/50 dark:bg-amber-950/30',
 }
 
 const MODULE_STATUS_LABELS = {
@@ -193,10 +196,59 @@ export default function MyLearning() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[300px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500 dark:text-gray-400">Loading your learning...</span>
+      <div className="w-full space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+
+        <div className="mb-8">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-6">
+            <Skeleton className="h-4 w-8" variant="rect" />
+            <Skeleton className="h-4 w-1/3" variant="text" />
+          </h2>
+          <div className="flex flex-wrap items-start gap-x-8 gap-y-10">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-[132px] sm:w-[148px] lg:w-[164px]">
+                <div className="h-40 w-full rounded-lg bg-muted animate-pulse mb-3" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-4 w-2/3" variant="text" />
+                  <div className="h-1 w-full rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse mb-2" />
+                  <Skeleton className="h-4 w-1/2" variant="text" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="scroll-mt-24 border-t border-gray-200/80 dark:border-gray-800 pt-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <Skeleton className="h-6 w-1/2" variant="text" />
+                <Skeleton className="h-4 w-1/3" variant="text" />
+              </div>
+              <Skeleton className="h-8 w-20" variant="rect" />
+            </div>
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Card key={i} className="animate-pulse cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150">
+                  <CardContent className="p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="h-8 w-8 rounded-md bg-muted animate-pulse shrink-0" />
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <Skeleton className="h-4 w-2/3" variant="text" />
+                        <Skeleton className="h-3 w-1/3" variant="text" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <Skeleton className="h-5 w-12 rounded-full" variant="rect" />
+                      <Skeleton className="h-8 w-[72px]" variant="rect" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
         </div>
       </div>
     )
@@ -418,26 +470,46 @@ export default function MyLearning() {
                       isCompleted ? 'border-brand-100 dark:border-blue-900/50 bg-brand-50/50 dark:bg-blue-950/20' : ''
                     }`}
                   >
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
+                    <CardContent className="p-4 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="h-8 w-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0">
                           {isCompleted ? (
-                            <CheckCircle className="text-emerald-500" />
+                            <CheckCircle className="text-emerald-500" size={18} />
                           ) : (
-                            <PlayCircle size={14} className="text-brand-600 dark:text-blue-400" />
+                            <PlayCircle size={18} className="text-deep-600 dark:text-blue-400" />
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm">{lesson.title}</CardTitle>
-                            <Badge className={LESSON_TYPE_COLORS[lesson.type]}>{lesson.type}</Badge>
-                          </div>
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400">{formatTime(lesson.duration_minutes)}</p>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-sm font-semibold truncate text-gray-900 dark:text-white" title={lesson.title}>
+                            {lesson.title}
+                          </CardTitle>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            {formatTime(lesson.duration_minutes)}
+                          </p>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleLessonClick(lesson) }}>
-                        {isCompleted ? 'Review' : 'Start'}
-                      </Button>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'capitalize text-[11px] font-medium shrink-0',
+                            LESSON_TYPE_COLORS[lesson.type] || 'text-gray-600 border-gray-200 dark:border-gray-700 dark:text-gray-300'
+                          )}
+                        >
+                          {lesson.type}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="shrink-0 min-w-[72px] text-xs font-semibold dark:border-gray-700 dark:hover:bg-gray-800"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleLessonClick(lesson)
+                          }}
+                        >
+                          {isCompleted ? 'Review' : 'Start'}
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 )

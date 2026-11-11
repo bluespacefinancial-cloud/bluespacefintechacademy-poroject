@@ -20,19 +20,17 @@ Start the client at <http://localhost:3000> and open the portal for the role.
 | Role | Email | Portal |
 |------|-------|--------|
 | Student | `student@bluespacefintechacademy.com` | `/student-login` |
-| Student (Ada Okonkwo) | `ada.okonkwo@bluespacefintechacademy.com` | `/student-login` |
-| Student (Kwame Asante) | `kwame.asante@bluespacefintechacademy.com` | `/student-login` |
-| Student (Zainab Yusuf) | `zainab.yusuf@bluespacefintechacademy.com` | `/student-login` |
-| Student (Emeka Ndiaye) | `emeka.ndiaye@bluespacefintechacademy.com` | `/student-login` |
-| Student (Fatima Diallo) | `fatima.diallo@bluespacefintechacademy.com` | `/student-login` |
-| Instructor (FinCore) | `fin.core@bluespacefintechacademy.com` | `/instructor-login` |
-| Instructor (FaaS) | `faas.domain@bluespacefintechacademy.com` | `/instructor-login` |
-| Instructor (FinOps) | `finops.domain@bluespacefintechacademy.com` | `/instructor-login` |
+| Instructor | `fin.core@bluespacefintechacademy.com` | `/instructor-login` |
 | Administrator | `academy.lead@bluespacefintechacademy.com` | `/admin-login` |
 | Partner | `partner@bluespacefintechacademy.com` | `/partner-login` |
 
 These are local demo credentials. Change or remove them before any shared
 deployment.
+
+`01_schema.sql` seeds additional student and instructor demo accounts for
+richer class data. `12_trim_demo_accounts.sql` removes those extra accounts
+and their dependent demo rows, leaving exactly one login per role. It is
+re-runnable: once the accounts are gone, every statement is a no-op.
 
 ---
 
@@ -250,6 +248,7 @@ order, when Docker creates the volume:
 | `09_media_assets.sql` | Service-only `media_assets` upload index; `type`, `audio_url`, `duration_seconds`, `thumbnail_url`, `caption_url` on `partner_course_lessons` |
 | `10_partner_enrolment_scope.sql` | Scopes Partner access on `partner_course_enrolments` to courses owned by the caller's organisation (students stay self-only, Administrators stay global) |
 | `11_partner_profile_update.sql` | Partners can update their own organisation profile; a guard trigger freezes identity, slug and review/approval columns |
+| `12_trim_demo_accounts.sql` | Removes the extra seeded demo accounts and their dependent demo rows, leaving one login per role (see Test Logins) |
 
 `00_bootstrap.sql` creates these API roles:
 

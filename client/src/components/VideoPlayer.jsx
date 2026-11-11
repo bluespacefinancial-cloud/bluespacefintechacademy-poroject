@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Play, Pause, Volume2, VolumeOff, Minimize, Expand, RefreshCw } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeOff, Minimize, Expand } from 'lucide-react'
+import { Skeleton } from './ui/skeleton'
 
 function getYouTubeEmbedUrl(url) {
   if (!url || typeof url !== 'string') return null
@@ -141,7 +142,7 @@ export function VideoPlayer({
         />
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-            <RefreshCw size={24} className="animate-spin text-white" />
+            <Skeleton className="h-48 w-full max-w-md" variant="rect" />
           </div>
         )}
         {!isPlaying && !loading && (

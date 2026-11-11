@@ -20,7 +20,6 @@ import {
   FileText,
   Video,
   Briefcase,
-  ListPlus,
   ChevronDown,
   ChevronUp,
   Shield,
@@ -78,7 +77,6 @@ const sidebarGroups = {
         { to: '/my-modules', icon: BookOpen, label: 'My Modules', ariaLabel: 'My Modules' },
         { to: '/grading', icon: ClipboardList, label: 'Evaluation & Grading', ariaLabel: 'Evaluation & Grading' },
         { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
-        { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring', ariaLabel: 'Quiz Authoring' },
       ],
     },
     {
@@ -129,6 +127,7 @@ const sidebarGroups = {
         { to: '/user-management', icon: Users, label: 'User Management', ariaLabel: 'User Management' },
         { to: '/cohorts', icon: GraduationCap, label: 'Cohorts', ariaLabel: 'Cohorts' },
         { to: '/enrolments', icon: Users, label: 'Enrolments', ariaLabel: 'Enrolments' },
+        { to: '/instructor-assignments', icon: User, label: 'Instructor Assignments', ariaLabel: 'Instructor Assignments' },
         { to: '/applications', icon: ClipboardList, label: 'Applications', ariaLabel: 'Applications' },
         { to: '/curriculum', icon: BookOpen, label: 'Curriculum', ariaLabel: 'Curriculum' },
       ],
@@ -153,7 +152,6 @@ const sidebarGroups = {
         { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
         { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
         { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
-        { to: '/quiz-management', icon: ListPlus, label: 'Quiz Authoring', ariaLabel: 'Quiz Authoring' },
       ],
     },
     {

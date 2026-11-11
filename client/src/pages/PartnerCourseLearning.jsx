@@ -172,123 +172,135 @@ export default function PartnerCourseLearning() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="mx-auto max-w-6xl">
-        <Breadcrumb
-          items={[
-            { to: '/partner-catalog', label: 'Partner Catalog' },
-            { label: course?.title || 'Course' },
-          ]}
-        />
-        <div className="mb-6 flex items-center gap-3">
-          {course.partners?.logo_url && (
-            <img src={course.partners.logo_url} alt="" className="h-12 w-12 object-contain" />
-          )}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{course.title}</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {course.partners?.name}
-              {lessons.length > 0 ? ` · ${completedCount}/${lessons.length} lessons complete` : ''}
-            </p>
-          </div>
+      <Breadcrumb
+        items={[
+          { to: '/partner-catalog', label: 'Partner Catalog' },
+          { label: course?.title || 'Course' },
+        ]}
+      />
+      <div className="flex items-center gap-3">
+        {course.partners?.logo_url && (
+          <img
+            src={course.partners.logo_url}
+            alt=""
+            className="h-12 w-12 object-contain rounded-lg border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-800 shrink-0"
+          />
+        )}
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate">{course.title}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {course.partners?.name}
+            {lessons.length > 0 ? ` · ${completedCount}/${lessons.length} lessons complete` : ''}
+          </p>
         </div>
+      </div>
 
-        {error && <p role="alert" className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
-        {message && <p role="status" className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
+      {error && (
+        <p role="alert" className="rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">
+          {error}
+        </p>
+      )}
+      {message && (
+        <p role="status" className="rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+          {message}
+        </p>
+      )}
 
-        {lessons.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center text-sm text-gray-500">
-              This course has no published lessons yet.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-3 lg:col-span-2">
-              {playerLesson ? (
-                <MediaPlayer
-                  key={playerLesson.id}
-                  lesson={playerLesson}
-                  user={profile}
-                  onComplete={handleComplete}
-                  progressAdapter={progressAdapter}
-                />
-              ) : isTextLesson ? (
-                <Card>
-                  <CardContent className="space-y-3 p-6">
-                    <h2 className="text-lg font-semibold text-gray-900">{selectedLesson.title}</h2>
-                    <div className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
-                      {selectedLesson.description || 'This reading lesson has no text yet.'}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant={isDone(selectedLesson.id) ? 'secondary' : 'default'}
-                      disabled={isDone(selectedLesson.id)}
-                      onClick={() => handleComplete(selectedLesson.id)}
-                    >
-                      {isDone(selectedLesson.id) ? 'Completed' : 'Mark as read'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardContent className="py-12 text-center text-sm text-gray-500">
-                    Select a lesson to begin.
-                  </CardContent>
-                </Card>
-              )}
-
-              {selectedLesson?.content_url && (
-                <a
-                  href={selectedLesson.content_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-block text-sm font-semibold text-deep-600 hover:text-deep-700"
-                >
-                  Open the lesson resource
-                </a>
-              )}
-
-              {!isTextLesson && selectedLesson?.description && (
-                <p className="whitespace-pre-line text-sm text-gray-600">{selectedLesson.description}</p>
-              )}
-            </div>
-
-            <aside>
-              <Card>
-                <CardContent className="space-y-1 p-3">
-                  <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-                    Lessons
-                  </p>
-                  {lessons.map((lesson, index) => {
-                    const done = isDone(lesson.id)
-                    const active = lesson.id === selectedLessonId
-                    return (
-                      <button
-                        key={lesson.id}
-                        type="button"
-                        onClick={() => setSelectedLessonId(lesson.id)}
-                        className={`flex w-full items-start gap-2 rounded-md p-2 text-left transition-colors ${
-                          active ? 'bg-deep-50' : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        {done ? (
-                          <CheckCircle size={16} className="mt-0.5 shrink-0 text-emerald-600" />
-                        ) : (
-                          <Circle size={16} className="mt-0.5 shrink-0 text-gray-300" />
-                        )}
-                        <span className="min-w-0">
-                          <span className="block text-[10px] font-medium text-gray-400">Lesson {index + 1}</span>
-                          <span className="block truncate text-xs font-medium text-gray-800" title={lesson.title}>{lesson.title}</span>
-                        </span>
-                      </button>
-                    )
-                  })}
+      {lessons.length === 0 ? (
+        <Card className="dark:bg-card dark:border-border">
+          <CardContent className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+            This course has no published lessons yet.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-3 w-full">
+          <div className="space-y-4 lg:col-span-2">
+            {playerLesson ? (
+              <MediaPlayer
+                key={playerLesson.id}
+                lesson={playerLesson}
+                user={profile}
+                onComplete={handleComplete}
+                progressAdapter={progressAdapter}
+              />
+            ) : isTextLesson ? (
+              <Card className="dark:bg-card dark:border-border">
+                <CardContent className="space-y-3 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{selectedLesson.title}</h2>
+                  <div className="whitespace-pre-line text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    {selectedLesson.description || 'This reading lesson has no text yet.'}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={isDone(selectedLesson.id) ? 'secondary' : 'default'}
+                    disabled={isDone(selectedLesson.id)}
+                    onClick={() => handleComplete(selectedLesson.id)}
+                  >
+                    {isDone(selectedLesson.id) ? 'Completed' : 'Mark as read'}
+                  </Button>
                 </CardContent>
               </Card>
-            </aside>
+            ) : (
+              <Card className="dark:bg-card dark:border-border">
+                <CardContent className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                  Select a lesson to begin.
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedLesson?.content_url && (
+              <a
+                href={selectedLesson.content_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block text-sm font-semibold text-deep-600 hover:text-deep-700 dark:text-deep-400 dark:hover:text-deep-300"
+              >
+                Open the lesson resource
+              </a>
+            )}
+
+            {!isTextLesson && selectedLesson?.description && (
+              <p className="whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">{selectedLesson.description}</p>
+            )}
           </div>
-        )}
-      </div>
+
+          <aside className="space-y-4">
+            <Card className="dark:bg-card dark:border-border">
+              <CardContent className="space-y-1 p-3">
+                <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  Lessons
+                </p>
+                {lessons.map((lesson, index) => {
+                  const done = isDone(lesson.id)
+                  const active = lesson.id === selectedLessonId
+                  return (
+                    <button
+                      key={lesson.id}
+                      type="button"
+                      onClick={() => setSelectedLessonId(lesson.id)}
+                      className={`flex w-full items-start gap-2 rounded-md p-2 text-left transition-colors ${
+                        active
+                          ? 'bg-deep-50 dark:bg-deep-950/40 text-deep-700 dark:text-deep-300 font-medium'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {done ? (
+                        <CheckCircle size={16} className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      ) : (
+                        <Circle size={16} className="mt-0.5 shrink-0 text-gray-300 dark:text-gray-600" />
+                      )}
+                      <span className="min-w-0">
+                        <span className="block text-[10px] font-medium text-gray-400 dark:text-gray-500">Lesson {index + 1}</span>
+                        <span className="block truncate text-xs" title={lesson.title}>{lesson.title}</span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
+      )}
     </div>
   )
 }

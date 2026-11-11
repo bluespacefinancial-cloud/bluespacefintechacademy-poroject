@@ -160,7 +160,11 @@ class QueryBuilder {
   }
 
   select(columns = '*', options = {}) {
-    this.params.set('select', columns)
+    // PostgREST rejects select strings that carry newlines or stray
+    // whitespace (PGRST100). Normalise here so every page gets a clean,
+    // single-line select regardless of how the columns are written.
+    const normalized = String(columns).replace(/\s+/g, ' ').trim()
+    this.params.set('select', normalized)
 
     if (options.count === 'exact') {
       this.countExact = true
@@ -220,6 +224,11 @@ class QueryBuilder {
     return this
   }
 
+  or(conditions) {
+    this.params.append('or', conditions)
+    return this
+  }
+
   eq(column, value) {
     return this.addFilter(column, 'eq', value)
   }
@@ -263,6 +272,11 @@ class QueryBuilder {
     return this
   }
 
+  range(from, to) {
+    this.params.set('range', `${from}-${to}`)
+    return this
+  }
+
   single() {
     this.objectMode = 'single'
     return this
@@ -282,6 +296,13 @@ class QueryBuilder {
       this.params.set('limit', '2')
     }
 
+    // Pagination belongs in the Range header, not the query string. PostgREST
+    // treats ?range=0-24 as a filter and rejects it with PGRST100.
+    const range = this.params.get('range')
+    if (range) {
+      this.params.delete('range')
+    }
+
     let path = `/data/${this.table}`
     const query = this.params.toString()
     if (query) {
@@ -295,6 +316,10 @@ class QueryBuilder {
         prefer.push('count=exact')
       }
       headers.Prefer = prefer.join(',')
+    }
+
+    if (range) {
+      headers.Range = `items=${range}`
     }
 
     const method = this.head ? 'HEAD' : this.method

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
+import { Skeleton } from '../components/ui/skeleton'
 import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 
@@ -65,7 +66,32 @@ export default function Quiz() {
       {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
       {message && <p className="mb-4 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
       {loading ? (
-        <p className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading quiz...</p>
+        <div className="max-w-3xl space-y-4 py-10">
+          <Skeleton className="h-8 w-3/4" variant="text" />
+          <Skeleton className="h-4 w-1/2" variant="text" />
+          <Card className="dark:border-gray-800 animate-pulse">
+            <CardContent className="flex items-center justify-between p-4">
+              <Skeleton className="h-4 w-1/3" variant="text" />
+              <Skeleton className="h-8 w-20" variant="rect" />
+            </CardContent>
+          </Card>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Card key={i} className="animate-pulse cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="h-8 w-8 rounded-md bg-muted animate-pulse shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Skeleton className="h-4 w-3/4" variant="text" />
+                      <Skeleton className="h-3 w-1/3" variant="text" />
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" disabled />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       ) : (
         <div className="max-w-3xl space-y-4">
           {attempt?.status === 'graded' && (

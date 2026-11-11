@@ -399,7 +399,7 @@ export default function MediaPlayer({
   if (useYouTube) {
     const youtubeDuration = duration || lesson.duration_minutes * 60
     return (
-      <div className="max-w-[960px] mx-auto rounded-xl overflow-hidden flex flex-col shadow-sm border border-gray-200/90 bg-white relative">
+      <div className="w-full rounded-xl overflow-hidden flex flex-col shadow-sm border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-850 relative">
         <div className="relative aspect-video w-full bg-black">
           <YouTubeFrame
             ref={ytRef}
@@ -588,7 +588,7 @@ export default function MediaPlayer({
   )
 
   return (
-    <div className="max-w-[960px] mx-auto rounded-xl overflow-hidden flex flex-col min-h-[400px] max-h-[600px] shadow-sm border border-gray-200/90 bg-white relative">
+    <div className="w-full rounded-xl overflow-hidden flex flex-col min-h-[400px] max-h-[600px] shadow-sm border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-850 relative">
       {/* Media Area */}
       <div
         className="relative flex-1 w-full bg-black group cursor-pointer"

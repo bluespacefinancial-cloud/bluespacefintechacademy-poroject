@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Search, Edit3, X, Trash2, Plus } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import {
@@ -41,6 +41,10 @@ export default function Enrolments() {
   const [search, setSearch] = useState('')
   const [filterTrack, setFilterTrack] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(25)
+  const [total, setTotal] = useState(0)
+  const prevFilters = useRef(`${search}|${filterTrack}|${filterStatus}`)
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [saving, setSaving] = useState(null)
@@ -49,13 +53,22 @@ export default function Enrolments() {
 
   useEffect(() => {
     loadEnrolments()
-  }, [])
+  }, [search, filterTrack, filterStatus, page, pageSize])
 
   const loadEnrolments = async () => {
+    const currentFilters = `${search}|${filterTrack}|${filterStatus}`
+    if (currentFilters !== prevFilters.current) {
+      prevFilters.current = currentFilters
+      setPage(1)
+    }
+
     try {
-      const { data, error } = await api
+      const from = (page - 1) * pageSize
+      const to = page * pageSize - 1
+      let q = api
         .from('enrolments')
-        .select(`
+        .select(
+          `
           *,
           users (
             name,
@@ -63,9 +76,30 @@ export default function Enrolments() {
           ),
           cohorts (
             name
+          ),
+          squads (
+            name
           )
-        `)
+        `,
+          { count: 'exact' }
+        )
         .order('created_at', { ascending: false })
+        .range(from, to)
+
+      if (filterTrack !== 'all') {
+        q = q.eq('track', filterTrack)
+      }
+
+      if (filterStatus !== 'all') {
+        q = q.eq('status', filterStatus)
+      }
+
+      if (search.trim()) {
+        const term = `%${search.trim()}%`
+        q = q.or(`users.name.ilike.${term},users.email.ilike.${term}`)
+      }
+
+      const { data, error, count } = await q
 
       if (error) throw error
 
@@ -75,16 +109,21 @@ export default function Enrolments() {
         email: e.users?.email || 'Unknown',
         cohort: e.cohorts?.name || 'Unknown',
         track: e.track,
-        squad: e.squad_id ? 'Squad Alpha' : 'Unassigned',
+        squad: e.squads?.name || 'Unassigned',
         status: e.status,
         enrolledAt: e.created_at,
       }))
 
       setEnrolments(dataWithNames)
+      setTotal(count ?? 0)
     } catch (err) {
       console.error('Error loading enrolments:', err)
     }
   }
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const startIndex = (page - 1) * pageSize + 1
+  const endIndex = Math.min(page * pageSize, total)
 
   const filtered = enrolments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase()) || e.email.toLowerCase().includes(search.toLowerCase())
@@ -428,6 +467,57 @@ export default function Enrolments() {
             </Card>
           ))}
       </div>
+
+      {total > 0 && (
+        <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Showing {startIndex}–{endIndex} of {total} enrolments
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Prev
+            </Button>
+            {[...Array(totalPages)].map((_, i) => {
+              const p = i + 1
+              const show =
+                p === 1 ||
+                p === totalPages ||
+                (p >= page - 2 && p <= page + 2)
+              if (!show) return null
+              if (p === page - 3 || p === page + 3) {
+                return (
+                  <span key={p} className="text-xs text-gray-400 px-2">
+                    …
+                  </span>
+                )
+              }
+              return (
+                <Button
+                  key={p}
+                  size="sm"
+                  variant={page === p ? 'default' : 'outline'}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              )
+            })}
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -9,8 +9,15 @@ import { api } from '../lib/backend'
 import WelcomeGuide from '../components/WelcomeGuide'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
 import MetricCard from '../components/dashboard/MetricCard'
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart as RechartsBarChart, Bar,
+  PieChart as RechartsPieChart, Pie, Cell,
+} from 'recharts'
 
-const emptyData = { activeCohorts: 0, activeFellows: 0, pendingApplications: 0, partnerReviews: 0, cohorts: [], applications: [], courses: [] }
+const COLORS = ['#0000FF', '#C5A059', '#16233B', '#2B3A5F', '#B98A3F', '#9CA3AF']
+
+const emptyData = { activeCohorts: 0, activeFellows: 0, pendingApplications: 0, partnerReviews: 0, cohorts: [], applications: [], courses: [], completionTrend: [], cohortEnrollment: [], lessonTypes: [] }
 
 export default function AdministratorDashboard({ user }) {
   const [data, setData] = useState(emptyData)
@@ -22,7 +29,8 @@ export default function AdministratorDashboard({ user }) {
     let cancelled = false
     const load = async () => {
       try {
-        const [cohortCount, fellowCount, applicationCount, courseCount, cohorts, applications, courses] = await Promise.all([
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        const [cohortCount, fellowCount, applicationCount, courseCount, cohorts, applications, courses, progressRows, enrolmentRows, lessonRows] = await Promise.all([
           api.from('cohorts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
           api.from('enrolments').select('id', { count: 'exact', head: true }).in('status', ['enrolled', 'active']),
           api.from('academy_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -30,9 +38,60 @@ export default function AdministratorDashboard({ user }) {
           api.from('cohorts').select('id, name, status, start_date, capacity').in('status', ['active', 'planned']).order('start_date').limit(5),
           api.from('academy_applications').select('id, name, email, requested_role, track, created_at').eq('status', 'pending').order('created_at', { ascending: false }).limit(5),
           api.from('partner_courses').select('id, title, status, submitted_at').in('status', ['submitted', 'under_review']).order('submitted_at', { ascending: true }).limit(5),
+          api.from('lesson_progress').select('user_id, lesson_id, is_completed, updated_at').gte('updated_at', thirtyDaysAgo).order('updated_at', { ascending: false }).limit(1000),
+          api.from('enrolments').select('cohort_id, status').in('status', ['enrolled', 'active']),
+          api.from('lessons').select('type'),
         ])
-        const failure = [cohortCount, fellowCount, applicationCount, courseCount, cohorts, applications, courses].find((item) => item.error)
+        const failure = [cohortCount, fellowCount, applicationCount, courseCount, cohorts, applications, courses, progressRows, enrolmentRows, lessonRows].find((item) => item.error)
         if (failure?.error) throw failure.error
+
+        // Completion trend: group completed lessons by date over last 30 days
+        const progressData = progressRows.data || []
+        const byDate = new Map()
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(today)
+          d.setDate(today.getDate() - i)
+          const key = d.toISOString().slice(0, 10)
+          byDate.set(key, { date: key, completions: 0, total: 0 })
+        }
+        for (const row of progressData) {
+          const key = row.updated_at ? row.updated_at.slice(0, 10) : null
+          if (!key || !byDate.has(key)) continue
+          const entry = byDate.get(key)
+          entry.total += 1
+          if (row.is_completed) entry.completions += 1
+        }
+        const completionTrend = Array.from(byDate.values()).map((entry) => ({
+          date: entry.date,
+          rate: entry.total === 0 ? 0 : Math.round((entry.completions / entry.total) * 100),
+        }))
+
+        // Cohort enrollment: count active fellows per cohort
+        const enrolmentData = enrolmentRows.data || []
+        const cohortMap = new Map((cohorts.data || []).map((c) => [c.id, c.name]))
+        const cohortCounts = new Map()
+        for (const row of enrolmentData) {
+          const cid = row.cohort_id
+          cohortCounts.set(cid, (cohortCounts.get(cid) || 0) + 1)
+        }
+        const cohortEnrollment = Array.from(cohortCounts.entries()).map(([cid, count]) => ({
+          cohort: cohortMap.get(cid) || 'Unknown',
+          fellows: count,
+        })).sort((a, b) => b.fellows - a.fellows)
+
+        // Lesson type distribution
+        const lessonData = lessonRows.data || []
+        const typeCounts = new Map()
+        for (const row of lessonData) {
+          typeCounts.set(row.type, (typeCounts.get(row.type) || 0) + 1)
+        }
+        const lessonTypes = Array.from(typeCounts.entries()).map(([type, count]) => ({
+          name: type.replace('_', ' '),
+          value: count,
+        }))
+
         if (!cancelled) setData({
           activeCohorts: cohortCount.count || 0,
           activeFellows: fellowCount.count || 0,
@@ -41,6 +100,9 @@ export default function AdministratorDashboard({ user }) {
           cohorts: cohorts.data || [],
           applications: applications.data || [],
           courses: courses.data || [],
+          completionTrend,
+          cohortEnrollment,
+          lessonTypes,
         })
       } catch (loadError) {
         if (!cancelled) setError(loadError.message || 'Unable to load academy operations')
@@ -254,6 +316,65 @@ export default function AdministratorDashboard({ user }) {
                   </Badge>
                 </div>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Analytics */}
+      <Card data-tour="admin-analytics" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+          <div>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Academy analytics</h3>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Completion trends, cohort enrollment, and lesson mix over the last 30 days</p>
+          </div>
+        </div>
+        <CardContent className="p-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.completionTrend}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={5} />
+                  <YAxis domain={[0, 100]} label={{ value: 'Completion rate (%)', position: 'insideLeft', angle: -90 }} tickFormatter={(v) => `${v}%`} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="rate" stroke="#0000FF" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="h-[300px]">
+              <RechartsBarChart data={data.cohortEnrollment.slice(0, 8)}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis dataKey="cohort" tick={{ fontSize: 10 }} />
+                <YAxis label={{ value: 'Fellows', position: 'insideLeft', angle: -90 }} />
+                <Tooltip />
+                <Bar dataKey="fellows" fill="#C5A059" radius={[4, 4, 0, 0]} />
+              </RechartsBarChart>
+            </div>
+            <div className="h-[300px] flex items-center justify-center">
+              <RechartsPieChart width={300} height={300}>
+                <Pie
+                  data={data.lessonTypes}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  innerRadius={60}
+                  fill="#888"
+                  label
+                >
+                  {data.lessonTypes.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </RechartsPieChart>
+            </div>
+          </div>
+          {data.completionTrend.length === 0 && data.cohortEnrollment.length === 0 && data.lessonTypes.length === 0 && (
+            <div className="py-12 text-center text-gray-500 text-sm">
+              No activity data available yet.
             </div>
           )}
         </CardContent>

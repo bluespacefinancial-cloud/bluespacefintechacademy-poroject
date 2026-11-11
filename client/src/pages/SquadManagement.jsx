@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext'
 
 export default function SquadManagement() {
   const { user } = useAuth()
-  const canManage = user?.type === 'Administrator'
+  const canManage = user?.type === 'Administrator' || user?.type === 'Instructor'
   const [squads, setSquads] = useState([])
   const [cohorts, setCohorts] = useState([])
   const [search, setSearch] = useState('')
@@ -53,7 +53,7 @@ export default function SquadManagement() {
 
   const createSquad = async (event) => {
     event.preventDefault()
-    if (!canManage) { setError('Only administrators can create squads.'); return }
+    if (!canManage) { setError('Only administrators and instructors can create squads.'); return }
     setError('')
     const { data: created, error: createError } = await api
       .from('squads')
@@ -67,7 +67,7 @@ export default function SquadManagement() {
 
   const assignMember = async (squadId, userId) => {
     if (!userId) return
-    if (!canManage) { setError('Only administrators can assign squad members.'); return }
+    if (!canManage) { setError('Only administrators and instructors can assign squad members.'); return }
     setError('')
     const { data: updated, error: assignError } = await api
       .from('enrolments')
@@ -95,7 +95,7 @@ export default function SquadManagement() {
       </div>
       {!canManage && (
         <p className="mb-4 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-card p-3 text-sm text-gray-600 dark:text-gray-300">
-          Read-only view. Squad creation and member assignment are restricted to administrators.
+          Read-only view. Squad creation and member assignment are restricted to administrators and instructors.
         </p>
       )}
       {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
@@ -177,7 +177,7 @@ export default function SquadManagement() {
                   ))}
                 </select>
               ) : (
-                <p className="text-xs text-gray-500 dark:text-gray-400">Member assignment is managed by administrators.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Member assignment is managed by administrators and instructors.</p>
               )}
             </CardContent>
           </Card>

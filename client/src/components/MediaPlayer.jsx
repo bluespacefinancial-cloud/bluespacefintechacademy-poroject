@@ -3,6 +3,16 @@ import { api } from '../lib/backend'
 import { getCurrentProfile } from '../lib/profile'
 import { Badge } from '../components/ui/badge'
 import YouTubeFrame, { parseYouTubeId } from './YouTubeFrame'
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize2,
+  Minimize2,
+  ChevronDown,
+  Check,
+} from 'lucide-react'
 
 const COMPLETION_THRESHOLD = 90 // percent
 const SAVE_INTERVAL_MS = 10000 // save progress every 10 seconds
@@ -77,6 +87,17 @@ export default function MediaPlayer({
   const [showControls, setShowControls] = useState(true)
   const [speedMenuVisible, setSpeedMenuVisible] = useState(false)
   const [keyboardActive, setKeyboardActive] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement))
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
 
   const isVideo = lesson.type === 'video'
   const mediaUrl = lesson.type === 'video' ? lesson.video_url : lesson.audio_url
@@ -229,17 +250,17 @@ export default function MediaPlayer({
       const p = ytRef.current
       const host = p?.getIframe?.()
       if (!document.fullscreenElement) {
-        host?.requestFullscreen?.()
+        host?.requestFullscreen?.().catch?.(() => {})
       } else {
-        document.exitFullscreen()
+        document.exitFullscreen?.().catch?.(() => {})
       }
       return
     }
     if (!mediaRef.current) return
     if (!document.fullscreenElement) {
-      mediaRef.current.requestFullscreen()
+      mediaRef.current.requestFullscreen?.().catch?.(() => {})
     } else {
-      document.exitFullscreen()
+      document.exitFullscreen?.().catch?.(() => {})
     }
   }
 
@@ -400,19 +421,14 @@ export default function MediaPlayer({
           <div className="flex items-center gap-4">
             <button
               onClick={togglePlay}
-              className="w-10 h-10 rounded-full bg-deep-600 flex items-center justify-center text-white hover:bg-deep-700 transition-colors"
+              className="w-10 h-10 rounded-full bg-deep-600 flex items-center justify-center text-white hover:bg-deep-700 transition-colors shadow-sm"
               title={isPlaying ? 'Pause' : 'Play'}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Pause className="w-5 h-5 fill-current" />
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Play className="w-5 h-5 fill-current ml-0.5" />
               )}
             </button>
             <div className="flex items-center gap-2 min-w-[120px] shrink-0">
@@ -439,18 +455,14 @@ export default function MediaPlayer({
                 <>
                   <button
                     onClick={toggleMute}
-                    className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm transition-colors"
-                    title={isMuted ? 'Unmute' : 'Mute'}
+                    className="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 transition-colors"
+                    title={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+                    aria-label={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
                   >
-                    {isMuted ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1v1.5a1 1 0 001 1h1.5a1 1 0 011 1v7.5a1 1 0 01-1 1zM17 14a2 2 0 10-4 0h3.586l-1.293-1.293a1 1 0 010-1.414l4.293-4.293a1 1 0 011.414 1.414L17.414 15H17z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 18l2-2m0 0l2-2m-2 2l-2-2m-2 2l-2-2" />
-                      </svg>
+                    {isMuted || volume === 0 ? (
+                      <VolumeX className="w-4 h-4" />
                     ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.343C7.67 6.165 6 8.388 6 11v3.159c0 .538.214 1.055.595 1.436L4 17h1m6 0a1 1 0 100-2 1 1 0 000 2z" />
-                      </svg>
+                      <Volume2 className="w-4 h-4" />
                     )}
                   </button>
                   <input
@@ -458,7 +470,7 @@ export default function MediaPlayer({
                     min="0"
                     max="1"
                     step="0.1"
-                    value={volume}
+                    value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
                     className="w-24 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-deep-600"
                   />
@@ -467,21 +479,20 @@ export default function MediaPlayer({
               <div className="relative group">
                 <button
                   onClick={() => setSpeedMenuVisible(!speedMenuVisible)}
-                  className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm text-gray-700 transition-colors"
+                  className="h-8 px-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center gap-1 text-xs font-medium text-gray-700 transition-colors"
+                  aria-label="Playback speed"
                 >
-                  <span className="text-xs font-medium">{playbackRate.toFixed(1)}x</span>
-                  <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <span>{playbackRate.toFixed(1)}x</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                 </button>
                 {speedMenuVisible && (
-                  <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg p-2 shadow-lg min-w-[80px] border border-gray-100">
+                  <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg p-1.5 shadow-lg min-w-[80px] border border-gray-100 z-30">
                     {speedOptions.map((rate) => (
                       <button
                         key={rate}
                         onClick={() => handleSpeedChange({ target: { value: rate.toString() } })}
-                        className={`w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100 transition-colors ${
-                          playbackRate === rate ? 'bg-deep-600 text-white' : 'text-gray-700'
+                        className={`w-full text-left px-2.5 py-1.5 text-xs rounded hover:bg-gray-100 transition-colors ${
+                          playbackRate === rate ? 'bg-deep-600 text-white font-medium' : 'text-gray-700'
                         }`}
                       >
                         {rate.toFixed(1)}x
@@ -492,12 +503,15 @@ export default function MediaPlayer({
               </div>
               <button
                 onClick={toggleFullscreen}
-                className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm transition-colors"
-                title="Fullscreen"
+                className="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 transition-colors"
+                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l4 4m4-4 4 4m-4 4v4m0 0h4m-4 4l-4-4M4 16v4m0 0h4m-4 4l4-4m-4 4V8m8 0v-4m0 0h-4M4 8l-4 4m4 4 4-4m8 8v-4m0 0h-4m-4 4 4-4m4 4 4-4" />
-                </svg>
+                {isFullscreen ? (
+                  <Minimize2 className="w-4 h-4" />
+                ) : (
+                  <Maximize2 className="w-4 h-4" />
+                )}
               </button>
             </div>
             {readOnly ? (
@@ -589,11 +603,8 @@ export default function MediaPlayer({
         {/* Play Overlay */}
         {!isLoaded && !isPlaying && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center pl-1 hover:scale-105 transition-transform cursor-pointer">
-              <svg className="w-6 h-6 text-white ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center pl-0.5 hover:scale-105 transition-transform cursor-pointer shadow-lg">
+              <Play className="w-7 h-7 text-white fill-current ml-0.5" />
             </div>
           </div>
         )}
@@ -641,11 +652,15 @@ export default function MediaPlayer({
               <div className="flex items-center gap-3">
                 <button
                   onClick={toggleFullscreen}
-                  className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center text-sm transition-colors"
+                  className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition-colors"
+                  title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                  aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l4 4m4-4 4 4m-4 4v4m0 0h4m-4 4l-4-4M4 16v4m0 0h4m-4 4l4-4m-4 4V8m8 0v-4m0 0h-4M4 8l-4 4m4 4 4-4m8 8v-4m0 0h-4m-4 4 4-4m4 4 4-4" />
-                  </svg>
+                  {isFullscreen ? (
+                    <Minimize2 className="w-4 h-4" />
+                  ) : (
+                    <Maximize2 className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -655,18 +670,14 @@ export default function MediaPlayer({
               <div className="flex items-center gap-4">
                 <button
                   onClick={togglePlay}
-                  className="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white hover:bg-brand-500 transition-colors"
+                  className="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white hover:bg-brand-500 transition-colors shadow-sm"
+                  title={isPlaying ? 'Pause' : 'Play'}
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
                 >
                   {isPlaying ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Pause className="w-5 h-5 fill-current" />
                   ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
                   )}
                 </button>
                 <div className="flex items-center gap-2 min-w-[120px]">
@@ -709,18 +720,14 @@ export default function MediaPlayer({
                   <>
                     <button
                       onClick={toggleMute}
-                      className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center text-sm transition-colors"
-                      title={isMuted ? 'Unmute' : 'Mute'}
+                      className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition-colors"
+                      title={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+                      aria-label={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
                     >
-                      {isMuted ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1v1.5a1 1 0 001 1h1.5a1 1 0 011 1v7.5a1 1 0 01-1 1zM17 14a2 2 0 10-4 0h3.586l-1.293-1.293a1 1 0 010-1.414l4.293-4.293a1 1 0 011.414 1.414L17.414 15H17z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 18l2-2m0 0l2-2m-2 2l-2-2m-2 2l-2-2" />
-                        </svg>
+                      {isMuted || volume === 0 ? (
+                        <VolumeX className="w-4 h-4" />
                       ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.343C7.67 6.165 6 8.388 6 11v3.159c0 .538.214 1.055.595 1.436L4 17h1m6 0a1 1 0 100-2 1 1 0 000 2z" />
-                        </svg>
+                        <Volume2 className="w-4 h-4" />
                       )}
                     </button>
                     <input
@@ -728,7 +735,7 @@ export default function MediaPlayer({
                       min="0"
                       max="1"
                       step="0.1"
-                      value={volume}
+                      value={isMuted ? 0 : volume}
                       onChange={handleVolumeChange}
                       className="w-24 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-brand-600"
                     />
@@ -739,20 +746,19 @@ export default function MediaPlayer({
                 <div className="relative group">
                   <button
                     onClick={() => setSpeedMenuVisible(!speedMenuVisible)}
-                    className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center text-sm text-gray-200 transition-colors"
+                    className="h-8 px-2.5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center gap-1 text-xs font-medium text-gray-200 transition-colors"
+                    aria-label="Playback speed"
                   >
-                    <span className="text-xs font-medium">{playbackRate.toFixed(1)}x</span>
-                    <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <span>{playbackRate.toFixed(1)}x</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
                   </button>
                   {speedMenuVisible && (
-                    <div className="absolute bottom-full left-0 mb-2 bg-white/90 rounded-lg p-2 shadow-lg min-w-[80px]">
+                    <div className="absolute bottom-full left-0 mb-2 bg-white/95 text-gray-900 rounded-lg p-1.5 shadow-lg min-w-[80px] z-30">
                       {speedOptions.map((rate) => (
                         <button
                           key={rate}
                           onClick={() => handleSpeedChange({ target: { value: rate.toString() } })}
-                          className={`w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-200 transition-colors ${playbackRate === rate ? 'bg-brand-600 text-white' : 'text-gray-700'}`}
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded transition-colors ${playbackRate === rate ? 'bg-brand-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
                         >
                           {rate.toFixed(1)}x
                         </button>
@@ -765,11 +771,15 @@ export default function MediaPlayer({
                 {isVideo && (
                   <button
                     onClick={toggleFullscreen}
-                    className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center text-sm transition-colors"
+                    className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition-colors"
+                    title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                    aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l4 4m4-4 4 4m-4 4v4m0 0h4m-4 4l-4-4M4 16v4m0 0h4m-4 4l4-4m-4 4V8m8 0v-4m0 0h-4M4 8l-4 4m4 4 4-4m8 8v-4m0 0h-4m-4 4 4-4m4 4 4-4" />
-                    </svg>
+                    {isFullscreen ? (
+                      <Minimize2 className="w-4 h-4" />
+                    ) : (
+                      <Maximize2 className="w-4 h-4" />
+                    )}
                   </button>
                 )}
               </div>
@@ -781,9 +791,7 @@ export default function MediaPlayer({
           <div className="absolute inset-0 bg-green-900/90 flex items-center justify-center z-20">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                <Check className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-white font-bold mb-1">Lesson Complete!</h3>
               <p className="text-green-100 text-sm">You&apos;ve completed this lesson.</p>

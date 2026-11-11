@@ -60,6 +60,21 @@ function resolveMediaProvider(lesson) {
   return lesson.type === 'video' && parseYouTubeId(lesson.video_url) ? 'youtube' : 'self'
 }
 
+function inferMediaType(url, isVideo) {
+  if (!url || typeof url !== 'string') return isVideo ? 'video/mp4' : 'audio/mpeg'
+  const cleanUrl = url.split('?')[0].toLowerCase()
+  if (isVideo) {
+    if (cleanUrl.endsWith('.webm')) return 'video/webm'
+    if (cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.ogv')) return 'video/ogg'
+    return 'video/mp4'
+  }
+  if (cleanUrl.endsWith('.mp3')) return 'audio/mpeg'
+  if (cleanUrl.endsWith('.wav')) return 'audio/wav'
+  if (cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.oga')) return 'audio/ogg'
+  if (cleanUrl.endsWith('.m4a') || cleanUrl.endsWith('.aac')) return 'audio/mp4'
+  return 'audio/mpeg'
+}
+
 export default function MediaPlayer({
   lesson,
   user,
@@ -101,7 +116,7 @@ export default function MediaPlayer({
 
   const isVideo = lesson.type === 'video'
   const mediaUrl = lesson.type === 'video' ? lesson.video_url : lesson.audio_url
-  const mediaType = lesson.type === 'video' ? 'video/mp4' : 'audio/mpeg'
+  const mediaType = inferMediaType(mediaUrl, isVideo)
   const mediaProvider = resolveMediaProvider(lesson)
   const useYouTube = isVideo && mediaProvider === 'youtube'
 
@@ -417,7 +432,7 @@ export default function MediaPlayer({
             {error}
           </p>
         )}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
           <div className="flex items-center gap-4">
             <button
               onClick={togglePlay}
@@ -806,21 +821,21 @@ export default function MediaPlayer({
       </div>
 
       {/* Lesson Info Below Media */}
-      <div className="p-6 bg-gray-50 border-t border-gray-200">
+      <div className="p-6 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 text-sm font-bold shrink-0">
+          <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-950/50 flex items-center justify-center text-brand-700 dark:text-brand-300 text-sm font-bold shrink-0">
             {lesson.order_index}
           </div>
           <div className="flex-1">
-            <h3 className="text-base font-bold text-gray-800 mb-1">{lesson.title}</h3>
-            <p className="text-sm text-gray-600 mb-3">
+            <h3 className="text-base font-bold text-gray-800 dark:text-white mb-1">{lesson.title}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               {lesson.type === 'video' ? 'Video lesson' : 'Audio lesson'} • {formatTime(lesson.duration_minutes * 60)}
             </p>
             <div className="flex items-center gap-3">
               <Badge variant={isCompleted ? 'secondary' : 'default'}>
                 {isCompleted ? 'Completed' : Math.round(completionPercent) + '% Complete'}
               </Badge>
-              <span className="text-xs font-medium text-gray-600">
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                 {formatTime(currentTime)} / {formatTime(duration || lesson.duration_minutes * 60)}
               </span>
             </div>

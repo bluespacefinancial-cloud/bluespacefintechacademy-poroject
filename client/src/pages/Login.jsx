@@ -252,7 +252,7 @@ export default function Login() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25, ease }}
               >
-                <Card>
+                <Card className="dark:bg-white dark:text-gray-900">
                   <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
                     <CardTitle>Set New Password</CardTitle>
                     <CardDescription>Your password was reset by admin. Please create a new one.</CardDescription>
@@ -325,7 +325,7 @@ export default function Login() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25, ease }}
               >
-                <Card>
+                <Card className="dark:bg-white dark:text-gray-900">
                   <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
                     <CardTitle>{portal.title}</CardTitle>
                     <CardDescription>{portal.description}</CardDescription>

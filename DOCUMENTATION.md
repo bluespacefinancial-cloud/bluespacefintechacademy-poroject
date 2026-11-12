@@ -88,9 +88,67 @@ Open <http://localhost:3000>.
 
 | Service | Address | Notes |
 |---------|---------|-------|
-| Supabase API | `https://<ref>.supabase.co` | REST + Auth + Storage |
-| Supabase PostgreSQL | `db.<ref>.supabase.co:5432` | Direct DB access (admin only) |
+| Supabase API | `http://127.0.0.1:54321` | Local Supabase REST + Auth |
+| Supabase Studio | `http://127.0.0.1:54323` | Database GUI |
+| Supabase PostgreSQL | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` | Direct DB access |
 | Vite client | `localhost:3000` | Development server |
+
+### Local Supabase development
+
+```bash
+# From lms/
+supabase start          # Start local Supabase stack
+supabase stop           # Stop the stack
+
+# Apply schema (run once after a fresh start)
+docker run --rm -i --network host postgres:17 psql \
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres" \
+  -v ON_ERROR_STOP=1 -f database/00_bootstrap.sql
+docker run --rm -i --network host postgres:17 psql \
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres" \
+  -v ON_ERROR_STOP=1 -f database/01_schema.sql
+# ...etc for remaining database/*.sql files
+
+# Grant table-level access for Supabase client roles
+# (needed once after schema apply)
+docker run --rm -i --network host postgres:17 psql \
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres" <<'SQL'
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+SQL
+
+# Create media storage bucket
+docker run --rm -i --network host postgres:17 psql \
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres" <<'SQL'
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('media', 'media', true, 524288000,
+  '{"video/mp4","video/webm","audio/mpeg","audio/mp4","audio/wav","audio/ogg",
+    "image/jpeg","image/png","image/webp","text/vtt","application/x-subrip"}')
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Link Supabase Auth users to academy users (run once)
+docker run --rm -i --network host postgres:17 psql \
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres" <<'SQL'
+UPDATE public.users u
+SET auth_user_id = au.id
+FROM auth.users au
+WHERE u.email = au.email AND u.auth_user_id IS NULL;
+SQL
+
+# Start the client
+cd client
+npm run dev     # http://localhost:3000
+
+# Demo logins (password: BlueSpace2026!)
+# Student:    student@bluespacefintechacademy.com
+# Instructor: fin.core@bluespacefintechacademy.com
+# Admin:      academy.lead@bluespacefintechacademy.com
+# Partner:    partner@bluespacefintechacademy.com
+```
+
 
 ### Environment variables
 

@@ -43,3 +43,7 @@ coverage/
 *.tsbuildinfo
 .eslintcache
 .temp/
+
+# Local Supabase dev state (do not commit)
+supabase/
+

@@ -119,24 +119,28 @@ export default function StudentDashboard({ user }) {
         }
 
         if (!cancelled) {
-          // Resume surface: last incomplete lesson the student started, or the
-          // first not-yet-started lesson in curriculum order.
-          const progressByLesson = new Map((progress || []).map((p) => [p.lesson_id, p]))
-          const incompleteLessons = (lessons || []).filter((lesson) => {
-            const p = progressByLesson.get(lesson.id)
-            return !p || p.is_completed === 0 || p.completion_percentage < 100
-          })
-          const resumeLesson =
-            incompleteLessons.length > 0
-              ? incompleteLessons
-                  .sort((a, b) => {
-                    const pa = progressByLesson.get(a.id) || {}
-                    const pb = progressByLesson.get(b.id) || {}
-                    const ta = new Date(pa.updated_at || 0).getTime()
-                    const tb = new Date(pb.updated_at || 0).getTime()
-                    return tb - ta
-                  })[0]
-              : null
+          // Resume surface: first incomplete lesson in the first incomplete
+          // module, ordered by curriculum week -> order_index. Students must
+          // finish week N before week N+1 unlocks.
+          const completedLessonIdSet = new Set((progress || []).filter((p) => p.is_completed).map((p) => p.lesson_id))
+
+          let resumeLesson = null
+          let currentModule = null
+          for (const mod of (modules || [])) {
+            const modLessons = (lessons || []).filter((l) => l.module_id === mod.id).sort((a, b) => a.order_index - b.order_index)
+            const firstIncomplete = modLessons.find((l) => !completedLessonIdSet.has(l.id))
+            if (firstIncomplete) {
+              resumeLesson = firstIncomplete
+              currentModule = mod
+              break
+            }
+          }
+          // Fallback: if all complete, use the last module
+          if (!resumeLesson && modules.length > 0) {
+            currentModule = modules[modules.length - 1]
+            const lastLessons = (lessons || []).filter((l) => l.module_id === currentModule.id).sort((a, b) => a.order_index - b.order_index)
+            resumeLesson = lastLessons[lastLessons.length - 1] || null
+          }
 
           setData({
             profile,
@@ -151,6 +155,7 @@ export default function StudentDashboard({ user }) {
             members,
             liveClasses: liveClasses || [],
             resumeLesson,
+            currentModule,
           })
         }
       } catch (loadError) {
@@ -186,17 +191,33 @@ export default function StudentDashboard({ user }) {
   const totalLessons = data.lessons.length
   const overallPercent = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 0
 
-  // Find active module & next incomplete lesson
-  const currentModule = data.modules.find((mod) => {
-    const modLessons = data.lessons.filter((l) => l.module_id === mod.id)
-    return modLessons.some((l) => !completedLessonIdSet.has(l.id))
-  }) || data.modules[0]
+  // Active module comes from the load step (first module with an incomplete lesson,
+  // ordered by week_start). Falls back to the first module.
+  const currentModule = data.currentModule || data.modules[0]
 
   const currentLessons = currentModule ? data.lessons.filter((l) => l.module_id === currentModule.id) : []
-  const nextLesson = currentLessons.find((l) => !completedLessonIdSet.has(l.id)) || currentLessons[0]
-  const resumeTarget = data.resumeLesson || nextLesson
+  const resumeTarget = data.resumeLesson || currentLessons[0]
   const currentModuleCompleted = currentLessons.filter((l) => completedLessonIdSet.has(l.id)).length
   const currentModulePercent = currentLessons.length ? Math.round((currentModuleCompleted / currentLessons.length) * 100) : 0
+
+  // Week-by-week progress for every module in curriculum order
+  const weekProgress = data.modules.map((mod) => {
+    const modLessons = data.lessons.filter((l) => l.module_id === mod.id)
+    const modCompleted = modLessons.filter((l) => completedLessonIdSet.has(l.id)).length
+    const modPercent = modLessons.length ? Math.round((modCompleted / modLessons.length) * 100) : 0
+    const isComplete = modLessons.length > 0 && modCompleted === modLessons.length
+    return {
+      ...mod,
+      lessons: modLessons,
+      completed: modCompleted,
+      total: modLessons.length,
+      percent: modPercent,
+      isComplete,
+    }
+  })
+
+  // First incomplete week (gating target)
+  const firstIncompleteWeek = weekProgress.find((w) => !w.isComplete)
 
   // Next live class
   const nextLiveClass = data.liveClasses.length > 0 ? data.liveClasses[0] : null
@@ -397,6 +418,75 @@ export default function StudentDashboard({ user }) {
           </div>
         }
       />
+
+      {/* Week-by-week study path */}
+      <section aria-label="Week-by-week study path" className="mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            Study Path
+          </h2>
+          <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-300">
+            Complete each week before the next unlocks
+          </span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-2 sm:overflow-visible sm:flex-wrap sm:gap-3">
+          {weekProgress.map((week, idx) => {
+            const isCurrent = week.id === currentModule?.id
+            const isLocked = idx > 0 && !weekProgress[idx - 1].isComplete
+            return (
+              <div
+                key={week.id}
+                className={`w-64 shrink-0 rounded-xl border p-3 shadow-sm transition-all ${
+                  isCurrent
+                    ? 'border-deep-600 bg-deep-50 dark:border-deep-400 dark:bg-deep-950/40 shadow-deep'
+                    : week.isComplete
+                    ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/10'
+                    : isLocked
+                    ? 'border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900 opacity-60 grayscale'
+                    : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <span className="text-[10px] font-bold tracking-wide ${
+                    isCurrent ? 'text-deep-700 dark:text-deep-400' : week.isComplete ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'
+                  }">
+                    Week {week.week_start}
+                  </span>
+                  {isLocked && (
+                    <span className="text-[10px] text-amber-500 font-semibold">
+                      Locked
+                    </span>
+                  )}
+                </div>
+                <div className="h-1 w-full rounded-full bg-gray-100 dark:bg-gray-700 mb-2 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500 ${
+                      week.isComplete ? 'bg-emerald-600' : isCurrent ? 'bg-deep-600' : 'bg-gray-300 dark:bg-gray-600'
+                    }"
+                    style={{ width: `${week.percent}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className={`${week.isComplete ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'} font-medium`}>
+                    {week.completed}/{week.total}
+                  </span>
+                  <span className="text-gray-400 dark:text-gray-500">{week.percent}%</span>
+                </div>
+                {week.isComplete && (
+                  <span className="text-[9px] text-emerald-500 font-bold mt-1 block">
+                    ✓ Week complete
+                  </span>
+                )}
+                {isLocked && (
+                  <span className="text-[9px] text-amber-500 font-bold mt-1 block">
+                    Finish Week {weekProgress[idx - 1]?.week_start} first
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </section>
 
       {/* Primary Section: Continue Learning Hero (2/3) + Next Live Session (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

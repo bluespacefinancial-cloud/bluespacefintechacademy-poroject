@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Code2, BookOpen } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Code2, BookOpen, Lock } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -372,22 +372,41 @@ export default function LessonPlayer() {
               <div className="divide-y divide-gray-100">
                 {moduleLessons.map((l, index) => {
                   const isCurrent = l.id === lesson.id
+                  const priorLessons = moduleLessons.filter(
+                    (pl) => pl.order_index < l.order_index
+                  )
+                  const priorIncomplete = priorLessons.some(
+                    (pl) => !progress[pl.id]?.is_completed
+                  )
+                  const lessonLocked = priorIncomplete && !isCurrent
                   return (
                     <button
                       key={l.id}
                       type="button"
-                      onClick={() => navigate(`/lesson/${l.id}`)}
+                      onClick={() => {
+                        if (lessonLocked) {
+                          toast.error('Complete the previous lesson first')
+                          return
+                        }
+                        navigate(`/lesson/${l.id}`)
+                      }}
                       className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-lg text-left transition-colors text-xs ${
                         isCurrent
                           ? 'bg-deep-50 border border-deep-100 font-semibold text-deep-900'
+                          : lessonLocked
+                          ? 'opacity-50 grayscale text-gray-400 cursor-not-allowed'
                           : 'hover:bg-gray-50 text-gray-700'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                          isCurrent ? 'bg-deep-600 text-white' : 'bg-gray-100 text-gray-600'
+                          lessonLocked
+                            ? 'bg-gray-200 text-gray-400'
+                            : isCurrent
+                            ? 'bg-deep-600 text-white'
+                            : 'bg-gray-100 text-gray-600'
                         }`}>
-                          {index + 1}
+                          {lessonLocked ? <Lock size={10} /> : index + 1}
                         </span>
                         <span className="truncate">{l.title}</span>
                       </div>

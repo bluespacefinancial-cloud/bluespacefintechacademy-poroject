@@ -18,8 +18,8 @@ class PartnerCourseEnrolmentSeeder extends Seeder
                         'partner_course_id' => $course->id,
                         'user_id' => $student->id,
                     ]);
-                });
-            }
+                })
+            ;
         }
     }
 }

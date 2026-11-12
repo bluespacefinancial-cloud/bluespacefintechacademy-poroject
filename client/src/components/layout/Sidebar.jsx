@@ -32,39 +32,28 @@ import {
 const sidebarGroups = {
   Student: [
     {
-      category: 'Learning',
+      category: 'Coursework',
       icon: BookOpen,
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
-        { to: '/my-learning', icon: BookOpen, label: 'My Learning', ariaLabel: 'My Learning' },
-        { to: '/lab-workspace', icon: ClipboardList, label: 'Lab Workspace', ariaLabel: 'Lab Workspace' },
-        { to: '/progress', icon: Activity, label: 'Progress & Milestones', ariaLabel: 'Progress and Milestones' },
+        { to: '/my-learning', icon: BookOpen, label: 'Curriculum & Labs', ariaLabel: 'Curriculum and Labs' },
+        { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Courses', ariaLabel: 'Partner Courses' },
       ],
     },
     {
-      category: 'Classes & Clinics',
-      icon: Monitor,
-      items: [
-        { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
-        { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics', ariaLabel: 'Mentor Clinics' },
-      ],
-    },
-    {
-      category: 'Collaboration',
+      category: 'Community & Faculty',
       icon: Users,
       items: [
+        { to: '/live-classes', icon: Video, label: 'Sessions & Clinics', ariaLabel: 'Live Sessions and Mentor Clinics' },
         { to: '/my-squad', icon: Users, label: 'Squad Workspace', ariaLabel: 'Squad Workspace' },
-        { to: '/peer-reviews', icon: ClipboardList, label: 'Peer Reviews', ariaLabel: 'Peer Reviews' },
-        { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Courses', ariaLabel: 'Partner Catalog' },
         { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
       ],
     },
     {
-      category: 'Credentials & Portfolio',
+      category: 'Credentials',
       icon: Shield,
       items: [
-        { to: '/capstone', icon: FileText, label: 'Capstone Project', ariaLabel: 'Capstone Project' },
-        { to: '/certificates', icon: Award, label: 'Certificates', ariaLabel: 'Certificates' },
+        { to: '/certificates', icon: Award, label: 'Capstone & Certificates', ariaLabel: 'Capstone and Certificates' },
       ],
     },
   ],
@@ -279,7 +268,12 @@ export default function Sidebar({ open, onOpen, onClose }) {
               </button>
               <nav className={`space-y-0.5 mt-1 ${isCategoryOpen(group.category) ? '' : 'hidden'}`}>
                 {group.items.map((item) => {
-                  const active = location.pathname === item.to
+                  const active = location.pathname === item.to ||
+                    (item.to === '/my-learning' && (location.pathname === '/lab-workspace' || location.pathname.startsWith('/lesson/'))) ||
+                    (item.to === '/partner-catalog' && location.pathname.startsWith('/partner-course/')) ||
+                    (item.to === '/live-classes' && location.pathname === '/mentor-clinics') ||
+                    (item.to === '/my-squad' && location.pathname === '/peer-reviews') ||
+                    (item.to === '/certificates' && (location.pathname === '/capstone' || location.pathname.startsWith('/certificate/')))
                   const itemTourTag = `tour-nav-${item.to.replace(/^\//, '').replace(/[^a-z0-9]/g, '-') || 'dashboard'}`
                   const badgeCount = item.to === '/notifications' ? unreadCount : null
                   return (

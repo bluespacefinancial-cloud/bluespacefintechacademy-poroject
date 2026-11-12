@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Calendar, ExternalLink, Plus, Video, Users, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Calendar, ExternalLink, Plus, Video, Users, RefreshCw, Clock } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
@@ -9,6 +10,7 @@ import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
 import { VideoPlayer } from '../components/VideoPlayer'
 import { getCurrentProfile } from '../lib/profile'
+import LazyMentorClinics from './MentorClinics'
 
 const EMPTY_FORM = {
   title: '',
@@ -37,6 +39,8 @@ const STATUS_LABELS = {
 
 export default function LiveClasses() {
   const { user } = useAuth()
+  const isStudent = user?.type === 'Student'
+  const [activeTab, setActiveTab] = useState('classes') // 'classes' | 'clinics'
   const [classes, setClasses] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [showForm, setShowForm] = useState(false)
@@ -316,21 +320,60 @@ export default function LiveClasses() {
 
   return (
     <div className="w-full space-y-6">
-      <Breadcrumb items={[{ label: 'Live Classes' }]} />
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">Live Classes</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Schedule online and offline classes, share Google Meet links, and track attendance.
-          </p>
+      <Breadcrumb items={[{ label: isStudent ? 'Sessions & Clinics' : 'Live Classes' }]} />
+
+      {/* Tabs navigation for Students */}
+      {isStudent && (
+        <div className="flex border-b border-border gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('classes')}
+            className={`flex items-center gap-2 pb-3 px-3 text-sm font-semibold border-b-2 transition-colors ${
+              activeTab === 'classes'
+                ? 'border-deep-600 text-deep-600 dark:border-bluespace-400 dark:text-bluespace-300'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Video size={16} />
+            Cohort Workshops & Live Classes
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('clinics')}
+            className={`flex items-center gap-2 pb-3 px-3 text-sm font-semibold border-b-2 transition-colors ${
+              activeTab === 'clinics'
+                ? 'border-deep-600 text-deep-600 dark:border-bluespace-400 dark:text-bluespace-300'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Clock size={16} />
+            1-on-1 Mentor Clinics
+          </button>
         </div>
-        {canManage && (
-          <Button onClick={() => setShowForm((visible) => !visible)}>
-            <Plus size={16} className="mr-2" />
-            Schedule class
-          </Button>
-        )}
-      </div>
+      )}
+
+      {activeTab === 'clinics' && isStudent ? (
+        <LazyMentorClinics />
+      ) : (
+        <>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="mb-1 text-2xl font-bold text-foreground">
+                {isStudent ? 'Cohort Live Sessions' : 'Live Classes'}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {isStudent
+                  ? 'Join interactive masterclasses, sprint reviews, and live Q&A sessions with faculty.'
+                  : 'Schedule online and offline classes, share Google Meet links, and track attendance.'}
+              </p>
+            </div>
+            {canManage && (
+              <Button onClick={() => setShowForm((visible) => !visible)}>
+                <Plus size={16} className="mr-2" />
+                Schedule class
+              </Button>
+            )}
+          </div>
 
       {error && <p className="mb-4 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
 
@@ -449,6 +492,8 @@ export default function LiveClasses() {
           ))}
         </CardContent>
       </Card>
+      </>
+      )}
     </div>
   )
 }

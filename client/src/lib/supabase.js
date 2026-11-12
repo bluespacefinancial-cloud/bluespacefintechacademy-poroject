@@ -274,7 +274,7 @@ async function resend({ email } = {}) {
 }
 
 function onAuthStateChange(callback) {
-  const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
       storeSession(session)
       emit('SIGNED_IN', session)

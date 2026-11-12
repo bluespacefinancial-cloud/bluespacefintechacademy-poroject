@@ -56,7 +56,7 @@ export default function ForgotPassword() {
               </div>
             ) : (
               <form onSubmit={submit} className="space-y-4">
-                <label className="block space-y-2 text-sm font-medium text-deep-600">
+                <label className="block space-y-2 text-sm font-medium text-deep-600 dark:text-bluespace-300">
                   Email
                   <Input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
                 </label>
@@ -65,8 +65,8 @@ export default function ForgotPassword() {
                 </Button>
               </form>
             )}
-            <p className="mt-5 text-center text-sm text-gray-500">
-              Remember your password? <Link to={returnTo} className="font-semibold text-deep-700 hover:underline">Back to sign in</Link>
+            <p className="mt-5 text-center text-sm text-gray-500 dark:text-gray-400">
+              Remember your password? <Link to={returnTo} className="font-semibold text-deep-700 dark:text-bluespace-300 hover:underline">Back to sign in</Link>
             </p>
           </CardContent>
         </Card>

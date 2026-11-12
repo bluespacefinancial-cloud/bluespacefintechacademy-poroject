@@ -82,14 +82,14 @@ export default function ResetPassword() {
             {updated ? (
               <Button className="w-full bg-deep-600 text-white hover:bg-deep-700" onClick={() => navigate(returnTo, { replace: true })}>Back to sign in</Button>
             ) : checking ? (
-              <p className="text-sm text-gray-500">Checking your secure reset link...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Checking your secure reset link...</p>
             ) : hasSession ? (
               <form onSubmit={submit} className="space-y-4">
-                <label className="block space-y-2 text-sm font-medium text-deep-600">
+                <label className="block space-y-2 text-sm font-medium text-deep-600 dark:text-bluespace-300">
                   New password
                   <Input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" />
                 </label>
-                <label className="block space-y-2 text-sm font-medium text-deep-600">
+                <label className="block space-y-2 text-sm font-medium text-deep-600 dark:text-bluespace-300">
                   Confirm new password
                   <Input type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Enter it again" />
                 </label>
@@ -99,12 +99,12 @@ export default function ResetPassword() {
               </form>
             ) : (
               <div className="space-y-4">
-                <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700">This password reset link is invalid or has expired. Request a new one to continue.</p>
+                <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">This password reset link is invalid or has expired. Request a new one to continue.</p>
                 <Button className="w-full bg-deep-600 text-white hover:bg-deep-700" onClick={() => navigate('/forgot-password', { replace: true, state: { from: returnTo } })}>Request another reset link</Button>
               </div>
             )}
-            <p className="mt-5 text-center text-sm text-gray-500">
-              <Link to={returnTo} className="font-semibold text-deep-700 hover:underline">Back to sign in</Link>
+            <p className="mt-5 text-center text-sm text-gray-500 dark:text-gray-400">
+              <Link to={returnTo} className="font-semibold text-deep-700 dark:text-bluespace-300 hover:underline">Back to sign in</Link>
             </p>
           </CardContent>
         </Card>

@@ -59,6 +59,11 @@ export default {
           fininfra: '#64748b',  // slate-500
         },
         // Semantic theme colors mapped to CSS variables in index.css
+        background: {
+          DEFAULT: 'hsl(var(--background))',
+          200: 'var(--ds-background-200)',
+        },
+        foreground: 'hsl(var(--foreground))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -90,18 +95,7 @@ export default {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))',
         },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
         // Book component tokens
-        background: {
-          200: 'var(--ds-background-200)',
-        },
         'gray-alpha': {
           400: 'var(--ds-gray-alpha-400)',
         },

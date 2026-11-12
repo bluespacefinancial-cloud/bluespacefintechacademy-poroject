@@ -252,7 +252,7 @@ export default function Login() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25, ease }}
               >
-                <Card className="dark:bg-white dark:text-gray-900">
+                <Card>
                   <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
                     <CardTitle>Set New Password</CardTitle>
                     <CardDescription>Your password was reset by admin. Please create a new one.</CardDescription>
@@ -260,11 +260,11 @@ export default function Login() {
                   <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
                     <form onSubmit={handleForceChange} className="space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600 dark:text-bluespace-300">
                           New password
                         </label>
                         <div className="relative">
-                          <input
+                          <Input
                             type={showNewPassword ? 'text' : 'password'}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
@@ -272,32 +272,31 @@ export default function Login() {
                             placeholder="Create a new password"
                             required
                             minLength={8}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="pr-10"
                           />
                           <button
                             type="button"
                             onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-2 top-1/2 -mt-2 flex items-center px-3 text-gray-400 hover:text-deep-500 transition-colors"
+                            className="absolute right-2 top-1/2 -mt-2 flex items-center px-3 text-gray-400 hover:text-deep-500 dark:hover:text-bluespace-300 transition-colors"
                           >
                             {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           Must include uppercase, lowercase, number, and special character
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600 dark:text-bluespace-300">
                           Confirm New password
                         </label>
-                        <input
+                        <Input
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           autoComplete="new-password"
                           placeholder="Enter your new password again"
                           required
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </div>
                       <Button type="submit" className="w-full bg-deep-600 text-white hover:bg-deep-700" disabled={changing}>
@@ -325,17 +324,17 @@ export default function Login() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25, ease }}
               >
-                <Card className="dark:bg-white dark:text-gray-900">
+                <Card>
                   <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
                     <CardTitle>{portal.title}</CardTitle>
                     <CardDescription>{portal.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
-                    {emailVerified && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">Your email is verified. The academy team must approve your application before you can sign in.</p>}
+                    {emailVerified && <p role="status" className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">Your email is verified. The academy team must approve your application before you can sign in.</p>}
                     {pendingVerification && <div className="mb-4 rounded-md bg-bluespace-700 p-3 text-sm text-white"><p>Check your inbox for the verification link. You can resend it after entering your email below.</p><Button type="button" variant="link" className="mt-1 h-auto p-0 text-white" onClick={resendVerification} disabled={resending}>{resending ? 'Sending...' : 'Resend verification email'}</Button></div>}
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600 dark:text-bluespace-300">
                           Email
                         </label>
                         <Input
@@ -348,34 +347,34 @@ export default function Login() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600">
+                        <label className="block text-xs font-semibold normal-case tracking-normal text-deep-600 dark:text-bluespace-300">
                           Password
                         </label>
                         <div className="relative">
-                          <input
+                          <Input
                             type={showPassword ? 'text' : 'password'}
                             autoComplete="current-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             required
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
+                            className="pr-10"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-2 top-1/2 -mt-2 flex items-center px-3 text-gray-400 hover:text-deep-500 transition-colors"
+                            className="absolute right-2 top-1/2 -mt-2 flex items-center px-3 text-gray-400 hover:text-deep-500 dark:hover:text-bluespace-300 transition-colors"
                           >
                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           Must include uppercase, lowercase, number, and special character
                         </p>
                       </div>
 
                       <div className="-mt-2 flex justify-end">
-                        <Link to="/forgot-password" state={{ email, from: pathname }} className="text-sm font-medium text-deep-700 hover:underline">Forgot password?</Link>
+                        <Link to="/forgot-password" state={{ email, from: pathname }} className="text-sm font-medium text-deep-700 dark:text-bluespace-300 hover:underline">Forgot password?</Link>
                       </div>
 
                       <div className="pt-2">
@@ -399,8 +398,8 @@ export default function Login() {
                         </Button>
                       </div>
                     </form>
-                    <p className="mt-5 text-center text-xs text-gray-500">
-                      Need an account? <Link to="/register" className="font-semibold text-deep-700 hover:underline">Submit an application</Link>
+                    <p className="mt-5 text-center text-xs text-gray-500 dark:text-gray-400">
+                      Need an account? <Link to="/register" className="font-semibold text-deep-700 dark:text-bluespace-300 hover:underline">Submit an application</Link>
                     </p>
                   </CardContent>
                 </Card>

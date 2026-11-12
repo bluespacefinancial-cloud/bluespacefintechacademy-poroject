@@ -5,7 +5,7 @@ const ease = [0.23, 1, 0.32, 1]
 
 export default function AuthSplitLayout({ image, imageAlt, headline, description, children }) {
   return (
-    <div className="flex min-h-screen w-full bg-gray-50">
+    <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
       <aside className="relative hidden min-h-screen w-1/2 overflow-hidden bg-deep-600 lg:flex lg:items-center lg:justify-center" aria-label={imageAlt}>
         <img
           src={image}
@@ -42,11 +42,18 @@ export default function AuthSplitLayout({ image, imageAlt, headline, description
         </div>
       </aside>
       <main className="relative flex min-h-screen w-full flex-col lg:w-1/2">
-        <img
-          src="/logo-dark.png"
-          alt="BlueSPACE Fintech Academy"
-          className="absolute left-5 top-5 z-20 h-8 w-auto lg:hidden"
-        />
+        <div className="lg:hidden">
+          <img
+            src="/logo-dark.png"
+            alt="BlueSPACE Fintech Academy"
+            className="absolute left-5 top-5 z-20 h-8 w-auto dark:hidden"
+          />
+          <img
+            src="/logo-white.png"
+            alt="BlueSPACE Fintech Academy"
+            className="absolute left-5 top-5 z-20 hidden h-8 w-auto dark:block"
+          />
+        </div>
         {children}
       </main>
     </div>

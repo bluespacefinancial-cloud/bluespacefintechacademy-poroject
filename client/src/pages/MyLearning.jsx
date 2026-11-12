@@ -464,7 +464,14 @@ export default function MyLearning() {
                       />
                     </div>
                     <p className="truncate text-[10px] text-gray-400">
-                      {isLocked ? MODULE_STATUS_LABELS.locked : MODULE_STATUS_LABELS[moduleStatus(module, moduleLessonsList, progress)]} ·{' '}
+                      {isLocked ? MODULE_STATUS_LABELS.locked : (() => {
+                        const modCompleted = moduleLessonsList.filter(
+                          (l) => progress[l.id]?.is_completed
+                        ).length
+                        if (moduleLessonsList.length > 0 && modCompleted === moduleLessonsList.length) return MODULE_STATUS_LABELS.completed
+                        if (modCompleted > 0) return MODULE_STATUS_LABELS.in_progress
+                        return MODULE_STATUS_LABELS.not_started
+                      })()} ·{' '}
                       {module.domain || module.track || 'Academy'}
                       {` · Week ${module.week_start}${module.week_end !== module.week_start ? `-${module.week_end}` : ''}`}
                     </p>
@@ -520,8 +527,7 @@ export default function MyLearning() {
                     onClick={() => handleLessonClick(lesson)}
                     className={`cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150 ${
                       isCompleted ? 'border-brand-100 dark:border-blue-900/50 bg-brand-50/50 dark:bg-blue-950/20' : ''
-                      lessonLocked || priorIncomplete ? 'opacity-50' : ''
-                    }`}
+                    } ${lessonLocked || priorIncomplete ? 'opacity-50' : ''}`}
                   >
                     <CardContent className="p-4 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -578,13 +584,4 @@ export default function MyLearning() {
       </div>
     )
   )
-}
-
-function moduleStatus(module, moduleLessonsList, progress) {
-  const moduleCompleted = moduleLessonsList.filter(
-    (lesson) => progress[lesson.id]?.is_completed
-  ).length
-  if (moduleLessonsList.length > 0 && moduleCompleted === moduleLessonsList.length) return 'completed'
-  if (moduleCompleted > 0) return 'in_progress'
-  return 'not_started'
 }

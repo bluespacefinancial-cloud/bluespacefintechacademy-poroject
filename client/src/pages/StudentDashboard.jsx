@@ -216,9 +216,6 @@ export default function StudentDashboard({ user }) {
     }
   })
 
-  // First incomplete week (gating target)
-  const firstIncompleteWeek = weekProgress.find((w) => !w.isComplete)
-
   // Next live class
   const nextLiveClass = data.liveClasses.length > 0 ? data.liveClasses[0] : null
 

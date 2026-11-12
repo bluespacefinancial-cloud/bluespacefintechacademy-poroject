@@ -22,6 +22,7 @@ export default function LessonPlayer() {
   const [loading, setLoading] = useState(true)
   const [completed, setCompleted] = useState(false)
   const [savingProgress, setSavingProgress] = useState(false)
+  const [progress, setProgress] = useState({})
 
   const loadLesson = async () => {
     if (!lessonId) return
@@ -41,7 +42,7 @@ export default function LessonPlayer() {
 
       const profile = await getCurrentProfile()
 
-      // Concurrently fetch sibling lessons, progress, and attached lab
+      // Fetch sibling lessons, progress for all module lessons, and attached lab
       const [siblingResult, progressResult, labResult] = await Promise.all([
         api
           .from('lessons')
@@ -51,11 +52,13 @@ export default function LessonPlayer() {
         profile
           ? api
               .from('lesson_progress')
-              .select('is_completed, completion_percentage')
+              .select('lesson_id, is_completed')
               .eq('user_id', profile.id)
-              .eq('lesson_id', parseInt(lessonId))
-              .maybeSingle()
-          : Promise.resolve({ data: null }),
+              .in(
+                'lesson_id',
+                moduleLessons.length > 0 ? moduleLessons.map((l) => l.id) : [data.id]
+              )
+          : Promise.resolve({ data: [] }),
         api
           .from('labs')
           .select('id, title, max_score, due_date')
@@ -63,12 +66,15 @@ export default function LessonPlayer() {
           .maybeSingle(),
       ])
 
+      const progressMap = {}
+      progressResult.data?.forEach((p) => {
+        progressMap[p.lesson_id] = p
+      })
+      setProgress(progressMap)
+
       setModuleLessons(siblingResult.data || [])
-      if (progressResult.data) {
-        setCompleted(progressResult.data.is_completed || false)
-      } else {
-        setCompleted(false)
-      }
+      const currentProgress = progressMap[data.id]
+      setCompleted(currentProgress?.is_completed || false)
 
       if (labResult.data) {
         setAttachedLab(labResult.data)
@@ -224,20 +230,20 @@ export default function LessonPlayer() {
 
           {/* Attached Lab Exercise Box (if lab exists for this lesson) */}
           {attachedLab && (
-            <Card className="border border-deep-600/30 shadow-sm rounded-xl bg-deep-50/20 overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-deep-100 bg-deep-50/50">
+            <Card className="border border-deep-600/30 dark:border-bluespace-500/30 shadow-sm rounded-xl bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-deep-50/50 dark:bg-bluespace-950/40">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-deep-600 text-white flex items-center justify-center shrink-0">
                     <Code2 size={15} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-gray-900">Attached Practical Lab</h3>
-                    <p className="text-[11px] text-gray-500">Hands-on deliverable for this lesson</p>
+                    <h3 className="text-sm font-bold text-foreground">Attached Practical Lab</h3>
+                    <p className="text-[11px] text-muted-foreground">Hands-on deliverable for this lesson</p>
                   </div>
                 </div>
                 <Badge
                   variant={!isPreview && labSubmission?.status === 'graded' ? 'secondary' : 'outline'}
-                  className="text-[11px] font-medium"
+                  className="text-[11px] font-medium border-border"
                 >
                   {isPreview
                     ? 'Preview'
@@ -251,8 +257,8 @@ export default function LessonPlayer() {
 
               <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-bold text-gray-900 truncate">{attachedLab.title}</h4>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                  <h4 className="text-sm font-bold text-foreground truncate">{attachedLab.title}</h4>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>Worth: {attachedLab.max_score} pts</span>
                     {attachedLab.due_date && (
                       <>
@@ -262,8 +268,8 @@ export default function LessonPlayer() {
                     )}
                   </div>
                   {labSubmission?.feedback && (
-                    <div className="mt-2 rounded-lg bg-white border border-gray-100 p-2.5 text-xs text-gray-600">
-                      <strong className="text-gray-900 font-semibold">Faculty Feedback: </strong>
+                    <div className="mt-2 rounded-lg bg-muted/40 border border-border p-2.5 text-xs text-muted-foreground">
+                      <strong className="text-foreground font-semibold">Faculty Feedback: </strong>
                       {labSubmission.feedback}
                     </div>
                   )}
@@ -284,40 +290,40 @@ export default function LessonPlayer() {
           )}
 
           {/* Lesson Details Card */}
-          <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h3 className="text-sm font-bold text-gray-900">Lesson Overview</h3>
+          <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+            <div className="px-5 py-4 border-b border-border bg-muted/30">
+              <h3 className="text-sm font-bold text-foreground">Lesson Overview</h3>
             </div>
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-gray-500">Format</span>
-                <span className="font-semibold text-gray-900 capitalize">{lesson.type || 'Lecture'}</span>
+                <span className="font-medium text-muted-foreground">Format</span>
+                <span className="font-semibold text-foreground capitalize">{lesson.type || 'Lecture'}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-gray-500">Duration</span>
-                <span className="font-semibold text-gray-900">{formatTime(lesson.duration_minutes * 60)}</span>
+                <span className="font-medium text-muted-foreground">Duration</span>
+                <span className="font-semibold text-foreground">{formatTime(lesson.duration_minutes * 60)}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-gray-500">Status</span>
-                <span className="font-semibold text-gray-900">{isPreview ? 'Preview' : completed ? 'Completed' : 'In Progress'}</span>
+                <span className="font-medium text-muted-foreground">Status</span>
+                <span className="font-semibold text-foreground">{isPreview ? 'Preview' : completed ? 'Completed' : 'In Progress'}</span>
               </div>
               {lesson.description && (
-                <div className="pt-2 border-t border-gray-100">
-                  <p className="text-xs text-gray-600 leading-relaxed">{lesson.description}</p>
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground leading-relaxed">{lesson.description}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Bottom Lesson Navigation Bar */}
-          <div className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm flex items-center justify-between gap-3">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between gap-3">
             <div>
               {prevLesson ? (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate(`/lesson/${prevLesson.id}`)}
-                  className="text-xs border-gray-200 text-gray-700 hover:bg-gray-50"
+                  className="text-xs border-border text-foreground hover:bg-muted"
                 >
                   <ChevronLeft size={14} className="mr-1" />
                   Previous Lesson
@@ -327,7 +333,7 @@ export default function LessonPlayer() {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate(backTarget)}
-                  className="text-xs border-gray-200 text-gray-500"
+                  className="text-xs border-border text-muted-foreground"
                 >
                   <BookOpen size={13} className="mr-1.5" />
                   {isPreview ? 'My Modules' : 'Curriculum'}
@@ -363,13 +369,13 @@ export default function LessonPlayer() {
 
         {/* Right Sidebar: Module Syllabus Track */}
         <div className="space-y-5">
-          <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h3 className="text-sm font-bold text-gray-900 leading-tight">Module Lessons</h3>
-              <p className="mt-0.5 text-xs text-gray-500">{moduleLessons.length} lessons in this module</p>
+          <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+            <div className="px-5 py-4 border-b border-border bg-muted/30">
+              <h3 className="text-sm font-bold text-foreground leading-tight">Module Lessons</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">{moduleLessons.length} lessons in this module</p>
             </div>
             <CardContent className="p-3">
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {moduleLessons.map((l, index) => {
                   const isCurrent = l.id === lesson.id
                   const priorLessons = moduleLessons.filter(
@@ -392,25 +398,25 @@ export default function LessonPlayer() {
                       }}
                       className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-lg text-left transition-colors text-xs ${
                         isCurrent
-                          ? 'bg-deep-50 border border-deep-100 font-semibold text-deep-900'
+                          ? 'bg-deep-50 dark:bg-bluespace-950/60 border border-deep-100 dark:border-bluespace-800 font-semibold text-deep-900 dark:text-bluespace-200'
                           : lessonLocked
-                          ? 'opacity-50 grayscale text-gray-400 cursor-not-allowed'
-                          : 'hover:bg-gray-50 text-gray-700'
+                          ? 'opacity-50 grayscale text-muted-foreground cursor-not-allowed'
+                          : 'hover:bg-muted text-foreground'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                           lessonLocked
-                            ? 'bg-gray-200 text-gray-400'
+                            ? 'bg-muted text-muted-foreground'
                             : isCurrent
                             ? 'bg-deep-600 text-white'
-                            : 'bg-gray-100 text-gray-600'
+                            : 'bg-muted text-muted-foreground'
                         }`}>
                           {lessonLocked ? <Lock size={10} /> : index + 1}
                         </span>
                         <span className="truncate">{l.title}</span>
                       </div>
-                      <span className="text-[10px] text-gray-400 shrink-0">
+                      <span className="text-[10px] text-muted-foreground shrink-0">
                         {l.duration_minutes ? `${l.duration_minutes}m` : ''}
                       </span>
                     </button>
@@ -421,18 +427,18 @@ export default function LessonPlayer() {
           </Card>
 
           {/* Quick Support / Feedback Box */}
-          <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white p-5 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+          <Card className="border border-border shadow-sm rounded-xl bg-card p-5 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Need assistance?
             </h4>
-            <p className="text-xs text-gray-600 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               If you have questions about this lesson&apos;s API integration or encounter bug issues during the practical lab, reach out in your squad workspace or book a clinic slot with faculty.
             </p>
             <Button
               asChild
               variant="outline"
               size="sm"
-              className="w-full text-xs border-gray-200 text-deep-600 hover:bg-deep-50"
+              className="w-full text-xs border-border text-deep-600 dark:text-bluespace-300 hover:bg-muted"
             >
               <Link to="/my-squad">Squad Workspace</Link>
             </Button>

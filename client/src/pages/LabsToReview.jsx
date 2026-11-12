@@ -10,7 +10,6 @@ import {
   CardContent,
   CardFooter,
 } from '../components/ui/card'
-import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import {
   Select,
@@ -20,12 +19,13 @@ import {
   SelectItem,
 } from '../components/ui/select'
 import { api } from '../lib/backend'
+import { Badge } from '../components/ui/badge'
 
-const SUBMISSION_STATUS = {
-  submitted: { label: 'Submitted', variant: 'default', color: 'text-brand-600' },
-  graded: { label: 'Graded', variant: 'secondary', color: 'text-emerald-600' },
-  remediation: { label: 'Remediation', variant: 'outline', color: 'text-amber-600' },
-  failed: { label: 'Failed', variant: 'danger', color: 'text-red-600' },
+const SUBMISSION_LABELS = {
+  submitted: 'Submitted',
+  graded: 'Graded',
+  remediation: 'Remediation',
+  failed: 'Failed',
 }
 
 const DOMAIN_COLORS = {
@@ -107,8 +107,6 @@ export default function LabsToReview() {
     if (!dateStr) return 'Unknown'
     return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   }
-
-  const statusConfig = (status) => SUBMISSION_STATUS[status] || { label: status, variant: 'secondary', color: 'text-gray-600' }
 
   return (
     <div className="w-full space-y-6">
@@ -234,9 +232,9 @@ export default function LabsToReview() {
                 </div>
               </CardContent>
               <CardFooter className="flex items-center justify-between pt-3">
-                <Badge variant={statusConfig(lab.status).variant} className={statusConfig(lab.status).color}>
-                  {statusConfig(lab.status).label}
-                </Badge>
+                    <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                      {SUBMISSION_LABELS[lab.status] || lab.status}
+                    </span>
                 <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/grading?submission=${lab.id}`) }}>
                   Review
                 </Button>

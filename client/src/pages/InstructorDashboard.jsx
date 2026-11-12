@@ -110,7 +110,7 @@ export default function InstructorDashboard({ user }) {
 
   if (error) {
     return (
-      <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div role="alert" className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800 dark:text-red-300">
         <p className="font-semibold">Unable to load dashboard</p>
         <p className="mt-1 text-xs">{error}</p>
       </div>
@@ -128,13 +128,13 @@ export default function InstructorDashboard({ user }) {
         onStartTour={() => setTourOpen(true)}
         actions={
           <div className="flex items-center gap-2">
-            <Button asChild size="sm" variant="outline" className="border-gray-200">
+            <Button asChild size="sm" variant="outline" className="border-border">
               <Link to="/labs-to-review">
                 <ClipboardList size={14} className="mr-1.5" />
                 Review Labs ({data.submissions.length})
               </Link>
             </Button>
-            <Button asChild size="sm" variant="outline" className="border-gray-200">
+            <Button asChild size="sm" variant="outline" className="border-border">
               <Link to="/live-classes">
                 <Calendar size={14} className="mr-1.5" />
                 Live Schedule
@@ -184,14 +184,14 @@ export default function InstructorDashboard({ user }) {
       {/* Primary Section: Priority Grading Queue (2/3) + Next Live Teaching Session (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* SUBMISSIONS WAITING FOR REVIEW */}
-        <Card data-tour="instructor-reviews" className="lg:col-span-2 border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
+        <Card data-tour="instructor-reviews" className="lg:col-span-2 border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
               <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Priority Grading Queue</h3>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Student lab exercises submitted and awaiting evaluation</p>
+                <h3 className="text-base font-bold text-foreground leading-tight">Priority Grading Queue</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">Student lab exercises submitted and awaiting evaluation</p>
               </div>
-              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
+              <Button asChild variant="outline" size="sm" className="text-xs border-border">
                 <Link to="/labs-to-review">
                   Review all
                   <ArrowRight size={13} className="ml-1.5" />
@@ -202,28 +202,28 @@ export default function InstructorDashboard({ user }) {
             <CardContent className="p-5">
               {data.submissions.length === 0 ? (
                 <div className="py-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-2">
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-2">
                     <CheckCircle2 size={18} />
                   </div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Grading queue is clear</p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                  <p className="text-sm font-semibold text-foreground">Grading queue is clear</p>
+                  <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
                     All student lab submissions have been reviewed. New submissions will appear here as fellows complete their exercises.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="divide-y divide-border">
                   {data.submissions.map((item) => (
                     <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={item.labTitle}>{item.labTitle}</p>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold text-gray-800 dark:text-gray-200">{item.studentName}</span>
+                        <p className="text-sm font-semibold text-foreground truncate" title={item.labTitle}>{item.labTitle}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground">{item.studentName}</span>
                           <span>•</span>
                           <span className="truncate" title={item.moduleTitle}>{item.moduleTitle}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-muted-foreground">
                           {new Date(item.submitted_at).toLocaleDateString()}
                         </span>
                         <Button asChild size="sm" className="h-8 px-3 text-xs bg-deep-600 text-white hover:bg-deep-700">
@@ -237,25 +237,25 @@ export default function InstructorDashboard({ user }) {
             </CardContent>
           </div>
 
-          <div className="px-5 py-3 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
-            <span className="text-gray-500 dark:text-gray-400">
+          <div className="px-5 py-3 bg-muted/20 border-t border-border flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">
               Need to review cohort project deliverables?
             </span>
-            <Link to="/project-review" className="font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300">
+            <Link to="/project-review" className="font-semibold text-deep-600 dark:text-bluespace-300 hover:underline">
               Project Review Queue →
             </Link>
           </div>
         </Card>
 
         {/* UPCOMING LIVE TEACHING SESSION */}
-        <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
+        <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
-                <Video size={16} className="text-deep-600 dark:text-deep-400" />
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Teaching Schedule</h3>
+                <Video size={16} className="text-deep-600 dark:text-bluespace-300" />
+                <h3 className="text-base font-bold text-foreground leading-tight">Teaching Schedule</h3>
               </div>
-              <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
+              <Button asChild variant="outline" size="sm" className="text-xs border-border">
                 <Link to="/live-classes">Calendar</Link>
               </Button>
             </div>
@@ -264,21 +264,21 @@ export default function InstructorDashboard({ user }) {
               {nextLiveClass ? (
                 <>
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30">
                       Next Scheduled Class
                     </span>
-                    <h4 className="text-base font-bold text-gray-900 dark:text-white leading-snug pt-1">
+                    <h4 className="text-base font-bold text-foreground leading-snug pt-1">
                       {nextLiveClass.title}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                       {cohortNamesFor(nextLiveClass, data.cohorts)}
                     </p>
                   </div>
 
-                  <div className="rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 p-3 space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <Calendar size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
-                      <span className="font-semibold text-gray-900 dark:text-white">
+                  <div className="rounded-lg bg-muted/40 border border-border p-3 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Calendar size={13} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
+                      <span className="font-semibold text-foreground">
                         {new Date(nextLiveClass.starts_at).toLocaleDateString(undefined, {
                           weekday: 'short',
                           month: 'short',
@@ -294,8 +294,8 @@ export default function InstructorDashboard({ user }) {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                      <Video size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Video size={13} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
                       <span>{nextLiveClass.is_offline ? nextLiveClass.venue : 'Virtual Live Stream'}</span>
                     </div>
                   </div>
@@ -309,7 +309,7 @@ export default function InstructorDashboard({ user }) {
                         </a>
                       </Button>
                     ) : (
-                      <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-800">
+                      <Button asChild variant="outline" size="sm" className="w-full text-xs border-border">
                         <Link to="/live-classes">View Class Roster</Link>
                       </Button>
                     )}
@@ -317,14 +317,14 @@ export default function InstructorDashboard({ user }) {
                 </>
               ) : (
                 <div className="py-8 text-center space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto">
+                  <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto">
                     <Calendar size={18} />
                   </div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">No classes scheduled today</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
+                  <p className="text-sm font-semibold text-foreground">No classes scheduled today</p>
+                  <p className="text-xs text-muted-foreground max-w-xs mx-auto">
                     Schedule weekly cohort masterclasses or open office hours in the calendar.
                   </p>
-                  <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-gray-200 dark:border-gray-800">
+                  <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-border">
                     <Link to="/live-classes">Schedule Class</Link>
                   </Button>
                 </div>
@@ -332,8 +332,8 @@ export default function InstructorDashboard({ user }) {
             </CardContent>
           </div>
 
-          <div className="px-5 py-3 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 text-center">
-            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300">
+          <div className="px-5 py-3 bg-muted/20 border-t border-border text-center">
+            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 dark:text-bluespace-300 hover:underline">
               Manage 1-on-1 Mentor Clinic Hours →
             </Link>
           </div>
@@ -342,13 +342,13 @@ export default function InstructorDashboard({ user }) {
 
       {/* Secondary Section: Cohort Modules (2/3) + Faculty Toolkit (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card data-tour="instructor-modules" className="lg:col-span-2 border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+        <Card data-tour="instructor-modules" className="lg:col-span-2 border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Teaching Modules</h3>
-              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Curricula taught across your assigned cohorts</p>
+              <h3 className="text-base font-bold text-foreground leading-tight">Teaching Modules</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Curricula taught across your assigned cohorts</p>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
+            <Button asChild variant="outline" size="sm" className="text-xs border-border">
               <Link to="/my-modules">
                 All Modules
                 <ArrowRight size={13} className="ml-1.5" />
@@ -358,11 +358,11 @@ export default function InstructorDashboard({ user }) {
           <CardContent className="p-5">
             {data.modules.length === 0 ? (
               <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto mb-2.5">
                   <BookOpen size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">No modules assigned yet</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                <p className="text-sm font-semibold text-foreground">No modules assigned yet</p>
+                <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
                   Cohort modules will appear here once assigned by the curriculum director, or you can author a custom module.
                 </p>
                 <Button asChild size="sm" className="mt-4 bg-deep-600 text-white hover:bg-deep-700">
@@ -374,11 +374,11 @@ export default function InstructorDashboard({ user }) {
                 {data.modules.slice(0, 5).map((module) => (
                   <div
                     key={module.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3.5 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-border p-3.5 hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={module.title}>{module.title}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-sm font-semibold text-foreground truncate" title={module.title}>{module.title}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <span className="capitalize">{module.stage ? module.stage.replaceAll('_', ' ') : 'Foundations'}</span>
                         <span>•</span>
                         <span>{module.domain || module.track || 'Fintech Core'}</span>
@@ -387,7 +387,7 @@ export default function InstructorDashboard({ user }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium">
+                      <Badge variant={module.is_published ? 'secondary' : 'outline'} className="text-[11px] font-medium border-border">
                         {module.is_published ? 'Published' : 'Draft'}
                       </Badge>
                     </div>
@@ -399,76 +399,76 @@ export default function InstructorDashboard({ user }) {
         </Card>
 
         {/* Faculty Toolkit */}
-        <Card data-tour="instructor-squads" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
+        <Card data-tour="instructor-squads" className="border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
               <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Faculty Toolkit</h3>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Quick actions for teaching operations</p>
+                <h3 className="text-base font-bold text-foreground leading-tight">Faculty Toolkit</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">Quick actions for teaching operations</p>
               </div>
             </div>
             <CardContent className="p-4 space-y-2">
               <Link
                 to="/labs-to-review"
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <ClipboardList size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                  <ClipboardList size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
                   <span>Grade Student Labs</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] font-medium">
+                <Badge variant="outline" className="text-[10px] font-medium border-border">
                   {data.submissions.length} pending
                 </Badge>
               </Link>
 
               <Link
                 to="/project-review"
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <Award size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                  <Award size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
                   <span>Project Deliverables</span>
                 </div>
-                <ArrowRight size={13} className="text-gray-400" />
+                <ArrowRight size={13} className="text-muted-foreground" />
               </Link>
 
               <Link
                 to="/mentor-clinics"
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <Clock size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                  <Clock size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
                   <span>Mentor Clinic Hours</span>
                 </div>
-                <ArrowRight size={13} className="text-gray-400" />
+                <ArrowRight size={13} className="text-muted-foreground" />
               </Link>
 
               <Link
                 to="/squads"
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <Users size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                  <Users size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
                   <span>Assigned Squads ({data.squads.length})</span>
                 </div>
-                <ArrowRight size={13} className="text-gray-400" />
+                <ArrowRight size={13} className="text-muted-foreground" />
               </Link>
 
               <Link
                 to="/announcements"
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <MessageSquare size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
+                  <MessageSquare size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
                   <span>Post Cohort Announcement</span>
                 </div>
-                <ArrowRight size={13} className="text-gray-400" />
+                <ArrowRight size={13} className="text-muted-foreground" />
               </Link>
             </CardContent>
           </div>
 
-          <div className="p-4 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800">
-            <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-800">
+          <div className="p-4 bg-muted/20 border-t border-border">
+            <Button asChild variant="outline" size="sm" className="w-full text-xs border-border">
               <Link to="/squads">View Mentored Squads ({data.squads.length})</Link>
             </Button>
           </div>

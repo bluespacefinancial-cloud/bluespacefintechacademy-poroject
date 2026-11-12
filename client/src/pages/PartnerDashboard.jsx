@@ -99,7 +99,7 @@ export default function PartnerDashboard({ user }) {
 
   if (error) {
     return (
-      <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div role="alert" className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800 dark:text-red-300">
         <p className="font-semibold">Unable to load dashboard</p>
         <p className="mt-1 text-xs">{error}</p>
       </div>
@@ -158,107 +158,109 @@ export default function PartnerDashboard({ user }) {
         />
       </div>
 
-      {/* Recent Courses */}
-      <Card data-tour="partner-courses" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
-        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-          <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Recent courses</h3>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Courses owned by your organisation</p>
-          </div>
-          <Button asChild variant="outline" size="sm" className="shrink-0 text-xs border-gray-200 dark:border-gray-800">
-            <Link to="/partner-courses">
-              Open course studio
-              <ArrowRight size={13} className="ml-1.5" />
-            </Link>
-          </Button>
-        </div>
-        <CardContent className="p-5">
-          {recentCourses.length === 0 ? (
-            <div className="py-16 text-center">
-              <EmptyState
-                icon={Briefcase}
-                title="No courses yet"
-                description="Create your first course in the Course Studio to begin offering partner electives to academy fellows."
-                action={
-                  <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
-                    <Link to="/partner-courses">
-                      <Plus size={14} className="mr-1.5" />
-                      Create course
-                    </Link>
-                  </Button>
-                }
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Courses (2/3) */}
+        <Card data-tour="partner-courses" className="lg:col-span-2 border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-border bg-muted/30">
+            <div>
+              <h3 className="text-base font-bold text-foreground leading-tight">Recent courses</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Courses owned by your organisation</p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {recentCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={course.title}>{course.title}</p>
-                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(course.created_at).toLocaleDateString()} ·{' '}
-                      {course.status.replace('_', ' ')}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={
-                      course.status === 'published'
-                        ? 'secondary'
-                        : course.status === 'draft'
-                        ? 'outline'
-                        : 'default'
-                    }
-                    className="text-[11px] font-medium shrink-0 capitalize"
+            <Button asChild variant="outline" size="sm" className="shrink-0 text-xs border-border">
+              <Link to="/partner-courses">
+                Open course studio
+                <ArrowRight size={13} className="ml-1.5" />
+              </Link>
+            </Button>
+          </div>
+          <CardContent className="p-5">
+            {recentCourses.length === 0 ? (
+              <div className="py-16 text-center">
+                <EmptyState
+                  icon={Briefcase}
+                  title="No courses yet"
+                  description="Create your first course in the Course Studio to begin offering partner electives to academy fellows."
+                  action={
+                    <Button asChild size="sm" className="bg-deep-600 text-white hover:bg-deep-700">
+                      <Link to="/partner-courses">
+                        <Plus size={14} className="mr-1.5" />
+                        Create course
+                      </Link>
+                    </Button>
+                  }
+                />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentCourses.map((course) => (
+                  <div
+                    key={course.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-border p-3.5 hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card"
                   >
-                    {course.status.replace('_', ' ')}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Quick actions */}
-      <Card data-tour="partner-actions" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
-        <div>
-          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Studio actions</h3>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Quick actions for partner course operations</p>
-          </div>
-          <CardContent className="p-4 space-y-2">
-            <Link
-              to="/partner-courses"
-              className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
-            >
-              <div className="flex items-center gap-2.5">
-                <BookOpen size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
-                <span>Course Studio</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground truncate" title={course.title}>{course.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {new Date(course.created_at).toLocaleDateString()} ·{' '}
+                        {course.status.replace('_', ' ')}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        course.status === 'published'
+                          ? 'secondary'
+                          : course.status === 'draft'
+                          ? 'outline'
+                          : 'default'
+                      }
+                      className="text-[11px] font-medium shrink-0 capitalize border-border"
+                    >
+                      {course.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                ))}
               </div>
-              <ArrowRight size={13} className="text-gray-400" />
-            </Link>
-
-            <Link
-              to="/partner-organisation"
-              className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40 text-xs font-semibold text-gray-800 dark:text-gray-200"
-            >
-              <div className="flex items-center gap-2.5">
-                <Users size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
-                <span>Organisation Profile</span>
-              </div>
-              <ArrowRight size={13} className="text-gray-400" />
-            </Link>
+            )}
           </CardContent>
-        </div>
-        <div className="p-4 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800">
-          <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-800">
-            <Link to="/partner-courses">View All Courses ({data.courses.length})</Link>
-          </Button>
-        </div>
-      </Card>
+        </Card>
+
+        {/* Studio actions (1/3) */}
+        <Card data-tour="partner-actions" className="border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="px-5 py-4 border-b border-border bg-muted/30">
+              <h3 className="text-base font-bold text-foreground leading-tight">Studio actions</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Quick actions for partner course operations</p>
+            </div>
+            <CardContent className="p-4 space-y-2">
+              <Link
+                to="/partner-courses"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <BookOpen size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
+                  <span>Course Studio</span>
+                </div>
+                <ArrowRight size={13} className="text-muted-foreground" />
+              </Link>
+
+              <Link
+                to="/partner-organisation"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card text-xs font-semibold text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Users size={16} className="text-deep-600 dark:text-bluespace-300 shrink-0" />
+                  <span>Organisation Profile</span>
+                </div>
+                <ArrowRight size={13} className="text-muted-foreground" />
+              </Link>
+            </CardContent>
+          </div>
+          <div className="p-4 bg-muted/20 border-t border-border">
+            <Button asChild variant="outline" size="sm" className="w-full text-xs border-border">
+              <Link to="/partner-courses">View All Courses ({data.courses.length})</Link>
+            </Button>
+          </div>
+        </Card>
+      </div>
 
       <WelcomeGuide
         role="Partner"

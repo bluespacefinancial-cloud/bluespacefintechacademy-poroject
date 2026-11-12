@@ -6,12 +6,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8001',
-        changeOrigin: true,
-      },
-    },
   },
   resolve: {
     alias: {
@@ -25,6 +19,7 @@ export default defineConfig({
           react: ['react', 'react-dom', 'react-router-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-popover', '@radix-ui/react-scroll-area', '@radix-ui/react-select', '@radix-ui/react-slot', '@radix-ui/react-tooltip'],
           icons: ['lucide-react'],
+          supabase: ['@supabase/supabase-js'],
         },
       },
     },

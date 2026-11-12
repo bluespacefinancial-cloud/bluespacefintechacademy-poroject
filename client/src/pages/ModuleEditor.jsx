@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import { Breadcrumb } from '../components/ui/breadcrumb'
+import MediaUpload from '../components/MediaUpload'
 import toast from 'react-hot-toast'
 
 const STAGE_OPTIONS = [
@@ -985,7 +986,11 @@ export default function ModuleEditor() {
                   </div>
                   <div>
                     <label htmlFor="lesson-type" className="mb-1 block text-xs font-medium text-deep-600">Type</label>
-                    <Select value={lessonForm.type} onValueChange={(value) => setLessonForm({ ...lessonForm, type: value })}>
+                    <Select value={lessonForm.type} onValueChange={(value) => {
+                      const next = { ...lessonForm, type: value }
+                      if (value !== 'video') next.video_url = ''
+                      setLessonForm(next)
+                    }}>
                       <SelectTrigger id="lesson-type" className="w-full">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -1013,7 +1018,12 @@ export default function ModuleEditor() {
                     <label htmlFor="lesson-provider" className="mb-1 block text-xs font-medium text-deep-600">Media provider</label>
                     <Select
                       value={lessonForm.media_provider}
-                      onValueChange={(value) => setLessonForm({ ...lessonForm, media_provider: value })}
+                      onValueChange={(value) => {
+                        const next = { ...lessonForm, media_provider: value }
+                        // Switching away from self-hosted drops the uploaded file URL.
+                        if (value !== 'self') next.video_url = ''
+                        setLessonForm(next)
+                      }}
                     >
                       <SelectTrigger id="lesson-provider" className="w-full">
                         <SelectValue />
@@ -1032,16 +1042,36 @@ export default function ModuleEditor() {
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="lesson-video" className="mb-1 block text-xs font-medium text-deep-600">Video URL</label>
-                    <Input
-                      id="lesson-video"
-                      type="url"
-                      value={lessonForm.video_url}
-                      onChange={(event) => setLessonForm({ ...lessonForm, video_url: event.target.value })}
-                      placeholder="YouTube or hosted video"
-                    />
-                  </div>
+                  {lessonForm.type === 'video' && lessonForm.media_provider === 'self' ? (
+                    <div className="sm:col-span-2">
+                      <label htmlFor="lesson-video-upload" className="mb-1 block text-xs font-medium text-deep-600">Video file</label>
+                      <MediaUpload
+                        id="lesson-video-upload"
+                        kind="video"
+                        label="Upload video"
+                        value={lessonForm.video_url || undefined}
+                        onUploaded={(data) => {
+                          setLessonForm({ ...lessonForm, video_url: data.url })
+                        }}
+                        onClear={() => {
+                          setLessonForm({ ...lessonForm, video_url: '' })
+                        }}
+                        disabled={savingLesson}
+                        helper="MP4 or WebM · max 200 MB · self-hosted, plays in the native video player"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label htmlFor="lesson-video" className="mb-1 block text-xs font-medium text-deep-600">Video URL</label>
+                      <Input
+                        id="lesson-video"
+                        type="url"
+                        value={lessonForm.video_url}
+                        onChange={(event) => setLessonForm({ ...lessonForm, video_url: event.target.value })}
+                        placeholder="YouTube or hosted video"
+                      />
+                    </div>
+                  )}
                   <div>
                     <label htmlFor="lesson-audio" className="mb-1 block text-xs font-medium text-deep-600">Audio URL</label>
                     <Input

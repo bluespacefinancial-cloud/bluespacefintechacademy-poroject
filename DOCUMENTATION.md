@@ -38,55 +38,43 @@ re-runnable: once the accounts are gone, every statement is a no-op.
 
 ### Prerequisites
 
-- Docker + Docker Compose
 - Node.js 18+
-- PHP 8.3 with `pdo_pgsql` (or `backend/bin/artisan` with the local extracted
-  extension — see `backend/scripts/install-php-pgsql-local.sh`)
-- Composer
+- A Supabase project with the `database/*.sql` schema applied
+- (Optional) Docker + Docker Compose for a local PostgreSQL/PostgREST stack
 
 ### 1. Configure the environment
 
-Copy the example files and generate the shared JWT secret locally:
+Copy the example files:
 
 ```bash
 cd lms
-cp .env.example .env
-cp backend/.env.example backend/.env
 cp client/.env.example client/.env
-
-# Put the output in PGRST_JWT_SECRET in both lms/.env and backend/.env.
-openssl rand -hex 32
 ```
 
-Set `DB_PASSWORD` in `backend/.env` to the `lms_service` password defined in
-`database/00_bootstrap.sql`. The `authenticator` password in
-`docker-compose.yml` and `database/00_bootstrap.sql` must match as well. These
-are local development defaults; replace them before any shared deployment.
+Set the following in `client/.env`:
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_SUPABASE_URL` | Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anon (publishable) key |
 
 Never commit a populated `.env` file. The repository ignores `.env` variants.
 
-### 2. Start PostgreSQL and PostgREST
+### 2. Apply the database schema
+
+Run `database/*.sql` against your Supabase PostgreSQL database in filename order:
 
 ```bash
-docker compose up -d
+psql "postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres" \
+  -v ON_ERROR_STOP=1 -f database/00_bootstrap.sql
+psql "postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres" \
+  -v ON_ERROR_STOP=1 -f database/01_schema.sql
+# …etc for remaining files
 ```
 
-The first start runs `database/*.sql` in filename order. Rebuild from scratch
-with `docker compose down -v && docker compose up -d`.
+Or use the Supabase SQL Editor in the dashboard to apply each file.
 
-### 3. Start the Laravel API
-
-```bash
-cd backend
-composer install
-./bin/artisan key:generate
-./bin/artisan serve --host=127.0.0.1 --port=8001
-```
-
-Port `8001` is used because an unrelated local project already occupies `8000`.
-The Vite proxy in `client/vite.config.js` targets `127.0.0.1:8001`.
-
-### 4. Start the client
+### 3. Start the client
 
 ```bash
 cd client
@@ -100,55 +88,30 @@ Open <http://localhost:3000>.
 
 | Service | Address | Notes |
 |---------|---------|-------|
-| PostgreSQL | `127.0.0.1:5433` | Local development container |
-| PostgREST | `127.0.0.1:54330` | Internal only; the browser never calls it |
-| Laravel API | `127.0.0.1:8001` | Bearer token from `/api/auth/login` |
+| Supabase API | `https://<ref>.supabase.co` | REST + Auth + Storage |
+| Supabase PostgreSQL | `db.<ref>.supabase.co:5432` | Direct DB access (admin only) |
 | Vite client | `localhost:3000` | Development server |
 
 ### Environment variables
-
-`lms/.env`:
-
-| Variable | Purpose |
-|----------|---------|
-| `PGRST_JWT_SECRET` | Random 32+ byte secret shared with Laravel |
-| `LMS_DB_PORT` | Host port for PostgreSQL (default `5433`) |
-| `LMS_REST_PORT` | Host port for PostgREST (default `54330`) |
-
-`backend/.env`:
-
-| Variable | Purpose |
-|----------|---------|
-| `APP_URL` | Laravel origin, e.g. `http://localhost:8001` |
-| `DB_*` | PostgreSQL connection; `DB_PASSWORD` must match the local role |
-| `POSTGREST_URL` | Internal PostgREST origin |
-| `PGRST_JWT_SECRET` | Must equal `lms/.env` |
-| `LMS_FRONTEND_URL` | Frontend origin used in reset links |
-| `LMS_TOKEN_TTL_MINUTES` | Bearer-token lifetime |
-| `LMS_RECOVERY_TTL_MINUTES` | Password-reset token lifetime |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins |
 
 `client/.env`:
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_API_URL` | API base path; `/api` in development |
+| `VITE_SUPABASE_URL` | Supabase project URL, e.g. `https://dsipoxbmztvlgowyznkl.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key for client-side access |
 
 Vite variables are compiled into the browser bundle. Never place a secret in a
 `VITE_*` variable.
 
 ### Available scripts
 
-From `lms/`:
+From `lms/client/`:
 
 - `npm run dev` — start the Vite client
 - `npm run build` — build the client
 - `npm run lint` — run ESLint
 - `npm run format` — format with Prettier
-- `npm run stack:up` — start PostgreSQL and PostgREST
-- `npm run stack:down` — stop the stack
-- `npm run stack:reset` — rebuild the database from `database/*.sql`
-- `npm run api` — start Laravel on `127.0.0.1:8001`
 
 ### PWA
 

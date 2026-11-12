@@ -124,7 +124,7 @@ export default function AdministratorDashboard({ user }) {
 
   if (error) {
     return (
-      <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div role="alert" className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800 dark:text-red-300">
         <p className="font-semibold">Unable to load academy operations</p>
         <p className="mt-1 text-xs">{error}</p>
       </div>
@@ -140,13 +140,13 @@ export default function AdministratorDashboard({ user }) {
         onStartTour={() => setTourOpen(true)}
         actions={
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant="outline" className="border-gray-200">
+            <Button asChild size="sm" variant="outline" className="border-border">
               <Link to="/applications">
                 <ClipboardList size={14} className="mr-1.5" />
                 Review applications
               </Link>
             </Button>
-            <Button asChild size="sm" variant="outline" className="border-gray-200">
+            <Button asChild size="sm" variant="outline" className="border-border">
               <Link to="/audit-log">
                 <Shield size={14} className="mr-1.5" />
                 Audit log
@@ -193,13 +193,13 @@ export default function AdministratorDashboard({ user }) {
 
       {/* Grid: Applications + Partner Reviews */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card data-tour="admin-applications" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+        <Card data-tour="admin-applications" className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Pending applications</h3>
-              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Candidate applications awaiting admissions decision</p>
+              <h3 className="text-base font-bold text-foreground leading-tight">Pending applications</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Candidate applications awaiting admissions decision</p>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
+            <Button asChild variant="outline" size="sm" className="text-xs border-border">
               <Link to="/applications">
                 Open queue
                 <ArrowRight size={13} className="ml-1.5" />
@@ -209,23 +209,23 @@ export default function AdministratorDashboard({ user }) {
           <CardContent className="p-5">
             {data.applications.length === 0 ? (
               <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto mb-2.5">
                   <ClipboardList size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">No applications waiting</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">All student and partner applications have been reviewed.</p>
+                <p className="text-sm font-semibold text-foreground">No applications waiting</p>
+                <p className="mt-1 text-xs text-muted-foreground">All student and partner applications have been reviewed.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {data.applications.map((item) => (
-                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-border p-3 hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.name}</p>
-                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground truncate">
                         {item.email}{item.track ? ` • ${item.track}` : ''}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize">
+                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize border-border">
                       {item.requested_role}
                     </Badge>
                   </div>
@@ -235,13 +235,13 @@ export default function AdministratorDashboard({ user }) {
           </CardContent>
         </Card>
 
-        <Card data-tour="admin-partner-reviews" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+        <Card data-tour="admin-partner-reviews" className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Partner course reviews</h3>
-              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Partner courses submitted for curriculum audit</p>
+              <h3 className="text-base font-bold text-foreground leading-tight">Partner course reviews</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Partner courses submitted for curriculum audit</p>
             </div>
-            <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
+            <Button asChild variant="outline" size="sm" className="text-xs border-border">
               <Link to="/partner-course-review">
                 Review courses
                 <ArrowRight size={13} className="ml-1.5" />
@@ -251,23 +251,23 @@ export default function AdministratorDashboard({ user }) {
           <CardContent className="p-5">
             {data.courses.length === 0 ? (
               <div className="py-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+                <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto mb-2.5">
                   <Briefcase size={18} />
                 </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">No partner courses to review</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">No pending partner submissions at this time.</p>
+                <p className="text-sm font-semibold text-foreground">No partner courses to review</p>
+                <p className="mt-1 text-xs text-muted-foreground">No pending partner submissions at this time.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {data.courses.map((item) => (
-                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-border p-3 hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.title}</p>
-                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {item.submitted_at ? `Submitted ${new Date(item.submitted_at).toLocaleDateString()}` : 'Date unavailable'}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize">
+                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize border-border">
                       {item.status ? item.status.replace('_', ' ') : 'under review'}
                     </Badge>
                   </div>
@@ -279,13 +279,13 @@ export default function AdministratorDashboard({ user }) {
       </div>
 
       {/* Cohorts Card */}
-      <Card data-tour="admin-cohorts" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+      <Card data-tour="admin-cohorts" className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Upcoming and active cohorts</h3>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Cohort scheduling, enrollment statuses, and capacities</p>
+            <h3 className="text-base font-bold text-foreground leading-tight">Upcoming and active cohorts</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">Cohort scheduling, enrollment statuses, and capacities</p>
           </div>
-          <Button asChild variant="outline" size="sm" className="text-xs border-gray-200 dark:border-gray-800">
+          <Button asChild variant="outline" size="sm" className="text-xs border-border">
             <Link to="/cohorts">
               Manage cohorts
               <ArrowRight size={13} className="ml-1.5" />
@@ -295,23 +295,23 @@ export default function AdministratorDashboard({ user }) {
         <CardContent className="p-5">
           {data.cohorts.length === 0 ? (
             <div className="py-8 text-center">
-              <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 mx-auto mb-2.5">
+              <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto mb-2.5">
                 <GraduationCap size={18} />
               </div>
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">No active or planned cohorts</p>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Create a cohort to begin enrolling students.</p>
+              <p className="text-sm font-semibold text-foreground">No active or planned cohorts</p>
+              <p className="mt-1 text-xs text-muted-foreground">Create a cohort to begin enrolling students.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {data.cohorts.map((cohort) => (
-                <div key={cohort.id} className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 p-3.5 hover:border-gray-200 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900/40">
+                <div key={cohort.id} className="flex items-center justify-between rounded-lg border border-border p-3.5 hover:border-deep-600/30 dark:hover:border-bluespace-400 transition-colors bg-card">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{cohort.name}</p>
-                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-sm font-semibold text-foreground truncate">{cohort.name}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       Starts {new Date(`${cohort.start_date}T00:00:00`).toLocaleDateString()} • Capacity {cohort.capacity}
                     </p>
                   </div>
-                  <Badge variant={cohort.status === 'active' ? 'secondary' : 'outline'} className="text-[11px] font-medium capitalize shrink-0 ml-2">
+                  <Badge variant={cohort.status === 'active' ? 'secondary' : 'outline'} className="text-[11px] font-medium capitalize shrink-0 ml-2 border-border">
                     {cohort.status}
                   </Badge>
                 </div>
@@ -322,11 +322,11 @@ export default function AdministratorDashboard({ user }) {
       </Card>
 
       {/* Analytics */}
-      <Card data-tour="admin-analytics" className="border border-gray-200/90 dark:border-gray-800 shadow-sm rounded-xl bg-card overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+      <Card data-tour="admin-analytics" className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Academy analytics</h3>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Completion trends, cohort enrollment, and lesson mix over the last 30 days</p>
+            <h3 className="text-base font-bold text-foreground leading-tight">Academy analytics</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">Completion trends, cohort enrollment, and lesson mix over the last 30 days</p>
           </div>
         </div>
         <CardContent className="p-5">
@@ -334,20 +334,20 @@ export default function AdministratorDashboard({ user }) {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.completionTrend}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={5} />
-                  <YAxis domain={[0, 100]} label={{ value: 'Completion rate (%)', position: 'insideLeft', angle: -90 }} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'currentColor' }} interval={5} />
+                  <YAxis domain={[0, 100]} label={{ value: 'Completion rate (%)', position: 'insideLeft', angle: -90, fill: 'currentColor' }} tickFormatter={(v) => `${v}%`} tick={{ fill: 'currentColor' }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
                   <Line type="monotone" dataKey="rate" stroke="#0000FF" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <div className="h-[300px]">
               <RechartsBarChart data={data.cohortEnrollment.slice(0, 8)}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="cohort" tick={{ fontSize: 10 }} />
-                <YAxis label={{ value: 'Fellows', position: 'insideLeft', angle: -90 }} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="cohort" tick={{ fontSize: 10, fill: 'currentColor' }} />
+                <YAxis label={{ value: 'Fellows', position: 'insideLeft', angle: -90, fill: 'currentColor' }} tick={{ fill: 'currentColor' }} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
                 <Bar dataKey="fellows" fill="#C5A059" radius={[4, 4, 0, 0]} />
               </RechartsBarChart>
             </div>
@@ -368,12 +368,12 @@ export default function AdministratorDashboard({ user }) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
               </RechartsPieChart>
             </div>
           </div>
           {data.completionTrend.length === 0 && data.cohortEnrollment.length === 0 && data.lessonTypes.length === 0 && (
-            <div className="py-12 text-center text-gray-500 text-sm">
+            <div className="py-12 text-center text-muted-foreground text-sm">
               No activity data available yet.
             </div>
           )}

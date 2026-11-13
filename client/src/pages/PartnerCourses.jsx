@@ -375,7 +375,7 @@ export default function PartnerCourses() {
               <div className="space-y-2.5 rounded-xl border border-border bg-muted/40 p-3.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <Video size={14} className="text-blue-500" />
+                    <Video size={14} className="text-deep-600" />
                     Course Media Delivery *
                   </label>
                   <span className="text-[10px] text-muted-foreground font-medium">Link or Upload</span>
@@ -388,7 +388,7 @@ export default function PartnerCourses() {
                     onClick={() => setForm({ ...form, media_source: 'link', media_provider: 'youtube' })}
                     className={`flex items-center justify-center gap-1.5 py-1.5 rounded-md transition-all ${
                       form.media_source === 'link'
-                        ? 'bg-blue-600 text-white font-bold shadow-xs'
+                        ? 'bg-deep-600 text-white font-bold shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -400,7 +400,7 @@ export default function PartnerCourses() {
                     onClick={() => setForm({ ...form, media_source: 'upload', media_provider: 'self' })}
                     className={`flex items-center justify-center gap-1.5 py-1.5 rounded-md transition-all ${
                       form.media_source === 'upload'
-                        ? 'bg-blue-600 text-white font-bold shadow-xs'
+                        ? 'bg-deep-600 text-white font-bold shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -516,7 +516,7 @@ export default function PartnerCourses() {
                 </Select>
               </div>
 
-              <Button type="submit" disabled={saving} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5">
+              <Button type="submit" disabled={saving} className="w-full bg-deep-600 hover:bg-deep-700 text-white font-bold text-xs py-2.5">
                 <Plus size={14} className="mr-2" />
                 {saving ? 'Creating Draft…' : 'Create Course Draft'}
               </Button>
@@ -541,7 +541,7 @@ export default function PartnerCourses() {
                   onClick={() => selectCourse(course)}
                   className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                     isSelected
-                      ? 'border-blue-600 bg-muted/60 ring-1 ring-blue-500/50 shadow-xs'
+                      ? 'border-deep-600 bg-muted/60 ring-1 ring-deep-500/50 shadow-xs'
                       : 'border-border bg-card hover:bg-muted/30'
                   }`}
                 >
@@ -585,10 +585,18 @@ export default function PartnerCourses() {
             )}
 
             {selected && !canEdit && (
-              <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-                {selected.status === 'published'
-                  ? '✅ This course is live and published. Students in eligible tracks can access it directly.'
-                  : '⏳ This course is under review by the academy leadership.'}
+              <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground flex items-center gap-2">
+                {selected.status === 'published' ? (
+                  <>
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    <span>This course is live and published. Students in eligible tracks can access it directly.</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock size={14} className="text-amber-500 shrink-0" />
+                    <span>This course is under review by the academy leadership.</span>
+                  </>
+                )}
               </div>
             )}
 
@@ -666,7 +674,7 @@ export default function PartnerCourses() {
                         onClick={() => setLesson({ ...lesson, media_source: 'link', media_provider: 'youtube' })}
                         className={`flex items-center justify-center gap-1.5 py-1 rounded transition-all text-xs ${
                           (lesson.media_source || 'link') === 'link'
-                            ? 'bg-blue-600 text-white font-bold shadow-xs'
+                            ? 'bg-deep-600 text-white font-bold shadow-xs'
                             : 'text-muted-foreground hover:text-foreground'
                         }`}
                       >
@@ -678,7 +686,7 @@ export default function PartnerCourses() {
                         onClick={() => setLesson({ ...lesson, media_source: 'upload', media_provider: 'self' })}
                         className={`flex items-center justify-center gap-1.5 py-1 rounded transition-all text-xs ${
                           lesson.media_source === 'upload'
-                            ? 'bg-blue-600 text-white font-bold shadow-xs'
+                            ? 'bg-deep-600 text-white font-bold shadow-xs'
                             : 'text-muted-foreground hover:text-foreground'
                         }`}
                       >

@@ -307,7 +307,7 @@ export default function ProfileSettings() {
         />
         <div className="min-h-[300px] flex items-center justify-center bg-card border border-border rounded-xl">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-brand-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-deep-600 dark:border-deep-400 border-t-transparent rounded-full animate-spin" />
             <span className="text-sm text-muted-foreground">Loading fellow profile...</span>
           </div>
         </div>
@@ -360,10 +360,10 @@ export default function ProfileSettings() {
               variant="outline"
               size="sm"
               onClick={() => setShowIdCard(!showIdCard)}
-              className="text-xs border-border text-foreground dark:text-blue-300 bg-card hover:bg-muted/60 font-medium h-8"
+              className="text-xs border-border text-foreground dark:text-deep-300 bg-card hover:bg-muted/60 font-medium h-8"
               title="Toggle Student Lanyard ID Badge"
             >
-              <CreditCard size={13} className="mr-1.5 text-brand-600 dark:text-blue-400" />
+              <CreditCard size={13} className="mr-1.5 text-deep-600 dark:text-deep-400" />
               {showIdCard ? 'Hide Lanyard' : 'Physical ID Badge'}
             </Button>
             <Badge variant="solidEmerald" className="text-xs font-semibold px-2.5 py-0.5">
@@ -394,7 +394,7 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('showcase')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'showcase'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-deep-600 text-deep-600 dark:border-deep-400 dark:text-deep-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -407,13 +407,13 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('skills')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'skills'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-deep-600 text-deep-600 dark:border-deep-400 dark:text-deep-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Compass size={15} />
           Skills & Domains
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 bg-blue-50/80 dark:bg-blue-950/60">
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-deep-700 dark:text-deep-300 border border-deep-200 dark:border-deep-800/80 bg-deep-50/80 dark:bg-deep-950/60">
             {skillsCompletion}%
           </span>
         </button>
@@ -423,7 +423,7 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('credentials')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'credentials'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-deep-600 text-deep-600 dark:border-deep-400 dark:text-deep-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -441,7 +441,7 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('security')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'security'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-deep-600 text-deep-600 dark:border-deep-400 dark:text-deep-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -458,7 +458,7 @@ export default function ProfileSettings() {
             <Card className="border border-border shadow-sm bg-card overflow-hidden">
               <div className="p-6 border-b border-border bg-muted/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-blue-950/40 border border-brand-100 dark:border-blue-800/60 flex items-center justify-center text-xl font-bold text-brand-700 dark:text-blue-300 shrink-0">
+                  <div className="w-16 h-16 rounded-2xl bg-deep-50 dark:bg-deep-950/40 border border-deep-100 dark:border-deep-800/60 flex items-center justify-center text-xl font-bold text-deep-700 dark:text-deep-300 shrink-0">
                     {profile.name?.charAt(0)?.toUpperCase() || 'F'}
                   </div>
                   <div>
@@ -497,7 +497,7 @@ export default function ProfileSettings() {
                       {selectedDomains.map((d) => (
                         <span
                           key={d}
-                          className="text-xs font-semibold px-3 py-1 rounded-lg text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/30"
+                          className="text-xs font-semibold px-3 py-1 rounded-lg text-deep-700 dark:text-deep-300 border border-deep-200 dark:border-deep-800/60 bg-deep-50/50 dark:bg-deep-950/30"
                         >
                           {d}
                         </span>
@@ -546,7 +546,7 @@ export default function ProfileSettings() {
             <Card className="border border-border shadow-sm bg-card">
               <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <Shield size={15} className="text-brand-600 dark:text-blue-400" />
+                  <Shield size={15} className="text-deep-600 dark:text-deep-400" />
                   Fellow Verification
                 </CardTitle>
               </CardHeader>
@@ -574,7 +574,7 @@ export default function ProfileSettings() {
                   <button
                     type="button"
                     onClick={() => setShowIdCard(!showIdCard)}
-                    className="text-xs font-semibold text-brand-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-semibold text-deep-600 dark:text-deep-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <CreditCard size={12} />
                     {showIdCard ? 'Hide Badge' : 'View Hanging Badge'}
@@ -585,7 +585,7 @@ export default function ProfileSettings() {
 
             <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-2 text-xs text-muted-foreground">
               <p className="font-semibold text-foreground flex items-center gap-1.5">
-                <Award size={14} className="text-brand-600 dark:text-blue-400" />
+                <Award size={14} className="text-deep-600 dark:text-deep-400" />
                 Industry Talent Network
               </p>
               <p className="leading-relaxed">
@@ -604,14 +604,14 @@ export default function ProfileSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Compass size={15} className="text-brand-600 dark:text-blue-400" />
+                    <Compass size={15} className="text-deep-600 dark:text-deep-400" />
                     Specialization Role Preference
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Select the engineering or project leadership role you want to focus on in your squad
                   </CardDescription>
                 </div>
-                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Choose 1 Role</span>
+                <span className="text-xs font-semibold text-deep-600 dark:text-deep-400">Choose 1 Role</span>
               </div>
             </CardHeader>
             <CardContent className="p-5">
@@ -625,15 +625,15 @@ export default function ProfileSettings() {
                       onClick={() => setSelectedRole(r.id)}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
+                          ? 'border-deep-600 dark:border-deep-500 bg-deep-50/80 dark:bg-deep-950/60 shadow-xs ring-1 ring-deep-600 dark:ring-deep-500'
                           : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-gray-50 dark:hover:bg-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-deep-700 dark:text-deep-300' : 'text-gray-900 dark:text-white'}`}>
                           {r.label}
                         </span>
-                        {isSelected && <Check size={14} className="text-blue-600 dark:text-blue-400" />}
+                        {isSelected && <Check size={14} className="text-deep-600 dark:text-deep-400" />}
                       </div>
                       <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug">{r.desc}</p>
                     </button>
@@ -649,7 +649,7 @@ export default function ProfileSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Layers size={15} className="text-blue-600 dark:text-blue-400" />
+                    <Layers size={15} className="text-deep-600 dark:text-deep-400" />
                     Fintech Domain Tracks
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground mt-0.5">
@@ -672,15 +672,15 @@ export default function ProfileSettings() {
                       onClick={() => toggleDomain(domain.id)}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
+                          ? 'border-deep-600 dark:border-deep-500 bg-deep-50/80 dark:bg-deep-950/60 shadow-xs ring-1 ring-deep-600 dark:ring-deep-500'
                           : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-gray-50 dark:hover:bg-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-deep-700 dark:text-deep-300' : 'text-gray-900 dark:text-white'}`}>
                           {domain.name}
                         </span>
-                        {isSelected && <Check size={14} className="text-blue-600 dark:text-blue-400" />}
+                        {isSelected && <Check size={14} className="text-deep-600 dark:text-deep-400" />}
                       </div>
                       <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">{domain.desc}</p>
                     </button>
@@ -718,8 +718,8 @@ export default function ProfileSettings() {
                       onClick={() => toggleSkill(skill)}
                       className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-500 shadow-xs'
-                          : 'bg-white dark:bg-slate-900/80 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-500/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800/80'
+                          ? 'bg-deep-600 text-white border-deep-600 dark:bg-deep-600 dark:border-deep-500 shadow-xs'
+                          : 'bg-white dark:bg-slate-900/80 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-deep-600/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800/80'
                       }`}
                     >
                       {isSelected && <Check size={12} />}
@@ -756,7 +756,7 @@ export default function ProfileSettings() {
                   onClick={handleSaveSkills}
                   disabled={savingSkills}
                   size="sm"
-                  className="bg-brand-600 text-white hover:bg-brand-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-xs font-semibold"
+                  className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
                 >
                   <Save size={13} className="mr-1.5" />
                   {savingSkills ? 'Saving...' : 'Save Skills Profile'}
@@ -775,7 +775,7 @@ export default function ProfileSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Award size={15} className="text-brand-600 dark:text-blue-400" />
+                    <Award size={15} className="text-deep-600 dark:text-deep-400" />
                     Issued Certificates & Badges
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground mt-0.5">
@@ -850,7 +850,7 @@ export default function ProfileSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <GraduationCap size={15} className="text-brand-600 dark:text-blue-400" />
+                    <GraduationCap size={15} className="text-deep-600 dark:text-deep-400" />
                     Capstone Defense Status
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground mt-0.5">
@@ -952,7 +952,7 @@ export default function ProfileSettings() {
                     type="submit"
                     disabled={savingAccount}
                     size="sm"
-                    className="bg-brand-600 text-white hover:bg-brand-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-xs font-semibold"
+                    className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
                   >
                     <Save size={13} className="mr-1.5" />
                     {savingAccount ? 'Saving...' : 'Save Account Details'}

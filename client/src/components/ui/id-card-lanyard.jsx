@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react"
+import { X } from "lucide-react"
 
 const CSS = `
 .idcl-root{
@@ -586,7 +587,7 @@ export function IDCardLanyard({
           aria-label="Close ID badge"
           title="Dismiss ID Badge"
         >
-          ✕
+          <X size={14} />
         </button>
       )}
 

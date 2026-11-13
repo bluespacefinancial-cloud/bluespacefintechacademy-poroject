@@ -18,7 +18,7 @@ const BreadcrumbItem = ({ to, label, isLast, className }) => {
   return (
     <Link
       to={to}
-      className={cn('text-xs text-brand-600 dark:text-blue-400 hover:text-brand-700 dark:hover:text-blue-300 hover:underline transition-colors', className)}
+      className={cn('text-xs text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300 hover:underline transition-colors', className)}
     >
       {label}
     </Link>

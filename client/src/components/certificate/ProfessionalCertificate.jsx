@@ -288,7 +288,7 @@ function CertificateQRCode({ value, size = 52 }) {
       viewBox={`0 0 ${matrixSize} ${matrixSize}`}
       width={size}
       height={size}
-      className="bg-white p-1 rounded border border-blue-200/90 shadow-xs shrink-0"
+      className="bg-white p-1 rounded border border-deep-200/90 shadow-xs shrink-0"
       aria-label={`Verification code for ${value}`}
     >
       {modules.map((row, r) =>
@@ -419,7 +419,7 @@ export default function ProfessionalCertificate({
       {showActions && (
         <div className="print:hidden flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-gray-200/90 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-brand-700 border border-blue-200">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-deep-50 text-deep-700 border border-deep-200">
               <ShieldCheck size={14} className="text-[#0000ff]" />
               Verified Academic Credential
             </span>

@@ -158,7 +158,7 @@ export default function Placement() {
         </Card>
         <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600 dark:text-blue-400">
+            <p className="text-2xl font-bold text-deep-600 dark:text-deep-400">
               {placements.filter((p) => p.status === 'matched').length}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matched</p>
@@ -221,12 +221,12 @@ export default function Placement() {
                     </div>
                   </div>
                   <div className="mt-3 flex gap-2 text-[10px]">
-                    {placement.checkin30 && <span className="text-emerald-600">30✓</span>}
-                    {!placement.checkin30 && <span className="text-gray-400">30-</span>}
-                    {placement.checkin60 && <span className="text-emerald-600">60✓</span>}
-                    {!placement.checkin60 && <span className="text-gray-400">60-</span>}
-                    {placement.checkin90 && <span className="text-emerald-600">90✓</span>}
-                    {!placement.checkin90 && <span className="text-gray-400">90-</span>}
+                    {placement.checkin30 && <span className="text-emerald-600 font-semibold">30d Done</span>}
+                    {!placement.checkin30 && <span className="text-gray-400">30d -</span>}
+                    {placement.checkin60 && <span className="text-emerald-600 font-semibold">60d Done</span>}
+                    {!placement.checkin60 && <span className="text-gray-400">60d -</span>}
+                    {placement.checkin90 && <span className="text-emerald-600 font-semibold">90d Done</span>}
+                    {!placement.checkin90 && <span className="text-gray-400">90d -</span>}
                   </div>
                 </CardContent>
                 <CardFooter className="flex items-center justify-between pt-3">

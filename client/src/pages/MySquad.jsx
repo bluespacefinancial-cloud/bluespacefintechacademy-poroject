@@ -301,12 +301,12 @@ export default function MySquad() {
                         onClick={() => handleSelectSprint(sprint)}
                         className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                           isSelected
-                            ? 'border-deep-600 dark:border-blue-500 bg-deep-50/40 dark:bg-blue-950/40 shadow-sm'
+                            ? 'border-deep-600 dark:border-deep-500 bg-deep-50/40 dark:bg-deep-950/40 shadow-sm'
                             : 'border-gray-200/90 dark:border-gray-800 bg-card hover:border-gray-300 dark:hover:border-gray-700'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-sm font-bold ${isSelected ? 'text-deep-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                          <span className={`text-sm font-bold ${isSelected ? 'text-deep-700 dark:text-deep-400' : 'text-gray-900 dark:text-white'}`}>
                             Sprint {sprint.sprint_number}
                           </span>
                           <Badge
@@ -347,7 +347,7 @@ export default function MySquad() {
                         <div className="flex items-center justify-between">
                           <div>
                             <CardTitle className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                              <Target size={15} className="text-deep-600 dark:text-blue-400" />
+                              <Target size={15} className="text-deep-600 dark:text-deep-400" />
                               Submit Sprint {selectedSprint.sprint_number} Deliverable
                             </CardTitle>
                             <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -482,7 +482,7 @@ export default function MySquad() {
                                     href={item.evidence_url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300 hover:underline"
+                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300 hover:underline"
                                   >
                                     <ExternalLink size={13} />
                                     <span>Open Live Evidence</span>
@@ -493,7 +493,7 @@ export default function MySquad() {
                               {item.feedback && (
                                 <div className="rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 p-3 text-xs space-y-1 mt-2">
                                   <p className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                    <ShieldCheck size={13} className="text-deep-600 dark:text-blue-400" />
+                                    <ShieldCheck size={13} className="text-deep-600 dark:text-deep-400" />
                                     Faculty Reviewer Feedback:
                                   </p>
                                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.feedback}</p>
@@ -583,7 +583,7 @@ export default function MySquad() {
             <Card className="border border-gray-200/90 dark:border-gray-800 shadow-sm bg-card">
               <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
                 <CardTitle className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Briefcase size={15} className="text-deep-600 dark:text-blue-400" />
+                  <Briefcase size={15} className="text-deep-600 dark:text-deep-400" />
                   Squad Structure
                 </CardTitle>
               </CardHeader>

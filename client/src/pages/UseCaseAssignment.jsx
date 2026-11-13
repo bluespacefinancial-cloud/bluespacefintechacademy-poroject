@@ -416,7 +416,7 @@ export default function UseCaseAssignment() {
         </Card>
         <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600 dark:text-blue-400">
+            <p className="text-2xl font-bold text-deep-600 dark:text-deep-400">
               {useCases.filter((u) => u.status === 'proposed').length}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Proposed</p>

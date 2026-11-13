@@ -135,7 +135,7 @@ export function VideoPlayer({
         {/* Top Title Overlay */}
         <div className="absolute top-0 left-0 right-0 p-4 sm:p-5 bg-gradient-to-b from-black/85 via-black/40 to-transparent z-30 pointer-events-none flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0 pr-4">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-deep-600 animate-pulse shrink-0" />
             <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-md truncate">
               {title || 'Class Video'}
             </span>
@@ -162,7 +162,7 @@ export function VideoPlayer({
             className="absolute inset-0 flex items-center justify-center bg-black/40 z-20 hover:bg-black/30 transition-colors group"
             aria-label="Play video"
           >
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600/90 group-hover:bg-blue-500 text-white flex items-center justify-center shadow-xl shadow-blue-600/40 transition-all group-hover:scale-105 active:scale-95 pl-1">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-deep-600 group-hover:bg-deep-700 text-white flex items-center justify-center shadow-xl transition-all group-hover:scale-105 active:scale-95 pl-1">
               <Play size={32} className="fill-white" />
             </div>
           </button>
@@ -172,7 +172,7 @@ export function VideoPlayer({
           onMouseEnter={() => setShowControls(true)}
           onMouseLeave={() => setShowControls(false)}
         >
-          <button onClick={togglePlay} className="p-1.5 text-white hover:text-blue-400 transition-colors" aria-label={isPlaying ? 'Pause' : 'Play'}>
+          <button onClick={togglePlay} className="p-1.5 text-white hover:text-deep-400 transition-colors" aria-label={isPlaying ? 'Pause' : 'Play'}>
             {isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
           <div className="flex-1 h-1.5 bg-white/20 rounded-full cursor-pointer relative group">
@@ -180,13 +180,13 @@ export function VideoPlayer({
               className="absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full bg-white shadow transform transition-all duration-100 group-hover:scale-125"
               style={{ left: `${(currentTime / duration) * 100}%` }}
             />
-            <div className="absolute left-0 top-0 h-full bg-blue-600 rounded-full" style={{ width: `${(currentTime / duration) * 100}%` }} />
+            <div className="absolute left-0 top-0 h-full bg-deep-600 rounded-full" style={{ width: `${(currentTime / duration) * 100}%` }} />
           </div>
           <span className="text-xs font-medium text-white/80 tabular-nums">{formatTime(currentTime)} / {formatTime(duration)}</span>
-          <button onClick={toggleMute} className="p-1.5 text-white hover:text-blue-400 transition-colors" aria-label={isMuted ? 'Unmute' : 'Mute'}>
+          <button onClick={toggleMute} className="p-1.5 text-white hover:text-deep-400 transition-colors" aria-label={isMuted ? 'Unmute' : 'Mute'}>
             {isMuted ? <VolumeOff size={20} /> : <Volume2 size={20} />}
           </button>
-          <button onClick={toggleFullscreen} className="p-1.5 text-white hover:text-blue-400 transition-colors" aria-label="Toggle Fullscreen">
+          <button onClick={toggleFullscreen} className="p-1.5 text-white hover:text-deep-400 transition-colors" aria-label="Toggle Fullscreen">
             {isFullscreen ? <Minimize size={20} /> : <Expand size={20} />}
           </button>
         </div>

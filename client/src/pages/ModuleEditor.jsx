@@ -851,10 +851,10 @@ export default function ModuleEditor() {
                 </div>
 
                 {labEditorLessonId === lesson.id && (
-                  <form onSubmit={saveLab} className="space-y-3 rounded-lg border border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/30 p-4">
+                  <form onSubmit={saveLab} className="space-y-3 rounded-lg border border-deep-500/30 bg-deep-50/40 dark:bg-deep-950/30 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <ClipboardList size={15} className="text-blue-600 dark:text-blue-400" />
+                        <ClipboardList size={15} className="text-deep-600 dark:text-deep-400" />
                         <p className="text-sm font-semibold text-foreground">
                           {labsByLesson[lesson.id] ? 'Edit lab' : 'Attach a lab'}
                         </p>
@@ -862,7 +862,7 @@ export default function ModuleEditor() {
                       <button
                         type="button"
                         onClick={() => { setLabEditorLessonId(null); _setLabForm(emptyLabForm); setDirty(false) }}
-                        className="rounded p-1 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-blue-600"
+                        className="rounded p-1 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-deep-600"
                         aria-label="Close lab editor"
                       >
                         <X size={15} />
@@ -1107,7 +1107,7 @@ export default function ModuleEditor() {
                     type="checkbox"
                     checked={lessonForm.is_required}
                     onChange={(event) => setLessonForm({ ...lessonForm, is_required: event.target.checked })}
-                    className="h-4 w-4 rounded border-border text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
+                    className="h-4 w-4 rounded border-border text-deep-600 focus-visible:ring-2 focus-visible:ring-deep-600"
                   />
                   Required for completion
                 </label>

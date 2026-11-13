@@ -29,7 +29,7 @@ const SUBMISSION_LABELS = {
 }
 
 const DOMAIN_COLORS = {
-  FaaS: 'bg-blue-600 text-white font-semibold border-transparent',
+  FaaS: 'bg-deep-600 text-white font-semibold border-transparent',
   FinCore: 'bg-emerald-600 text-white font-semibold border-transparent',
   FinOps: 'bg-amber-500 text-slate-950 font-bold border-transparent',
   FinInfra: 'bg-slate-700 text-white font-semibold border-transparent',
@@ -161,7 +161,7 @@ export default function LabsToReview() {
         </Card>
         <Card className="dark:border-gray-800">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-deep-600 dark:text-blue-400">{labs.filter((l) => l.status === 'submitted').length}</p>
+            <p className="text-2xl font-bold text-deep-600 dark:text-deep-400">{labs.filter((l) => l.status === 'submitted').length}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending Review</p>
           </CardContent>
         </Card>

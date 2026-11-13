@@ -75,7 +75,7 @@ export default function Certificates() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
-            <Award className="text-[#0000ff] dark:text-blue-400" size={26} />
+            <Award className="text-deep-600 dark:text-deep-400" size={26} />
             Academic Certificates
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -84,8 +84,8 @@ export default function Certificates() {
         </div>
 
         {certificates.filter((c) => c.status === 'certified').length > 0 && (
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-xs font-semibold text-brand-700 dark:text-blue-300">
-            <CheckCircle2 size={14} className="text-[#0000ff] dark:text-blue-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-deep-50 dark:bg-deep-950/40 border border-deep-200 dark:border-deep-900/50 text-xs font-semibold text-deep-700 dark:text-deep-300">
+            <CheckCircle2 size={14} className="text-deep-600 dark:text-deep-400" />
             <span>
               {certificates.filter((c) => c.status === 'certified').length} Active Certificate
               {certificates.filter((c) => c.status === 'certified').length === 1 ? '' : 's'}
@@ -108,7 +108,7 @@ export default function Certificates() {
       ) : certificates.length === 0 ? (
         <Card className="border border-gray-200 dark:border-gray-800 shadow-sm bg-card">
           <CardContent className="py-16 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#0000ff] dark:text-blue-400 flex items-center justify-center mx-auto border border-blue-100 dark:border-blue-900/50">
+            <div className="w-12 h-12 rounded-full bg-deep-50 dark:bg-deep-950/60 text-deep-600 dark:text-deep-400 flex items-center justify-center mx-auto border border-deep-100 dark:border-deep-900/50">
               <Award size={26} />
             </div>
             <h3 className="text-base font-bold text-gray-900 dark:text-white">No Certification Records Yet</h3>
@@ -131,7 +131,7 @@ export default function Certificates() {
               >
                 <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
                   <div className="flex items-start gap-3">
-                    <div className="rounded-xl bg-blue-50 dark:bg-blue-950/60 p-2.5 text-[#0000ff] dark:text-blue-400 shrink-0 border border-blue-100 dark:border-blue-900/50">
+                    <div className="rounded-xl bg-deep-50 dark:bg-deep-950/60 p-2.5 text-deep-600 dark:text-deep-400 shrink-0 border border-deep-100 dark:border-deep-900/50">
                       <Award size={22} />
                     </div>
                     <div>
@@ -162,7 +162,7 @@ export default function Certificates() {
                     {certificate.final_grade !== null && certificate.final_grade !== undefined && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 dark:text-gray-400">Final Grade</span>
-                        <span className="font-bold text-brand-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900/50">
+                        <span className="font-bold text-deep-700 dark:text-deep-400 bg-deep-50 dark:bg-deep-950/40 px-2 py-0.5 rounded border border-deep-200 dark:border-deep-900/50">
                           {certificate.final_grade}%
                         </span>
                       </div>

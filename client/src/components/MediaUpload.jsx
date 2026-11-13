@@ -116,7 +116,7 @@ export default function MediaUpload({
             href={value}
             target="_blank"
             rel="noreferrer"
-            className="min-w-0 flex-1 truncate text-xs text-blue-600 dark:text-blue-400 hover:underline"
+            className="min-w-0 flex-1 truncate text-xs text-deep-600 dark:text-deep-400 hover:underline"
             title={fileName}
           >
             {fileName || 'Uploaded file'}

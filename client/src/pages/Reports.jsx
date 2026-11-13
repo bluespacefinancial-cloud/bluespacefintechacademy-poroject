@@ -126,7 +126,7 @@ export default function Reports() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
                 <p className="text-xs uppercase text-gray-500 dark:text-gray-400">{label}</p>
               </div>
-              <Icon size={18} className="text-brand-600 dark:text-blue-400" />
+              <Icon size={18} className="text-deep-600 dark:text-deep-400" />
             </CardContent>
           </Card>
         ))}

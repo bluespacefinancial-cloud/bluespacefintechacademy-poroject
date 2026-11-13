@@ -299,7 +299,7 @@ export default function Cohorts() {
               filteredCohorts.map((cohort) => (
                 <tr
                   key={cohort.id}
-                  className={`border-b border-gray-50 dark:border-gray-800/60 hover:bg-gray-50 dark:hover:bg-gray-800/40 text-gray-800 dark:text-gray-200 transition-colors duration-150 ${editingId === cohort.id ? 'bg-brand-50/50 dark:bg-blue-950/40' : ''}`}
+                  className={`border-b border-gray-50 dark:border-gray-800/60 hover:bg-gray-50 dark:hover:bg-gray-800/40 text-gray-800 dark:text-gray-200 transition-colors duration-150 ${editingId === cohort.id ? 'bg-deep-50/50 dark:bg-deep-950/40' : ''}`}
                 >
                   {editingId === cohort.id ? (
                     <td colSpan={6} className="p-4">

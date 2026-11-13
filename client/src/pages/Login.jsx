@@ -180,7 +180,7 @@ export default function Login() {
 
       if (user.forcePasswordChange) {
         setForceChange(true)
-        toast('Your password was reset by admin. Please set a new password.', { icon: '🔐' })
+        toast('Your password was reset by admin. Please set a new password.')
       } else {
         toast.success(`Welcome back, ${user.name || user.email}`)
         navigate('/dashboard', { replace: true })

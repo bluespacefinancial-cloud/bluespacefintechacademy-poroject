@@ -21,7 +21,7 @@ import {
 import { api } from '../lib/backend'
 
 const ROLE_COLORS = {
-  Student: 'bg-blue-600 text-white font-semibold border-transparent',
+  Student: 'bg-deep-600 text-white font-semibold border-transparent',
   Instructor: 'bg-emerald-600 text-white font-semibold border-transparent',
   Partner: 'bg-purple-600 text-white font-semibold border-transparent',
   Administrator: 'bg-slate-700 text-white font-semibold border-transparent',

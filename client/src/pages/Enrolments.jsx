@@ -364,7 +364,7 @@ export default function Enrolments() {
           filtered.map((enrolment) => (
             <Card
               key={enrolment.id}
-              className={`cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150 ${editingId === enrolment.id ? 'bg-brand-50/50 dark:bg-blue-950/40' : ''}`}
+              className={`cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150 ${editingId === enrolment.id ? 'bg-deep-50/50 dark:bg-deep-950/40' : ''}`}
             >
               {editingId === enrolment.id ? (
                 <>

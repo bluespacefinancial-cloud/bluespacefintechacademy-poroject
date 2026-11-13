@@ -66,7 +66,7 @@ export default function PeerReview() {
                 onClick={() => choose(review)}
                 className={`w-full rounded border p-3 text-left transition-colors ${
                   selected?.id === review.id
-                    ? 'border-brand-300 dark:border-blue-500 bg-brand-50/50 dark:bg-blue-950/40'
+                    ? 'border-brand-300 dark:border-deep-500 bg-deep-50/50 dark:bg-deep-950/40'
                     : 'border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40'
                 }`}
               >

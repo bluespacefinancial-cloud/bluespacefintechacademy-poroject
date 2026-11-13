@@ -122,7 +122,7 @@ export default function AppLayout() {
                   className="hidden sm:flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300 font-medium truncate max-w-[220px]"
                   title={cohortName}
                 >
-                  <GraduationCap size={13} className="text-brand-600 dark:text-blue-400 shrink-0" />
+                  <GraduationCap size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                   {cohortName}
                 </span>
               )}

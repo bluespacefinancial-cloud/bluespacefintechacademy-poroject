@@ -541,7 +541,7 @@ export default function MediaPlayer({
                 onClick={() => saveProgress(youtubeDuration, true, youtubeDuration)}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-deep-600 hover:bg-deep-700 text-white transition-colors"
               >
-                {isCompleted ? 'Completed ✓' : 'Mark Lesson Complete'}
+                {isCompleted ? 'Completed' : 'Mark Lesson Complete'}
               </button>
             )}
           </div>

@@ -219,7 +219,7 @@ export default function GlobalSearch({ open, onOpenChange }) {
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-blue-600"
+              className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-deep-600"
               aria-label="Clear search"
             >
               <X size={14} />
@@ -265,21 +265,21 @@ export default function GlobalSearch({ open, onOpenChange }) {
                           type="button"
                           onClick={() => go(item.href)}
                           onMouseEnter={() => setActiveIndex(index)}
-                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-blue-600 ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-deep-600 ${
                             isActive
-                              ? 'bg-blue-600/15 dark:bg-blue-500/20 text-foreground ring-1 ring-blue-500/40'
+                              ? 'bg-deep-50 dark:bg-deep-950/50 text-foreground ring-1 ring-deep-600/40'
                               : 'hover:bg-muted/50 text-foreground'
                           }`}
                         >
                           <GroupIcon
                             size={15}
-                            className={`shrink-0 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+                            className={`shrink-0 ${isActive ? 'text-deep-600 dark:text-deep-400' : 'text-muted-foreground'}`}
                             aria-hidden="true"
                           />
                           <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{item.label}</span>
                           <ArrowRight
                             size={13}
-                            className={isActive ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground/40'}
+                            className={isActive ? 'text-deep-600 dark:text-deep-400' : 'text-muted-foreground/40'}
                             aria-hidden="true"
                           />
                         </button>

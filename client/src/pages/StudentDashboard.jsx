@@ -448,7 +448,7 @@ export default function StudentDashboard({ user }) {
                 key={week.id}
                 className={`rounded-xl border p-3.5 shadow-sm transition-all flex flex-col justify-between ${
                   isCurrent
-                    ? 'border-2 border-blue-600 bg-card ring-2 ring-blue-500/30 shadow-md'
+                    ? 'border-2 border-deep-600 bg-card ring-2 ring-deep-600/30 shadow-md'
                     : week.isComplete
                     ? 'border border-emerald-600/60 bg-card'
                     : isLocked
@@ -461,7 +461,7 @@ export default function StudentDashboard({ user }) {
                     <span
                       className={`text-[11px] font-bold tracking-wide ${
                         isCurrent
-                          ? 'text-blue-700 dark:text-blue-300'
+                          ? 'text-deep-700 dark:text-deep-300'
                           : week.isComplete
                           ? 'text-emerald-700 dark:text-emerald-400'
                           : 'text-muted-foreground'
@@ -470,8 +470,8 @@ export default function StudentDashboard({ user }) {
                       Weeks {week.week_start}{week.week_end && week.week_end !== week.week_start ? `–${week.week_end}` : ''}
                     </span>
                     {isCurrent ? (
-                      <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
+                      <span className="text-[10px] font-bold text-deep-600 dark:text-deep-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-deep-600 dark:bg-deep-400 animate-pulse" />
                         Active
                       </span>
                     ) : week.isComplete ? (
@@ -512,7 +512,7 @@ export default function StudentDashboard({ user }) {
                         week.isComplete
                           ? 'bg-emerald-500 dark:bg-emerald-400'
                           : isCurrent
-                          ? 'bg-blue-600 dark:bg-blue-500'
+                          ? 'bg-deep-600 dark:bg-deep-500'
                           : 'bg-muted-foreground/30'
                       }`}
                       style={{ width: `${week.percent}%` }}
@@ -551,7 +551,7 @@ export default function StudentDashboard({ user }) {
           <div>
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-800/80 bg-blue-50 dark:bg-blue-950/40">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-deep-700 dark:text-deep-300 px-2.5 py-0.5 rounded border border-deep-200 dark:border-deep-800/80 bg-deep-50 dark:bg-deep-950/40">
                   Active Module • Weeks {currentModule?.week_start || 1}-{currentModule?.week_end || 2}
                 </span>
                 <span className="text-xs text-muted-foreground capitalize">
@@ -584,14 +584,14 @@ export default function StudentDashboard({ user }) {
                   </div>
 
                     {/* NEXT UP LESSON CALLOUT BOX */}
-                    <div className="rounded-xl border border-border bg-muted/30 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-blue-500/50 dark:hover:border-blue-400 transition-colors">
+                    <div className="rounded-xl border border-border bg-muted/30 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-deep-600/50 dark:hover:border-deep-400 transition-colors">
                       <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                        <div className="w-10 h-10 rounded-lg bg-deep-50 dark:bg-deep-950/50 border border-deep-200 dark:border-deep-800/60 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0 mt-0.5">
                           <PlayCircle size={20} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-deep-600 dark:text-deep-400">
                               {data.resumeLesson ? 'Resume' : 'Up Next'}
                             </span>
                             <span className="text-xs text-muted-foreground">•</span>
@@ -600,7 +600,7 @@ export default function StudentDashboard({ user }) {
                               {resumeTarget?.duration_minutes ? `${resumeTarget.duration_minutes} min` : 'Self-paced'}
                             </span>
                           </div>
-                          <p className="text-sm sm:text-base font-bold text-foreground truncate mt-0.5" title={resumeTarget?.title || 'Start Coursework'}>
+                          <p className="text-sm sm:base font-bold text-foreground truncate mt-0.5" title={resumeTarget?.title || 'Start Coursework'}>
                             {resumeTarget?.title || 'Start Coursework'}
                           </p>
                         </div>
@@ -609,7 +609,7 @@ export default function StudentDashboard({ user }) {
                       <Button
                         size="sm"
                         onClick={() => navigate(resumeTarget ? `/lesson/${resumeTarget.id}` : '/my-learning')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 shrink-0 shadow-sm"
+                        className="bg-deep-600 hover:bg-deep-700 text-white font-semibold px-4 shrink-0 shadow-sm"
                       >
                         {data.resumeLesson ? 'Resume Lesson' : 'Start Lesson'}
                         <ArrowRight size={14} className="ml-1.5" />
@@ -628,7 +628,7 @@ export default function StudentDashboard({ user }) {
               </span>
               <div className="w-full sm:w-48 h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300"
+                  className="h-full bg-deep-600 dark:bg-deep-500 rounded-full transition-all duration-300"
                   style={{ width: `${currentModulePercent}%` }}
                 />
               </div>
@@ -641,7 +641,7 @@ export default function StudentDashboard({ user }) {
           <div>
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
-                <Video size={16} className="text-blue-600 dark:text-blue-400" />
+                <Video size={16} className="text-deep-600 dark:text-deep-400" />
                 <h3 className="text-base font-bold text-foreground leading-tight">Live Session</h3>
               </div>
               <Button asChild variant="outline" size="sm" className="text-xs border-border">
@@ -666,7 +666,7 @@ export default function StudentDashboard({ user }) {
 
                   <div className="rounded-lg bg-muted/40 border border-border p-3 space-y-2 text-xs">
                     <div className="flex items-center gap-2 text-foreground">
-                      <Calendar size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                      <Calendar size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                       <span className="font-semibold text-foreground">
                         {new Date(nextLiveClass.starts_at).toLocaleDateString(undefined, {
                           weekday: 'short',
@@ -684,14 +684,14 @@ export default function StudentDashboard({ user }) {
                     </div>
 
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Video size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                      <Video size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                       <span>{nextLiveClass.is_offline ? nextLiveClass.venue : 'Virtual Live Stream'}</span>
                     </div>
                   </div>
 
                   <div className="pt-1">
                     {nextLiveClass.meet_url ? (
-                      <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">
+                      <Button asChild className="w-full bg-deep-600 hover:bg-deep-700 text-white text-xs font-semibold">
                         <a href={nextLiveClass.meet_url} target="_blank" rel="noreferrer">
                           <Video size={14} className="mr-1.5" />
                           Join Live Stream
@@ -722,7 +722,7 @@ export default function StudentDashboard({ user }) {
           </div>
 
           <div className="px-5 py-3 bg-muted/20 border-t border-border text-center">
-            <Link to="/mentor-clinics" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+            <Link to="/mentor-clinics" className="text-xs font-semibold text-deep-600 dark:text-deep-400 hover:underline">
               Need 1-on-1 guidance? Book a slot in Mentor Clinics →
             </Link>
           </div>
@@ -769,7 +769,7 @@ export default function StudentDashboard({ user }) {
                     <div key={lab.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <Code2 size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                          <Code2 size={15} className="text-deep-600 dark:text-deep-400 shrink-0" />
                           <p className="text-sm font-semibold text-foreground truncate" title={lab.title}>{lab.title}</p>
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -833,7 +833,7 @@ export default function StudentDashboard({ user }) {
                     {data.members.slice(0, 4).map((member) => (
                       <div key={member.id} className="flex items-center justify-between py-2.5 text-xs first:pt-0 last:pb-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center text-[10px] font-bold text-blue-700 dark:text-blue-300 shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-deep-50 dark:bg-deep-950/50 border border-deep-200 dark:border-deep-800/60 flex items-center justify-center text-[10px] font-bold text-deep-700 dark:text-deep-300 shrink-0">
                             {member.name?.charAt(0)?.toUpperCase() || 'M'}
                           </div>
                           <span className="font-semibold text-foreground truncate">{member.name}</span>
@@ -874,7 +874,7 @@ export default function StudentDashboard({ user }) {
       <div data-tour="student-achievements" className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy size={16} className="text-blue-600 dark:text-blue-400" />
+            <Trophy size={16} className="text-deep-600 dark:text-deep-400" />
             <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
               Work Achievements & Mastery Badges
             </h3>
@@ -890,7 +890,7 @@ export default function StudentDashboard({ user }) {
               key={achievement.id}
               achievement={achievement}
               badgeSize="sm"
-              className="bg-card border-border shadow-sm hover:border-blue-500/50 dark:hover:border-blue-400 hover:shadow-md transition-all text-center py-3.5 px-2"
+              className="bg-card border-border shadow-sm hover:border-deep-600/50 dark:hover:border-deep-400 hover:shadow-md transition-all text-center py-3.5 px-2"
             />
           ))}
         </div>
@@ -904,9 +904,9 @@ export default function StudentDashboard({ user }) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Link
             to="/lab-workspace"
-            className="rounded-xl border border-border bg-card p-4 shadow-sm hover:border-blue-500/50 dark:hover:border-blue-400 hover:shadow-md transition-all flex flex-col justify-between"
+            className="rounded-xl border border-border bg-card p-4 shadow-sm hover:border-deep-600/50 dark:hover:border-deep-400 hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-deep-50 dark:bg-deep-950/50 border border-deep-200 dark:border-deep-800/60 flex items-center justify-center text-deep-600 dark:text-deep-400 mb-3">
               <Code2 size={18} />
             </div>
             <div>

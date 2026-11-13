@@ -85,7 +85,7 @@ export default function ProjectReview() {
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-600 dark:text-gray-300">{selected.description}</p>
               {selected.evidence_url && (
-                <a className="text-sm text-deep-600 dark:text-blue-400 hover:underline" href={selected.evidence_url} target="_blank" rel="noreferrer">
+                <a className="text-sm text-deep-600 dark:text-deep-400 hover:underline" href={selected.evidence_url} target="_blank" rel="noreferrer">
                   Open evidence
                 </a>
               )}

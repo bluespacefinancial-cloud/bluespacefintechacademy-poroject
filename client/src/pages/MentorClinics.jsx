@@ -323,7 +323,7 @@ export default function MentorClinics() {
 
                       <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
                         <span className="flex items-center gap-1.5 font-medium text-gray-800 dark:text-gray-200">
-                          <Calendar size={13} className="text-deep-600 dark:text-blue-400 shrink-0" />
+                          <Calendar size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                           {startsAt.toLocaleDateString(undefined, {
                             weekday: 'short',
                             month: 'short',
@@ -331,12 +331,12 @@ export default function MentorClinics() {
                           })}
                         </span>
                         <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-                          <Clock size={13} className="text-deep-600 dark:text-blue-400 shrink-0" />
+                          <Clock size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                           {startsAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
                           {endsAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-                          <Users size={13} className="text-deep-600 dark:text-blue-400 shrink-0" />
+                          <Users size={13} className="text-deep-600 dark:text-deep-400 shrink-0" />
                           {clinic.attendee_count || 0}/{clinic.capacity} Attendees
                         </span>
                       </div>

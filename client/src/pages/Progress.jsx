@@ -278,7 +278,7 @@ export default function Progress() {
         <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-[#0000ff] dark:text-blue-400">
+              <div className="w-7 h-7 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-100 dark:border-deep-900/50 flex items-center justify-center text-deep-600 dark:text-deep-400">
                 <Trophy size={15} />
               </div>
               <div>
@@ -290,7 +290,7 @@ export default function Progress() {
                 </CardDescription>
               </div>
             </div>
-            <Badge variant="outline" className="text-xs border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/30">
+            <Badge variant="solidBlue" className="text-xs">
               4 of 6 Earned
             </Badge>
           </div>
@@ -351,7 +351,7 @@ export default function Progress() {
                 key={ach.id}
                 achievement={ach}
                 badgeSize="sm"
-                className="bg-card border-gray-200 dark:border-gray-800 shadow-sm hover:border-[#0000ff]/40 dark:hover:border-blue-500/50 hover:shadow-md transition-all text-center py-3.5 px-2"
+                className="bg-card border-gray-200 dark:border-gray-800 shadow-sm hover:border-deep-600/40 dark:hover:border-deep-500/50 hover:shadow-md transition-all text-center py-3.5 px-2"
               />
             ))}
           </div>
@@ -367,7 +367,7 @@ export default function Progress() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <BarChart3 size={15} className="text-deep-600 dark:text-blue-400" />
+                    <BarChart3 size={15} className="text-deep-600 dark:text-deep-400" />
                     Fintech Domain Progress
                   </CardTitle>
                   <CardDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -421,7 +421,7 @@ export default function Progress() {
 
           {/* Quick Learning Note */}
           <div className="rounded-xl border border-gray-200/90 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-900/40 p-4 text-xs text-gray-600 dark:text-gray-300 flex items-start gap-3">
-            <CheckCircle2 size={16} className="text-deep-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <CheckCircle2 size={16} className="text-deep-600 dark:text-deep-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="font-semibold text-gray-900 dark:text-white">Milestone Criteria</p>
               <p className="leading-relaxed">
@@ -451,7 +451,7 @@ export default function Progress() {
                     key={stage.key}
                     className={`rounded-xl border p-3.5 space-y-1.5 transition-colors ${
                       isActive
-                        ? 'border-deep-600 dark:border-blue-500 bg-deep-50/30 dark:bg-blue-950/30'
+                        ? 'border-deep-600 dark:border-deep-500 bg-deep-50/30 dark:bg-deep-950/30'
                         : isCompleted
                         ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/20 dark:bg-emerald-950/20'
                         : 'border-gray-200/90 dark:border-gray-800 bg-card'
@@ -478,7 +478,7 @@ export default function Progress() {
                           isCompleted
                             ? 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/60'
                             : isActive
-                            ? 'text-deep-700 dark:text-blue-400 border-deep-200 dark:border-blue-900/60'
+                            ? 'text-deep-700 dark:text-deep-400 border-deep-200 dark:border-deep-900/60'
                             : 'text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-800'
                         }`}
                       >
@@ -486,7 +486,7 @@ export default function Progress() {
                       </Badge>
                     </div>
 
-                    <p className="text-[11px] font-semibold text-deep-700 dark:text-blue-400">{stage.weeks}</p>
+                    <p className="text-[11px] font-semibold text-deep-700 dark:text-deep-400">{stage.weeks}</p>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">{stage.desc}</p>
                   </div>
                 )

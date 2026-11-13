@@ -115,7 +115,7 @@ export default function ProjectWorkspace() {
                         </div>
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{item.description}</p>
                         {item.evidence_url && (
-                          <a className="mt-1 block text-xs text-deep-600 dark:text-blue-400 hover:underline" href={item.evidence_url} target="_blank" rel="noreferrer">
+                          <a className="mt-1 block text-xs text-deep-600 dark:text-deep-400 hover:underline" href={item.evidence_url} target="_blank" rel="noreferrer">
                             Open evidence
                           </a>
                         )}

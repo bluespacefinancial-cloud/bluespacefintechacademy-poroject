@@ -110,7 +110,7 @@ export default function NotificationDropdown() {
       return <Calendar size={15} className="text-deep-600" />
     }
     if (t.includes('class') || t.includes('live')) {
-      return <Video size={15} className="text-blue-600" />
+      return <Video size={15} className="text-deep-600 dark:text-deep-400" />
     }
     if (t.includes('lab')) {
       return <FileText size={15} className="text-amber-600" />
@@ -145,7 +145,7 @@ export default function NotificationDropdown() {
         aria-expanded={open}
         className={`p-2 rounded-lg border transition-colors relative flex items-center justify-center ${
           open
-            ? 'bg-brand-50 dark:bg-blue-950/60 border-brand-200 dark:border-blue-800 text-brand-700 dark:text-blue-300'
+            ? 'bg-deep-50 dark:bg-deep-950/60 border-deep-200 dark:border-deep-800 text-deep-700 dark:text-deep-300'
             : 'bg-card border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground'
         }`}
       >
@@ -165,7 +165,7 @@ export default function NotificationDropdown() {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-foreground">Notifications</span>
               {unreadCount > 0 && (
-                <span className="text-[10px] font-bold text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-deep-700 dark:text-deep-300 border border-deep-200 dark:border-deep-800/60 bg-deep-50/50 dark:bg-deep-950/40 px-2 py-0.5 rounded-full">
                   {unreadCount} new
                 </span>
               )}
@@ -174,7 +174,7 @@ export default function NotificationDropdown() {
               <button
                 type="button"
                 onClick={markAllAsRead}
-                className="text-[11px] font-semibold text-brand-600 dark:text-blue-400 hover:text-brand-700 dark:hover:text-blue-300 hover:underline flex items-center gap-1"
+                className="text-[11px] font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300 hover:underline flex items-center gap-1"
               >
                 <Check size={12} />
                 Mark all read
@@ -202,7 +202,7 @@ export default function NotificationDropdown() {
                     key={item.id}
                     onClick={() => handleNotificationClick(item)}
                     className={`p-3.5 transition-colors cursor-pointer flex items-start gap-3 text-left ${
-                      isUnread ? 'bg-brand-50/20 dark:bg-blue-950/30 hover:bg-brand-50/40 dark:hover:bg-blue-900/40' : 'hover:bg-muted/40'
+                      isUnread ? 'bg-deep-50/20 dark:bg-deep-950/30 hover:bg-deep-50/40 dark:hover:bg-deep-900/40' : 'hover:bg-muted/40'
                     }`}
                   >
                     <div className="w-8 h-8 rounded-lg bg-muted/60 border border-border flex items-center justify-center shrink-0 mt-0.5 text-foreground">
@@ -223,7 +223,7 @@ export default function NotificationDropdown() {
                     </div>
                     {isUnread && (
                       <span
-                        className="w-2 h-2 rounded-full bg-brand-600 dark:bg-blue-400 shrink-0 mt-2"
+                        className="w-2 h-2 rounded-full bg-deep-600 dark:bg-deep-400 shrink-0 mt-2"
                         title="Unread"
                       />
                     )}
@@ -238,7 +238,7 @@ export default function NotificationDropdown() {
             <Link
               to="/notifications"
               onClick={() => setOpen(false)}
-              className="text-xs font-semibold text-brand-600 dark:text-blue-400 hover:text-brand-700 dark:hover:text-blue-300 hover:underline inline-flex items-center gap-1"
+              className="text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300 hover:underline inline-flex items-center gap-1"
             >
               <span>View full notification history</span>
               <ExternalLink size={11} />

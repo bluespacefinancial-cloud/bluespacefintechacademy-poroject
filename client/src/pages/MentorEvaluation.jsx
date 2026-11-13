@@ -101,12 +101,12 @@ export default function MentorEvaluation() {
               <textarea
                 required
                 rows={5}
-                className="w-full rounded-md border border-input bg-background text-foreground p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
+                className="w-full rounded-md border border-input bg-background text-foreground p-3 text-sm focus:outline-none focus:ring-1 focus:ring-deep-600"
                 placeholder="Feedback and development notes"
                 value={form.feedback}
                 onChange={(event) => setForm({ ...form, feedback: event.target.value })}
               />
-              <Button type="submit" disabled={saving} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+              <Button type="submit" disabled={saving} className="bg-deep-600 hover:bg-deep-700 text-white font-semibold">
                 <Save size={14} className="mr-2" />
                 {saving ? 'Saving...' : 'Save evaluation'}
               </Button>

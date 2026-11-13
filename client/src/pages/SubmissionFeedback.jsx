@@ -103,7 +103,7 @@ export default function SubmissionFeedback() {
           <div>
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-medium text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300"
+              className="flex items-center gap-2 text-sm font-medium text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300"
             >
               <ArrowLeft size={16} /> Back
             </button>

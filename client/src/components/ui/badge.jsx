@@ -7,8 +7,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white border-transparent shadow-xs',
-        primary: 'bg-blue-600 text-white border-transparent shadow-xs',
+        default: 'bg-primary text-primary-foreground border-transparent shadow-xs',
+        primary: 'bg-primary text-primary-foreground border-transparent shadow-xs',
         secondary: 'bg-slate-700 text-white border-transparent shadow-xs',
         destructive: 'bg-rose-600 text-white border-transparent shadow-xs',
         success: 'bg-emerald-600 text-white border-transparent shadow-xs',
@@ -16,7 +16,7 @@ const badgeVariants = cva(
         info: 'bg-sky-600 text-white border-transparent shadow-xs',
         purple: 'bg-purple-600 text-white border-transparent shadow-xs',
         outline: 'border border-border bg-card text-foreground font-semibold shadow-xs',
-        solidBlue: 'bg-blue-600 text-white border-transparent shadow-xs',
+        solidBlue: 'bg-primary text-primary-foreground border-transparent shadow-xs',
         solidEmerald: 'bg-emerald-600 text-white border-transparent shadow-xs',
         solidAmber: 'bg-amber-500 text-slate-950 font-bold border-transparent shadow-xs',
         solidRose: 'bg-rose-600 text-white border-transparent shadow-xs',

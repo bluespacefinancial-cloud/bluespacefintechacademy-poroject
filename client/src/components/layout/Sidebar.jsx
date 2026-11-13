@@ -434,7 +434,7 @@ export default function Sidebar({ open, onOpen, onClose }) {
                   key={item.to}
                   to={item.to}
                   className={`flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium transition-colors ${
-                    active ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
+                    active ? 'text-deep-600 dark:text-deep-400 font-bold' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
                   }`}
                   aria-current={active ? 'page' : undefined}
                 >
@@ -503,12 +503,12 @@ export default function Sidebar({ open, onOpen, onClose }) {
                       onClick={onClose}
                       className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                         active
-                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
+                          ? 'bg-deep-50 text-deep-700 dark:bg-deep-950/60 dark:text-deep-300 font-bold'
                           : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/60'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        {Icon && <Icon size={18} className={active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-slate-400'} />}
+                        {Icon && <Icon size={18} className={active ? 'text-deep-600 dark:text-deep-400' : 'text-gray-400 dark:text-slate-400'} />}
                         <span>{item.label}</span>
                       </div>
                       {badgeCount && badgeCount > 0 && (

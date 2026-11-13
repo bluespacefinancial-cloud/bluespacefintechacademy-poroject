@@ -35,9 +35,9 @@ const STAGE_LABELS = {
 }
 
 const LESSON_TYPE_COLORS = {
-  concept: 'text-deep-700 border-deep-200 dark:text-blue-400 dark:border-blue-900/50 dark:bg-blue-950/30',
-  demonstration: 'text-deep-700 border-deep-200 dark:text-blue-400 dark:border-blue-900/50 dark:bg-blue-950/30',
-  video: 'text-deep-700 border-deep-200 dark:text-blue-400 dark:border-blue-900/50 dark:bg-blue-950/30',
+  concept: 'text-deep-700 border-deep-200 dark:text-deep-400 dark:border-deep-900/50 dark:bg-deep-950/30',
+  demonstration: 'text-deep-700 border-deep-200 dark:text-deep-400 dark:border-deep-900/50 dark:bg-deep-950/30',
+  video: 'text-deep-700 border-deep-200 dark:text-deep-400 dark:border-deep-900/50 dark:bg-deep-950/30',
   audio: 'text-purple-700 border-purple-200 dark:text-purple-400 dark:border-purple-900/50 dark:bg-purple-950/30',
   lab: 'text-emerald-700 border-emerald-200 dark:text-emerald-400 dark:border-emerald-900/50 dark:bg-emerald-950/30',
   assessment: 'text-amber-700 border-amber-200 dark:text-amber-400 dark:border-amber-900/50 dark:bg-amber-950/30',
@@ -335,8 +335,8 @@ export default function MyLearning() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{overallStats.labsComplete}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lessons Complete</p>
               </div>
-              <div className="h-8 w-8 rounded-full bg-brand-100 dark:bg-blue-950/60 flex items-center justify-center">
-                <BookOpen size={14} className="text-brand-600 dark:text-blue-400" />
+              <div className="h-8 w-8 rounded-full bg-deep-100 dark:bg-deep-950/60 flex items-center justify-center">
+                <BookOpen size={14} className="text-deep-600 dark:text-deep-400" />
               </div>
             </div>
           </CardContent>
@@ -501,7 +501,7 @@ export default function MyLearning() {
                   onClick={() => handleLessonClick(lesson)}
                   className={
                     'cursor-pointer hover:border-brand-200 dark:hover:border-gray-700 transition-colors duration-150 ' +
-                    (isCompleted ? 'border-brand-100 dark:border-blue-900/50 bg-brand-50/50 dark:bg-blue-950/20' : '') +
+                    (isCompleted ? 'border-deep-100 dark:border-deep-900/50 bg-deep-50/50 dark:bg-deep-950/20' : '') +
                     (lessonLocked || priorIncomplete ? ' opacity-50' : '')
                   }
                 >
@@ -513,7 +513,7 @@ export default function MyLearning() {
                         ) : lessonLocked || priorIncomplete ? (
                           <Lock size={18} className="text-amber-500" />
                         ) : (
-                          <PlayCircle size={18} className="text-deep-600 dark:text-blue-400" />
+                          <PlayCircle size={18} className="text-deep-600 dark:text-deep-400" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">

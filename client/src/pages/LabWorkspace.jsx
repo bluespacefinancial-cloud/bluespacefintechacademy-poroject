@@ -187,7 +187,7 @@ export default function LabWorkspace() {
                 <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
                   <div className="min-w-0 flex-1">
                     <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white truncate">
-                      <FileText size={16} className="text-deep-600 dark:text-blue-400 shrink-0" />
+                      <FileText size={16} className="text-deep-600 dark:text-deep-400 shrink-0" />
                       {lab.title}
                     </h3>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -211,7 +211,7 @@ export default function LabWorkspace() {
                 <CardContent className="p-5 space-y-4">
                   {lab.instructions && (
                     <details className="rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-gray-50/50 dark:bg-gray-900/60">
-                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300">
+                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300">
                         Read instructions
                       </summary>
                       <div className="mt-3 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-300">
@@ -221,7 +221,7 @@ export default function LabWorkspace() {
                   )}
                   {lab.starter_code && (
                     <details className="rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-gray-50/50 dark:bg-gray-900/60">
-                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300">
+                      <summary className="cursor-pointer text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300">
                         View starter code
                       </summary>
                       <pre className="mt-3 max-h-64 overflow-auto rounded-lg bg-gray-900 p-3 text-xs text-gray-100 font-mono">
@@ -230,8 +230,8 @@ export default function LabWorkspace() {
                     </details>
                   )}
                   {submission?.feedback && (
-                    <div className="rounded-lg bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 p-3.5 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
-                      <p className="font-semibold text-deep-900 dark:text-blue-300 mb-1">Reviewer feedback</p>
+                    <div className="rounded-lg bg-deep-50/60 dark:bg-deep-950/40 border border-deep-100 dark:border-deep-900/50 p-3.5 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
+                      <p className="font-semibold text-deep-900 dark:text-deep-300 mb-1">Reviewer feedback</p>
                       <p className="text-gray-700 dark:text-gray-300">{submission.feedback}</p>
                     </div>
                   )}

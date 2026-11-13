@@ -320,7 +320,7 @@ export default function Grading() {
                       type="checkbox"
                       checked={bulkSelected.size === displayedSubmissions.length && displayedSubmissions.length > 0}
                       onChange={toggleBulkSelectAll}
-                      className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-border text-deep-600 focus:ring-deep-600"
                     />
                     <span className="text-muted-foreground font-medium">
                       {bulkSelected.size === displayedSubmissions.length ? 'Deselect all' : 'Select all visible'}
@@ -329,7 +329,7 @@ export default function Grading() {
                   <button
                     type="button"
                     onClick={() => setBulkSelected(new Set())}
-                    className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-[10px] font-semibold text-deep-600 dark:text-deep-400 hover:underline"
                   >
                     Clear selection
                   </button>
@@ -359,7 +359,7 @@ export default function Grading() {
                       onClick={() => choose(sub)}
                       className={`w-full text-left p-3 rounded-lg border transition-all text-xs ${
                         isSelected
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-1 ring-blue-500/40'
+                          ? 'border-deep-600 dark:border-deep-500 bg-deep-50/70 dark:bg-deep-950/40 shadow-sm ring-1 ring-deep-600/40'
                           : 'border-border hover:border-gray-300 dark:hover:border-slate-700 hover:bg-muted/50 bg-card'
                       }`}
                     >
@@ -372,7 +372,7 @@ export default function Grading() {
                               e.stopPropagation()
                               toggleBulkSelect(sub.id)
                             }}
-                            className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500"
+                            className="w-4 h-4 rounded border-border text-deep-600 focus:ring-deep-600"
                           />
                           <span className="font-bold text-foreground truncate">{title(sub)}</span>
                         </div>
@@ -409,7 +409,7 @@ export default function Grading() {
           <div>
             <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-200 dark:border-deep-800 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0">
                   <Code2 size={16} />
                 </div>
                 <div className="min-w-0">
@@ -425,7 +425,7 @@ export default function Grading() {
               {selected?.content_url && (
                 <Button asChild size="sm" variant="outline" className="text-xs border-border bg-card hover:bg-muted/60 text-foreground shrink-0">
                   <a href={selected.content_url} target="_blank" rel="noreferrer">
-                    <ExternalLink size={13} className="mr-1.5 text-blue-600 dark:text-blue-400" />
+                    <ExternalLink size={13} className="mr-1.5 text-deep-600 dark:text-deep-400" />
                     Open Repository
                   </a>
                 </Button>
@@ -494,7 +494,7 @@ export default function Grading() {
                           key={idx}
                           type="button"
                           onClick={() => appendPreset(preset.text)}
-                          className="px-2.5 py-1 rounded-md border border-border bg-card dark:bg-slate-900/80 text-[11px] font-semibold text-foreground hover:border-blue-500/60 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-muted/50 transition-all shadow-2xs"
+                          className="px-2.5 py-1 rounded-md border border-border bg-card dark:bg-slate-900/80 text-[11px] font-semibold text-foreground hover:border-deep-600/60 hover:text-deep-600 dark:hover:text-deep-400 hover:bg-muted/50 transition-all shadow-2xs"
                         >
                           {preset.label}
                         </button>
@@ -506,7 +506,7 @@ export default function Grading() {
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
                       placeholder="Write constructive evaluation notes, point deductions, or praise for clean fintech implementation..."
-                      className="w-full rounded-lg border border-input bg-background p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-600 text-foreground"
+                      className="w-full rounded-lg border border-input bg-background p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-deep-600 text-foreground"
                     />
                   </div>
                 </div>
@@ -536,7 +536,7 @@ export default function Grading() {
                   size="sm"
                   disabled={saving}
                   onClick={() => saveGrade('graded')}
-                  className="bg-blue-600 text-white hover:bg-blue-500 text-xs font-semibold"
+                  className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
                 >
                   <Save size={13} className="mr-1.5" />
                   {saving ? 'Saving...' : 'Submit Grade'}

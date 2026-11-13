@@ -24,7 +24,7 @@ const EMPTY_FORM = {
 }
 
 const STATUS_COLORS = {
-  scheduled: 'bg-blue-600 text-white border-transparent font-semibold',
+  scheduled: 'bg-deep-600 text-white border-transparent font-semibold',
   live: 'bg-emerald-600 text-white border-transparent font-semibold',
   completed: 'bg-slate-700 text-white border-transparent font-semibold',
   cancelled: 'bg-rose-600 text-white border-transparent font-semibold',
@@ -172,7 +172,7 @@ export default function LiveClasses() {
             <div className="space-y-1">
               <button
                 onClick={closeVideoPlayer}
-                className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-semibold text-deep-600 dark:text-deep-400 hover:text-deep-700 dark:hover:text-deep-300 transition-colors"
               >
                 <ArrowLeft size={14} />
                 Back to all classes
@@ -193,7 +193,7 @@ export default function LiveClasses() {
                 <Card className="border border-border overflow-hidden bg-card shadow-sm">
                   <CardHeader className="py-3 px-4 border-b border-border">
                     <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-2">
-                      <Video size={14} className="text-blue-600 dark:text-blue-400" />
+                      <Video size={14} className="text-deep-600 dark:text-deep-400" />
                       Class Recording & Playback
                     </CardTitle>
                   </CardHeader>
@@ -208,28 +208,28 @@ export default function LiveClasses() {
                 </Card>
               ) : (
                 /* Live Virtual Classroom Stage */
-                <div className="w-full aspect-video rounded-xl border border-border bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-950 relative flex flex-col justify-between p-6 sm:p-8 overflow-hidden shadow-xl">
+                <div className="w-full aspect-video rounded-xl border border-border bg-gradient-to-br from-slate-900 via-deep-950/40 to-slate-950 relative flex flex-col justify-between p-6 sm:p-8 overflow-hidden shadow-xl">
                   {/* Ambient background glows */}
-                  <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -top-24 -right-24 w-96 h-96 bg-deep-600/10 rounded-full blur-3xl pointer-events-none" />
                   <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
                   {/* Top Badge Row */}
                   <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       {selectedClass.status === 'live' || selectedClass.status === 'in_progress' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm">
-                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+                          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
                           Live Interactive Session
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-deep-600 text-white shadow-sm">
                           <Video size={13} />
                           Scheduled Virtual Masterclass
                         </span>
                       )}
                       <span className="text-xs text-slate-400">•</span>
                       <span className="text-xs font-medium text-slate-300 flex items-center gap-1">
-                        <Clock size={12} className="text-blue-400" />
+                        <Clock size={12} className="text-deep-300" />
                         {new Date(selectedClass.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(selectedClass.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -241,7 +241,7 @@ export default function LiveClasses() {
 
                   {/* Center Stage Info */}
                   <div className="relative z-10 my-auto py-4">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-4 shadow-lg shadow-blue-500/10">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-deep-600/20 border border-deep-500/30 flex items-center justify-center text-deep-400 mb-4 shadow-lg shadow-deep-500/10">
                       <Video size={28} />
                     </div>
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight max-w-2xl drop-shadow-sm">
@@ -259,7 +259,7 @@ export default function LiveClasses() {
                         href={selectedClass.meet_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-deep-600 hover:bg-deep-700 text-white font-bold text-sm shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <Video size={18} />
                         Join Live Google Meet Room
@@ -301,7 +301,7 @@ export default function LiveClasses() {
                             <tr key={userId} className="hover:bg-muted/40">
                               <td className="py-3">
                                 <div className="flex items-center gap-2">
-                                  <div className="h-7 w-7 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-xs font-bold text-blue-700 dark:text-blue-300">
+                                  <div className="h-7 w-7 rounded-full bg-deep-50 dark:bg-deep-950/60 border border-deep-200 dark:border-deep-800 flex items-center justify-center text-xs font-bold text-deep-700 dark:text-deep-300">
                                     {userId.charAt(0).toUpperCase()}
                                   </div>
                                   <span className="text-sm text-foreground">Student {userId.slice(-4)}</span>
@@ -391,7 +391,7 @@ export default function LiveClasses() {
                         href={selectedClass.meet_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-xs font-semibold text-deep-600 dark:text-deep-400 hover:underline flex items-center gap-1"
                       >
                         Open Google Meet
                         <ExternalLink size={11} />
@@ -563,7 +563,7 @@ export default function LiveClasses() {
             >
               <div>
                 <div className="mb-1 flex items-center gap-2">
-                  <Video size={15} className="text-brand-600 dark:text-blue-400" />
+                  <Video size={15} className="text-deep-600 dark:text-deep-400" />
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{liveClass.title}</p>
                   <Badge variant="outline">{STATUS_LABELS[liveClass.status]}</Badge>
                 </div>
@@ -579,7 +579,7 @@ export default function LiveClasses() {
                 </div>
               </div>
               {liveClass.meet_url && !liveClass.is_offline && (
-                <a className="inline-flex items-center text-sm font-medium text-brand-700 dark:text-blue-400 hover:underline" href={liveClass.meet_url} target="_blank" rel="noreferrer">
+                <a className="inline-flex items-center text-sm font-medium text-deep-600 dark:text-deep-400 hover:underline" href={liveClass.meet_url} target="_blank" rel="noreferrer">
                   Open Meet <ExternalLink size={14} className="ml-1" />
                 </a>
               )}

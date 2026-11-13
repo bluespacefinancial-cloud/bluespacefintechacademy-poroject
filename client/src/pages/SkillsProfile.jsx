@@ -182,7 +182,7 @@ export default function SkillsProfile() {
               <span className="text-muted-foreground">Profile Complete</span>
               <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden ml-1">
                 <div
-                  className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                  className="h-full bg-deep-600 rounded-full transition-all duration-300"
                   style={{ width: `${completion}%` }}
                 />
               </div>
@@ -191,7 +191,7 @@ export default function SkillsProfile() {
               size="sm"
               onClick={save}
               disabled={saving}
-              className="bg-blue-600 text-white hover:bg-blue-500 text-xs font-semibold"
+              className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
             >
               <Save size={13} className="mr-1.5" />
               {saving ? 'Saving...' : 'Save Profile'}
@@ -218,7 +218,7 @@ export default function SkillsProfile() {
       <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-200 dark:border-deep-800 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0">
               <Briefcase size={16} />
             </div>
             <div>
@@ -245,16 +245,16 @@ export default function SkillsProfile() {
                   onClick={() => setRole(r.id)}
                   className={`text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-2 border-blue-600 bg-card ring-1 ring-blue-500/40 shadow-xs'
+                      ? 'border-2 border-deep-600 bg-card ring-1 ring-deep-600/40 shadow-xs'
                       : 'border-border hover:border-muted-foreground/40 bg-card'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>{r.label}</p>
+                    <p className={`text-xs font-bold ${isSelected ? 'text-deep-700 dark:text-deep-300' : 'text-gray-900 dark:text-white'}`}>{r.label}</p>
                     <div
                       className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 mt-0.5 ${
                         isSelected
-                          ? 'border-blue-600 bg-blue-600 text-white'
+                          ? 'border-deep-600 bg-deep-600 text-white'
                           : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                       }`}
                     >
@@ -276,7 +276,7 @@ export default function SkillsProfile() {
           <div>
             <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-200 dark:border-deep-800 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0">
                   <Compass size={16} />
                 </div>
                 <div>
@@ -302,18 +302,18 @@ export default function SkillsProfile() {
                     onClick={() => toggleDomain(d.id)}
                     className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
                       isSelected
-                        ? 'border-2 border-blue-600 bg-card ring-1 ring-blue-500/40 shadow-xs'
+                        ? 'border-2 border-deep-600 bg-card ring-1 ring-deep-600/40 shadow-xs'
                         : 'border-border hover:border-muted-foreground/40 bg-card'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>{d.name}</p>
+                      <p className={`text-xs font-bold ${isSelected ? 'text-deep-700 dark:text-deep-300' : 'text-gray-900 dark:text-white'}`}>{d.name}</p>
                       <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">{d.desc}</p>
                     </div>
                     <div
                       className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 ${
                         isSelected
-                          ? 'border-blue-600 bg-blue-600 text-white'
+                          ? 'border-deep-600 bg-deep-600 text-white'
                           : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                       }`}
                     >
@@ -335,7 +335,7 @@ export default function SkillsProfile() {
           <div>
             <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-200 dark:border-deep-800 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0">
                   <Layers size={16} />
                 </div>
                 <div>
@@ -362,14 +362,14 @@ export default function SkillsProfile() {
                       onClick={() => toggleSkill(skill)}
                       className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-2 ${
                         isSelected
-                          ? 'border-blue-600 bg-blue-600 text-white shadow-2xs'
+                          ? 'border-deep-600 bg-deep-600 text-white shadow-2xs'
                           : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-gray-700 dark:text-slate-300 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/80'
                       }`}
                     >
                       <div
                         className={`w-3.5 h-3.5 rounded flex items-center justify-center border shrink-0 ${
                           isSelected
-                            ? 'border-blue-600 bg-blue-600 text-white'
+                            ? 'border-deep-600 bg-deep-600 text-white'
                             : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                         }`}
                       >
@@ -393,7 +393,7 @@ export default function SkillsProfile() {
       <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
         <div className="px-5 py-4 border-b border-border bg-muted/20">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-deep-50 dark:bg-deep-950/60 border border-deep-200 dark:border-deep-800 flex items-center justify-center text-deep-600 dark:text-deep-400 shrink-0">
               <FileText size={16} />
             </div>
             <div>
@@ -409,7 +409,7 @@ export default function SkillsProfile() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Tell us about your technical background, programming languages you're comfortable with, and specific fintech areas you want to master during this fellowship..."
-            className="w-full rounded-lg border border-input bg-background p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-600 text-foreground"
+            className="w-full rounded-lg border border-input bg-background p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-deep-600 text-foreground"
           />
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>{notes.length} characters</span>
@@ -431,7 +431,7 @@ export default function SkillsProfile() {
           <Button
             onClick={save}
             disabled={saving}
-            className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-500 font-semibold px-6 text-xs h-9"
+            className="w-full sm:w-auto bg-deep-600 text-white hover:bg-deep-700 font-semibold px-6 text-xs h-9"
           >
             <Save size={14} className="mr-1.5" />
             {saving ? 'Saving Profile...' : 'Save Skills Profile'}

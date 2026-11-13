@@ -30,8 +30,8 @@ const tracks = [
 const domains = [
   { name: 'FaaS', detail: 'Fintech APIs and partner services', color: 'text-brand-700 border border-brand-200' },
   { name: 'FinCore', detail: 'Ledgers and transaction systems', color: 'text-brand-700 border border-brand-200' },
-  { name: 'FinOps', detail: 'Reconciliation and reporting', color: 'text-amber-700 border border-amber-200' },
-  { name: 'FinInfra', detail: 'Cloud, delivery and observability', color: 'text-slate-700 border border-slate-200' },
+  { name: 'FinOps', detail: 'Treasury, payments, reconciliation, settlement, compliance & AML', color: 'text-amber-700 border border-amber-200' },
+  { name: 'FinFra', detail: 'AI & fintech, data infra, cyber resilience & data warehouse', color: 'text-slate-700 border border-slate-200' },
 ]
 const steps = [
   { number: '01', title: 'Learn the foundations', text: 'Build shared knowledge of fintech, financial systems and the language teams use.' },

@@ -33,6 +33,7 @@ const DOMAIN_COLORS = {
   FinCore: 'text-emerald-700 border-emerald-200',
   FinOps: 'text-amber-700 border-amber-200',
   FinInfra: 'text-slate-700 border-slate-200',
+  FinFra: 'text-slate-700 border-slate-200',
 }
 
 export default function LabsToReview() {

@@ -55,6 +55,7 @@ const DOMAIN_COVERS = {
   FinCore: { color: '#047857', icon: Landmark },
   FinOps: { color: '#b45309', icon: TrendingUp },
   FinInfra: { color: '#334155', icon: Server },
+  FinFra: { color: '#334155', icon: Server },
 }
 
 const STAGE_ICONS = {

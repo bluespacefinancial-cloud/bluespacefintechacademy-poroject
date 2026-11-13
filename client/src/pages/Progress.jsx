@@ -23,12 +23,13 @@ const DOMAIN_COLORS = {
   FinCore: { text: 'text-emerald-700', border: 'border-emerald-200', fill: 'bg-emerald-600' },
   FinOps: { text: 'text-amber-700', border: 'border-amber-200', fill: 'bg-amber-600' },
   FinInfra: { text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-600' },
+  FinFra: { text: 'text-slate-700', border: 'border-slate-200', fill: 'bg-slate-600' },
   General: { text: 'text-gray-700', border: 'border-gray-200', fill: 'bg-gray-600' },
 }
 
 const STAGES = [
   { key: 'foundations', label: 'Foundations', weeks: 'Weeks 1-4', desc: 'Fintech core fundamentals, financial APIs, and environment architecture.' },
-  { key: 'domain_immersion', label: 'Domain Immersion', weeks: 'Weeks 5-8', desc: 'Specialized track dive: FaaS, FinCore, FinOps, or FinInfra systems.' },
+  { key: 'domain_immersion', label: 'Domain Immersion', weeks: 'Weeks 5-8', desc: 'Specialized track dive: FaaS, FinCore, FinOps, or FinFra systems.' },
   { key: 'live_projects', label: 'Live Projects', weeks: 'Weeks 9-12', desc: 'Squad-based live banking sprints and technical deliverable submissions.' },
   { key: 'certification', label: 'Certification', weeks: 'Weeks 13-16', desc: 'Capstone review, faculty panel assessment, and industry credentials.' },
 ]

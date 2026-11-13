@@ -379,9 +379,9 @@ export default function ProfessionalCertificate({
       : track === 'FinCore'
       ? 'Core Banking & Ledger Architecture'
       : track === 'FinOps'
-      ? 'Fintech Operations & Reconciliation'
-      : track === 'FinInfra'
-      ? 'Fintech Infrastructure & Payment Rails'
+      ? 'Fintech Operations & Treasury Systems'
+      : (track === 'FinInfra' || track === 'FinFra')
+      ? 'Fintech Infrastructure & Cyber Resilience'
       : 'Fintech Engineering Fellowship')
 
   const formattedDate = issuedAt

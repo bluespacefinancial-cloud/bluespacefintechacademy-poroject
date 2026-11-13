@@ -38,21 +38,26 @@ const ROLES = [
 const DOMAINS = [
   { id: 'FaaS', name: 'Fintech-as-a-Service (FaaS)', desc: 'Banking-as-a-service, open banking APIs, and financial middleware' },
   { id: 'FinCore', name: 'Core Banking (FinCore)', desc: 'Double-entry ledgers, transaction switching, and core account systems' },
-  { id: 'FinOps', name: 'Fintech Operations (FinOps)', desc: 'Settlement rails, reconciliation engines, and dispute handling' },
-  { id: 'FinInfra', name: 'Fintech Infrastructure (FinInfra)', desc: 'High-availability payment gateways, HSM security, and cloud infra' },
+  { id: 'FinOps', name: 'Fintech Operations (FinOps)', desc: 'Treasury and Liquidity mgt, Payment Systems, Reconciliation, Settlement, Transaction monitoring, Compliance and AML' },
+  { id: 'FinInfra', name: 'Fintech Infrastructure (FinFra)', desc: 'AI and Fintech, Data Infrastructure, Cyber Resilience, Data warehouse etc' },
 ]
 
 const ALL_SKILLS = [
   'API Design',
   'Ledger Engineering',
-  'CI/CD Pipelines',
-  'Reconciliation',
-  'Regulatory Reporting',
-  'Cloud Platforms',
+  'Payment Systems',
+  'Treasury & Liquidity Mgt',
+  'Reconciliation & Settlement',
+  'Transaction Monitoring',
+  'Compliance & AML',
+  'AI & Fintech Systems',
+  'Data Infrastructure',
+  'Data Warehouse & Analytics',
+  'Cyber Resilience & Security',
+  'Cloud Platforms & CI/CD',
   'Project Management',
   'Stakeholder Communication',
   'UAT & Test Suites',
-  'Team Leadership',
   'SQL & TimescaleDB',
   'Message Queues (Kafka/RabbitMQ)',
 ]
@@ -280,7 +285,8 @@ export default function ProfileSettings() {
 
   const toggleDomain = (domainId) => {
     setSelectedDomains((prev) => {
-      if (prev.includes(domainId)) return prev.filter((d) => d !== domainId)
+      const match = (id) => id === domainId || (domainId === 'FinInfra' && id === 'FinFra') || (domainId === 'FinFra' && id === 'FinInfra')
+      if (prev.some(match)) return prev.filter((d) => !match(d))
       if (prev.length >= 2) return [prev[1], domainId]
       return [...prev, domainId]
     })
@@ -658,7 +664,7 @@ export default function ProfileSettings() {
             <CardContent className="p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {DOMAINS.map((domain) => {
-                  const isSelected = selectedDomains.includes(domain.id)
+                  const isSelected = selectedDomains.includes(domain.id) || (domain.id === 'FinInfra' && selectedDomains.includes('FinFra'))
                   return (
                     <button
                       key={domain.id}

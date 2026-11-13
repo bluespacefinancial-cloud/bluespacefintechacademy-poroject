@@ -211,7 +211,7 @@ export default function Announcements() {
           <CardContent>
             <form onSubmit={createAnnouncement} className="space-y-4">
               <div>
-                <label htmlFor="announcement-title" className="mb-1 block text-xs font-medium text-deep-600">Title</label>
+                <label htmlFor="announcement-title" className="mb-1 block text-xs font-semibold text-foreground">Title</label>
                 <Input
                   id="announcement-title"
                   required
@@ -221,7 +221,7 @@ export default function Announcements() {
                 />
               </div>
               <div>
-                <label htmlFor="announcement-content" className="mb-1 block text-xs font-medium text-deep-600">Message</label>
+                <label htmlFor="announcement-content" className="mb-1 block text-xs font-semibold text-foreground">Message</label>
                 <Textarea
                   id="announcement-content"
                   required
@@ -233,7 +233,7 @@ export default function Announcements() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:max-w-lg">
                 <div>
-                  <label htmlFor="announcement-type" className="mb-1 block text-xs font-medium text-deep-600">Type</label>
+                  <label htmlFor="announcement-type" className="mb-1 block text-xs font-semibold text-foreground">Type</label>
                   <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
                     <SelectTrigger id="announcement-type" className="w-full">
                       <SelectValue />
@@ -246,7 +246,7 @@ export default function Announcements() {
                   </Select>
                 </div>
                 <div>
-                  <label htmlFor="announcement-audience" className="mb-1 block text-xs font-medium text-deep-600">Audience</label>
+                  <label htmlFor="announcement-audience" className="mb-1 block text-xs font-semibold text-foreground">Audience</label>
                   <Select value={form.audience} onValueChange={(value) => setForm({ ...form, audience: value })}>
                     <SelectTrigger id="announcement-audience" className="w-full">
                       <SelectValue />

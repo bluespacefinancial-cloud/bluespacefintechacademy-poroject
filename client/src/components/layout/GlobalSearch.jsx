@@ -130,6 +130,12 @@ export default function GlobalSearch({ open, onOpenChange }) {
 
         if (cancelled) return
 
+        settled.forEach((entry, idx) => {
+          if (entry.status === 'rejected') {
+            console.warn(`Search failed for ${searchTargets(role)[idx]}:`, entry.reason)
+          }
+        })
+
         const groups = settled
           .filter((entry) => entry.status === 'fulfilled')
           .map((entry) => {
@@ -192,20 +198,20 @@ export default function GlobalSearch({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-xl gap-0 p-0">
+      <DialogContent className="max-w-xl gap-0 p-0 overflow-hidden border border-border bg-card shadow-2xl">
         <DialogTitle className="sr-only">Search the academy</DialogTitle>
         <DialogDescription className="sr-only">
           Search modules, lessons, labs, classes and partner courses.
         </DialogDescription>
 
-        <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
-          <Search size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3 bg-muted/20">
+          <Search size={16} className="shrink-0 text-muted-foreground" aria-hidden="true" />
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search modules, lessons, labs, classes…"
-            className="h-8 border-0 px-0 text-sm shadow-none focus-visible:ring-0"
+            className="h-9 border-0 px-0 text-sm bg-transparent text-foreground placeholder:text-muted-foreground shadow-none focus-visible:ring-0"
             aria-label="Search the academy"
             autoFocus
           />
@@ -213,7 +219,7 @@ export default function GlobalSearch({ open, onOpenChange }) {
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="rounded p-1 text-gray-400 transition-colors hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-deep-600"
+              className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-blue-600"
               aria-label="Clear search"
             >
               <X size={14} />
@@ -223,21 +229,21 @@ export default function GlobalSearch({ open, onOpenChange }) {
 
         <div className="max-h-[60vh] overflow-y-auto p-2">
           {trimmed.length < 2 && (
-            <p className="px-3 py-6 text-center text-xs text-gray-500">
+            <p className="px-3 py-6 text-center text-xs text-muted-foreground">
               Type at least two characters to search.
             </p>
           )}
 
           {trimmed.length >= 2 && loading && (
-            <p className="px-3 py-6 text-center text-xs text-gray-500">Searching…</p>
+            <p className="px-3 py-6 text-center text-xs text-muted-foreground">Searching…</p>
           )}
 
           {trimmed.length >= 2 && !loading && error && (
-            <p role="alert" className="px-3 py-6 text-center text-xs text-red-700">{error}</p>
+            <p role="alert" className="px-3 py-6 text-center text-xs text-red-600 dark:text-red-400">{error}</p>
           )}
 
           {trimmed.length >= 2 && !loading && !error && flatResults.length === 0 && (
-            <p className="px-3 py-6 text-center text-xs text-gray-500">
+            <p className="px-3 py-6 text-center text-xs text-muted-foreground">
               No matches for “{trimmed}”.
             </p>
           )}
@@ -246,10 +252,10 @@ export default function GlobalSearch({ open, onOpenChange }) {
             const GroupIcon = group.icon
             return (
               <div key={group.key} className="mb-1 last:mb-0">
-                <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </p>
-                <ul>
+                <ul className="space-y-0.5">
                   {group.items.map((item) => {
                     const index = flatResults.findIndex((entry) => entry.id === item.id)
                     const isActive = index === activeIndex
@@ -259,13 +265,23 @@ export default function GlobalSearch({ open, onOpenChange }) {
                           type="button"
                           onClick={() => go(item.href)}
                           onMouseEnter={() => setActiveIndex(index)}
-                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-deep-600 ${
-                            isActive ? 'bg-deep-50' : 'hover:bg-gray-50'
+                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-blue-600 ${
+                            isActive
+                              ? 'bg-blue-600/15 dark:bg-blue-500/20 text-foreground ring-1 ring-blue-500/40'
+                              : 'hover:bg-muted/50 text-foreground'
                           }`}
                         >
-                          <GroupIcon size={15} className="shrink-0 text-deep-600" aria-hidden="true" />
-                          <span className="min-w-0 flex-1 truncate text-sm text-gray-800">{item.label}</span>
-                          <ArrowRight size={13} className={isActive ? 'text-deep-600' : 'text-gray-300'} aria-hidden="true" />
+                          <GroupIcon
+                            size={15}
+                            className={`shrink-0 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+                            aria-hidden="true"
+                          />
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{item.label}</span>
+                          <ArrowRight
+                            size={13}
+                            className={isActive ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground/40'}
+                            aria-hidden="true"
+                          />
                         </button>
                       </li>
                     )
@@ -276,18 +292,18 @@ export default function GlobalSearch({ open, onOpenChange }) {
           })}
         </div>
 
-        <div className="flex items-center gap-4 border-t border-gray-200 px-4 py-2 text-[10px] text-gray-400">
+        <div className="flex items-center gap-4 border-t border-border px-4 py-2.5 text-[10px] text-muted-foreground bg-muted/20">
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-gray-200 px-1 py-0.5 font-sans">↑</kbd>
-            <kbd className="rounded border border-gray-200 px-1 py-0.5 font-sans">↓</kbd>
+            <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs">↑</kbd>
+            <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs">↓</kbd>
             to navigate
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-gray-200 px-1 py-0.5 font-sans">Enter</kbd>
+            <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs">Enter</kbd>
             to open
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-gray-200 px-1 py-0.5 font-sans">Esc</kbd>
+            <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs">Esc</kbd>
             to close
           </span>
         </div>

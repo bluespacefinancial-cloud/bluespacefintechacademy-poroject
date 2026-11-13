@@ -178,7 +178,7 @@ export default function PartnerOrganisation() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="organisation-name" className="mb-1 block text-xs font-medium text-deep-600">
+                <label htmlFor="organisation-name" className="mb-1 block text-xs font-semibold text-foreground">
                   Organisation name
                 </label>
                 <Input
@@ -191,7 +191,7 @@ export default function PartnerOrganisation() {
               </div>
 
               <div>
-                <label htmlFor="organisation-website" className="mb-1 block text-xs font-medium text-deep-600">
+                <label htmlFor="organisation-website" className="mb-1 block text-xs font-semibold text-foreground">
                   Website
                 </label>
                 <div className="relative">
@@ -213,7 +213,7 @@ export default function PartnerOrganisation() {
               </div>
 
               <div>
-                <label htmlFor="organisation-description" className="mb-1 block text-xs font-medium text-deep-600">
+                <label htmlFor="organisation-description" className="mb-1 block text-xs font-semibold text-foreground">
                   About the organisation
                 </label>
                 <Textarea

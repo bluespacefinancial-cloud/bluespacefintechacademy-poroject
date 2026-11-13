@@ -270,18 +270,18 @@ export default function Grading() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Submissions Queue (1/3) */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
             {/* Tab Controls & Search */}
-            <div className="p-4 border-b border-gray-100 space-y-3 bg-gray-50/40">
-              <div className="flex rounded-lg bg-gray-100 p-1 text-xs font-semibold">
+            <div className="p-4 border-b border-border space-y-3 bg-muted/20">
+              <div className="flex rounded-lg bg-muted p-1 text-xs font-semibold">
                 <button
                   type="button"
                   onClick={() => setTab('pending')}
                   className={`flex-1 py-1.5 rounded-md text-center transition-all ${
                     tab === 'pending'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Pending ({pendingSubmissions.length})
@@ -291,8 +291,8 @@ export default function Grading() {
                   onClick={() => setTab('all')}
                   className={`flex-1 py-1.5 rounded-md text-center transition-all ${
                     tab === 'all'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   All ({submissions.length})
@@ -300,13 +300,13 @@ export default function Grading() {
               </div>
 
               <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Filter by student or lab..."
-                  className="pl-8 text-xs h-8 border-gray-200 bg-white"
+                  className="pl-8 text-xs h-8 border-border bg-background text-foreground"
                 />
               </div>
             </div>
@@ -314,34 +314,34 @@ export default function Grading() {
             {/* Submissions List */}
             <CardContent className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto space-y-1.5">
               {bulkSelected.size > 0 && (
-                <div className="flex items-center justify-between px-3 py-2 text-xs border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center justify-between px-3 py-2 text-xs border-b border-border bg-muted/20">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={bulkSelected.size === displayedSubmissions.length && displayedSubmissions.length > 0}
                       onChange={toggleBulkSelectAll}
-                      className="w-4 h-4 rounded border-gray-300 text-deep-600 focus:ring-deep-500"
+                      className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-gray-600 font-medium">
+                    <span className="text-muted-foreground font-medium">
                       {bulkSelected.size === displayedSubmissions.length ? 'Deselect all' : 'Select all visible'}
                     </span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setBulkSelected(new Set())}
-                    className="text-[10px] font-semibold text-deep-600 hover:text-deep-700 hover:underline"
+                    className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Clear selection
                   </button>
                 </div>
               )}
               {loading ? (
-                <p className="py-12 text-center text-xs text-gray-500">Loading evaluation queue...</p>
+                <p className="py-12 text-center text-xs text-muted-foreground">Loading evaluation queue...</p>
               ) : displayedSubmissions.length === 0 ? (
-                <div className="py-12 text-center text-xs text-gray-500">
-                  <ClipboardList size={24} className="mx-auto text-gray-300 mb-2" />
-                  <p className="font-semibold text-gray-700">No submissions found</p>
-                  <p className="mt-0.5 text-gray-400">
+                <div className="py-12 text-center text-xs text-muted-foreground">
+                  <ClipboardList size={24} className="mx-auto text-muted-foreground/60 mb-2" />
+                  <p className="font-semibold text-foreground">No submissions found</p>
+                  <p className="mt-0.5 text-muted-foreground">
                     {tab === 'pending' ? 'All student submissions have been graded.' : 'No matching records found.'}
                   </p>
                 </div>
@@ -359,8 +359,8 @@ export default function Grading() {
                       onClick={() => choose(sub)}
                       className={`w-full text-left p-3 rounded-lg border transition-all text-xs ${
                         isSelected
-                          ? 'border-deep-600 bg-deep-50/30 shadow-sm'
-                          : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 bg-white'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-1 ring-blue-500/40'
+                          : 'border-border hover:border-gray-300 dark:hover:border-slate-700 hover:bg-muted/50 bg-card'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
@@ -372,21 +372,21 @@ export default function Grading() {
                               e.stopPropagation()
                               toggleBulkSelect(sub.id)
                             }}
-                            className="w-4 h-4 rounded border-gray-300 text-deep-600 focus:ring-deep-500"
+                            className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="font-bold text-gray-900 truncate">{title(sub)}</span>
+                          <span className="font-bold text-foreground truncate">{title(sub)}</span>
                         </div>
                         <Badge
                           variant={isGraded ? 'secondary' : isRemediation ? 'outline' : 'default'}
                           className={`text-[10px] capitalize shrink-0 ${
-                            isRemediation ? 'text-amber-700 border-amber-200' : ''
+                            isRemediation ? 'text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800/80 bg-amber-50/50 dark:bg-amber-950/30' : ''
                           }`}
                         >
                           {sub.status}
                         </Badge>
                       </div>
 
-                      <div className="mt-1 flex items-center justify-between text-gray-500">
+                      <div className="mt-1 flex items-center justify-between text-muted-foreground">
                         <span className="truncate">{sub.users?.name || sub.users?.email || 'Student'}</span>
                         <span className="text-[10px]">
                           {new Date(sub.submitted_at).toLocaleDateString()}
@@ -394,7 +394,7 @@ export default function Grading() {
                       </div>
 
                       {isGraded && (
-                        <div className="mt-1.5 flex items-center gap-1 font-semibold text-emerald-700 text-[11px]">
+                        <div className="mt-1.5 flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-400 text-[11px]">
                           <span>Score: {sub.score}/{sub.labs?.max_score || 100}</span>
                         </div>
                       )}
@@ -407,27 +407,27 @@ export default function Grading() {
         </Card>
 
         {/* Right Column: Grading Console & Rubric (2/3) */}
-        <Card className="lg:col-span-2 border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card className="lg:col-span-2 border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                   <Code2 size={16} />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-gray-900 truncate">
+                  <h3 className="text-sm font-bold text-foreground truncate">
                     {selected ? title(selected) : 'Select a submission'}
                   </h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {selected ? `Student: ${selected.users?.name || selected.users?.email}` : 'Choose from the left queue to evaluate'}
                   </p>
                 </div>
               </div>
 
               {selected?.content_url && (
-                <Button asChild size="sm" variant="outline" className="text-xs border-gray-200 shrink-0">
+                <Button asChild size="sm" variant="outline" className="text-xs border-border bg-card hover:bg-muted/60 text-foreground shrink-0">
                   <a href={selected.content_url} target="_blank" rel="noreferrer">
-                    <ExternalLink size={13} className="mr-1.5 text-deep-600" />
+                    <ExternalLink size={13} className="mr-1.5 text-blue-600 dark:text-blue-400" />
                     Open Repository
                   </a>
                 </Button>
@@ -436,27 +436,27 @@ export default function Grading() {
 
             <CardContent className="p-5">
               {!selected ? (
-                <div className="py-20 text-center text-sm text-gray-500">
-                  <ClipboardList size={32} className="mx-auto text-gray-300 mb-2" />
+                <div className="py-20 text-center text-sm text-muted-foreground">
+                  <ClipboardList size={32} className="mx-auto text-muted-foreground/60 mb-2" />
                   <p>Select a student deliverable from the queue to start review.</p>
                 </div>
               ) : (
                 <div className="space-y-5">
                   {/* Submission Details Bar */}
-                  <div className="rounded-lg border border-gray-100 bg-gray-50/60 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="rounded-lg border border-border bg-muted/30 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
                     <div>
-                      <span className="text-gray-500">Submitted: </span>
-                      <strong className="text-gray-900">
+                      <span className="text-muted-foreground">Submitted: </span>
+                      <strong className="text-foreground">
                         {new Date(selected.submitted_at).toLocaleString()}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-gray-500">Max Points: </span>
-                      <strong className="text-gray-900">{maxScore} pts</strong>
+                      <span className="text-muted-foreground">Max Points: </span>
+                      <strong className="text-foreground">{maxScore} pts</strong>
                     </div>
                     <div>
-                      <span className="text-gray-500">Current Status: </span>
-                      <Badge variant="outline" className="capitalize text-[11px] ml-1">
+                      <span className="text-muted-foreground">Current Status: </span>
+                      <Badge variant="outline" className="capitalize text-[11px] ml-1 border-border">
                         {selected.status}
                       </Badge>
                     </div>
@@ -464,7 +464,7 @@ export default function Grading() {
 
                   {/* Score Input */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
                       Awarded Score (0 to {maxScore})
                     </label>
                     <div className="flex items-center gap-3">
@@ -475,19 +475,19 @@ export default function Grading() {
                         value={score}
                         onChange={(e) => setScore(e.target.value)}
                         placeholder={`e.g. ${maxScore}`}
-                        className="w-36 font-bold text-sm"
+                        className="w-36 font-bold text-sm border-input bg-background text-foreground"
                       />
-                      <span className="text-xs text-gray-500 font-medium">/ {maxScore} points</span>
+                      <span className="text-xs text-muted-foreground font-medium">/ {maxScore} points</span>
                     </div>
                   </div>
 
                   {/* Rubric Feedback Presets */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-foreground">
                         Instructor Feedback & Rubric Guidance
                       </label>
-                      <span className="text-[11px] text-gray-500">Click a preset to insert</span>
+                      <span className="text-[11px] text-muted-foreground">Click a preset to insert</span>
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-2.5">
@@ -496,7 +496,7 @@ export default function Grading() {
                           key={idx}
                           type="button"
                           onClick={() => appendPreset(preset.text)}
-                          className="px-2.5 py-1 rounded-md border border-gray-200 bg-white text-[11px] font-semibold text-gray-700 hover:border-deep-600 hover:text-deep-700 hover:bg-deep-50/30 transition-all shadow-2xs"
+                          className="px-2.5 py-1 rounded-md border border-border bg-card dark:bg-slate-900/80 text-[11px] font-semibold text-foreground hover:border-blue-500/60 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-muted/50 transition-all shadow-2xs"
                         >
                           {preset.label}
                         </button>
@@ -508,7 +508,7 @@ export default function Grading() {
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
                       placeholder="Write constructive evaluation notes, point deductions, or praise for clean fintech implementation..."
-                      className="w-full rounded-lg border border-gray-200 p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-deep-600"
+                      className="w-full rounded-lg border border-input bg-background p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-600 text-foreground"
                     />
                   </div>
                 </div>
@@ -517,8 +517,8 @@ export default function Grading() {
           </div>
 
           {selected && (
-            <div className="p-4 bg-gray-50/60 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-xs text-gray-500">
+            <div className="p-4 bg-muted/20 border-t border-border flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">
                 Evaluation will be visible to the student in their Lab Workspace.
               </span>
 
@@ -528,7 +528,7 @@ export default function Grading() {
                   size="sm"
                   disabled={saving}
                   onClick={() => saveGrade('remediation')}
-                  className="text-xs border-amber-200 text-amber-700 hover:bg-amber-50"
+                  className="text-xs border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                 >
                   <AlertCircle size={13} className="mr-1.5" />
                   Request Remediation
@@ -538,7 +538,7 @@ export default function Grading() {
                   size="sm"
                   disabled={saving}
                   onClick={() => saveGrade('graded')}
-                  className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
+                  className="bg-blue-600 text-white hover:bg-blue-500 text-xs font-semibold"
                 >
                   <Save size={13} className="mr-1.5" />
                   {saving ? 'Saving...' : 'Submit Grade'}

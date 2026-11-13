@@ -52,18 +52,18 @@ export default function MentorEvaluation() {
       </div>
       {error && <p className="mb-4 rounded bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
       {message && <p className="mb-4 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
-      <Card className="max-w-2xl dark:border-gray-800">
+      <Card className="max-w-2xl border border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-sm">Evaluate fellow contribution</CardTitle>
+          <CardTitle className="text-sm font-bold text-foreground">Evaluate fellow contribution</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">Loading evaluation roster...</p>
+            <p className="text-sm text-muted-foreground">Loading evaluation roster...</p>
           ) : (
             <form onSubmit={save} className="space-y-4">
               <select
                 required
-                className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                className="w-full rounded-md border border-input bg-background text-foreground p-2.5 text-sm"
                 value={form.sprint_id}
                 onChange={(event) => setForm({ ...form, sprint_id: event.target.value })}
               >
@@ -76,7 +76,7 @@ export default function MentorEvaluation() {
               </select>
               <select
                 required
-                className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                className="w-full rounded-md border border-input bg-background text-foreground p-2.5 text-sm"
                 value={form.user_id}
                 onChange={(event) => setForm({ ...form, user_id: event.target.value })}
               >
@@ -101,12 +101,12 @@ export default function MentorEvaluation() {
               <textarea
                 required
                 rows={5}
-                className="w-full rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 text-sm"
+                className="w-full rounded-md border border-input bg-background text-foreground p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
                 placeholder="Feedback and development notes"
                 value={form.feedback}
                 onChange={(event) => setForm({ ...form, feedback: event.target.value })}
               />
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" disabled={saving} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold">
                 <Save size={14} className="mr-2" />
                 {saving ? 'Saving...' : 'Save evaluation'}
               </Button>

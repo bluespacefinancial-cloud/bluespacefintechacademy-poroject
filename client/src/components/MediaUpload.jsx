@@ -99,24 +99,24 @@ export default function MediaUpload({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <label htmlFor={inputId} className="text-xs font-medium text-deep-600">
+        <label htmlFor={inputId} className="text-xs font-semibold text-foreground">
           {label}
         </label>
-        {helper && <span className="text-[10px] text-gray-500">{helper}</span>}
+        {helper && <span className="text-[10px] text-muted-foreground">{helper}</span>}
       </div>
 
       {value ? (
-        <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 p-2">
           {kind === 'image' ? (
             <img src={value} alt="" className="h-9 w-9 shrink-0 rounded object-cover" />
           ) : (
-            <CheckCircle2 size={16} className="shrink-0 text-emerald-600" aria-hidden="true" />
+            <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
           )}
           <a
             href={value}
             target="_blank"
             rel="noreferrer"
-            className="min-w-0 flex-1 truncate text-xs text-deep-600 hover:text-deep-700 hover:underline"
+            className="min-w-0 flex-1 truncate text-xs text-blue-600 dark:text-blue-400 hover:underline"
             title={fileName}
           >
             {fileName || 'Uploaded file'}

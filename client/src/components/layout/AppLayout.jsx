@@ -68,10 +68,13 @@ export default function AppLayout() {
     }
   }, [user?.id])
 
-  // Open keyboard shortcuts panel on Shift + / (?)
+  // Keyboard listeners: Ctrl+K / Cmd+K for global search, Shift+? for shortcuts
   useEffect(() => {
     const onKeyDown = (event) => {
-      if (event.shiftKey && event.key === '/') {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen((prev) => !prev)
+      } else if (event.shiftKey && event.key === '/') {
         event.preventDefault()
         setShortcutsOpen(true)
       }
@@ -123,6 +126,16 @@ export default function AppLayout() {
                   {cohortName}
                 </span>
               )}
+
+              {/* Mobile Search Button */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="lg:hidden p-2 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Search academy"
+              >
+                <Search size={17} />
+              </button>
 
               {/* Notification Dropdown */}
               <div className="flex items-center shrink-0">

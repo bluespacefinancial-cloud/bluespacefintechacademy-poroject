@@ -640,18 +640,18 @@ export default function ModuleEditor() {
         </div>
       </div>
 
-      {error && <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p role="status" className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+      {error && <p role="alert" className="rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
+      {message && <p role="status" className="rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 p-3 text-sm text-emerald-700 dark:text-emerald-300">{message}</p>}
 
-      <Card>
+      <Card className="border border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-sm">Module details</CardTitle>
-          <CardDescription>Where this module sits in the programme.</CardDescription>
+          <CardTitle className="text-sm font-bold text-foreground">Module details</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">Where this module sits in the programme.</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="module-form" onSubmit={saveModule} className="space-y-4">
             <div>
-              <label htmlFor="module-title" className="mb-1 block text-sm font-medium text-deep-600">Title</label>
+              <label htmlFor="module-title" className="mb-1 block text-sm font-semibold text-foreground">Title</label>
               <Input
                 id="module-title"
                 value={form.title}
@@ -663,7 +663,7 @@ export default function ModuleEditor() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label htmlFor="module-cohort" className="mb-1 block text-sm font-medium text-deep-600">Cohort</label>
+                <label htmlFor="module-cohort" className="mb-1 block text-sm font-semibold text-foreground">Cohort</label>
                 <Select value={form.cohort_id} onValueChange={(value) => setForm({ ...form, cohort_id: value })}>
                   <SelectTrigger id="module-cohort" className="w-full">
                     <SelectValue placeholder="Select cohort" />
@@ -675,14 +675,14 @@ export default function ModuleEditor() {
                   </SelectContent>
                 </Select>
                 {cohorts.length === 0 && (
-                  <p className="mt-1 text-xs text-amber-700">
+                  <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
                     You are not assigned to a cohort yet. Ask an administrator.
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="module-stage" className="mb-1 block text-sm font-medium text-deep-600">Stage</label>
+                <label htmlFor="module-stage" className="mb-1 block text-sm font-semibold text-foreground">Stage</label>
                 <Select value={form.stage} onValueChange={(value) => setForm({ ...form, stage: value })}>
                   <SelectTrigger id="module-stage" className="w-full">
                     <SelectValue placeholder="Select stage" />
@@ -696,7 +696,7 @@ export default function ModuleEditor() {
               </div>
 
               <div>
-                <label htmlFor="module-domain" className="mb-1 block text-sm font-medium text-deep-600">Domain</label>
+                <label htmlFor="module-domain" className="mb-1 block text-sm font-semibold text-foreground">Domain</label>
                 <Select value={form.domain} onValueChange={(value) => setForm({ ...form, domain: value })}>
                   <SelectTrigger id="module-domain" className="w-full">
                     <SelectValue placeholder="No domain" />
@@ -711,7 +711,7 @@ export default function ModuleEditor() {
               </div>
 
               <div>
-                <label htmlFor="module-track" className="mb-1 block text-sm font-medium text-deep-600">Track</label>
+                <label htmlFor="module-track" className="mb-1 block text-sm font-semibold text-foreground">Track</label>
                 <Select value={form.track} onValueChange={(value) => setForm({ ...form, track: value })}>
                   <SelectTrigger id="module-track" className="w-full">
                     <SelectValue placeholder="Select track" />
@@ -727,7 +727,7 @@ export default function ModuleEditor() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:max-w-sm">
               <div>
-                <label htmlFor="module-week-start" className="mb-1 block text-sm font-medium text-deep-600">Week start</label>
+                <label htmlFor="module-week-start" className="mb-1 block text-sm font-semibold text-foreground">Week start</label>
                 <Input
                   id="module-week-start"
                   type="number"
@@ -737,7 +737,7 @@ export default function ModuleEditor() {
                 />
               </div>
               <div>
-                <label htmlFor="module-week-end" className="mb-1 block text-sm font-medium text-deep-600">Week end</label>
+                <label htmlFor="module-week-end" className="mb-1 block text-sm font-semibold text-foreground">Week end</label>
                 <Input
                   id="module-week-end"
                   type="number"
@@ -749,7 +749,7 @@ export default function ModuleEditor() {
             </div>
 
             <div>
-              <label htmlFor="module-description" className="mb-1 block text-sm font-medium text-deep-600">Description</label>
+              <label htmlFor="module-description" className="mb-1 block text-sm font-semibold text-foreground">Description</label>
               <Textarea
                 id="module-description"
                 value={form.description}
@@ -762,7 +762,7 @@ export default function ModuleEditor() {
       </Card>
 
       {!isNew && (
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <div>
               <CardTitle className="text-sm">Lessons</CardTitle>
@@ -850,30 +850,30 @@ export default function ModuleEditor() {
                 </div>
 
                 {labEditorLessonId === lesson.id && (
-                  <form onSubmit={saveLab} className="space-y-3 rounded-lg border border-deep-200 bg-deep-50/40 p-4">
+                  <form onSubmit={saveLab} className="space-y-3 rounded-lg border border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/30 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <ClipboardList size={15} className="text-deep-600" />
-                        <p className="text-sm font-semibold text-gray-900">
+                        <ClipboardList size={15} className="text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm font-semibold text-foreground">
                           {labsByLesson[lesson.id] ? 'Edit lab' : 'Attach a lab'}
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => { setLabEditorLessonId(null); _setLabForm(emptyLabForm); setDirty(false) }}
-                        className="rounded p-1 text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-deep-600"
+                        className="rounded p-1 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-blue-600"
                         aria-label="Close lab editor"
                       >
                         <X size={15} />
                       </button>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Attached to <span className="font-medium text-gray-700">{lesson.title}</span>. Students see this in their lab workspace.
+                    <p className="text-xs text-muted-foreground">
+                      Attached to <span className="font-semibold text-foreground">{lesson.title}</span>. Students see this in their lab workspace.
                     </p>
 
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="sm:col-span-2">
-                        <label htmlFor={`lab-title-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Lab title</label>
+                        <label htmlFor={`lab-title-${lesson.id}`} className="mb-1 block text-xs font-semibold text-foreground">Lab title</label>
                         <Input
                           id={`lab-title-${lesson.id}`}
                           value={labForm.title}
@@ -883,7 +883,7 @@ export default function ModuleEditor() {
                         />
                       </div>
                       <div>
-                        <label htmlFor={`lab-due-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Due date</label>
+                        <label htmlFor={`lab-due-${lesson.id}`} className="mb-1 block text-xs font-semibold text-foreground">Due date</label>
                         <Input
                           id={`lab-due-${lesson.id}`}
                           type="date"
@@ -892,7 +892,7 @@ export default function ModuleEditor() {
                         />
                       </div>
                       <div>
-                        <label htmlFor={`lab-score-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Max score</label>
+                        <label htmlFor={`lab-score-${lesson.id}`} className="mb-1 block text-xs font-semibold text-foreground">Max score</label>
                         <Input
                           id={`lab-score-${lesson.id}`}
                           type="number"
@@ -904,7 +904,7 @@ export default function ModuleEditor() {
                     </div>
 
                     <div>
-                      <label htmlFor={`lab-instructions-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Instructions</label>
+                      <label htmlFor={`lab-instructions-${lesson.id}`} className="mb-1 block text-xs font-semibold text-foreground">Instructions</label>
                       <Textarea
                         id={`lab-instructions-${lesson.id}`}
                         value={labForm.instructions}
@@ -916,7 +916,7 @@ export default function ModuleEditor() {
                     </div>
 
                     <div>
-                      <label htmlFor={`lab-starter-${lesson.id}`} className="mb-1 block text-xs font-medium text-deep-600">Starter code or template (optional)</label>
+                      <label htmlFor={`lab-starter-${lesson.id}`} className="mb-1 block text-xs font-semibold text-foreground">Starter code or template (optional)</label>
                       <Textarea
                         id={`lab-starter-${lesson.id}`}
                         value={labForm.starter_code}
@@ -976,7 +976,7 @@ export default function ModuleEditor() {
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="sm:col-span-2">
-                    <label htmlFor="lesson-title" className="mb-1 block text-xs font-medium text-deep-600">Title</label>
+                    <label htmlFor="lesson-title" className="mb-1 block text-xs font-semibold text-foreground">Title</label>
                     <Input
                       id="lesson-title"
                       value={lessonForm.title}
@@ -985,7 +985,7 @@ export default function ModuleEditor() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="lesson-type" className="mb-1 block text-xs font-medium text-deep-600">Type</label>
+                    <label htmlFor="lesson-type" className="mb-1 block text-xs font-semibold text-foreground">Type</label>
                     <Select value={lessonForm.type} onValueChange={(value) => {
                       const next = { ...lessonForm, type: value }
                       if (value !== 'video') next.video_url = ''
@@ -1002,7 +1002,7 @@ export default function ModuleEditor() {
                     </Select>
                   </div>
                   <div>
-                    <label htmlFor="lesson-duration" className="mb-1 block text-xs font-medium text-deep-600">Duration (min)</label>
+                    <label htmlFor="lesson-duration" className="mb-1 block text-xs font-semibold text-foreground">Duration (min)</label>
                     <Input
                       id="lesson-duration"
                       type="number"
@@ -1015,7 +1015,7 @@ export default function ModuleEditor() {
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:max-w-md">
                   <div>
-                    <label htmlFor="lesson-provider" className="mb-1 block text-xs font-medium text-deep-600">Media provider</label>
+                    <label htmlFor="lesson-provider" className="mb-1 block text-xs font-semibold text-foreground">Media provider</label>
                     <Select
                       value={lessonForm.media_provider}
                       onValueChange={(value) => {
@@ -1036,7 +1036,7 @@ export default function ModuleEditor() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <p className="self-end pb-2 text-[11px] leading-snug text-gray-500">
+                  <p className="self-end pb-2 text-[11px] leading-snug text-muted-foreground">
                     Lectures normally use an unlisted YouTube link. Keep only audio, captions and short assets on your own storage.
                   </p>
                 </div>
@@ -1044,7 +1044,7 @@ export default function ModuleEditor() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   {lessonForm.type === 'video' && lessonForm.media_provider === 'self' ? (
                     <div className="sm:col-span-2">
-                      <label htmlFor="lesson-video-upload" className="mb-1 block text-xs font-medium text-deep-600">Video file</label>
+                      <label htmlFor="lesson-video-upload" className="mb-1 block text-xs font-semibold text-foreground">Video file</label>
                       <MediaUpload
                         id="lesson-video-upload"
                         kind="video"
@@ -1062,7 +1062,7 @@ export default function ModuleEditor() {
                     </div>
                   ) : (
                     <div>
-                      <label htmlFor="lesson-video" className="mb-1 block text-xs font-medium text-deep-600">Video URL</label>
+                      <label htmlFor="lesson-video" className="mb-1 block text-xs font-semibold text-foreground">Video URL</label>
                       <Input
                         id="lesson-video"
                         type="url"
@@ -1073,7 +1073,7 @@ export default function ModuleEditor() {
                     </div>
                   )}
                   <div>
-                    <label htmlFor="lesson-audio" className="mb-1 block text-xs font-medium text-deep-600">Audio URL</label>
+                    <label htmlFor="lesson-audio" className="mb-1 block text-xs font-semibold text-foreground">Audio URL</label>
                     <Input
                       id="lesson-audio"
                       type="url"
@@ -1082,7 +1082,7 @@ export default function ModuleEditor() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="lesson-content" className="mb-1 block text-xs font-medium text-deep-600">Reading or resource URL</label>
+                    <label htmlFor="lesson-content" className="mb-1 block text-xs font-semibold text-foreground">Reading or resource URL</label>
                     <Input
                       id="lesson-content"
                       type="url"
@@ -1091,7 +1091,7 @@ export default function ModuleEditor() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="lesson-caption" className="mb-1 block text-xs font-medium text-deep-600">Caption URL</label>
+                    <label htmlFor="lesson-caption" className="mb-1 block text-xs font-semibold text-foreground">Caption URL</label>
                     <Input
                       id="lesson-caption"
                       type="url"
@@ -1101,12 +1101,12 @@ export default function ModuleEditor() {
                   </div>
                 </div>
 
-                <label className="flex items-center gap-2 text-xs text-gray-600">
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
                   <input
                     type="checkbox"
                     checked={lessonForm.is_required}
                     onChange={(event) => setLessonForm({ ...lessonForm, is_required: event.target.checked })}
-                    className="h-4 w-4 rounded border-gray-300 text-deep-600 focus-visible:ring-2 focus-visible:ring-deep-600"
+                    className="h-4 w-4 rounded border-border text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
                   />
                   Required for completion
                 </label>

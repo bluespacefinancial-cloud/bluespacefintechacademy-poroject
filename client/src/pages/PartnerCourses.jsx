@@ -292,7 +292,7 @@ export default function PartnerCourses() {
           <CardContent>
             <form onSubmit={createCourse} className="space-y-3">
               <div>
-                <label htmlFor="course-title" className="mb-1 block text-xs font-medium text-deep-600">Course title</label>
+                <label htmlFor="course-title" className="mb-1 block text-xs font-semibold text-foreground">Course title</label>
                 <Input
                   id="course-title"
                   placeholder="e.g. Payments Operations in Practice"
@@ -302,7 +302,7 @@ export default function PartnerCourses() {
                 />
               </div>
               <div>
-                <label htmlFor="course-description" className="mb-1 block text-xs font-medium text-deep-600">Description</label>
+                <label htmlFor="course-description" className="mb-1 block text-xs font-semibold text-foreground">Description</label>
                 <Textarea
                   id="course-description"
                   placeholder="What students will be able to do after this course."
@@ -313,7 +313,7 @@ export default function PartnerCourses() {
                 />
               </div>
               <div>
-                <label htmlFor="course-thumbnail" className="mb-1 block text-xs font-medium text-deep-600">Thumbnail URL</label>
+                <label htmlFor="course-thumbnail" className="mb-1 block text-xs font-semibold text-foreground">Thumbnail URL</label>
                 <Input
                   id="course-thumbnail"
                   type="url"
@@ -333,7 +333,7 @@ export default function PartnerCourses() {
                 </div>
               </div>
               <div>
-                <label htmlFor="course-partner-logo" className="mb-1 block text-xs font-medium text-deep-600">Partner logo URL</label>
+                <label htmlFor="course-partner-logo" className="mb-1 block text-xs font-semibold text-foreground">Partner logo URL</label>
                 <Input
                   id="course-partner-logo"
                   type="url"
@@ -353,7 +353,7 @@ export default function PartnerCourses() {
                 </div>
               </div>
               <div>
-                <label htmlFor="course-certificate" className="mb-1 block text-xs font-medium text-deep-600">Certificate title</label>
+                <label htmlFor="course-certificate" className="mb-1 block text-xs font-semibold text-foreground">Certificate title</label>
                 <Input
                   id="course-certificate"
                   value={form.certificate_title}
@@ -361,7 +361,7 @@ export default function PartnerCourses() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-deep-600">Target fellowship track</label>
+                <label className="mb-1 block text-xs font-semibold text-foreground">Target fellowship track</label>
                 <Select
                   value={form.track}
                   onValueChange={(val) => setForm({ ...form, track: val })}

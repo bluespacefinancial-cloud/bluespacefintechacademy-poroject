@@ -367,8 +367,8 @@ async function uploadMedia(file, kind) {
   }
 }
 
-async function invoke(functionName, { body } = {}) {
-  return rpc(functionName, body)
+async function invoke(functionName, { body, headers } = {}) {
+  return supabase.functions.invoke(functionName, { body, headers })
 }
 
 export const api = {

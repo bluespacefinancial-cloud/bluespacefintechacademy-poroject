@@ -52,6 +52,8 @@ export default function AppLayout() {
           .select('cohorts(name)')
           .eq('user_id', user.id)
           .in('status', ['enrolled', 'active'])
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
         if (!cancelled && data?.cohorts?.name) {
           setCohortName(data.cohorts.name)

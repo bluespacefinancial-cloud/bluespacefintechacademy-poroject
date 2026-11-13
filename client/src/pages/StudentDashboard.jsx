@@ -56,6 +56,8 @@ export default function StudentDashboard({ user }) {
           .select('cohort_id, track, squad_id')
           .eq('user_id', profile.id)
           .in('status', ['enrolled', 'active'])
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
         if (enrolmentError) throw enrolmentError
         if (!enrolment?.cohort_id) {

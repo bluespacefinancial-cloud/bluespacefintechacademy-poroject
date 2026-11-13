@@ -19,7 +19,14 @@ export default function ProjectWorkspace() {
 
   const load = async () => {
     const profile = await getCurrentProfile()
-    const { data: enrolment, error: enrolmentError } = await api.from('enrolments').select('squad_id').eq('user_id', profile.id).in('status', ['enrolled', 'active']).maybeSingle()
+    const { data: enrolment, error: enrolmentError } = await api
+      .from('enrolments')
+      .select('squad_id')
+      .eq('user_id', profile.id)
+      .in('status', ['enrolled', 'active'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
     if (enrolmentError) throw enrolmentError
     if (!enrolment?.squad_id) return
     const { data, error: sprintError } = await api.from('sprints').select('*, use_cases(title, domain), sprint_deliverables(*)').eq('squad_id', enrolment.squad_id).order('sprint_number')

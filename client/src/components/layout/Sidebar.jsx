@@ -35,25 +35,25 @@ const sidebarGroups = {
       category: 'Coursework',
       icon: BookOpen,
       items: [
-        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
-        { to: '/my-learning', icon: BookOpen, label: 'Curriculum & Labs', ariaLabel: 'Curriculum and Labs' },
-        { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Courses', ariaLabel: 'Partner Courses' },
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', shortLabel: 'Dashboard', ariaLabel: 'Dashboard' },
+        { to: '/my-learning', icon: BookOpen, label: 'Curriculum & Labs', shortLabel: 'Curriculum', ariaLabel: 'Curriculum and Labs' },
+        { to: '/partner-catalog', icon: SchoolIcon, label: 'Partner Courses', shortLabel: 'Partners', ariaLabel: 'Partner Courses' },
       ],
     },
     {
       category: 'Community & Faculty',
       icon: Users,
       items: [
-        { to: '/live-classes', icon: Video, label: 'Sessions & Clinics', ariaLabel: 'Live Sessions and Mentor Clinics' },
-        { to: '/my-squad', icon: Users, label: 'Squad Workspace', ariaLabel: 'Squad Workspace' },
-        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
+        { to: '/live-classes', icon: Video, label: 'Sessions & Clinics', shortLabel: 'Sessions', ariaLabel: 'Live Sessions and Mentor Clinics' },
+        { to: '/my-squad', icon: Users, label: 'Squad Workspace', shortLabel: 'Squad', ariaLabel: 'Squad Workspace' },
+        { to: '/announcements', icon: MapPin, label: 'Announcements', shortLabel: 'Updates', ariaLabel: 'Announcements' },
       ],
     },
     {
       category: 'Credentials',
       icon: Shield,
       items: [
-        { to: '/certificates', icon: Award, label: 'Capstone & Certificates', ariaLabel: 'Capstone and Certificates' },
+        { to: '/certificates', icon: Award, label: 'Capstone & Certificates', shortLabel: 'Capstone', ariaLabel: 'Capstone and Certificates' },
       ],
     },
   ],
@@ -62,30 +62,30 @@ const sidebarGroups = {
       category: 'Teaching',
       icon: SchoolIcon,
       items: [
-        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
-        { to: '/my-modules', icon: BookOpen, label: 'My Modules', ariaLabel: 'My Modules' },
-        { to: '/grading', icon: ClipboardList, label: 'Evaluation & Grading', ariaLabel: 'Evaluation & Grading' },
-        { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', shortLabel: 'Dashboard', ariaLabel: 'Dashboard' },
+        { to: '/my-modules', icon: BookOpen, label: 'My Modules', shortLabel: 'Modules', ariaLabel: 'My Modules' },
+        { to: '/grading', icon: ClipboardList, label: 'Evaluation & Grading', shortLabel: 'Grading', ariaLabel: 'Evaluation & Grading' },
+        { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', shortLabel: 'Monitoring', ariaLabel: 'Student Monitoring' },
       ],
     },
     {
       category: 'Classes & Clinics',
       icon: Monitor,
       items: [
-        { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
-        { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics', ariaLabel: 'Mentor Clinics' },
-        { to: '/capstone', icon: FileText, label: 'Capstone', ariaLabel: 'Capstone' },
-        { to: '/panel-review', icon: ClipboardList, label: 'Panel Review', ariaLabel: 'Panel Review' },
-        { to: '/mentor-evaluation', icon: CheckCircle, label: 'Mentor Evaluation', ariaLabel: 'Mentor Evaluation' },
+        { to: '/live-classes', icon: Video, label: 'Live Classes', shortLabel: 'Classes', ariaLabel: 'Live Classes' },
+        { to: '/mentor-clinics', icon: Activity, label: 'Mentor Clinics', shortLabel: 'Clinics', ariaLabel: 'Mentor Clinics' },
+        { to: '/capstone', icon: FileText, label: 'Capstone', shortLabel: 'Capstone', ariaLabel: 'Capstone' },
+        { to: '/panel-review', icon: ClipboardList, label: 'Panel Review', shortLabel: 'Panels', ariaLabel: 'Panel Review' },
+        { to: '/mentor-evaluation', icon: CheckCircle, label: 'Mentor Evaluation', shortLabel: 'Evaluation', ariaLabel: 'Mentor Evaluation' },
       ],
     },
     {
       category: 'Community',
       icon: Users,
       items: [
-        { to: '/squads', icon: Target, label: 'Squads', ariaLabel: 'Squads' },
-        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
-        { to: '/project-review', icon: ClipboardList, label: 'Project Review', ariaLabel: 'Project Review' },
+        { to: '/squads', icon: Target, label: 'Squads', shortLabel: 'Squads', ariaLabel: 'Squads' },
+        { to: '/announcements', icon: MapPin, label: 'Announcements', shortLabel: 'Updates', ariaLabel: 'Announcements' },
+        { to: '/project-review', icon: ClipboardList, label: 'Project Review', shortLabel: 'Projects', ariaLabel: 'Project Review' },
       ],
     },
   ],
@@ -94,16 +94,16 @@ const sidebarGroups = {
       category: 'Courses',
       icon: SchoolIcon,
       items: [
-        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
-        { to: '/partner-courses', icon: BookOpen, label: 'Course Studio', ariaLabel: 'Course Studio' },
-        { to: '/partner-organisation', icon: Briefcase, label: 'Organisation', ariaLabel: 'Organisation Profile' },
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', shortLabel: 'Dashboard', ariaLabel: 'Dashboard' },
+        { to: '/partner-courses', icon: BookOpen, label: 'Course Studio', shortLabel: 'Studio', ariaLabel: 'Course Studio' },
+        { to: '/partner-organisation', icon: Briefcase, label: 'Organisation', shortLabel: 'Org', ariaLabel: 'Organisation Profile' },
       ],
     },
     {
       category: 'Community',
       icon: Users,
       items: [
-        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
+        { to: '/announcements', icon: MapPin, label: 'Announcements', shortLabel: 'Updates', ariaLabel: 'Announcements' },
       ],
     },
   ],
@@ -112,43 +112,43 @@ const sidebarGroups = {
       category: 'Academy',
       icon: SchoolIcon,
       items: [
-        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', ariaLabel: 'Dashboard' },
-        { to: '/user-management', icon: Users, label: 'User Management', ariaLabel: 'User Management' },
-        { to: '/cohorts', icon: GraduationCap, label: 'Cohorts', ariaLabel: 'Cohorts' },
-        { to: '/enrolments', icon: Users, label: 'Enrolments', ariaLabel: 'Enrolments' },
-        { to: '/instructor-assignments', icon: User, label: 'Instructor Assignments', ariaLabel: 'Instructor Assignments' },
-        { to: '/applications', icon: ClipboardList, label: 'Applications', ariaLabel: 'Applications' },
-        { to: '/curriculum', icon: BookOpen, label: 'Curriculum', ariaLabel: 'Curriculum' },
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', shortLabel: 'Dashboard', ariaLabel: 'Dashboard' },
+        { to: '/user-management', icon: Users, label: 'User Management', shortLabel: 'Users', ariaLabel: 'User Management' },
+        { to: '/cohorts', icon: GraduationCap, label: 'Cohorts', shortLabel: 'Cohorts', ariaLabel: 'Cohorts' },
+        { to: '/enrolments', icon: Users, label: 'Enrolments', shortLabel: 'Enrolments', ariaLabel: 'Enrolments' },
+        { to: '/instructor-assignments', icon: User, label: 'Instructor Assignments', shortLabel: 'Instructors', ariaLabel: 'Instructor Assignments' },
+        { to: '/applications', icon: ClipboardList, label: 'Applications', shortLabel: 'Applications', ariaLabel: 'Applications' },
+        { to: '/curriculum', icon: BookOpen, label: 'Curriculum', shortLabel: 'Curriculum', ariaLabel: 'Curriculum' },
       ],
     },
     {
       category: 'Partners',
       icon: Briefcase,
       items: [
-        { to: '/partner-management', icon: Briefcase, label: 'Partner Agencies', ariaLabel: 'Partner Agencies' },
-        { to: '/partner-course-review', icon: ClipboardList, label: 'Partner Course Review', ariaLabel: 'Partner Course Review' },
-        { to: '/use-case-assignment', icon: Target, label: 'Use Cases', ariaLabel: 'Use Cases' },
-        { to: '/placement', icon: MapPin, label: 'Placement', ariaLabel: 'Placement' },
+        { to: '/partner-management', icon: Briefcase, label: 'Partner Agencies', shortLabel: 'Partners', ariaLabel: 'Partner Agencies' },
+        { to: '/partner-course-review', icon: ClipboardList, label: 'Partner Course Review', shortLabel: 'Review', ariaLabel: 'Partner Course Review' },
+        { to: '/use-case-assignment', icon: Target, label: 'Use Cases', shortLabel: 'Cases', ariaLabel: 'Use Cases' },
+        { to: '/placement', icon: MapPin, label: 'Placement', shortLabel: 'Placement', ariaLabel: 'Placement' },
       ],
     },
     {
       category: 'Operations',
       icon: Monitor,
       items: [
-        { to: '/squads', icon: Target, label: 'Squads', ariaLabel: 'Squads' },
-        { to: '/reports', icon: BarChart3, label: 'Reports', ariaLabel: 'Reports' },
-        { to: '/audit-log', icon: Shield, label: 'Audit Log', ariaLabel: 'Audit Log' },
-        { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', ariaLabel: 'Student Monitoring' },
-        { to: '/live-classes', icon: Video, label: 'Live Classes', ariaLabel: 'Live Classes' },
-        { to: '/announcements', icon: MapPin, label: 'Announcements', ariaLabel: 'Announcements' },
+        { to: '/squads', icon: Target, label: 'Squads', shortLabel: 'Squads', ariaLabel: 'Squads' },
+        { to: '/reports', icon: BarChart3, label: 'Reports', shortLabel: 'Reports', ariaLabel: 'Reports' },
+        { to: '/audit-log', icon: Shield, label: 'Audit Log', shortLabel: 'Audit', ariaLabel: 'Audit Log' },
+        { to: '/student-monitoring', icon: Activity, label: 'Student Monitoring', shortLabel: 'Monitoring', ariaLabel: 'Student Monitoring' },
+        { to: '/live-classes', icon: Video, label: 'Live Classes', shortLabel: 'Classes', ariaLabel: 'Live Classes' },
+        { to: '/announcements', icon: MapPin, label: 'Announcements', shortLabel: 'Updates', ariaLabel: 'Announcements' },
       ],
     },
     {
       category: 'Capstone & Review',
       icon: FileText,
       items: [
-        { to: '/capstone', icon: FileText, label: 'Capstone', ariaLabel: 'Capstone' },
-        { to: '/panel-review', icon: ClipboardList, label: 'Panel Review', ariaLabel: 'Panel Review' },
+        { to: '/capstone', icon: FileText, label: 'Capstone', shortLabel: 'Capstone', ariaLabel: 'Capstone' },
+        { to: '/panel-review', icon: ClipboardList, label: 'Panel Review', shortLabel: 'Panels', ariaLabel: 'Panel Review' },
       ],
     },
   ],
@@ -417,59 +417,72 @@ export default function Sidebar({ open, onOpen, onClose }) {
         </div>
       </aside>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
-        {groups.flatMap((g) => g.items).slice(0, 5).map((item) => {
-          const active = location.pathname === item.to
-          const badgeCount = item.to === '/notifications' ? unreadCount : null
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={`flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium transition-colors ${
-                active ? 'text-deep-600 font-bold' : 'text-gray-500 hover:text-gray-800'
-              }`}
-              aria-current={active ? 'page' : undefined}
-            >
-              <div className="relative">
-                <item.icon size={19} className="shrink-0" />
-                {badgeCount && badgeCount > 0 && (
-                  <span className="absolute -top-1 -right-2.5 bg-red-600 text-white text-[9px] font-bold px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
-                    {badgeCount}
+      {/* Mobile Bottom Navigation Bar (5 buttons max) */}
+      {(() => {
+        const allNavItems = groups.flatMap((g) => g.items)
+        const hasMore = allNavItems.length > 5
+        const visibleNavItems = hasMore ? allNavItems.slice(0, 4) : allNavItems.slice(0, 5)
+
+        return (
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#0B0F19] border-t border-gray-200 dark:border-slate-800/80 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom)]">
+            {visibleNavItems.map((item) => {
+              const active = location.pathname === item.to
+              const badgeCount = item.to === '/notifications' ? unreadCount : null
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={`flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium transition-colors ${
+                    active ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
+                  }`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <div className="relative">
+                    {Icon && <Icon size={19} className="shrink-0" />}
+                    {badgeCount && badgeCount > 0 && (
+                      <span className="absolute -top-1 -right-2.5 bg-red-600 text-white text-[9px] font-bold px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
+                        {badgeCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] truncate max-w-full mt-0.5 leading-tight" title={item.shortLabel || item.label}>
+                    {item.shortLabel || item.label}
                   </span>
-                )}
-              </div>
-              <span className="text-[10px] truncate max-w-full mt-0.5 leading-tight" title={item.shortLabel || item.label}>{item.shortLabel || item.label}</span>
-            </NavLink>
-          )
-        })}
-        {groups.flatMap((g) => g.items).length > 5 && (
-          <button
-            onClick={onOpen}
-            className="flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-center text-gray-500 hover:text-gray-800 transition-colors"
-            aria-label="More options"
-          >
-            <div className="relative">
-              <MoreHorizontal size={19} className="shrink-0" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-2.5 bg-red-600 text-white text-[9px] font-bold px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
-                  {unreadCount}
+                </NavLink>
+              )
+            })}
+            {hasMore && (
+              <button
+                onClick={onOpen}
+                className="flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-1 text-center text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors"
+                aria-label="More options"
+              >
+                <div className="relative">
+                  <MoreHorizontal size={19} className="shrink-0" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-2.5 bg-red-600 text-white text-[9px] font-bold px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium truncate max-w-full mt-0.5 leading-tight" title="More">
+                  More
                 </span>
-              )}
-            </div>
-            <span className="text-[10px] font-medium truncate max-w-full mt-0.5 leading-tight" title="More">More</span>
-          </button>
-        )}
-      </nav>
+              </button>
+            )}
+          </nav>
+        )
+      })()}
 
       {/* Mobile "More" Slide-up Drawer */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-xs" onClick={onClose} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-sheet-up">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-              <span className="text-sm font-bold text-deep-600">Academy Menu</span>
-              <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-deep-600 rounded-md">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity" onClick={onClose} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-[#0F172A] border-t border-gray-200 dark:border-slate-800 rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-sheet-up pb-[env(safe-area-inset-bottom)]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-800/80 shrink-0">
+              <span className="text-sm font-bold text-gray-900 dark:text-white">Academy Menu</span>
+              <button onClick={onClose} className="p-1.5 text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white rounded-md transition-colors">
                 <X size={20} />
                 <span className="sr-only">Close menu</span>
               </button>
@@ -477,25 +490,29 @@ export default function Sidebar({ open, onOpen, onClose }) {
 
             <nav className="p-3 space-y-1 overflow-y-auto" aria-label="More options">
               {groups.flatMap((g) => g.items).length === 0 ? (
-                <p className="px-4 py-3 text-xs text-gray-400">No additional items</p>
+                <p className="px-4 py-3 text-xs text-gray-400 dark:text-slate-500">No additional items</p>
               ) : (
                 groups.flatMap((g) => g.items).map((item) => {
+                  const active = location.pathname === item.to
                   const badgeCount = item.to === '/notifications' ? unreadCount : null
+                  const Icon = item.icon
                   return (
                     <NavLink
                       key={item.to}
                       to={item.to}
                       onClick={onClose}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        location.pathname === item.to ? 'bg-deep-50 text-deep-700 font-bold' : 'text-gray-600 hover:bg-gray-50'
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                        active
+                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
+                          : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/60'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon size={18} />
-                        {item.label}
+                        {Icon && <Icon size={18} className={active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-slate-400'} />}
+                        <span>{item.label}</span>
                       </div>
                       {badgeCount && badgeCount > 0 && (
-                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 border-red-200">
+                        <Badge variant="outline" className="text-[10px] font-bold text-red-600 border-red-200 dark:border-red-900/50">
                           {badgeCount}
                         </Badge>
                       )}
@@ -505,18 +522,18 @@ export default function Sidebar({ open, onOpen, onClose }) {
               )}
             </nav>
 
-            <div className="p-3 border-t border-gray-100 shrink-0 space-y-1">
+            <div className="p-3 border-t border-gray-100 dark:border-slate-800/80 shrink-0 space-y-1">
               <NavLink
                 to="/profile-settings"
                 onClick={onClose}
-                className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/60 transition-colors"
               >
-                <User size={16} className="text-gray-500" />
+                <User size={16} className="text-gray-500 dark:text-slate-400" />
                 <span>Profile & Settings</span>
               </NavLink>
               <button
                 onClick={() => { onClose(); logout() }}
-                className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
               >
                 <LogOut size={16} />
                 <span>Sign Out</span>

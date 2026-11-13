@@ -71,6 +71,8 @@ export default function SkillsProfile() {
           .from('skills_profiles')
           .select('*')
           .eq('user_id', current.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
         if (loadError) throw loadError
 

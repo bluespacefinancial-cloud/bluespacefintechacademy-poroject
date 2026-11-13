@@ -32,6 +32,8 @@ if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then((registration) => {
           console.log('BlueSPACE PWA service worker registered:', registration.scope)
+          // Proactively check for service worker updates on page load
+          registration.update().catch(() => {})
         })
         .catch((error) => {
           console.warn('BlueSPACE PWA service worker registration failed:', error)

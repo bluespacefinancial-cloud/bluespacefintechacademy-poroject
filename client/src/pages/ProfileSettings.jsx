@@ -119,11 +119,15 @@ export default function ProfileSettings() {
             .select('cohort_id, track, cohorts(name)')
             .eq('user_id', p.id)
             .in('status', ['enrolled', 'active'])
+            .order('created_at', { ascending: false })
+            .limit(1)
             .maybeSingle(),
           api
             .from('skills_profiles')
             .select('*')
             .eq('user_id', p.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
             .maybeSingle(),
           api
             .from('certifications')

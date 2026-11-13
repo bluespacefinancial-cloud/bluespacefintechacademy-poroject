@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bluespace-v1'
+const CACHE_NAME = 'bluespace-v2'
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -38,10 +38,18 @@ self.addEventListener('fetch', (event) => {
   // Only handle same-origin requests
   if (url.origin !== self.location.origin) return
 
-  // Navigation requests: serve the SPA shell so it works offline
+  // Navigation requests: network-first so deployed updates are immediate, fall back to offline shell
   if (request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/index.html').then((cached) => cached || fetch(request))
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone))
+          }
+          return response
+        })
+        .catch(() => caches.match('/index.html'))
     )
     return
   }
@@ -63,6 +71,15 @@ self.addEventListener('fetch', (event) => {
 
   // Static assets: cache-first, fall back to network
   event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request))
+    caches.match(request).then((cached) => {
+      if (cached) return cached
+      return fetch(request).then((response) => {
+        if (response.ok) {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
+        }
+        return response
+      })
+    })
   )
 })

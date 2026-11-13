@@ -91,7 +91,8 @@ export default function AppLayout() {
         <header className="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center justify-between w-full gap-4">
             <div className="flex items-center lg:hidden mr-1">
-              <img src="/logo-dark.png" alt="BlueSPACE" className="h-6 w-auto" />
+              <img src="/logo-dark.png" alt="BlueSPACE" className="h-6 w-auto dark:hidden" />
+              <img src="/logo-white.png" alt="BlueSPACE" className="h-6 w-auto hidden dark:block" />
             </div>
 
             {/* Global Search */}

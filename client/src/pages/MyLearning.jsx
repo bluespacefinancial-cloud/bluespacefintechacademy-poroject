@@ -138,6 +138,8 @@ export default function MyLearning() {
         .order('week_start', { ascending: true })
       setModules(modulesData || [])
       const moduleIds = modulesData?.map(m => m.id) || []
+      let loadedLessons = []
+      let loadedProgressMap = {}
       if (moduleIds.length > 0) {
         const { data: lessonsData } = await api
           .from('lessons')
@@ -145,19 +147,19 @@ export default function MyLearning() {
           .in('module_id', moduleIds)
           .order('module_id', { ascending: true })
           .order('order_index', { ascending: true })
-        setLessons(lessonsData || [])
-        const lessonIds = lessonsData?.map(l => l.id) || []
+        loadedLessons = lessonsData || []
+        setLessons(loadedLessons)
+        const lessonIds = loadedLessons.map(l => l.id)
         const { data: progressData } = await api
           .from('lesson_progress')
           .select('*')
           .eq('user_id', user.id)
           .in('lesson_id', lessonIds)
-        const progressMap = {}
         progressData?.forEach(p => {
-          progressMap[p.lesson_id] = p
+          loadedProgressMap[p.lesson_id] = p
         })
-        setProgress(progressMap)
-        const totalLessons = lessonsData.length
+        setProgress(loadedProgressMap)
+        const totalLessons = loadedLessons.length
         const completedLessons = progressData?.filter(p => p.is_completed).length || 0
         const overallCompletion = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
         setOverallStats({
@@ -167,11 +169,12 @@ export default function MyLearning() {
           currentGrade: 0,
         })
       }
-      const firstIncomplete = (modulesData || []).find(m => {
-        const modLessons = (lessons || []).filter(l => l.module_id === m.id)
-        return modLessons.some(l => !progress[l.id]?.is_completed)
-      }) || (modulesData?.[0]?.id || null)
-      setActiveModuleId(firstIncomplete)
+      const firstIncompleteModule = (modulesData || []).find(m => {
+        const modLessons = loadedLessons.filter(l => l.module_id === m.id)
+        return modLessons.some(l => !loadedProgressMap[l.id]?.is_completed)
+      })
+      const targetModuleId = firstIncompleteModule?.id || (modulesData?.[0]?.id || null)
+      setActiveModuleId(targetModuleId)
       setLoading(false)
     } catch (err) {
       console.error('Error loading data:', err)

@@ -42,7 +42,7 @@ export default function PartnerCourseLearning() {
         // page correct even if that policy is ever relaxed for another role.
         const { data: courseRow, error: courseError } = await api
           .from('partner_courses')
-          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, type, video_url, audio_url, thumbnail_url, caption_url, content_url, order_index, is_published, media_provider)')
+          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, video_url, content_url, order_index, is_published)')
           .eq('id', courseId)
           .single()
         if (courseError) throw courseError
@@ -157,14 +157,15 @@ export default function PartnerCourseLearning() {
 
   const lessons = course.partner_course_lessons || []
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || null
-  const playerLesson = selectedLesson && selectedLesson.type !== 'text'
+  const isVideoLesson = Boolean(selectedLesson?.video_url && selectedLesson.video_url.trim() !== '')
+  const playerLesson = isVideoLesson
     ? {
         ...selectedLesson,
         duration_minutes: 0,
-        video_url: selectedLesson.media_provider === 'none' ? null : selectedLesson.video_url,
+        media_provider: selectedLesson.media_provider || 'youtube',
       }
     : null
-  const isTextLesson = selectedLesson?.type === 'text'
+  const isTextLesson = selectedLesson && !isVideoLesson
   const completedCount = lessons.filter((lesson) =>
     progress.some((item) => item.lesson_id === lesson.id && item.is_completed),
   ).length

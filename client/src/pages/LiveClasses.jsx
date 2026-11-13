@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, ExternalLink, Plus, Video, Users, RefreshCw, Clock } from 'lucide-react'
+import { Calendar, ExternalLink, Plus, Video, Users, RefreshCw, Clock, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/backend'
 import { Button } from '../components/ui/button'
@@ -153,23 +153,34 @@ export default function LiveClasses() {
   }
 
   if (selectedClass) {
+    const isRecorded = Boolean(
+      selectedClass.recording_url ||
+      (selectedClass.meet_url && (
+        selectedClass.meet_url.includes('youtube.com') ||
+        selectedClass.meet_url.includes('youtu.be') ||
+        selectedClass.meet_url.endsWith('.mp4') ||
+        selectedClass.meet_url.endsWith('.webm')
+      ))
+    )
+    const videoSrc = selectedClass.recording_url || selectedClass.meet_url
+
     return (
       <div className="w-full space-y-6">
-        <Breadcrumb items={[{ to: '/live-classes', label: 'Live Classes' }, { label: selectedClass.title }]} />
+        <Breadcrumb items={[{ to: '/live-classes', label: isStudent ? 'Sessions & Clinics' : 'Live Classes' }, { label: selectedClass.title }]} />
         <div>
           <div className="flex items-center justify-between mb-6">
-            <div>
+            <div className="space-y-1">
               <button
                 onClick={closeVideoPlayer}
-                className="flex items-center gap-2 text-sm font-medium text-deep-600 dark:text-blue-400 hover:text-deep-700 dark:hover:text-blue-300"
+                className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
-                <RefreshCw size={16} className="rotate-180" />
-                Back to classes
+                <ArrowLeft size={14} />
+                Back to all classes
               </button>
-              <h1 className="ml-4 text-2xl font-bold text-gray-900 dark:text-white">{selectedClass.title}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">{selectedClass.title}</h1>
             </div>
             {canManage && (
-              <Button variant="outline" size="sm" onClick={() => loadAttendance(selectedClass.id)}>
+              <Button variant="outline" size="sm" onClick={() => loadAttendance(selectedClass.id)} className="border-border">
                 <RefreshCw size={14} className="mr-2" />
                 Refresh attendance
               </Button>
@@ -177,23 +188,100 @@ export default function LiveClasses() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">Video Player</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
-                    <VideoPlayer
-                      src={selectedClass.meet_url || ''}
-                      title={selectedClass.title}
-                    />
+            <div className="lg:col-span-2 space-y-4">
+              {isRecorded ? (
+                <Card className="border border-border overflow-hidden bg-card shadow-sm">
+                  <CardHeader className="py-3 px-4 border-b border-border">
+                    <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-2">
+                      <Video size={14} className="text-blue-600 dark:text-blue-400" />
+                      Class Recording & Playback
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="w-full aspect-video bg-black overflow-hidden">
+                      <VideoPlayer
+                        src={videoSrc}
+                        title={selectedClass.title}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                /* Live Virtual Classroom Stage */
+                <div className="w-full aspect-video rounded-xl border border-border bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-950 relative flex flex-col justify-between p-6 sm:p-8 overflow-hidden shadow-xl">
+                  {/* Ambient background glows */}
+                  <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+
+                  {/* Top Badge Row */}
+                  <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      {selectedClass.status === 'live' || selectedClass.status === 'in_progress' ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm">
+                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                          Live Interactive Session
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm">
+                          <Video size={13} />
+                          Scheduled Virtual Masterclass
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-400">•</span>
+                      <span className="text-xs font-medium text-slate-300 flex items-center gap-1">
+                        <Clock size={12} className="text-blue-400" />
+                        {new Date(selectedClass.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(selectedClass.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+
+                    <Badge variant="outline" className="border-slate-700 bg-slate-900/60 text-slate-300 text-[11px]">
+                      {selectedClass.is_offline ? 'In-Person Venue' : 'Google Meet Video Call'}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Center Stage Info */}
+                  <div className="relative z-10 my-auto py-4">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-4 shadow-lg shadow-blue-500/10">
+                      <Video size={28} />
+                    </div>
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight max-w-2xl drop-shadow-sm">
+                      {selectedClass.title}
+                    </h2>
+                    <p className="mt-2 text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed line-clamp-2">
+                      {selectedClass.description || 'Interactive live masterclass and technical Q&A session with BlueSPACE fintech faculty.'}
+                    </p>
+                  </div>
+
+                  {/* Bottom Action Row */}
+                  <div className="relative z-10 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+                    {selectedClass.meet_url ? (
+                      <a
+                        href={selectedClass.meet_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        <Video size={18} />
+                        Join Live Google Meet Room
+                        <ExternalLink size={14} className="opacity-70" />
+                      </a>
+                    ) : selectedClass.is_offline ? (
+                      <div className="text-sm text-slate-300">
+                        Venue: <strong className="text-white">{selectedClass.venue || 'Academy Lab Campus'}</strong>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400">Meeting link will be published prior to class start.</span>
+                    )}
+
+                    <p className="text-[11px] text-slate-400">
+                      Camera & microphone recommended for breakout exercises.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {canManage && (
-                <Card className="mt-6">
+                <Card className="mt-6 border border-border bg-card">
                   <CardHeader>
                     <CardTitle className="text-sm">Attendance</CardTitle>
                   </CardHeader>
@@ -201,22 +289,22 @@ export default function LiveClasses() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-gray-100 dark:border-gray-800 text-left">
-                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
-                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined</th>
-                            <th className="pb-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
+                          <tr className="border-b border-border text-left">
+                            <th className="pb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Student</th>
+                            <th className="pb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                            <th className="pb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Joined</th>
+                            <th className="pb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Action</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                        <tbody className="divide-y divide-border">
                           {Object.entries(attendance[selectedClass.id] || {}).map(([userId, status]) => (
-                            <tr key={userId} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                            <tr key={userId} className="hover:bg-muted/40">
                               <td className="py-3">
                                 <div className="flex items-center gap-2">
-                                  <div className="h-7 w-7 rounded-full bg-deep-100 dark:bg-deep-950/60 flex items-center justify-center text-xs font-bold text-deep-600 dark:text-deep-400">
+                                  <div className="h-7 w-7 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-xs font-bold text-blue-700 dark:text-blue-300">
                                     {userId.charAt(0).toUpperCase()}
                                   </div>
-                                  <span className="text-sm text-gray-700 dark:text-gray-200">Student {userId.slice(-4)}</span>
+                                  <span className="text-sm text-foreground">Student {userId.slice(-4)}</span>
                                 </div>
                               </td>
                               <td className="py-3">
@@ -224,7 +312,7 @@ export default function LiveClasses() {
                                   {status.charAt(0).toUpperCase() + status.slice(1)}
                                 </Badge>
                               </td>
-                              <td className="py-3 text-xs text-gray-500 dark:text-gray-400">
+                              <td className="py-3 text-xs text-muted-foreground">
                                 {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </td>
                               <td className="py-3">
@@ -241,7 +329,7 @@ export default function LiveClasses() {
                           ))}
                           {Object.keys(attendance[selectedClass.id] || {}).length === 0 && (
                             <tr>
-                              <td colSpan={4} className="py-8 text-center text-sm text-gray-400">
+                              <td colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
                                 No attendance records yet. Mark students as they join.
                               </td>
                             </tr>
@@ -255,59 +343,66 @@ export default function LiveClasses() {
             </div>
 
             <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">Class Details</CardTitle>
+              <Card className="border border-border bg-card">
+                <CardHeader className="pb-3 border-b border-border">
+                  <CardTitle className="text-sm font-bold text-foreground">Class Details</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Status</span>
-                    <Badge className={STATUS_COLORS[selectedClass.status]}>
-                      {STATUS_LABELS[selectedClass.status]}
+                    <span className="text-xs text-muted-foreground">Status</span>
+                    <Badge variant="outline" className={STATUS_COLORS[selectedClass.status] || 'border-border'}>
+                      {STATUS_LABELS[selectedClass.status] || selectedClass.status}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Type</span>
-                    <span className="text-sm font-medium text-deep-600 dark:text-blue-400">
-                      {selectedClass.is_offline ? 'Offline (In-person)' : 'Online'}
+                    <span className="text-xs text-muted-foreground">Type</span>
+                    <span className="text-xs font-semibold text-foreground">
+                      {selectedClass.is_offline ? 'Offline (In-person)' : 'Online Virtual'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Starts</span>
-                    <span className="text-sm font-medium text-deep-600 dark:text-blue-400">
-                      {new Date(selectedClass.starts_at).toLocaleString()}
+                    <span className="text-xs text-muted-foreground">Starts</span>
+                    <span className="text-xs font-medium text-foreground">
+                      {new Date(selectedClass.starts_at).toLocaleString(undefined, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Ends</span>
-                    <span className="text-sm font-medium text-deep-600 dark:text-blue-400">
-                      {new Date(selectedClass.ends_at).toLocaleString()}
+                    <span className="text-xs text-muted-foreground">Ends</span>
+                    <span className="text-xs font-medium text-foreground">
+                      {new Date(selectedClass.ends_at).toLocaleString(undefined, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
                     </span>
                   </div>
                   {selectedClass.is_offline && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Venue</span>
-                      <span className="text-sm font-medium text-deep-600 dark:text-blue-400">{selectedClass.venue || 'Not specified'}</span>
+                      <span className="text-xs text-muted-foreground">Venue</span>
+                      <span className="text-xs font-medium text-foreground">{selectedClass.venue || 'Not specified'}</span>
                     </div>
                   )}
                   {!selectedClass.is_offline && selectedClass.meet_url && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Meet Link</span>
+                      <span className="text-xs text-muted-foreground">Meet Link</span>
                       <a
                         href={selectedClass.meet_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm font-medium text-brand-600 dark:text-blue-400 hover:underline"
+                        className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
                       >
                         Open Google Meet
+                        <ExternalLink size={11} />
                       </a>
                     </div>
                   )}
-                  <div className="pt-4">
-                    <span className="text-xs font-semibold text-deep-600 dark:text-blue-400 uppercase tracking-wider">Attendees</span>
-                    <p className="text-lg font-bold text-deep-600 dark:text-blue-400">
+                  <div className="pt-3 border-t border-border flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Attendees</span>
+                    <span className="text-base font-bold text-foreground">
                       {Object.keys(attendance[selectedClass.id] || {}).length}
-                    </p>
+                    </span>
                   </div>
                 </CardContent>
               </Card>

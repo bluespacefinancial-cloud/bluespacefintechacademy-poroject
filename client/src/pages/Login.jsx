@@ -153,11 +153,10 @@ export default function Login() {
       const user = await login(email, password)
       const accountRole = user?.type
 
-      // Deactivated accounts are also blocked by RLS (see migration 010), but
-      // fail visibly here instead of dropping them into an empty dashboard.
+      // Accounts pending approval or deactivated are blocked.
       if (user?.is_active === 0 || user?.is_active === false) {
         await logout()
-        toast.error('This account has been deactivated. Contact an administrator.')
+        toast.error('Your application is pending academy review and approval. You will receive an email once approved.')
         return
       }
 

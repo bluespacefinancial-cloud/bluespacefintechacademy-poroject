@@ -8,8 +8,15 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character
   "'": '&#39;',
 }[character]))
 
-const appOrigin = () => (typeof window === 'undefined' ? '' : window.location.origin)
-const logoUrl = () => `${appOrigin()}/logo-dark.png`
+const CANONICAL_ORIGIN = 'https://bluespacefintechacademy.vercel.app'
+const appOrigin = () => {
+  if (typeof window !== 'undefined' && window.location?.origin && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1')) {
+    return window.location.origin
+  }
+  return CANONICAL_ORIGIN
+}
+// Email clients (Gmail, Outlook, Apple Mail) need a globally accessible absolute HTTPS URL.
+const logoUrl = () => `${CANONICAL_ORIGIN}/logo-dark.png`
 const signInUrl = (role) => {
   const paths = { Student: '/student-login', Instructor: '/instructor-login', Partner: '/partner-login' }
   return `${appOrigin()}${paths[role] || '/student-login'}`
@@ -21,7 +28,7 @@ function emailLayout({ heading, greeting, content, actionLabel, actionUrl, prehe
     ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 8px"><tr><td bgcolor="#0000ff" style="border-radius:5px"><a href="${safeActionUrl}" style="display:inline-block;padding:13px 20px;color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none">${escapeHtml(actionLabel)}</a></td></tr></table>`
     : ''
 
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(heading)}</title></head><body style="margin:0;background:#f5f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preheader)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f7fb;padding:28px 12px"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px"><tr><td style="padding:26px 32px 20px;border-bottom:1px solid #e5e7eb"><img src="${escapeHtml(logoUrl())}" width="220" alt="BlueSPACE Financial Cloud" style="display:block;width:220px;max-width:100%;height:auto"></td></tr><tr><td style="padding:30px 32px 34px"><h1 style="margin:0 0 18px;color:#0000ff;font-size:24px;line-height:1.3">${escapeHtml(heading)}</h1><p style="margin:0 0 16px;font-size:15px;line-height:1.65">${greeting}</p>${content}${action}</td></tr><tr><td style="padding:18px 32px;background:#f8fafc;border-top:1px solid #e5e7eb;color:#64748b;font-size:12px;line-height:1.6">BlueSPACE Fintech Academy<br>Practical fintech learning through focused tracks and real project work.<br><a href="${escapeHtml(signInUrl())}" style="color:#0000ff">Visit your academy</a></td></tr></table></td></tr></table></body></html>`
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(heading)}</title></head><body style="margin:0;background:#f5f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preheader)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f7fb;padding:28px 12px"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px"><tr><td style="padding:26px 32px 20px;border-bottom:1px solid #e5e7eb"><img src="${escapeHtml(logoUrl())}" width="220" alt="BlueSPACE Financial Cloud" style="display:block;width:220px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none"></td></tr><tr><td style="padding:30px 32px 34px"><h1 style="margin:0 0 18px;color:#0000ff;font-size:24px;line-height:1.3">${escapeHtml(heading)}</h1><p style="margin:0 0 16px;font-size:15px;line-height:1.65">${greeting}</p>${content}${action}</td></tr><tr><td style="padding:18px 32px;background:#f8fafc;border-top:1px solid #e5e7eb;color:#64748b;font-size:12px;line-height:1.6">BlueSPACE Fintech Academy<br>Practical fintech learning through focused tracks and real project work.<br><a href="${escapeHtml(signInUrl())}" style="color:#0000ff">Visit your academy</a></td></tr></table></td></tr></table></body></html>`
 }
 
 function paragraph(text, style = 'color:#475569') {

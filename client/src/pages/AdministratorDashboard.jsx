@@ -225,9 +225,14 @@ export default function AdministratorDashboard({ user }) {
                         {item.email}{item.track ? ` • ${item.track}` : ''}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[11px] font-medium shrink-0 capitalize border-border">
-                      {item.requested_role}
-                    </Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-600 text-white capitalize">
+                        {item.requested_role}
+                      </span>
+                      <Button asChild size="sm" variant="outline" className="h-7 px-2.5 text-xs border-border">
+                        <Link to="/applications">Review</Link>
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

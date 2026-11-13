@@ -37,6 +37,7 @@ export default {
           700: '#0000cc',
           800: '#000099',
           900: '#000066',
+          950: '#000033',
         },
         brand: {
           DEFAULT: '#0000ff',
@@ -50,6 +51,7 @@ export default {
           700: '#0000cc',
           800: '#000099',
           900: '#000066',
+          950: '#000033',
         },
         // Domain colors (educational extensions)
         domain: {

@@ -10,6 +10,24 @@ class ErrorBoundary extends Component {
     return { hasError: true }
   }
 
+  componentDidCatch(error) {
+    console.error('ErrorBoundary caught:', error)
+    const msg = error?.message || ''
+    if (
+      msg.includes('dynamically imported module') ||
+      msg.includes('module script') ||
+      msg.includes('Loading chunk') ||
+      msg.includes('Failed to fetch')
+    ) {
+      const lastReload = sessionStorage.getItem('last_chunk_reload')
+      const now = Date.now()
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem('last_chunk_reload', String(now))
+        window.location.reload()
+      }
+    }
+  }
+
   reload = () => {
     this.setState({ hasError: false })
     window.location.reload()

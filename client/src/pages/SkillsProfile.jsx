@@ -176,13 +176,13 @@ export default function SkillsProfile() {
         subtitle="Keep your role preferences, domain interests, and technical strengths up to date for collaborative squad placement."
         actions={
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white border border-gray-200/90 rounded-lg px-3 py-1.5 shadow-xs text-xs">
-              <span className="font-semibold text-gray-900">{completion}%</span>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-600">Profile Complete</span>
-              <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden ml-1">
+            <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-1.5 shadow-xs text-xs">
+              <span className="font-semibold text-foreground">{completion}%</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground">Profile Complete</span>
+              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden ml-1">
                 <div
-                  className="h-full bg-deep-600 rounded-full transition-all duration-300"
+                  className="h-full bg-blue-600 rounded-full transition-all duration-300"
                   style={{ width: `${completion}%` }}
                 />
               </div>
@@ -191,7 +191,7 @@ export default function SkillsProfile() {
               size="sm"
               onClick={save}
               disabled={saving}
-              className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
+              className="bg-blue-600 text-white hover:bg-blue-500 text-xs font-semibold"
             >
               <Save size={13} className="mr-1.5" />
               {saving ? 'Saving...' : 'Save Profile'}
@@ -201,34 +201,34 @@ export default function SkillsProfile() {
       />
 
       {error && (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
+        <div role="alert" className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-4 text-xs text-red-800 dark:text-red-300">
           <p className="font-semibold">Notice</p>
           <p className="mt-0.5">{error}</p>
         </div>
       )}
 
       {message && (
-        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-800">
+        <div role="status" className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-xs text-emerald-800 dark:text-emerald-300">
           <p className="font-semibold">Saved</p>
           <p className="mt-0.5">{message}</p>
         </div>
       )}
 
       {/* Section 1: Preferred Fellowship Role */}
-      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+      <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
               <Briefcase size={16} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 leading-tight">1. Preferred Fellowship Role</h3>
-              <p className="text-xs text-gray-500">Select your primary role contribution within cohort sprint teams</p>
+              <h3 className="text-sm font-bold text-foreground leading-tight">1. Preferred Fellowship Role</h3>
+              <p className="text-xs text-muted-foreground">Select your primary role contribution within cohort sprint teams</p>
             </div>
           </div>
           <Badge
             variant={role ? 'secondary' : 'outline'}
-            className="text-[11px] font-medium border-gray-200"
+            className="text-[11px] font-medium border-border"
           >
             {role || 'Select one'}
           </Badge>
@@ -245,23 +245,23 @@ export default function SkillsProfile() {
                   onClick={() => setRole(r.id)}
                   className={`text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-deep-600 bg-deep-50/30 ring-1 ring-deep-600 shadow-2xs'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/60 bg-white'
+                      ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-1 ring-blue-600 shadow-2xs'
+                      : 'border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/80 bg-white dark:bg-slate-900/80'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-xs font-bold text-gray-900">{r.label}</p>
+                    <p className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>{r.label}</p>
                     <div
                       className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 mt-0.5 ${
                         isSelected
-                          ? 'border-deep-600 bg-deep-600 text-white'
-                          : 'border-gray-300 bg-white'
+                          ? 'border-blue-600 bg-blue-600 text-white'
+                          : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                       }`}
                     >
                       {isSelected && <Check size={10} strokeWidth={3} />}
                     </div>
                   </div>
-                  <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">{r.desc}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-2 leading-relaxed">{r.desc}</p>
                 </button>
               )
             })}
@@ -272,21 +272,21 @@ export default function SkillsProfile() {
       {/* Section 2: Domain Interests (2/3) & Skills (1/3 or 2-col) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Domain Interests */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                   <Compass size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 leading-tight">2. Domain Specialization</h3>
-                  <p className="text-xs text-gray-500">Pick up to 2 target fintech tracks</p>
+                  <h3 className="text-sm font-bold text-foreground leading-tight">2. Domain Specialization</h3>
+                  <p className="text-xs text-muted-foreground">Pick up to 2 target fintech tracks</p>
                 </div>
               </div>
               <Badge
                 variant={selectedDomains.length > 0 ? 'secondary' : 'outline'}
-                className="text-[11px] font-medium border-gray-200"
+                className="text-[11px] font-medium border-border"
               >
                 {selectedDomains.length}/2 selected
               </Badge>
@@ -302,19 +302,19 @@ export default function SkillsProfile() {
                     onClick={() => toggleDomain(d.id)}
                     className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
                       isSelected
-                        ? 'border-deep-600 bg-deep-50/30 ring-1 ring-deep-600 shadow-2xs'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/60 bg-white'
+                        ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-1 ring-blue-600 shadow-2xs'
+                        : 'border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/80 bg-white dark:bg-slate-900/80'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-gray-900">{d.name}</p>
-                      <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{d.desc}</p>
+                      <p className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>{d.name}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">{d.desc}</p>
                     </div>
                     <div
                       className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 ${
                         isSelected
-                          ? 'border-deep-600 bg-deep-600 text-white'
-                          : 'border-gray-300 bg-white'
+                          ? 'border-blue-600 bg-blue-600 text-white'
+                          : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                       }`}
                     >
                       {isSelected && <Check size={10} strokeWidth={3} />}
@@ -325,27 +325,27 @@ export default function SkillsProfile() {
             </CardContent>
           </div>
 
-          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-[11px] text-gray-500">
+          <div className="px-5 py-3 bg-muted/20 border-t border-border text-[11px] text-muted-foreground">
             Selected domains determine which lab modules and use-case challenges you tackle.
           </div>
         </Card>
 
         {/* Technical Strengths & Skills */}
-        <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden flex flex-col justify-between">
+        <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                   <Layers size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 leading-tight">3. Skills & Competencies</h3>
-                  <p className="text-xs text-gray-500">Tag competencies you bring to your squad</p>
+                  <h3 className="text-sm font-bold text-foreground leading-tight">3. Skills & Competencies</h3>
+                  <p className="text-xs text-muted-foreground">Tag competencies you bring to your squad</p>
                 </div>
               </div>
               <Badge
                 variant={selectedSkills.length > 0 ? 'secondary' : 'outline'}
-                className="text-[11px] font-medium border-gray-200"
+                className="text-[11px] font-medium border-border"
               >
                 {selectedSkills.length} selected
               </Badge>
@@ -362,15 +362,15 @@ export default function SkillsProfile() {
                       onClick={() => toggleSkill(skill)}
                       className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-2 ${
                         isSelected
-                          ? 'border-deep-600 bg-deep-50 text-deep-800 shadow-2xs'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'border-blue-600 bg-blue-600 text-white shadow-2xs'
+                          : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-gray-700 dark:text-slate-300 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/80'
                       }`}
                     >
                       <div
                         className={`w-3.5 h-3.5 rounded flex items-center justify-center border shrink-0 ${
                           isSelected
-                            ? 'border-deep-600 bg-deep-600 text-white'
-                            : 'border-gray-300 bg-white'
+                            ? 'border-blue-600 bg-blue-600 text-white'
+                            : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                         }`}
                       >
                         {isSelected && <Check size={9} strokeWidth={3} />}
@@ -383,22 +383,22 @@ export default function SkillsProfile() {
             </CardContent>
           </div>
 
-          <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 text-[11px] text-gray-500">
+          <div className="px-5 py-3 bg-muted/20 border-t border-border text-[11px] text-muted-foreground">
             Skills are matched against sprint challenge requirements to ensure balanced teams.
           </div>
         </Card>
       </div>
 
       {/* Section 4: Experience & Career Notes */}
-      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+      <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border bg-muted/20">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-deep-50 border border-deep-100 flex items-center justify-center text-deep-600 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
               <FileText size={16} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 leading-tight">4. Background & Career Goals</h3>
-              <p className="text-xs text-gray-500">Share your prior software or banking experience and career aspirations</p>
+              <h3 className="text-sm font-bold text-foreground leading-tight">4. Background & Career Goals</h3>
+              <p className="text-xs text-muted-foreground">Share your prior software or banking experience and career aspirations</p>
             </div>
           </div>
         </div>
@@ -409,9 +409,9 @@ export default function SkillsProfile() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Tell us about your technical background, programming languages you're comfortable with, and specific fintech areas you want to master during this fellowship..."
-            className="w-full rounded-lg border border-gray-200 p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-deep-600"
+            className="w-full rounded-lg border border-input bg-background p-3 text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-600 text-foreground"
           />
-          <div className="flex items-center justify-between text-[11px] text-gray-400">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>{notes.length} characters</span>
             <span>Reviewed by faculty advisors during squad allocation</span>
           </div>
@@ -419,11 +419,11 @@ export default function SkillsProfile() {
       </Card>
 
       {/* Bottom Save Bar */}
-      <Card className="border border-gray-200/90 shadow-sm rounded-xl bg-white overflow-hidden">
+      <Card className="border border-border shadow-sm rounded-xl bg-card overflow-hidden">
         <CardContent className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h4 className="text-sm font-bold text-gray-900">Ready to update your matching profile?</h4>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h4 className="text-sm font-bold text-foreground">Ready to update your matching profile?</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
               You can return to update your role preference or skill tags at any point during your fellowship.
             </p>
           </div>
@@ -431,7 +431,7 @@ export default function SkillsProfile() {
           <Button
             onClick={save}
             disabled={saving}
-            className="w-full sm:w-auto bg-deep-600 text-white hover:bg-deep-700 font-semibold px-6 text-xs h-9"
+            className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-500 font-semibold px-6 text-xs h-9"
           >
             <Save size={14} className="mr-1.5" />
             {saving ? 'Saving Profile...' : 'Save Skills Profile'}

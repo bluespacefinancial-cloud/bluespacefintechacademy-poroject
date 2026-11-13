@@ -394,7 +394,7 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('showcase')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'showcase'
-              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -407,13 +407,13 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('skills')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'skills'
-              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Compass size={15} />
           Skills & Domains
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/40">
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 bg-blue-50/80 dark:bg-blue-950/60">
             {skillsCompletion}%
           </span>
         </button>
@@ -423,7 +423,7 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('credentials')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'credentials'
-              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -441,7 +441,7 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('security')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'security'
-              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -611,7 +611,7 @@ export default function ProfileSettings() {
                     Select the engineering or project leadership role you want to focus on in your squad
                   </CardDescription>
                 </div>
-                <span className="text-xs font-semibold text-brand-600 dark:text-blue-400">Choose 1 Role</span>
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Choose 1 Role</span>
               </div>
             </CardHeader>
             <CardContent className="p-5">
@@ -625,17 +625,17 @@ export default function ProfileSettings() {
                       onClick={() => setSelectedRole(r.id)}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
-                          : 'border-border bg-card hover:bg-muted/50 dark:hover:bg-accent/40 hover:border-gray-300 dark:hover:border-gray-700'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
+                          : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-gray-50 dark:hover:bg-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-bold ${isSelected ? 'text-brand-700 dark:text-blue-300' : 'text-foreground'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>
                           {r.label}
                         </span>
-                        {isSelected && <Check size={14} className="text-brand-600 dark:text-blue-400" />}
+                        {isSelected && <Check size={14} className="text-blue-600 dark:text-blue-400" />}
                       </div>
-                      <p className="text-[11px] text-muted-foreground leading-snug">{r.desc}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug">{r.desc}</p>
                     </button>
                   )
                 })}
@@ -649,7 +649,7 @@ export default function ProfileSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Layers size={15} className="text-brand-600 dark:text-blue-400" />
+                    <Layers size={15} className="text-blue-600 dark:text-blue-400" />
                     Fintech Domain Tracks
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground mt-0.5">
@@ -672,17 +672,17 @@ export default function ProfileSettings() {
                       onClick={() => toggleDomain(domain.id)}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
-                          : 'border-border bg-card hover:bg-muted/50 dark:hover:bg-accent/40 hover:border-gray-300 dark:hover:border-gray-700'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
+                          : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-gray-50 dark:hover:bg-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className={`text-xs font-bold ${isSelected ? 'text-brand-700 dark:text-blue-300' : 'text-foreground'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>
                           {domain.name}
                         </span>
-                        {isSelected && <Check size={14} className="text-brand-600 dark:text-blue-400" />}
+                        {isSelected && <Check size={14} className="text-blue-600 dark:text-blue-400" />}
                       </div>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">{domain.desc}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">{domain.desc}</p>
                     </button>
                   )
                 })}
@@ -718,8 +718,8 @@ export default function ProfileSettings() {
                       onClick={() => toggleSkill(skill)}
                       className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-brand-600 dark:bg-blue-600 text-white border-brand-600 dark:border-blue-500 shadow-xs'
-                          : 'bg-card text-muted-foreground border-border hover:border-brand-500/50 hover:text-foreground hover:bg-muted/40'
+                          ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-500 shadow-xs'
+                          : 'bg-white dark:bg-slate-900/80 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-500/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800/80'
                       }`}
                     >
                       {isSelected && <Check size={12} />}

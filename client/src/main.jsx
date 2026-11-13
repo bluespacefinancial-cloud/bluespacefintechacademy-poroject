@@ -6,6 +6,17 @@ import { AuthProvider } from './context/AuthContext'
 import App from './App'
 import './index.css'
 
+// Handle chunk-loading errors gracefully across deployments
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('New deployment detected, reloading to latest version...', event)
+  const lastReload = sessionStorage.getItem('last_chunk_reload')
+  const now = Date.now()
+  if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+    sessionStorage.setItem('last_chunk_reload', String(now))
+    window.location.reload()
+  }
+})
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

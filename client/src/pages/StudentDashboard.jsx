@@ -448,12 +448,12 @@ export default function StudentDashboard({ user }) {
                 key={week.id}
                 className={`rounded-xl border p-3.5 shadow-sm transition-all flex flex-col justify-between ${
                   isCurrent
-                    ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-500/50'
+                    ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-1 ring-blue-500/50'
                     : week.isComplete
                     ? 'border-emerald-300 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/30'
                     : isLocked
-                    ? 'border-border/60 bg-card/40 dark:bg-card/20 opacity-75'
-                    : 'border-border bg-card hover:border-gray-300 dark:hover:border-gray-700'
+                    ? 'border-border/60 bg-card/40 dark:bg-slate-900/40 opacity-75'
+                    : 'border-border bg-card dark:bg-slate-900/80 hover:border-gray-300 dark:hover:border-slate-700'
                 }`}
               >
                 <div>

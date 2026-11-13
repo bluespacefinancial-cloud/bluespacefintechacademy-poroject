@@ -60,7 +60,7 @@ export default function PartnerCatalog() {
                 <Badge variant="outline" className="w-fit text-[11px] border-border text-muted-foreground">
                   {course.partner_course_lessons?.length || 0} lessons
                 </Badge>
-                <Button className="w-full text-white font-semibold shadow-sm" onClick={() => enrol(course.id)}>
+                <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-sm" onClick={() => enrol(course.id)}>
                   <PlayCircle size={15} className="mr-2 text-white shrink-0" />
                   <span>Start course</span>
                 </Button>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bluespace-v2'
+const CACHE_NAME = 'bluespace-v3'
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -69,7 +69,40 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets: cache-first, fall back to network
+  // Static JS / CSS / assets: cache-first, but NEVER cache or serve text/html for scripts/assets
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) {
+          const contentType = cached.headers.get('content-type') || ''
+          if (!contentType.includes('text/html')) {
+            return cached
+          }
+          // Purge corrupted cached HTML
+          caches.open(CACHE_NAME).then((cache) => cache.delete(request))
+        }
+        return fetch(request).then((response) => {
+          const contentType = response.headers.get('content-type') || ''
+          // If server returned text/html for an asset, it was an SPA rewrite fallback (not a script)
+          if (contentType.includes('text/html')) {
+            return new Response('Asset not found', {
+              status: 404,
+              statusText: 'Not Found',
+              headers: { 'Content-Type': 'text/plain' },
+            })
+          }
+          if (response.ok) {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
+          }
+          return response
+        })
+      })
+    )
+    return
+  }
+
+  // Other static assets (images, fonts, manifest)
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached

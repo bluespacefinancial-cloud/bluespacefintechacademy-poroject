@@ -35,6 +35,7 @@ const emptyCourseForm = {
   thumbnail_url: '',
   certificate_title: 'Partner Course Certificate',
   partner_logo_url: '',
+  track: 'All',
 }
 
 const emptyLessonForm = {
@@ -122,6 +123,8 @@ export default function PartnerCourses() {
     setMessage('')
     setSaving(true)
     try {
+      const baseSlug = form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'course'
+      const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`
       const { data: created, error: createError } = await api
         .from('partner_courses')
         .insert({
@@ -132,6 +135,8 @@ export default function PartnerCourses() {
           partner_logo_url: form.partner_logo_url.trim() || null,
           partner_id: partner.id,
           status: 'draft',
+          track: form.track || 'All',
+          slug: uniqueSlug,
         })
         .select()
         .single()
@@ -354,6 +359,22 @@ export default function PartnerCourses() {
                   value={form.certificate_title}
                   onChange={(event) => setForm({ ...form, certificate_title: event.target.value })}
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-deep-600">Target fellowship track</label>
+                <Select
+                  value={form.track}
+                  onValueChange={(val) => setForm({ ...form, track: val })}
+                >
+                  <SelectTrigger className="w-full text-sm" aria-label="Target track">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Tracks (Cross-functional)</SelectItem>
+                    <SelectItem value="Finsoft">Finsoft (Engineering & Architecture)</SelectItem>
+                    <SelectItem value="Finops">Finops (Operations & Treasury)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button type="submit" disabled={saving}>
                 <Plus size={14} className="mr-2" />

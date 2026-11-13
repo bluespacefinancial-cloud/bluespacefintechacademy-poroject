@@ -42,7 +42,7 @@ export default function PartnerCourseLearning() {
         // page correct even if that policy is ever relaxed for another role.
         const { data: courseRow, error: courseError } = await api
           .from('partner_courses')
-          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, video_url, content_url, order_index, is_published)')
+          .select('id, title, description, thumbnail_url, partners(name, logo_url), partner_course_lessons(id, title, description, type, media_provider, video_url, audio_url, thumbnail_url, caption_url, content_url, order_index, is_published, duration_seconds)')
           .eq('id', courseId)
           .single()
         if (courseError) throw courseError

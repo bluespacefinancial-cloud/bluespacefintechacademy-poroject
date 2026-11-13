@@ -313,24 +313,44 @@ async function uploadMedia(file, kind) {
     return { data: null, error: new ApiError('Choose a file to upload.') }
   }
 
-  const bucket = 'media'
-  const fileName = `${kind}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+  const BUCKET_BY_KIND = {
+    video: 'videos',
+    audio: 'audio',
+    caption: 'captions',
+    image: 'thumbnails',
+  }
+  const targetBucket = BUCKET_BY_KIND[kind] || 'media'
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const fileName = `${Date.now()}-${safeName}`
 
   try {
-    const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
+    let usedBucket = targetBucket
+    let uploadRes = await supabase.storage.from(targetBucket).upload(fileName, file, {
       cacheControl: '3600',
       upsert: false,
     })
 
-    if (error) {
-      return { data: null, error: new ApiError(error.message, { status: error.status ?? 400 }) }
+    // If specific bucket fails, attempt fallback to unified 'media' bucket
+    if (uploadRes.error && targetBucket !== 'media') {
+      const fallbackName = `${kind}/${fileName}`
+      uploadRes = await supabase.storage.from('media').upload(fallbackName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+      if (!uploadRes.error) {
+        usedBucket = 'media'
+      }
     }
 
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
+    if (uploadRes.error) {
+      return { data: null, error: new ApiError(uploadRes.error.message, { status: uploadRes.error.status ?? 400 }) }
+    }
+
+    const { data: urlData } = supabase.storage.from(usedBucket).getPublicUrl(uploadRes.data.path)
 
     return {
       data: {
-        id: data.path,
+        id: uploadRes.data.path,
         kind,
         url: urlData.publicUrl,
         mime: file.type,

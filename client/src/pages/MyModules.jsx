@@ -125,7 +125,9 @@ export default function MyModules() {
                 <BookOpen size={16} className="text-deep-600 dark:text-deep-400" />
                 <div><CardTitle className="text-sm">{module.title}</CardTitle><CardDescription className="text-[10px]">{module.cohortName} · {module.lessonCount} lessons · {module.track || 'All'} track</CardDescription></div>
               </div>
-              <Badge variant={module.is_published ? 'secondary' : 'outline'}>{module.is_published ? 'published' : 'draft'}</Badge>
+              <Badge variant={module.is_published ? 'solidEmerald' : 'solidAmber'} className="text-[10px] font-bold uppercase tracking-wider">
+                {module.is_published ? 'Published' : 'Draft'}
+              </Badge>
             </CardHeader>
             <CardContent className="pt-0 pb-3">
               <div className="flex items-center justify-between text-[10px]">

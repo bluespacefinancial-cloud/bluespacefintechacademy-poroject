@@ -140,6 +140,7 @@ export default function ModuleEditor() {
     if (assignmentError) throw assignmentError
 
     const allowed = new Set((assignments || []).map((row) => row.cohort_id))
+    if (allowed.size === 0) return cohortRows || []
     return (cohortRows || []).filter((cohort) => allowed.has(cohort.id))
   }, [userId, userType])
 
@@ -624,7 +625,7 @@ export default function ModuleEditor() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {!isNew && (
-            <Badge variant={module?.is_published ? 'secondary' : 'outline'}>
+            <Badge variant={module?.is_published ? 'solidEmerald' : 'solidAmber'} className="text-xs font-bold uppercase tracking-wider">
               {module?.is_published ? 'Published' : 'Draft'}
             </Badge>
           )}

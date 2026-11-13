@@ -24,10 +24,10 @@ const EMPTY_FORM = {
 }
 
 const STATUS_COLORS = {
-  scheduled: 'text-gray-600 border-gray-200',
-  live: 'text-emerald-700 border-emerald-200',
-  completed: 'text-slate-600 border-slate-200',
-  cancelled: 'text-red-700 border-red-200',
+  scheduled: 'bg-blue-600 text-white border-transparent font-semibold',
+  live: 'bg-emerald-600 text-white border-transparent font-semibold',
+  completed: 'bg-slate-700 text-white border-transparent font-semibold',
+  cancelled: 'bg-rose-600 text-white border-transparent font-semibold',
 }
 
 const STATUS_LABELS = {

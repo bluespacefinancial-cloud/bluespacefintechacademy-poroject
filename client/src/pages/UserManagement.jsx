@@ -21,10 +21,10 @@ import {
 import { api } from '../lib/backend'
 
 const ROLE_COLORS = {
-  Student: 'text-brand-700 border-brand-200',
-  Instructor: 'text-emerald-700 border-emerald-200',
-  Partner: 'text-amber-700 border-amber-200',
-  Administrator: 'text-slate-700 border-slate-200',
+  Student: 'bg-blue-600 text-white font-semibold border-transparent',
+  Instructor: 'bg-emerald-600 text-white font-semibold border-transparent',
+  Partner: 'bg-purple-600 text-white font-semibold border-transparent',
+  Administrator: 'bg-slate-700 text-white font-semibold border-transparent',
 }
 
 export default function UserManagement() {
@@ -285,13 +285,13 @@ export default function UserManagement() {
                   <CardContent className="pt-0 pb-3">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-deep-600">Status</span>
-                        <Badge variant={user.is_active === 1 ? 'secondary' : 'outline'}>
+                        <span className="text-xs font-medium text-muted-foreground">Status</span>
+                        <Badge variant={user.is_active === 1 ? 'solidEmerald' : 'solidRose'} className="text-[10px] font-bold">
                           {user.is_active === 1 ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-deep-600">Last Login</span>
+                        <span className="text-xs font-medium text-muted-foreground">Last Login</span>
                         <span className="text-xs text-gray-600">{user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : 'Never'}</span>
                       </div>
                     </div>

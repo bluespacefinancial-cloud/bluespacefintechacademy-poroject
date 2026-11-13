@@ -227,8 +227,8 @@ export default function SkillsProfile() {
             </div>
           </div>
           <Badge
-            variant={role ? 'secondary' : 'outline'}
-            className="text-[11px] font-medium border-border"
+            variant={role ? 'solidBlue' : 'secondary'}
+            className="text-[11px] font-semibold"
           >
             {role || 'Select one'}
           </Badge>
@@ -245,8 +245,8 @@ export default function SkillsProfile() {
                   onClick={() => setRole(r.id)}
                   className={`text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-1 ring-blue-600 shadow-2xs'
-                      : 'border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/80 bg-white dark:bg-slate-900/80'
+                      ? 'border-2 border-blue-600 bg-card ring-1 ring-blue-500/40 shadow-xs'
+                      : 'border-border hover:border-muted-foreground/40 bg-card'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -285,8 +285,8 @@ export default function SkillsProfile() {
                 </div>
               </div>
               <Badge
-                variant={selectedDomains.length > 0 ? 'secondary' : 'outline'}
-                className="text-[11px] font-medium border-border"
+                variant={selectedDomains.length > 0 ? 'solidBlue' : 'secondary'}
+                className="text-[11px] font-semibold"
               >
                 {selectedDomains.length}/2 selected
               </Badge>
@@ -302,8 +302,8 @@ export default function SkillsProfile() {
                     onClick={() => toggleDomain(d.id)}
                     className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
                       isSelected
-                        ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-1 ring-blue-600 shadow-2xs'
-                        : 'border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/80 bg-white dark:bg-slate-900/80'
+                        ? 'border-2 border-blue-600 bg-card ring-1 ring-blue-500/40 shadow-xs'
+                        : 'border-border hover:border-muted-foreground/40 bg-card'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
@@ -344,8 +344,8 @@ export default function SkillsProfile() {
                 </div>
               </div>
               <Badge
-                variant={selectedSkills.length > 0 ? 'secondary' : 'outline'}
-                className="text-[11px] font-medium border-border"
+                variant={selectedSkills.length > 0 ? 'solidBlue' : 'secondary'}
+                className="text-[11px] font-semibold"
               >
                 {selectedSkills.length} selected
               </Badge>

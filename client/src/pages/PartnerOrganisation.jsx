@@ -276,7 +276,7 @@ export default function PartnerOrganisation() {
           <CardContent className="space-y-4 text-sm">
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs text-gray-500">Status</span>
-              <Badge variant={partner.status === 'approved' ? 'secondary' : 'outline'} className="capitalize">
+              <Badge variant={partner.status === 'approved' ? 'solidEmerald' : 'solidAmber'} className="capitalize font-bold text-xs">
                 {statusLabel}
               </Badge>
             </div>

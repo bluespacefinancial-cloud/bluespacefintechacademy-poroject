@@ -207,12 +207,12 @@ export default function PartnerDashboard({ user }) {
                     <Badge
                       variant={
                         course.status === 'published'
-                          ? 'secondary'
+                          ? 'solidEmerald'
                           : course.status === 'draft'
-                          ? 'outline'
-                          : 'default'
+                          ? 'secondary'
+                          : 'solidAmber'
                       }
-                      className="text-[11px] font-medium shrink-0 capitalize border-border"
+                      className="text-[11px] font-bold shrink-0 capitalize"
                     >
                       {course.status.replace('_', ' ')}
                     </Badge>

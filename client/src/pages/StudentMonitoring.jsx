@@ -255,7 +255,7 @@ export default function StudentMonitoring() {
                         </span>
                       </td>
                       <td className="px-3 py-3">
-                        <Badge className={student.atRisk ? 'text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900/60 dark:bg-amber-950/40' : 'text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/60 dark:bg-emerald-950/40'}>
+                        <Badge variant={student.atRisk ? 'solidAmber' : 'solidEmerald'} className="font-bold text-[11px] uppercase tracking-wider">
                           {student.atRisk ? 'Needs attention' : 'On track'}
                         </Badge>
                       </td>

@@ -448,12 +448,12 @@ export default function StudentDashboard({ user }) {
                 key={week.id}
                 className={`rounded-xl border p-3.5 shadow-sm transition-all flex flex-col justify-between ${
                   isCurrent
-                    ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-1 ring-blue-500/50'
+                    ? 'border-2 border-blue-600 bg-card ring-2 ring-blue-500/30 shadow-md'
                     : week.isComplete
-                    ? 'border-emerald-300 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/30'
+                    ? 'border border-emerald-600/60 bg-card'
                     : isLocked
-                    ? 'border-border/60 bg-card/40 dark:bg-slate-900/40 opacity-75'
-                    : 'border-border bg-card dark:bg-slate-900/80 hover:border-gray-300 dark:hover:border-slate-700'
+                    ? 'border border-border/60 bg-card/40 opacity-70'
+                    : 'border border-border bg-card hover:border-border/80'
                 }`}
               >
                 <div>
@@ -653,9 +653,9 @@ export default function StudentDashboard({ user }) {
               {nextLiveClass ? (
                 <>
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30">
-                      Scheduled Workshop
-                    </span>
+                    <Badge variant={nextLiveClass.status === 'live' ? 'solidEmerald' : 'solidBlue'} className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5">
+                      {nextLiveClass.status === 'live' ? '● Live Now' : 'Scheduled Workshop'}
+                    </Badge>
                     <h4 className="text-base font-bold text-foreground leading-snug pt-1">
                       {nextLiveClass.title}
                     </h4>
@@ -787,8 +787,8 @@ export default function StudentDashboard({ user }) {
 
                       <div className="flex items-center gap-3 shrink-0">
                         <Badge
-                          variant={isSubmitted ? 'secondary' : 'outline'}
-                          className="text-[11px] font-medium capitalize"
+                          variant={isSubmitted ? 'warning' : 'secondary'}
+                          className="text-[11px] font-bold capitalize"
                         >
                           {isSubmitted ? 'Awaiting grading' : 'Pending submission'}
                         </Badge>

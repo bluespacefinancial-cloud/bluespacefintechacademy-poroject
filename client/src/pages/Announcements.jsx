@@ -315,7 +315,7 @@ export default function Announcements() {
                   <div className="flex flex-wrap items-center gap-2">
                     <CardTitle className="text-sm">{announcement.title}</CardTitle>
                     {announcement.pinned && (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="solidAmber" className="text-[10px] font-bold">
                         <Pin size={10} className="mr-1" />
                         Pinned
                       </Badge>
@@ -356,7 +356,7 @@ export default function Announcements() {
                 )}
 
                 {!isStaff && isRead && (
-                  <Badge variant="outline" className="shrink-0 text-[10px]">
+                  <Badge variant="solidEmerald" className="shrink-0 text-[10px] font-bold">
                     <CheckCircle size={10} className="mr-1" />
                     Read
                   </Badge>

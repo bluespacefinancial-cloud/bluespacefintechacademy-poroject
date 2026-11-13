@@ -29,11 +29,11 @@ const SUBMISSION_LABELS = {
 }
 
 const DOMAIN_COLORS = {
-  FaaS: 'text-brand-700 border-brand-200',
-  FinCore: 'text-emerald-700 border-emerald-200',
-  FinOps: 'text-amber-700 border-amber-200',
-  FinInfra: 'text-slate-700 border-slate-200',
-  FinFra: 'text-slate-700 border-slate-200',
+  FaaS: 'bg-blue-600 text-white font-semibold border-transparent',
+  FinCore: 'bg-emerald-600 text-white font-semibold border-transparent',
+  FinOps: 'bg-amber-500 text-slate-950 font-bold border-transparent',
+  FinInfra: 'bg-slate-700 text-white font-semibold border-transparent',
+  FinFra: 'bg-slate-700 text-white font-semibold border-transparent',
 }
 
 export default function LabsToReview() {
@@ -118,7 +118,7 @@ export default function LabsToReview() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Review and grade student lab submissions</p>
           </div>
           {pendingCount > 0 && (
-            <Badge variant="default">{pendingCount} pending</Badge>
+            <Badge variant="solidAmber" className="font-bold text-xs">{pendingCount} pending</Badge>
           )}
         </div>
       </div>

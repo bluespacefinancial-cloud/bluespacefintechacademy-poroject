@@ -159,11 +159,13 @@ export default function SquadManagement() {
                 <CardTitle className="text-sm">{squad.name}</CardTitle>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{squad.cohortName} · Lead: {squad.leadName}</p>
               </div>
-              <Badge variant="outline">{squad.members.length ? 'Active' : 'Forming'}</Badge>
+              <Badge variant={squad.members.length ? 'solidEmerald' : 'solidAmber'} className="font-bold text-xs">
+                {squad.members.length ? 'Active' : 'Forming'}
+              </Badge>
             </CardHeader>
             <CardContent>
               <div className="mb-3 flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
-                <Users size={14} /> {squad.members.length} members <Badge variant="outline">{squad.finsoft} Finsoft</Badge><Badge variant="outline">{squad.finops} Finops</Badge>
+                <Users size={14} /> {squad.members.length} members <Badge variant="solidBlue" className="text-[10px] font-semibold">{squad.finsoft} Finsoft</Badge><Badge variant="solidSlate" className="text-[10px] font-semibold">{squad.finops} Finops</Badge>
               </div>
               {canManage ? (
                 <select

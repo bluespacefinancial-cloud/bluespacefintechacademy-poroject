@@ -228,7 +228,7 @@ export default function Grading() {
         subtitle="Review student code deliverables, inspect Git repositories, and provide rubric-aligned feedback."
         actions={
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-gray-200 text-gray-700 bg-white px-3 py-1 text-xs">
+            <Badge variant={pendingSubmissions.length > 0 ? "solidAmber" : "secondary"} className="px-3 py-1 text-xs font-bold">
               {pendingSubmissions.length} Pending Review
             </Badge>
           </div>
@@ -377,10 +377,8 @@ export default function Grading() {
                           <span className="font-bold text-foreground truncate">{title(sub)}</span>
                         </div>
                         <Badge
-                          variant={isGraded ? 'secondary' : isRemediation ? 'outline' : 'default'}
-                          className={`text-[10px] capitalize shrink-0 ${
-                            isRemediation ? 'text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800/80 bg-amber-50/50 dark:bg-amber-950/30' : ''
-                          }`}
+                          variant={isGraded ? 'solidEmerald' : isRemediation ? 'destructive' : 'solidAmber'}
+                          className="text-[10px] capitalize shrink-0 font-bold"
                         >
                           {sub.status}
                         </Badge>
@@ -456,7 +454,7 @@ export default function Grading() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Current Status: </span>
-                      <Badge variant="outline" className="capitalize text-[11px] ml-1 border-border">
+                      <Badge variant={selected.status === 'graded' || selected.status === 'passed' ? 'solidEmerald' : selected.status === 'submitted' ? 'solidAmber' : 'secondary'} className="capitalize text-[11px] ml-1 font-bold">
                         {selected.status}
                       </Badge>
                     </div>

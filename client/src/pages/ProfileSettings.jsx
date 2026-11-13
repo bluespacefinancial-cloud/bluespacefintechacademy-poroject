@@ -366,7 +366,7 @@ export default function ProfileSettings() {
               <CreditCard size={13} className="mr-1.5 text-brand-600 dark:text-blue-400" />
               {showIdCard ? 'Hide Lanyard' : 'Physical ID Badge'}
             </Button>
-            <Badge variant="outline" className="text-xs border-emerald-200 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-950/30 font-medium">
+            <Badge variant="solidEmerald" className="text-xs font-semibold px-2.5 py-0.5">
               Active Enrolment
             </Badge>
           </div>
@@ -465,7 +465,7 @@ export default function ProfileSettings() {
                     <h3 className="text-lg font-bold text-foreground">{profile.name}</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-300 font-mono mt-0.5">{profile.email}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline" className="text-[10px] font-semibold text-brand-700 dark:text-blue-300 border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/30">
+                      <Badge variant="solidBlue" className="text-[10px] font-semibold">
                         {selectedRole || 'Fintech Engineer Fellow'}
                       </Badge>
                       <span className="text-[11px] text-muted-foreground">•</span>
@@ -561,7 +561,7 @@ export default function ProfileSettings() {
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-border">
                   <span className="text-muted-foreground">Academic Status</span>
-                  <Badge variant="outline" className="text-[10px] text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/40 dark:bg-emerald-950/30">
+                  <Badge variant="solidEmerald" className="text-[10px] font-semibold">
                     Enrolled
                   </Badge>
                 </div>
@@ -656,7 +656,7 @@ export default function ProfileSettings() {
                     Select up to 2 domain focus areas for squad placement
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
+                <Badge variant="solidBlue" className="text-xs font-semibold">
                   {selectedDomains.length} of 2 Selected
                 </Badge>
               </div>
@@ -702,7 +702,7 @@ export default function ProfileSettings() {
                     Click skills that match your experience or targets
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
+                <Badge variant="solidBlue" className="text-xs font-semibold">
                   {selectedSkills.length} Selected
                 </Badge>
               </div>
@@ -816,8 +816,8 @@ export default function ProfileSettings() {
                           </p>
                         </div>
                         <Badge
-                          variant="outline"
-                          className="text-[10px] capitalize text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/40 dark:bg-emerald-950/30"
+                          variant="solidEmerald"
+                          className="text-[10px] capitalize font-semibold"
                         >
                           {cert.status}
                         </Badge>
@@ -872,7 +872,7 @@ export default function ProfileSettings() {
                     <span className="text-xs font-bold text-foreground">
                       {capstoneSubmission.assessments?.title || 'Production Capstone'}
                     </span>
-                    <Badge variant="outline" className="text-[10px] capitalize text-brand-700 dark:text-blue-400 border-brand-200 dark:border-blue-800 bg-brand-50/40 dark:bg-blue-950/30">
+                    <Badge variant="solidBlue" className="text-[10px] capitalize font-semibold">
                       {capstoneSubmission.status || 'Under Review'}
                     </Badge>
                   </div>

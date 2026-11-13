@@ -3,14 +3,25 @@ import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
       variant: {
-        default: 'border-deep-200 text-deep-700 bg-deep-50/50 dark:border-blue-800/60 dark:text-blue-300 dark:bg-blue-950/40',
-        secondary: 'border-gray-200 text-gray-700 bg-gray-50/50 dark:border-gray-700 dark:text-gray-300 dark:bg-gray-800/60',
-        destructive: 'border-red-200 text-red-700 bg-red-50/50 dark:border-red-900/60 dark:text-red-300 dark:bg-red-950/40',
-        outline: 'border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:bg-gray-800/40',
+        default: 'bg-blue-600 text-white border-transparent shadow-xs',
+        primary: 'bg-blue-600 text-white border-transparent shadow-xs',
+        secondary: 'bg-slate-700 text-white border-transparent shadow-xs',
+        destructive: 'bg-rose-600 text-white border-transparent shadow-xs',
+        success: 'bg-emerald-600 text-white border-transparent shadow-xs',
+        warning: 'bg-amber-500 text-slate-950 font-bold border-transparent shadow-xs',
+        info: 'bg-sky-600 text-white border-transparent shadow-xs',
+        purple: 'bg-purple-600 text-white border-transparent shadow-xs',
+        outline: 'border border-border bg-card text-foreground font-semibold shadow-xs',
+        solidBlue: 'bg-blue-600 text-white border-transparent shadow-xs',
+        solidEmerald: 'bg-emerald-600 text-white border-transparent shadow-xs',
+        solidAmber: 'bg-amber-500 text-slate-950 font-bold border-transparent shadow-xs',
+        solidRose: 'bg-rose-600 text-white border-transparent shadow-xs',
+        solidSlate: 'bg-slate-700 text-white border-transparent shadow-xs',
+        solidPurple: 'bg-purple-600 text-white border-transparent shadow-xs',
       },
     },
     defaultVariants: {

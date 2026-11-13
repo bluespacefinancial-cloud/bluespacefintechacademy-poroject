@@ -204,7 +204,7 @@ export default function LabWorkspace() {
                       )}
                     </div>
                   </div>
-                  <Badge variant={submission?.status === 'graded' ? 'secondary' : submission?.status === 'submitted' ? 'default' : 'outline'} className="text-[11px] font-medium shrink-0 capitalize">
+                  <Badge variant={submission?.status === 'graded' || submission?.status === 'passed' ? 'solidEmerald' : submission?.status === 'submitted' ? 'solidAmber' : 'secondary'} className="text-[11px] font-bold shrink-0 capitalize">
                     {submission?.status || 'Not submitted'}
                   </Badge>
                 </div>

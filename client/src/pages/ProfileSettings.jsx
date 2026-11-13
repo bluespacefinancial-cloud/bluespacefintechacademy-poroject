@@ -295,10 +295,10 @@ export default function ProfileSettings() {
           title="Fellow Profile & Showcase"
           subtitle="Manage your fintech track preferences, verified skills, and account security."
         />
-        <div className="min-h-[300px] flex items-center justify-center bg-white border border-gray-200/90 rounded-xl">
+        <div className="min-h-[300px] flex items-center justify-center bg-card border border-border rounded-xl">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-gray-500">Loading fellow profile...</span>
+            <div className="w-8 h-8 border-2 border-brand-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-muted-foreground">Loading fellow profile...</span>
           </div>
         </div>
       </div>
@@ -342,21 +342,21 @@ export default function ProfileSettings() {
         subtitle={`${profile.name || 'Fellow'} • ${profile.type || 'Student'} • ${cohortName}`}
         actions={
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 hidden sm:inline">
-              ID: <span className="font-mono font-medium text-gray-700" style={{ fontVariantNumeric: 'tabular-nums' }}>{profile.student_id || profile.id}</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              ID: <span className="font-mono font-medium text-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>{profile.student_id || profile.id}</span>
             </span>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setShowIdCard(!showIdCard)}
-              className="text-xs border-blue-200 text-brand-700 bg-blue-50/50 hover:bg-blue-100/50 font-medium h-8"
+              className="text-xs border-blue-200 dark:border-blue-800 text-brand-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-950/40 hover:bg-blue-100/50 dark:hover:bg-blue-900/50 font-medium h-8"
               title="Toggle Student Lanyard ID Badge"
             >
-              <CreditCard size={13} className="mr-1.5 text-[#0000ff]" />
+              <CreditCard size={13} className="mr-1.5 text-[#0000ff] dark:text-blue-400" />
               {showIdCard ? 'Hide Lanyard' : 'Physical ID Badge'}
             </Button>
-            <Badge variant="outline" className="text-xs border-emerald-200 text-emerald-700 font-medium">
+            <Badge variant="outline" className="text-xs border-emerald-200 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-950/30 font-medium">
               Active Enrolment
             </Badge>
           </div>
@@ -365,27 +365,27 @@ export default function ProfileSettings() {
 
       {/* Alerts */}
       {error && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-800 flex items-start gap-2">
-          <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600" />
+        <div role="alert" className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-3.5 text-xs text-red-800 dark:text-red-300 flex items-start gap-2">
+          <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
           <span>{error}</span>
         </div>
       )}
       {message && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800 flex items-start gap-2">
-          <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-emerald-600" />
+        <div className="rounded-lg border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 p-3.5 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+          <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
           <span>{message}</span>
         </div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center border-b border-gray-200 gap-4 sm:gap-6 overflow-x-auto">
+      <div className="flex items-center border-b border-border gap-4 sm:gap-6 overflow-x-auto">
         <button
           type="button"
           onClick={() => handleTabChange('showcase')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'showcase'
-              ? 'border-deep-600 text-deep-600'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
+              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <User size={15} />
@@ -397,13 +397,13 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('skills')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'skills'
-              ? 'border-deep-600 text-deep-600'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
+              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Compass size={15} />
           Skills & Domains
-          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-deep-700 border border-deep-200">
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/40">
             {skillsCompletion}%
           </span>
         </button>
@@ -413,14 +413,14 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('credentials')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'credentials'
-              ? 'border-deep-600 text-deep-600'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
+              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Award size={15} />
           Credentials & Capstone
           {certifications.length > 0 && (
-            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-emerald-700 border border-emerald-200">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/40">
               {certifications.length}
             </span>
           )}
@@ -431,8 +431,8 @@ export default function ProfileSettings() {
           onClick={() => handleTabChange('security')}
           className={`pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'security'
-              ? 'border-deep-600 text-deep-600'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
+              ? 'border-brand-600 text-brand-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Lock size={15} />
@@ -445,21 +445,21 @@ export default function ProfileSettings() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Fellow Card (2 cols) */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border border-gray-200/90 shadow-sm bg-white overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <Card className="border border-border shadow-sm bg-card overflow-hidden">
+              <div className="p-6 border-b border-border bg-muted/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-deep-50 border border-deep-100 flex items-center justify-center text-xl font-bold text-deep-700 shrink-0">
+                  <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-blue-950/40 border border-brand-100 dark:border-blue-800/60 flex items-center justify-center text-xl font-bold text-brand-700 dark:text-blue-300 shrink-0">
                     {profile.name?.charAt(0)?.toUpperCase() || 'F'}
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">{profile.name}</h3>
-                    <p className="text-xs text-gray-500 font-mono mt-0.5">{profile.email}</p>
+                    <h3 className="text-lg font-bold text-foreground">{profile.name}</h3>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">{profile.email}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline" className="text-[10px] font-semibold text-deep-700 border-deep-200">
+                      <Badge variant="outline" className="text-[10px] font-semibold text-brand-700 dark:text-blue-300 border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/30">
                         {selectedRole || 'Fintech Engineer Fellow'}
                       </Badge>
-                      <span className="text-[11px] text-gray-400">•</span>
-                      <span className="text-xs text-gray-600">{cohortName}</span>
+                      <span className="text-[11px] text-muted-foreground">•</span>
+                      <span className="text-xs text-muted-foreground">{cohortName}</span>
                     </div>
                   </div>
                 </div>
@@ -468,7 +468,7 @@ export default function ProfileSettings() {
                   size="sm"
                   variant="outline"
                   onClick={() => handleTabChange('skills')}
-                  className="text-xs border-gray-200"
+                  className="text-xs border-border"
                 >
                   Edit Skills
                 </Button>
@@ -477,17 +477,17 @@ export default function ProfileSettings() {
               <CardContent className="p-6 space-y-6">
                 {/* Domain Focus */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
                     Specialization Tracks
                   </h4>
                   {selectedDomains.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">No domain focus selected yet.</p>
+                    <p className="text-xs text-muted-foreground italic">No domain focus selected yet.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {selectedDomains.map((d) => (
                         <span
                           key={d}
-                          className="text-xs font-semibold px-3 py-1 rounded-lg text-deep-700 border border-deep-200"
+                          className="text-xs font-semibold px-3 py-1 rounded-lg text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/30"
                         >
                           {d}
                         </span>
@@ -498,17 +498,17 @@ export default function ProfileSettings() {
 
                 {/* Skills Chips */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
                     Verified Competencies ({selectedSkills.length})
                   </h4>
                   {selectedSkills.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">No skills selected yet.</p>
+                    <p className="text-xs text-muted-foreground italic">No skills selected yet.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {selectedSkills.map((skill) => (
                         <span
                           key={skill}
-                          className="text-xs font-medium px-2.5 py-1 rounded-md text-gray-700 border border-gray-200"
+                          className="text-xs font-medium px-2.5 py-1 rounded-md text-foreground border border-border bg-background"
                         >
                           {skill}
                         </span>
@@ -519,10 +519,10 @@ export default function ProfileSettings() {
 
                 {/* Career Notes */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                     Fellowship Bio & Career Goals
                   </h4>
-                  <div className="rounded-xl border border-gray-200/90 bg-gray-50/50 p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  <div className="rounded-xl border border-border bg-muted/30 p-4 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
                     {careerNotes ||
                       'No bio added yet. Visit the Skills & Domains tab to add your background, target fintech roles, and engineering aspirations.'}
                   </div>
@@ -533,38 +533,38 @@ export default function ProfileSettings() {
 
           {/* Quick Metrics & Showcase Sidebar */}
           <div className="space-y-4">
-            <Card className="border border-gray-200/90 shadow-sm bg-white">
-              <CardHeader className="pb-3 border-b border-gray-100">
-                <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <Shield size={15} className="text-deep-600" />
+            <Card className="border border-border shadow-sm bg-card">
+              <CardHeader className="pb-3 border-b border-border">
+                <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Shield size={15} className="text-brand-600 dark:text-blue-400" />
                   Fellow Verification
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 space-y-3 text-xs text-gray-600">
-                <div className="flex justify-between items-center py-1 border-b border-gray-100">
-                  <span className="text-gray-500">Student ID</span>
-                  <span className="font-mono font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{profile.student_id || profile.id}</span>
+              <CardContent className="p-4 space-y-3 text-xs text-muted-foreground">
+                <div className="flex justify-between items-center py-1 border-b border-border">
+                  <span className="text-muted-foreground">Student ID</span>
+                  <span className="font-mono font-semibold text-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>{profile.student_id || profile.id}</span>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b border-gray-100">
-                  <span className="text-gray-500">Cohort</span>
-                  <span className="font-semibold text-gray-900">{cohortName}</span>
+                <div className="flex justify-between items-center py-1 border-b border-border">
+                  <span className="text-muted-foreground">Cohort</span>
+                  <span className="font-semibold text-foreground">{cohortName}</span>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b border-gray-100">
-                  <span className="text-gray-500">Academic Status</span>
-                  <Badge variant="outline" className="text-[10px] text-emerald-700 border-emerald-200">
+                <div className="flex justify-between items-center py-1 border-b border-border">
+                  <span className="text-muted-foreground">Academic Status</span>
+                  <Badge variant="outline" className="text-[10px] text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/40 dark:bg-emerald-950/30">
                     Enrolled
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center py-1">
-                  <span className="text-gray-500">Certificates Earned</span>
-                  <span className="font-semibold text-gray-900">{certifications.length}</span>
+                  <span className="text-muted-foreground">Certificates Earned</span>
+                  <span className="font-semibold text-foreground">{certifications.length}</span>
                 </div>
-                <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-gray-500">Interactive Lanyard</span>
+                <div className="pt-2 border-t border-border flex items-center justify-between">
+                  <span className="text-muted-foreground">Interactive Lanyard</span>
                   <button
                     type="button"
                     onClick={() => setShowIdCard(!showIdCard)}
-                    className="text-xs font-semibold text-[#0000ff] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-semibold text-brand-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <CreditCard size={12} />
                     {showIdCard ? 'Hide Badge' : 'View Hanging Badge'}
@@ -573,9 +573,9 @@ export default function ProfileSettings() {
               </CardContent>
             </Card>
 
-            <div className="rounded-xl border border-gray-200/90 bg-gray-50/60 p-4 space-y-2 text-xs text-gray-600">
-              <p className="font-semibold text-gray-900 flex items-center gap-1.5">
-                <Award size={14} className="text-deep-600" />
+            <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-2 text-xs text-muted-foreground">
+              <p className="font-semibold text-foreground flex items-center gap-1.5">
+                <Award size={14} className="text-brand-600 dark:text-blue-400" />
                 Industry Talent Network
               </p>
               <p className="leading-relaxed">
@@ -589,19 +589,19 @@ export default function ProfileSettings() {
       {/* TAB 2: SKILLS & DOMAINS */}
       {activeTab === 'skills' && (
         <div className="space-y-6">
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <Compass size={15} className="text-deep-600" />
+                  <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Compass size={15} className="text-brand-600 dark:text-blue-400" />
                     Specialization Role Preference
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Select the engineering or project leadership role you want to focus on in your squad
                   </CardDescription>
                 </div>
-                <span className="text-xs font-semibold text-deep-600">Choose 1 Role</span>
+                <span className="text-xs font-semibold text-brand-600 dark:text-blue-400">Choose 1 Role</span>
               </div>
             </CardHeader>
             <CardContent className="p-5">
@@ -615,17 +615,17 @@ export default function ProfileSettings() {
                       onClick={() => setSelectedRole(r.id)}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'border-deep-600 bg-deep-50/40 shadow-xs ring-1 ring-deep-600'
-                          : 'border-gray-200/90 bg-white hover:border-gray-300'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
+                          : 'border-border bg-card hover:bg-muted/50 dark:hover:bg-accent/40 hover:border-gray-300 dark:hover:border-gray-700'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-bold ${isSelected ? 'text-deep-700' : 'text-gray-900'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-brand-700 dark:text-blue-300' : 'text-foreground'}`}>
                           {r.label}
                         </span>
-                        {isSelected && <Check size={14} className="text-deep-600" />}
+                        {isSelected && <Check size={14} className="text-brand-600 dark:text-blue-400" />}
                       </div>
-                      <p className="text-[11px] text-gray-500 leading-snug">{r.desc}</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug">{r.desc}</p>
                     </button>
                   )
                 })}
@@ -634,19 +634,19 @@ export default function ProfileSettings() {
           </Card>
 
           {/* Domain Selection */}
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <Layers size={15} className="text-deep-600" />
+                  <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Layers size={15} className="text-brand-600 dark:text-blue-400" />
                     Fintech Domain Tracks
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Select up to 2 domain focus areas for squad placement
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs font-medium text-gray-700">
+                <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
                   {selectedDomains.length} of 2 Selected
                 </Badge>
               </div>
@@ -662,17 +662,17 @@ export default function ProfileSettings() {
                       onClick={() => toggleDomain(domain.id)}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'border-deep-600 bg-deep-50/40 shadow-xs ring-1 ring-deep-600'
-                          : 'border-gray-200/90 bg-white hover:border-gray-300'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-600 dark:ring-blue-500'
+                          : 'border-border bg-card hover:bg-muted/50 dark:hover:bg-accent/40 hover:border-gray-300 dark:hover:border-gray-700'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className={`text-xs font-bold ${isSelected ? 'text-deep-700' : 'text-gray-900'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-brand-700 dark:text-blue-300' : 'text-foreground'}`}>
                           {domain.name}
                         </span>
-                        {isSelected && <Check size={14} className="text-deep-600" />}
+                        {isSelected && <Check size={14} className="text-brand-600 dark:text-blue-400" />}
                       </div>
-                      <p className="text-[11px] text-gray-500 leading-relaxed">{domain.desc}</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{domain.desc}</p>
                     </button>
                   )
                 })}
@@ -681,18 +681,18 @@ export default function ProfileSettings() {
           </Card>
 
           {/* Skills Chips */}
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900">
+                  <CardTitle className="text-sm font-bold text-foreground">
                     Technical & Operational Competencies
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Click skills that match your experience or targets
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs font-medium text-gray-700">
+                <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
                   {selectedSkills.length} Selected
                 </Badge>
               </div>
@@ -708,8 +708,8 @@ export default function ProfileSettings() {
                       onClick={() => toggleSkill(skill)}
                       className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-deep-600 text-white border-deep-600 shadow-xs'
-                          : 'bg-white text-gray-700 border-gray-200/90 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'bg-brand-600 dark:bg-blue-600 text-white border-brand-600 dark:border-blue-500 shadow-xs'
+                          : 'bg-card text-muted-foreground border-border hover:border-brand-500/50 hover:text-foreground hover:bg-muted/40'
                       }`}
                     >
                       {isSelected && <Check size={12} />}
@@ -722,12 +722,12 @@ export default function ProfileSettings() {
           </Card>
 
           {/* Career Notes */}
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-sm font-bold text-gray-900">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
+              <CardTitle className="text-sm font-bold text-foreground">
                 Career Goals & Engineering Background
               </CardTitle>
-              <CardDescription className="text-xs text-gray-500 mt-0.5">
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 Share any prior experience, programming languages, or target fintech companies
               </CardDescription>
             </CardHeader>
@@ -737,7 +737,7 @@ export default function ProfileSettings() {
                 placeholder="Tell us about your background, tools you've worked with, or what you want to build during the academy..."
                 value={careerNotes}
                 onChange={(e) => setCareerNotes(e.target.value)}
-                className="text-xs"
+                className="text-xs text-foreground bg-background border-input"
               />
 
               <div className="flex justify-end">
@@ -746,7 +746,7 @@ export default function ProfileSettings() {
                   onClick={handleSaveSkills}
                   disabled={savingSkills}
                   size="sm"
-                  className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
+                  className="bg-brand-600 text-white hover:bg-brand-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-xs font-semibold"
                 >
                   <Save size={13} className="mr-1.5" />
                   {savingSkills ? 'Saving...' : 'Save Skills Profile'}
@@ -760,19 +760,19 @@ export default function ProfileSettings() {
       {/* TAB 3: CREDENTIALS & CAPSTONE */}
       {activeTab === 'credentials' && (
         <div className="space-y-6">
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <Award size={15} className="text-deep-600" />
+                  <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Award size={15} className="text-brand-600 dark:text-blue-400" />
                     Issued Certificates & Badges
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Official graduation credentials issued by BlueSPACE Fintech Academy
                   </CardDescription>
                 </div>
-                <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+                <Button asChild variant="outline" size="sm" className="text-xs border-border">
                   <Link to="/certificates">
                     <span>Full Certificates Page</span>
                     <ExternalLink size={12} className="ml-1.5" />
@@ -783,9 +783,9 @@ export default function ProfileSettings() {
             <CardContent className="p-5">
               {certifications.length === 0 ? (
                 <div className="py-10 text-center space-y-2">
-                  <Award size={24} className="text-gray-300 mx-auto" />
-                  <p className="text-xs font-bold text-gray-800">No Certificates Issued Yet</p>
-                  <p className="text-[11px] text-gray-500 max-w-sm mx-auto">
+                  <Award size={24} className="text-muted-foreground/40 mx-auto" />
+                  <p className="text-xs font-bold text-foreground">No Certificates Issued Yet</p>
+                  <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
                     Certificates are awarded upon achieving 80%+ coursework completion, submitting all required labs, and successfully defending your capstone project.
                   </p>
                 </div>
@@ -794,33 +794,33 @@ export default function ProfileSettings() {
                   {certifications.map((cert) => (
                     <div
                       key={cert.id}
-                      className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-sm space-y-3"
+                      className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3"
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <h5 className="text-sm font-bold text-gray-900">
+                          <h5 className="text-sm font-bold text-foreground">
                             BlueSPACE {cert.track} Certificate
                           </h5>
-                          <p className="text-[11px] text-gray-500 mt-0.5">
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
                             {cert.cohorts?.name || cohortName}
                           </p>
                         </div>
                         <Badge
                           variant="outline"
-                          className="text-[10px] capitalize text-emerald-700 border-emerald-200"
+                          className="text-[10px] capitalize text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/40 dark:bg-emerald-950/30"
                         >
                           {cert.status}
                         </Badge>
                       </div>
 
                       {cert.final_grade && (
-                        <p className="text-xs text-gray-700">
-                          Final Grade: <span className="font-bold">{cert.final_grade}%</span>
+                        <p className="text-xs text-muted-foreground">
+                          Final Grade: <span className="font-bold text-foreground">{cert.final_grade}%</span>
                         </p>
                       )}
 
                       {cert.certificate_url && (
-                        <Button asChild size="sm" variant="outline" className="w-full text-xs border-gray-200">
+                        <Button asChild size="sm" variant="outline" className="w-full text-xs border-border">
                           <a href={cert.certificate_url} target="_blank" rel="noreferrer">
                             <ExternalLink size={13} className="mr-1.5" />
                             View Verifiable Certificate
@@ -835,19 +835,19 @@ export default function ProfileSettings() {
           </Card>
 
           {/* Capstone Defense Status */}
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <GraduationCap size={15} className="text-deep-600" />
+                  <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <GraduationCap size={15} className="text-brand-600 dark:text-blue-400" />
                     Capstone Defense Status
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500 mt-0.5">
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Final graduation software deliverable and faculty review panel
                   </CardDescription>
                 </div>
-                <Button asChild variant="outline" size="sm" className="text-xs border-gray-200">
+                <Button asChild variant="outline" size="sm" className="text-xs border-border">
                   <Link to="/capstone">
                     <span>Open Capstone Submission</span>
                     <ExternalLink size={12} className="ml-1.5" />
@@ -857,28 +857,28 @@ export default function ProfileSettings() {
             </CardHeader>
             <CardContent className="p-5">
               {capstoneSubmission ? (
-                <div className="rounded-xl border border-gray-200/90 bg-gray-50/40 p-4 space-y-2">
+                <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-900">
+                    <span className="text-xs font-bold text-foreground">
                       {capstoneSubmission.assessments?.title || 'Production Capstone'}
                     </span>
-                    <Badge variant="outline" className="text-[10px] capitalize text-brand-700 border-brand-200">
+                    <Badge variant="outline" className="text-[10px] capitalize text-brand-700 dark:text-blue-400 border-brand-200 dark:border-blue-800 bg-brand-50/40 dark:bg-blue-950/30">
                       {capstoneSubmission.status || 'Under Review'}
                     </Badge>
                   </div>
                   {capstoneSubmission.score !== null && (
-                    <p className="text-xs font-bold text-emerald-700">
+                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                       Panel Score: {capstoneSubmission.score}/100
                     </p>
                   )}
                   {capstoneSubmission.feedback && (
-                    <p className="text-xs text-gray-600 mt-1">{capstoneSubmission.feedback}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{capstoneSubmission.feedback}</p>
                   )}
                 </div>
               ) : (
                 <div className="py-8 text-center space-y-1.5">
-                  <p className="text-xs font-bold text-gray-800">Capstone Project Pending</p>
-                  <p className="text-[11px] text-gray-500 max-w-sm mx-auto">
+                  <p className="text-xs font-bold text-foreground">Capstone Project Pending</p>
+                  <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
                     The capstone milestone opens in Weeks 13-16. Fellows submit a functional fintech application with video walkthrough and defend before the panel.
                   </p>
                 </div>
@@ -892,17 +892,17 @@ export default function ProfileSettings() {
       {activeTab === 'security' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Personal Information */}
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-sm font-bold text-gray-900">Personal Information</CardTitle>
-              <CardDescription className="text-xs text-gray-500 mt-0.5">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
+              <CardTitle className="text-sm font-bold text-foreground">Personal Information</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 Update your display name and contact telephone
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5">
               <form onSubmit={handleSaveAccount} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Full Name <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -914,18 +914,18 @@ export default function ProfileSettings() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Email Address (Read Only)
                   </label>
                   <Input
                     disabled
                     value={accountForm.email}
-                    className="text-xs bg-gray-50 text-gray-500 font-mono"
+                    className="text-xs bg-muted/40 text-muted-foreground font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Phone Number
                   </label>
                   <Input
@@ -942,7 +942,7 @@ export default function ProfileSettings() {
                     type="submit"
                     disabled={savingAccount}
                     size="sm"
-                    className="bg-deep-600 text-white hover:bg-deep-700 text-xs font-semibold"
+                    className="bg-brand-600 text-white hover:bg-brand-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-xs font-semibold"
                   >
                     <Save size={13} className="mr-1.5" />
                     {savingAccount ? 'Saving...' : 'Save Account Details'}
@@ -953,17 +953,17 @@ export default function ProfileSettings() {
           </Card>
 
           {/* Change Password */}
-          <Card className="border border-gray-200/90 shadow-sm bg-white">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-sm font-bold text-gray-900">Change Password</CardTitle>
-              <CardDescription className="text-xs text-gray-500 mt-0.5">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="border-b border-border">
+              <CardTitle className="text-sm font-bold text-foreground">Change Password</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 Ensure your account uses a secure password of at least 8 characters
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5">
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     New Password <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -980,7 +980,7 @@ export default function ProfileSettings() {
                   />
                   {passwordStrength > 0 && (
                     <div className="mt-1 flex items-center gap-2">
-                      <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${
                             passwordStrength < 40
@@ -995,10 +995,10 @@ export default function ProfileSettings() {
                       <span
                         className={`text-[10px] font-medium ${
                           passwordStrength < 40
-                            ? 'text-red-600'
+                            ? 'text-red-600 dark:text-red-400'
                             : passwordStrength < 70
-                            ? 'text-amber-600'
-                            : 'text-emerald-600'
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-emerald-600 dark:text-emerald-400'
                         }`}
                       >
                         {passwordStrength < 40
@@ -1012,7 +1012,7 @@ export default function ProfileSettings() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Confirm New Password <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -1031,7 +1031,7 @@ export default function ProfileSettings() {
                     disabled={savingPassword}
                     size="sm"
                     variant="outline"
-                    className="text-xs border-gray-200"
+                    className="text-xs border-border"
                   >
                     <Lock size={13} className="mr-1.5" />
                     {savingPassword ? 'Updating...' : 'Update Password'}

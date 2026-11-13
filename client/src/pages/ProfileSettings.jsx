@@ -350,10 +350,10 @@ export default function ProfileSettings() {
               variant="outline"
               size="sm"
               onClick={() => setShowIdCard(!showIdCard)}
-              className="text-xs border-blue-200 dark:border-blue-800 text-brand-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-950/40 hover:bg-blue-100/50 dark:hover:bg-blue-900/50 font-medium h-8"
+              className="text-xs border-border text-foreground dark:text-blue-300 bg-card hover:bg-muted/60 font-medium h-8"
               title="Toggle Student Lanyard ID Badge"
             >
-              <CreditCard size={13} className="mr-1.5 text-[#0000ff] dark:text-blue-400" />
+              <CreditCard size={13} className="mr-1.5 text-brand-600 dark:text-blue-400" />
               {showIdCard ? 'Hide Lanyard' : 'Physical ID Badge'}
             </Button>
             <Badge variant="outline" className="text-xs border-emerald-200 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-950/30 font-medium">
@@ -453,7 +453,7 @@ export default function ProfileSettings() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-foreground">{profile.name}</h3>
-                    <p className="text-xs text-muted-foreground font-mono mt-0.5">{profile.email}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-300 font-mono mt-0.5">{profile.email}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <Badge variant="outline" className="text-[10px] font-semibold text-brand-700 dark:text-blue-300 border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/30">
                         {selectedRole || 'Fintech Engineer Fellow'}
@@ -468,7 +468,7 @@ export default function ProfileSettings() {
                   size="sm"
                   variant="outline"
                   onClick={() => handleTabChange('skills')}
-                  className="text-xs border-border"
+                  className="text-xs border-border bg-card dark:bg-card/90 text-foreground dark:text-white hover:bg-muted/60 hover:text-foreground dark:hover:text-white font-medium"
                 >
                   Edit Skills
                 </Button>
@@ -522,7 +522,7 @@ export default function ProfileSettings() {
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                     Fellowship Bio & Career Goals
                   </h4>
-                  <div className="rounded-xl border border-border bg-muted/30 p-4 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+                  <div className="rounded-xl border border-border bg-card dark:bg-card/60 p-4 text-xs text-foreground dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
                     {careerNotes ||
                       'No bio added yet. Visit the Skills & Domains tab to add your background, target fintech roles, and engineering aspirations.'}
                   </div>

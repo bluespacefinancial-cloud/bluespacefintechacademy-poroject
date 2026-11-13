@@ -145,8 +145,8 @@ export default function NotificationDropdown() {
         aria-expanded={open}
         className={`p-2 rounded-lg border transition-colors relative flex items-center justify-center ${
           open
-            ? 'bg-deep-50 border-deep-200 text-deep-700'
-            : 'bg-gray-50/80 border-gray-200/80 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+            ? 'bg-brand-50 dark:bg-blue-950/60 border-brand-200 dark:border-blue-800 text-brand-700 dark:text-blue-300'
+            : 'bg-card border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground'
         }`}
       >
         <Bell size={17} className="shrink-0" />
@@ -159,13 +159,13 @@ export default function NotificationDropdown() {
 
       {/* Dropdown Overlay Menu */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-gray-200/90 rounded-2xl shadow-xl z-50 overflow-hidden animate-sheet-up">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden animate-sheet-up">
           {/* Header */}
-          <div className="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div className="px-4 py-3.5 border-b border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-900">Notifications</span>
+              <span className="text-xs font-bold text-foreground">Notifications</span>
               {unreadCount > 0 && (
-                <span className="text-[10px] font-bold text-deep-700 border border-deep-200 px-2 py-0.2 rounded-full">
+                <span className="text-[10px] font-bold text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-800/60 bg-brand-50/50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full">
                   {unreadCount} new
                 </span>
               )}
@@ -174,7 +174,7 @@ export default function NotificationDropdown() {
               <button
                 type="button"
                 onClick={markAllAsRead}
-                className="text-[11px] font-semibold text-deep-600 hover:text-deep-700 hover:underline flex items-center gap-1"
+                className="text-[11px] font-semibold text-brand-600 dark:text-blue-400 hover:text-brand-700 dark:hover:text-blue-300 hover:underline flex items-center gap-1"
               >
                 <Check size={12} />
                 Mark all read
@@ -183,14 +183,14 @@ export default function NotificationDropdown() {
           </div>
 
           {/* List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-gray-100">
+          <div className="max-h-[380px] overflow-y-auto divide-y divide-border">
             {loading && notifications.length === 0 ? (
-              <div className="py-8 text-center text-xs text-gray-400">Loading notifications...</div>
+              <div className="py-8 text-center text-xs text-muted-foreground">Loading notifications...</div>
             ) : notifications.length === 0 ? (
               <div className="py-10 text-center space-y-1.5 px-4">
-                <Bell size={20} className="text-gray-300 mx-auto" />
-                <p className="text-xs font-bold text-gray-800">All caught up</p>
-                <p className="text-[11px] text-gray-400">
+                <Bell size={20} className="text-muted-foreground/40 mx-auto" />
+                <p className="text-xs font-bold text-foreground">All caught up</p>
+                <p className="text-[11px] text-muted-foreground">
                   New submissions, grading notes, and clinic invites will appear here.
                 </p>
               </div>
@@ -202,28 +202,28 @@ export default function NotificationDropdown() {
                     key={item.id}
                     onClick={() => handleNotificationClick(item)}
                     className={`p-3.5 transition-colors cursor-pointer flex items-start gap-3 text-left ${
-                      isUnread ? 'bg-deep-50/20 hover:bg-deep-50/40' : 'hover:bg-gray-50'
+                      isUnread ? 'bg-brand-50/20 dark:bg-blue-950/30 hover:bg-brand-50/40 dark:hover:bg-blue-900/40' : 'hover:bg-muted/40'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200/70 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-lg bg-muted/60 border border-border flex items-center justify-center shrink-0 mt-0.5 text-foreground">
                       {getIcon(item.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={`text-xs truncate ${isUnread ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
+                        <p className={`text-xs truncate ${isUnread ? 'font-bold text-foreground' : 'font-medium text-muted-foreground'}`}>
                           {humaniseNotificationType(item.type)}
                         </p>
-                        <span className="text-[10px] text-gray-400 shrink-0">
+                        <span className="text-[10px] text-muted-foreground shrink-0">
                           {formatTimeAgo(item.created_at)}
                         </span>
                       </div>
-                      <p className="text-[11px] text-gray-600 line-clamp-2 mt-0.5 leading-relaxed">
+                      <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
                         {item.data}
                       </p>
                     </div>
                     {isUnread && (
                       <span
-                        className="w-2 h-2 rounded-full bg-deep-600 shrink-0 mt-2"
+                        className="w-2 h-2 rounded-full bg-brand-600 dark:bg-blue-400 shrink-0 mt-2"
                         title="Unread"
                       />
                     )}
@@ -234,11 +234,11 @@ export default function NotificationDropdown() {
           </div>
 
           {/* Footer */}
-          <div className="p-2.5 bg-gray-50/70 border-t border-gray-100 text-center">
+          <div className="p-2.5 bg-muted/30 border-t border-border text-center">
             <Link
               to="/notifications"
               onClick={() => setOpen(false)}
-              className="text-xs font-semibold text-deep-600 hover:text-deep-700 hover:underline inline-flex items-center gap-1"
+              className="text-xs font-semibold text-brand-600 dark:text-blue-400 hover:text-brand-700 dark:hover:text-blue-300 hover:underline inline-flex items-center gap-1"
             >
               <span>View full notification history</span>
               <ExternalLink size={11} />

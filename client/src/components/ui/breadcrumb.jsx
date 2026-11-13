@@ -8,7 +8,7 @@ const BreadcrumbItem = ({ to, label, isLast, className }) => {
   if (isLast) {
     return (
       <span
-        className={cn('text-xs text-gray-500', className)}
+        className={cn('text-xs text-muted-foreground', className)}
         aria-current="page"
       >
         {label}
@@ -18,7 +18,7 @@ const BreadcrumbItem = ({ to, label, isLast, className }) => {
   return (
     <Link
       to={to}
-      className={cn('text-xs text-deep-600 hover:text-deep-700 hover:underline transition-colors', className)}
+      className={cn('text-xs text-brand-600 dark:text-blue-400 hover:text-brand-700 dark:hover:text-blue-300 hover:underline transition-colors', className)}
     >
       {label}
     </Link>
@@ -51,7 +51,7 @@ export function Breadcrumb({ items, className }) {
           return (
             <Fragment key={index}>
               <BreadcrumbItem to={to} label={label} isLast={false} />
-              <ChevronRight size={12} className="text-gray-400 shrink-0 mx-0.5" aria-hidden="true" />
+              <ChevronRight size={12} className="text-muted-foreground/60 shrink-0 mx-0.5" aria-hidden="true" />
             </Fragment>
           )
         }

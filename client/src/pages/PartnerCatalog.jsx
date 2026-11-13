@@ -42,31 +42,35 @@ export default function PartnerCatalog() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {courses.map((course) => (
-          <Card key={course.id}>
+          <Card key={course.id} className="border border-border bg-card shadow-sm flex flex-col justify-between">
             <CardHeader>
               <div className="flex items-center gap-3">
                 {course.partners?.logo_url && (
-                  <img src={course.partners.logo_url} alt="" className="h-10 w-10 rounded object-contain" />
+                  <img src={course.partners.logo_url} alt="" className="h-10 w-10 rounded object-contain bg-muted/40 p-1 border border-border" />
                 )}
                 <div>
-                  <CardTitle className="text-sm">{course.title}</CardTitle>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{course.partners?.name}</p>
+                  <CardTitle className="text-sm font-bold text-foreground">{course.title}</CardTitle>
+                  <p className="text-xs text-muted-foreground">{course.partners?.name}</p>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-xs text-gray-600 dark:text-gray-300">{course.description}</p>
-              <Badge variant="outline">{course.partner_course_lessons?.length || 0} lessons</Badge>
-              <Button className="w-full" onClick={() => enrol(course.id)}>
-                <PlayCircle size={14} className="mr-2" />
-                Start course
-              </Button>
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{course.description}</p>
+              <div className="pt-2 flex flex-col gap-3">
+                <Badge variant="outline" className="w-fit text-[11px] border-border text-muted-foreground">
+                  {course.partner_course_lessons?.length || 0} lessons
+                </Badge>
+                <Button className="w-full text-white font-semibold shadow-sm" onClick={() => enrol(course.id)}>
+                  <PlayCircle size={15} className="mr-2 text-white shrink-0" />
+                  <span>Start course</span>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
         {courses.length === 0 && (
-          <div className="col-span-full py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-            <BookOpen className="mx-auto mb-2" size={24} />
+          <div className="col-span-full py-12 text-center text-sm text-muted-foreground">
+            <BookOpen className="mx-auto mb-2 text-muted-foreground/60" size={24} />
             No approved partner courses are published yet.
           </div>
         )}
